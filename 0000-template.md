@@ -1,7 +1,7 @@
 - Feature Name: (fill me in with a unique ident, my_awesome_feature)
 - Type (new feature, enhancement)
 - Related components (if any)
-- Start Date: (fill me in with today's date, YYYY-MM-DD)
+- Start Date: (fill me in with today's date, DD-MM-YYYY)
 - RFC PR: (leave this empty)
 - Issue number: (leave this empty)
 
