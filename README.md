@@ -1,9 +1,11 @@
 # Project SAFE RFCs
 
-This process attempts to emulate the success of the Rust programming language and 
+_This process attempts to emulate the success of the Rust programming language and 
 as such has almost mirrored the RFC process the Rust developers use, which is 
 tried and tested and appears to work very well. The rust process is found here 
-https://github.com/rust-lang/rfcs  
+https://github.com/rust-lang/rfcs_
+
+#Introduction
 
 Many changes, including bug fixes and documentation improvements can be
 implemented and reviewed via the normal GitHub pull request workflow.
