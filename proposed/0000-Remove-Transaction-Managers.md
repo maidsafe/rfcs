@@ -30,10 +30,6 @@ It is expected this will reduce complexity, code and increase security on the ne
 
 # Detailed design
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
-with the network to understand, and for somebody familiar with the code practices to implement.
-This should get into specifics and corner-cases, and include examples of how the feature is used.
-
 The design entails reducing all StructuredData types to a consistent Super Type, therefore it should be able to
 be recognised by the network as StructuredData and all such types handled exactly in the same manner. This type 
 would be a relatively simple type, this is defined here:
@@ -69,6 +65,7 @@ owner to a new owner and that is allowed.
 For private data the data filed will be encrypted (at client discresion), for public data this need not be the case as 
 anyone can read that, but only the worked can update it. 
 
+
 ##Security
 
 This code reduction will increase security, but will require that StructuredData, be passed via the Sentinel in routing.
@@ -83,11 +80,19 @@ client had a notion of the direction of the monotonic output.
 This will put a heavier requirement on `Refresh` calls on the network in times of churn, rather than transferring only keys and
 versions (which may be small) this will require sending up to 100kB per StructuredData element. If content was always held as
 immutable data then it is not transferred at every churn event. 
+The client will also have more work as when the StructuredData type is larger than 100kB it then has to self_encrypt the 
+remainder and store the datamap in the data filed of the StructuredData. This currently happens in a manner, but every 
+time and without calculation of when.
 
 # Alternatives
 
+Status quo is an option and realistic. 
 
-What other designs have been considered? What is the impact of not doing this?
+- Another option posed by Qi is that structured data types be directly stored on `ManagedNodes` (`PmidNode`), this would 
+reduce churn issues, but may introduce a security concern as we do not trust a `Pmidnode` to not lie or replay and 
+it potentially can with data that is mutable and not intrinsically validatable as accurate. 
+- Another possibility by Qi is the `PmidManager` (`NodeManager`) stores the data size separate from the immutableData size.  
+  
 
 # Unresolved questions
 
