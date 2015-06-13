@@ -2,7 +2,7 @@
 
 This process attempts to emulate the success of the Rust programming language and 
 as such has almost mirrored the RFC process the Rust developers use, which is 
-tired and tested and appears to work very well. The rust process is found here 
+tried and tested and appears to work very well. The rust process is found here 
 https://github.com/rust-lang/rfcs  
 
 Many changes, including bug fixes and documentation improvements can be
