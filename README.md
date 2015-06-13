@@ -9,7 +9,7 @@ Many changes, including bug fixes and documentation improvements can be
 implemented and reviewed via the normal GitHub pull request workflow.
 
 Some changes though are "substantial", and we ask that these be put
-through a bit of a design process and produce a consensus among the Rust
+through a bit of a design process and produce a consensus among the 
 community and the [core team].
 
 The "RFC" (request for comments) process is intended to provide a
@@ -138,7 +138,7 @@ point where we actually reach a decision.
 [The RFC life-cycle]: #the-rfc-life-cycle
 
 Once an RFC becomes active then authors may implement it and submit
-the feature as a pull request to the Rust repo. Being 'active' is not
+the feature as a pull request to the repo. Being 'active' is not
 a rubber stamp, and in particular still does not mean the feature will
 ultimately be merged; it does mean that in principle all the major
 stakeholders have agreed to the feature and are amenable to merging
