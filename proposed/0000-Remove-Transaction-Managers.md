@@ -101,7 +101,7 @@ The inclusion of the version number will allow resistance to replay attacks.
 
 ### GetKey removal
 
-Teh removal and validation of client keys is also a significant reduction in complexity and means instead of lookups to get keys, these keys are included as part of the data. This makes the data self validating and reduces security risks from sparticus type attacks. IT also removes ability for any key replacement attack on data.
+The removal and validation of client keys is also a significant reduction in complexity and means instead of lookups to get keys, these keys are included as part of the data. This makes the data self validating and reduces security risks from sparticus type attacks. IT also removes ability for any key replacement attack on data.
 
 # Drawbacks
 
