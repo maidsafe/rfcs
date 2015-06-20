@@ -42,6 +42,7 @@ but may include the following:
 that is not a bug fix.
    - Any proposed additions to existing algorithms
    - Any proposed additional functionality
+   - Anything that reduces interoperability (e.g. changes to the wire protocol or data serialisation.)
 
 Some changes do not require an RFC:
 
