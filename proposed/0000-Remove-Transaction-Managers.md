@@ -1,4 +1,4 @@
-- Feature Name: Remove Transaction Managers from network and have network only recognise 2 data types 
+- Feature Name: Remove Transaction Managers from network and have network only recognise 2 Structured data sub-types 
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
 - Start Date: 13-06-2015
@@ -9,7 +9,7 @@
 
 Have network only recognise two primary data types, Immutable and Structured. These types will have tag_ids
 to allow them to contain several data types that can be used in the network by users of the client interface.
-This does mean a change to default behaviour and is, therefore a significant change.
+This does mean a change to default behaviour and is, therefore a significant change. ImmutableData has already two sub-types (Backup and Sacrificial). StructuredData will have two sub types, `fixed` and `transferrable`. This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types. 
 
 # Motivation
 
@@ -20,58 +20,92 @@ and using that as a key to lookup next) and also to remove complexity (thereby i
 
 ##What cases does it support?
 
-This change supports all use of non immutable data (structured data). This coverall all non content data
+This change supports all use of non immutable data (structured data). This covers all all non `content only` data
 on the network and how it is handled. 
 
 ##Expected outcome
 
-It is expected this will reduce complexity, code and increase security on the network. 
-
+It is expected this will vastly reduce complexity, code and increase security on the network. 
 
 # Detailed design
 
-The design entails reducing all StructuredData types to a consistent Super Type, therefore it should be able to
-be recognised by the network as StructuredData and all such types handled exactly in the same manner. This type 
-would be a relatively simple type, this is defined here:
+The design entails reducing all StructuredData types to two sub-types, therefore it should be able to
+be recognised by the network as StructuredData and all such sub-types handled exactly in the same manner. the sub types are defined here:
 
 ```
-struct StructuredData {
+struct FixedStructuredData {
 type : TagType, // 64 Bytes
-name : NameType, // 64 Bytes
-data : Vec<u8>, // in many cases this is encrypted
+data : mut Vec<u8>, // in many cases this is encrypted
 owner_keys : vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of owners)
-version : u64, // incrementing (determinisdic) version number
-signature : Signature // signs the fields above // 32 bytes (using e2559 sig)
-signed_by : Option<crypto::sign::PublicKey> // 64 Bytes, not required if vec below is of size 1 
-                                            // this is required by sentinel (who will not need to retrieve 
-                                            // the key as it's crypto secure
+version : mut u64, // incrementing (deterministic) version number
+signature : mut Vec<Signature> // signs the fields above // 32 bytes (using e2559 sig)
 }
 ```
 __Size of raw packet minus data is 192Bytes leaving 320Bytes if restricted to 512 Bytes__
 
-When `Put` on the network this type is StructuredData with a subtype field. The network ignores this subtype 
-except for collisions. No two data types with the same name and type can exist on the network. The network will
-accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. 
+Fixed (immutable fields) 
+- type
+- owner_keys
+
+##Validation 
+
+- To confirm name (storage location on network) we SHA512(TagType + owner_keys (concatanted))
+- To validate data we confirm signature using hash of (tag_type + version) as nonce. 
+- To confirm sender of any `Put` (store or overwrite) then we check the signature of sender using same mechanism. For multiple senders we confirm at least 50% of owners have signed the request for `Put`
+
+When `Put` on the network this type is `FixedStructuredData` with a subtype field. The network ignores this subtype except for collisions. No two data types with the same name and type can exist on the network. 
+
+```
+struct TransferableStructuredData {
+type : TagType, // 4 Bytes ?
+Identifier : NameType // 64Bytes
+data : mut Vec<u8>, // in many cases this is encrypted
+owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of owners)
+version : mut u64, // incrementing (deterministic) version number
+signature : mut Vec<Signature> // signs the fields above // 32 bytes (using e2559 sig)
+}
+```
+__Size of raw packet minus data is 192Bytes leaving 320Bytes if restricted to 512 Bytes__
+
+Fixed (immutable fields) 
+- type
+- identifier
+
+##Validation 
+
+- To confirm name (storage location on network) we SHA512(TagType + Identifier)
+- To validate data we confirm signature using hash of (tag_type + version) as nonce. 
+- To confirm sender of any `Put` (store or overwrite) then we check the signature of sender using same mechanism. For multiple senders we confirm at least 50% of owners have signed the request for `Put`
+
+When `Put` on the network this type is FixedStructuredData with a subtype field. The network ignores this subtype 
+except for collisions. No two data types with the same name and type can exist on the network. 
 
 These types are stored in a disk based storage mechanism such as `Btree` at the NaeManagers (DataManagers) responsible for the area of the network at that `name`. 
 
+## common features 
+
 These types will be limited to 100kB in size (as Immutable Chunks are also limited to 1Mb) which is for the time being a magic number.
 
-If a client requires these be larger than 100kB then the data component will contain a datamap to be able to retrieve chunks of the network. 
+If a client requires these be larger than 100kB then the data component will contain a (optionally encrypted) datamap to be able to retrieve chunks of the network. 
 
-To update such a type the client will `Put` again (paying for this again) and the network will overwrite the existing data element if the request is signed by the previous owner and comes via a group (ClientManagers). This may alter the owner to a new owner and that is allowed. 
+The network will accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. For avoidance of doubt 2 owners would require at least 1 have signed, 4 owners would require at least 2 etc. for majority control use an odd number of owners. Any `Put` must obey the mutability rules of these types.
+To update such a type the client will `Put` again (paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and comes via a group (ClientManagers). 
 
-For private data the data filed will be encrypted (at client discresion), for public data this need not be the case as anyone can read that, but only the worked can update it. 
-
+For private data the data filed will be encrypted (at client discresion), for public data this need not be the case as anyone can read that, but only the owner can update it. 
 
 ##Security
 
-This code reduction will increase security, but will require that StructuredData, be passed via the Sentinel in routing. This is also a requirement for current structured Data types in any case to ensure group consensus on those types. The security is not relate to tampering with the data (as it is signed), but instead for replay attacks by a bad close group node acting as a `DataManager`. To prevent this consensus is used. A monotonic function could be considered if the client had a notion of the direction of the monotonic output.  
+### Replay attack avoidance
 
+The inclusion of the version number will allow resistance to replay attacks.
+
+### GetKey removal
+
+Teh removal and validation of client keys is also a significant reduction in complexity and means instead of lookups to get keys, these keys are included as part of the data. This makes the data self validating and reduces security risks from sparticus type attacks. IT also removes ability for any key replacement attack on data.
 
 # Drawbacks
 
-This will put a heavier requirement on `Refresh` calls on the network in times of churn, rather than transferring only keys and versions (which may be small) this will require sending up to 100kB per StructuredData element. If content was always held as immutable data then it is not transferred at every churn event. 
+This will put a heavier requirement on `Refresh` calls on the network in times of churn, rather than transferring only keys and versions (which may be small) this will require sending up to 100kB per StructuredData element. If content was always held as immutable data then it is not transferred at every churn event.
 The client will also have more work as when the StructuredData type is larger than 100kB it then has to self_encrypt the remainder and store the datamap in the data filed of the StructuredData. This currently happens in a manner, but every time and without calculation of when.
 
 # Alternatives
