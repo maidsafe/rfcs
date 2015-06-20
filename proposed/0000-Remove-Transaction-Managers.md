@@ -18,19 +18,35 @@ This does mean a change to default behaviour and is, therefore a significant cha
 The primary goal is two fold, reduce network traffic (by removing an indirection, of looking up a value 
 and using that as a key to lookup next) and also to remove complexity (thereby increasing security).
 
+Another facet of this proposal is extendability. In networks such as SAFE for isntance, client app developers can define their own types (say of the `fix` protocol for financial transactions) and instanciate this type on the network. For users creaatign their own network they may whitelist or blacklist types and type_id's as they wish, but the possibility would exist for network builders (of new networks) to allow extensability of types.  
+
 ##What cases does it support?
 
 This change supports all use of non immutable data (structured data). This covers all all non `content only` data
 on the network and how it is handled. 
 
+###Data storage and retrieval
+
+ImmutableData is fixed self validating non mutable chunks. These require StructuredData types to manipulate information. These structured Data types may then create a global application acting on a key value store with very high degrees of availablity and security (i.e. create network scale apps). Such apps could easily include medical condition analysis linked with genomic and protiomic sequencing to advance health based knowledge on a global scale. This proposal allows such systems to certainly be prototyped and tested with a high degree of flexability. 
+
+###New protocols
+
+As these types are self validating and may contain different information, such as new protocols, `rdf`/`owl` data types then the limit of new data types and ability to link such data is extremely scalable. Such protocols could indeed easily encompass token based systems (a form of 'crypto-currency'), linked data, natural language learning databases, pre-compilation units, distributed version control systems (git like) etc.
+
+###Compute
+
+Such a scheme would allow global computation types, possibly a Domain Specific Language (DSL) would define operator types to allow combination of functions. These could be made monotonic and allow out of order processing of programs (disorderly programming) which in itself presents an area that may prove to be well aligned with decentralised 'intelligence' efforts. Linked with 'zk-snarks' to aleviate any 'halting problem' type issues then a global turing complete programming enviroment that acts on semantic ('owl' / 'json-ld' etc.) data is a potential outcome. 
+
 ##Expected outcome
 
-It is expected this will vastly reduce complexity, code and increase security on the network. 
+It is expected this will reduce complexity, code and increase security on the network, whilst allowing a greater degree of flexability. 
 
 # Detailed design
 
 The design entails reducing all StructuredData types to two sub-types, therefore it should be able to
 be recognised by the network as StructuredData and all such sub-types handled exactly in the same manner. the sub types are defined here:
+
+##FixedStructuredData
 
 ```
 struct FixedStructuredData {
@@ -54,6 +70,8 @@ Fixed (immutable fields)
 - To confirm sender of any `Put` (store or overwrite) then we check the signature of sender using same mechanism. For multiple senders we confirm at least 50% of owners have signed the request for `Put`
 
 When `Put` on the network this type is `FixedStructuredData` with a subtype field. The network ignores this subtype except for collisions. No two data types with the same name and type can exist on the network. 
+
+##TransferableStructuredData
 
 ```
 struct TransferableStructuredData {
