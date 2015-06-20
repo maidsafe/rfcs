@@ -35,7 +35,7 @@ As these types are self validating and may contain different information, such a
 
 ###Compute
 
-Such a scheme would allow global computation types, possibly a Domain Specific Language (DSL) would define operator types to allow combination of functions. These could be made monotonic and allow out of order processing of programs (disorderly programming) which in itself presents an area that may prove to be well aligned with decentralised 'intelligence' efforts. Linked with 'zk-snarks' to aleviate any 'halting problem' type issues then a global turing complete programming enviroment that acts on semantic ('owl' / 'json-ld' etc.) data is a potential outcome. 
+Such a scheme would allow global computation types, possibly a Domain Specific Language (DSL) would define operator types to allow combination of functions. These could be made monotonic and allow out of order processing of programs (disorderly programming) which in itself presents an area that may prove to be well aligned with decentralised 'intelligence' efforts. Linked with 'zk-snarks' to aleviate any 'halting problem' type issues then a global turing complete programming enviroment that optionally acts on semantic ('owl' / 'json-ld' etc.) data is a possible. 
 
 ##Expected outcome
 
