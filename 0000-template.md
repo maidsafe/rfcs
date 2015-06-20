@@ -1,4 +1,4 @@
-- Feature Name: (fill me in with a unique ident, my_awesome_feature)
+- Feature Name: (fill me in with a unique identity, my_awesome_feature)
 - Type (new feature, enhancement)
 - Related components (if any)
 - Start Date: (fill me in with today's date, DD-MM-YYYY)
@@ -7,7 +7,7 @@
 
 # Summary
 
-One para explanation of the feature.
+One paragraph explanation of the feature.
 
 # Motivation
 
@@ -29,4 +29,4 @@ What other designs have been considered? What is the impact of not doing this?
 
 # Unresolved questions
 
-What parts of the design are still TBD?
+What parts of the design are still to be done?
