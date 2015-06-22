@@ -31,7 +31,7 @@ ImmutableData is fixed self validating non mutable chunks. These require Structu
 
 ###New protocols
 
-As these types are self validating and may contain different information, such as new protocols, `rdf`/`owl` data types then the limit of new data types and ability to link such data is extremely scalable. Such protocols could indeed easily encompass token based systems (a form of 'crypto-currency'), linked data, natural language learning databases, pre-compilation units, distributed version control systems (git like) etc.
+As these data types are now self validating and may contain different information, such as new protocols, `rdf`/`owl` data types, the limit of new data types and ability to link such data is extremely scalable. Such protocols could indeed easily encompass token based systems (a form of 'crypto-currency'), linked data, natural language learning databases, pre-compilation units, distributed version control systems (git like) etc.
 
 ###Compute
 
