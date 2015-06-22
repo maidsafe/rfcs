@@ -1,4 +1,4 @@
-- Feature Name: Remove Transaction Managers from network and have network only recognise 2 Structured data sub-types 
+- Feature Name: Have network only recognise 2 Structured data sub-types 
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
 - Start Date: 13-06-2015
@@ -39,8 +39,8 @@ Such a scheme would allow global computation types, possibly a Domain Specific L
 
 ##Expected outcome
 
-It is expected this will reduce complexity, code and increase security on the network, whilst allowing a greater degree of flexability. 
-
+It is expected removing Transaction Managers from network will reduce complexity, code and increase security on the network, whilst allowing a greater degree of flexability. These types now allow the users of this network to 
+create their own data types and structuresa to be securely managed. This is hoped to allow many new types of application to exist. 
 # Detailed design
 
 The design entails reducing all StructuredData types to two sub-types, therefore it should be able to
