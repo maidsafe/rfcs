@@ -50,14 +50,13 @@ be recognised by the network as StructuredData and all such sub-types handled ex
 
 ```
 struct FixedStructuredData {
-type : TagType, // 64 Bytes
+type : TagType, // 4 Bytes
 data : mut Vec<u8>, // in many cases this is encrypted
 owner_keys : vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of owners)
 version : mut u64, // incrementing (deterministic) version number
 signature : mut Vec<Signature> // signs the fields above // 32 bytes (using e2559 sig)
 }
 ```
-__Size of raw packet minus data is 192Bytes leaving 320Bytes if restricted to 512 Bytes__
 
 Fixed (immutable fields) 
 - type
