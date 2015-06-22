@@ -2,8 +2,8 @@
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
 - Start Date: 13-06-2015
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- RFC #: 0000 
+- Issue number: #6
 
 # Summary
 
