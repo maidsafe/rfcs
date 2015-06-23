@@ -1,4 +1,4 @@
-- Feature Name: Have network only recognise 2 Structured data sub-types
+- Feature Name: Structured & data sub-types
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
 - Start Date: 13-06-2015
@@ -9,7 +9,7 @@
 
 Have network only recognise two primary data types, Immutable and Structured. These types will have tag_ids
 to allow them to contain several data types that can be used in the network by users of the client interface.
-This does mean a change to default behaviour and is, therefore a significant change. ImmutableData has already two sub-types (Backup and Sacrificial). StructuredData will have two sub types, `fixed` and `transferrable`. This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types.
+This does mean a change to default behaviour and is, therefore a significant change. ImmutableData has already two sub-types (Backup and Sacrificial). This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types.
 
 # Motivation
 
@@ -44,36 +44,12 @@ It is expected removing Transaction Managers from network will reduce complexity
 
 # Detailed design
 
-The design entails reducing all StructuredData types to two sub-types, therefore it should be able to be recognised by the network as StructuredData and all such sub-types handled exactly in the same manner. The sub-types are defined here:
+The design entails reducing all StructuredData types to a single type, therefore it should be able to be recognised by the network as StructuredData and all such sub-types handled exactly in the same manner. 
 
-##FixedStructuredData
-
-```
-struct FixedStructuredData {
-tag_type : TagType, // 4 Bytes
-data : mut Vec<u8>, // in many cases this is encrypted
-owner_keys : vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of owners)
-version : mut u64, // incrementing (deterministic) version number
-signature : mut Vec<Signature> // signs the fields above // 32 bytes (using e2559 sig)
-}
-```
-
-Fixed (immutable fields)
-- tag_type
-- owner_keys
-
-##Validation
-
-- To confirm name (storage location on network) we SHA512(tag_type + owner_keys (concatenated))
-- To validate data we confirm signature using hash of (tag_type + version) as nonce.
-- To confirm sender of any `Put` (store or overwrite) then we check the signature of sender using same mechanism. For multiple senders we confirm at least 50% of owners have signed the request for `Put`
-
-When `Put` on the network this type is `FixedStructuredData` with a subtype field. The network ignores this subtype except for collisions. No two data types with the same name and type can exist on the network.
-
-##TransferableStructuredData
+##StructuredData
 
 ```
-struct TransferableStructuredData {
+struct StructuredData {
 tag_type : TagType, // 4 Bytes ?
 identifier : NameType // 64Bytes
 data : mut Vec<u8>, // in many cases this is encrypted
@@ -94,19 +70,17 @@ Fixed (immutable fields)
 - To validate data we confirm signature using hash of (tag_type + version) as nonce.
 - To confirm sender of any `Put` (store or overwrite) then we check the signature of sender using same mechanism. For multiple senders we confirm at least 50% of owners have signed the request for `Put`
 
-When `Put` on the network this type is `TransferableStructuredData` with a subtype field. The network ignores this subtype
+When `Put` on the network this type is `StructuredData` with a subtype field. The network ignores this subtype
 except for collisions. No two data types with the same name and type can exist on the network.
 
 These types are stored in a disk based storage mechanism such as `Btree` at the NaeManagers (DataManagers) responsible for the area of the network at that `name`.
-
-## Common features
 
 These types will be limited to 100kB in size (as Immutable Chunks are also limited to 1Mb) which is for the time being a magic number.
 
 If a client requires these be larger than 100kB then the data component will contain a (optionally encrypted) datamap to be able to retrieve chunks of the network.
 
 The network will accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. For avoidance of doubt 2 owners would require at least 1 have signed, 4 owners would require at least 2 etc. for majority control use an odd number of owners. Any `Put` must obey the mutability rules of these types.
-To update such a type the client will `Put` again (paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and comes via a group (ClientManagers).
+To update such a type the client will `Post` direct (not paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and comes via a group (ClientManagers).
 
 For private data the data filed will be encrypted (at client discretion), for public data this need not be the case as anyone can read that, but only the owner can update it.
 
