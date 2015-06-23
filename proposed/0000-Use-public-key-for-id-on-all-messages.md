@@ -7,7 +7,7 @@
 
 # Summary
 
-At the moment client Id packets are create and a hash of these packets used as identity. 
+At the moment client Id packets are created and a hash of these packets used as identity. 
 This involves storing such packets prior to the client interacting with the network. 
 As such this requires an initial `unauthorised put` as the client is not known to the 
 network and cannot be recognised without this. It also means there are many lookups
