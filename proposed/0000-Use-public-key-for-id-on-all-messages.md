@@ -47,6 +47,8 @@ connections more clearly. This does require a change to the routing API to accom
 Clients themselves no longer will require to store Id's packets on the network (although they can via StructuredData).
 `PublicId` types are no longer required in the maidsafe_types library (maidsafe_client exclusive now).
 
+To be able to `Put` any data one the network a client will require to `Post` and account creation and payment to the `ClientManagers` for that key. This is also an improvement as this message and action is explicit as opposed to a side effcet of a `Put`. Failure will mean the network returns a `NoAccount` error on any put. Any `Post` without an account although direct would fail as this requires the data already exists (in terms of data handling). 
+
 # Drawbacks
 
 To be identified
