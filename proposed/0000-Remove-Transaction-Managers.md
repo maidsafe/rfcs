@@ -1,3 +1,6 @@
+#NOTE Republished for review, Please use new location for discussion -> https://github.com/maidsafe/rfcs/pull/11/files
+
+
 - Feature Name: Structured & data sub-types
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
