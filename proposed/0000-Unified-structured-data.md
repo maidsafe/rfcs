@@ -56,7 +56,7 @@ owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number
 version : mut u64, // incrementing (deterministic) version number
 previous_owner_keys : mut Option<vec<crypto::sign::PublicKey>> // n * 32 Bytes (where n is number of
 owners) only required when owners change 
-signature : mut Option<Vec<Signature>> // signs the `mut` fields above // 32 bytes (using e2559 sig)
+signature : mut Option<Vec<Signature>> // signs the `mut` fields above // 32 bytes (using e25519 sig)
 }
 ```
 __Size of raw packet minus data is 192Bytes leaving 320Bytes if restricted to 512 Bytes__
