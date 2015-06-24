@@ -8,7 +8,7 @@
 # Summary
 
 Have network only recognise two primary data types, Immutable and Structured. These types will have tag_ids to allow them to contain several data types that can be used in the network by users of the client interface.
-This does mean a change to default behaviour and is, therefore a significant change. ImmutableData has already What parts of the design are still to be done?two sub-types (Backup and Sacrificial). This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types.
+This does mean a change to default behaviour and is, therefore a significant change. ImmutableData has already two sub-types (Backup and Sacrificial). This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types.
 
 # Motivation
 
