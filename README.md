@@ -1,5 +1,7 @@
 # Project SAFE RFCs
 
+[![Join the chat at https://gitter.im/maidsafe/rfcs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/maidsafe/rfcs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 _This process attempts to emulate the success of the Rust programming language
 and as such has almost mirrored the [RFC process the Rust developers
 use](https://github.com/rust-lang/rfcs), which is tried and tested and appears
