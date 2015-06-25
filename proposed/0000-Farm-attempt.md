@@ -27,7 +27,7 @@ ON receipt of a `Get` request for `ImmutableData` the `DataManager` calculates t
 1. PmidNodes -> tested at 100% of FR [i.e. Farming rate * 1]
 2. App Developer -> tested at 10% of FR [i.e. Farming rate * 1.1] 
 3. Publisher -> tested at 10% of FR [i.e. Farming rate * 1.1]
-4. Core development -> tested at 5% of FR [i.e. Farming rate * 1.2]
+4. Core development -> tested at 5% of FR [i.e. Farming rate * 1.05]
 
 ##Payment address 
 
