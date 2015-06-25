@@ -1,6 +1,6 @@
 - Feature Name: Use public key alone to authorise actions 
 - Type Enhancement
-- Related components routing, types, client, vaults
+- Related components routing, maidsafe_types, maidsafe_client, maidsafe_vaults
 - Start Date: 23-06-2015
 - RFC PR: 
 - Issue number: 
