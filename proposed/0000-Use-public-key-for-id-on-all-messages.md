@@ -7,12 +7,24 @@
 
 # Summary
 
-At the moment client Id packets are create and a hash of these packets used as identity. 
-This involves storing such packets prior to the client interacting with the network. 
+At the moment client Id packets are created and a hash of these packets used as identity.
+This is stored on th network as a `key` (ie the hash) / `value` (the public key) pair.
+These packets have to be available prior to the client storing data onto the network. 
+
+As the network must confirm a client has paid the network, either by providing resource
+or via a network token (i.e. safecoin). Then it needs to look up the clients public key 
+and confirm the signatuire of requests come from that client. This is done by querying 
+the client ID (Hash), then looking up the ID packet and downloading it to get the public key.
+
 As such this requires an initial `unauthorised put` as the client is not known to the 
-network and cannot be recognised without this. It also means there are many lookups
-to link the hash of the id packet with the client taking the action. 
-These lookups are costly it is proposed here that they are not required.  
+network and cannot be recognised without this. This means essentially the network has to 
+allow unliited `Put` of client Id packets, thereby exposing a risk of wasted network usage.
+
+This proposal removes all of this indirection and instead allows the client to be recodnised
+by the public key included in messages or data types. such messages and data types will be 
+signed by the `secret key` that is paired with this public key. As only the owner should have
+access to this `secret key` then it can be assumed the message or request to mutate data is 
+indeed valid in a cryptographically secure manner.
 
 # Motivation
 
