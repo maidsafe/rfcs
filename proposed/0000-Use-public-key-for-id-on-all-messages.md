@@ -22,7 +22,7 @@ highly unlikely, it is impossible to hack if they do not exist!
 
 This mechanism does not reduce the total number of clients or types of clients as they all exist 
 in an address space of 2^256 and app developers can use multiple Id's in very clever ways, such 
-as the SAFE network does to distinguish public id's and private id's. Now these and more are possible.
+as the SAFE network does not distinguish between public id's and private id's. Now these and more are possible.
 Id's could be created to share data types (as co-owners) and allow shares access and write capability
 between applications and groups. 
 
