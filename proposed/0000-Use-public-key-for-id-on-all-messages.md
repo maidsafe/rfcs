@@ -8,7 +8,7 @@
 # Summary
 
 At the moment client Id packets are created and a hash of these packets used as identity.
-This is stored on th network as a `key` (ie the hash) / `value` (the public key) pair.
+This is stored on the network as a `key` (ie the hash) / `value` (the public key) pair.
 These packets have to be available prior to the client storing data onto the network. 
 
 As the network must confirm a client has paid the network, either by providing resource
