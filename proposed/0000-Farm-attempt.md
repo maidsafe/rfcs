@@ -19,8 +19,7 @@ This implementation will be solely in the vault library. This will include sever
 
 # Detailed design
 
-ON receipt of a `Get` request for `ImmutableData` the `DataManager` calculates the SHA512 Hash of the `name()` of the `ImmutableData` concatenated with the
-`PmidHolder`. This result is then modulo divided by the farming rate (FR). The rate attempts should divide the award between 4 distinct groups. 
+ON receipt of a `Get` request for `ImmutableData` the `DataManager` calculates the SHA512 Hash of the `name()` of the `ImmutableData` concatenated with the`PmidNode`. This result is then modulo divided by the farming rate (FR). The rate attempts should divide the award between 4 distinct groups. (for clarity, this algorithm is applied to all `PmidNodes` that hold this data element in the current group).
 
 ##Rmte attempts 
 
