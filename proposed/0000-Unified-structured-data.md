@@ -96,8 +96,8 @@ For private data the data filed will be encrypted (at client discretion), for pu
 - Decide on a `type_tag` for a new type.
 - use whichever mechanism to create an `Identity` for this type
 - serialise any structure into `Vec<u8>` and include in data field (can be any structure that is serialisable)
-- store on network via `routing::Put(Identity: location, SafeData::StructuredData : data, u64: type_tag);`
-- Get from network via `routing::Get(Identity: name, SafeData : type, u64: type_tag);`
+- store on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
+- Get from network via `routing::Get(Identity: name, Data : type, u64: type_tag);`
 
 ##Security
 
