@@ -8,7 +8,7 @@
 # Summary
 
 Have network only recognise two primary data types, Immutable and Structured. These types will have tag_ids to allow them to contain several data types that can be used in the network by users of the client interface.
-This does mean a change to default behaviour and is, therefore a significant change. ImmutableData has already What parts of the design are still to be done?two sub-types (Backup and Sacrificial). This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types.
+This does mean a change to default behaviour and is, therefore a significant change. ImmutableData has already two sub-types (Backup and Sacrificial). This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types.
 
 # Motivation
 
@@ -50,13 +50,17 @@ The design entails reducing all StructuredData types to a single type, therefore
 ```
 struct StructuredData {
 tag_type : TagType, // 8 Bytes ?
-identifier : NameType // 16Bytes
+identifier : NameType // 64Bytes (i.e. SHA512 Hash)
 data : mut Vec<u8>, // in many cases this is encrypted
 owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of owners)
 version : mut u64, // incrementing (deterministic) version number
 previous_owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of
 owners) only required when owners change 
+<<<<<<< HEAD
 signature : mut Vec<Signature> // signs the `mut` fields above // 32 bytes (using e2559 sig)
+=======
+signature : mut Option<Vec<Signature>> // signs the `mut` fields above // 32 bytes (using e25519 sig)
+>>>>>>> beaa1fde273705f9f214dd92e4e5b11b25eeb596
 }
 ```
 __Size of raw packet minus data is 192Bytes leaving 320Bytes if restricted to 512 Bytes__
@@ -85,10 +89,19 @@ These types will be limited to 100kB in size (as Immutable Chunks are also limit
 
 If a client requires these be larger than 100kB then the data component will contain a (optionally encrypted) datamap to be able to retrieve chunks of the network.
 
-The network will accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. For avoidance of doubt 2 owners would require at least 1 have signed, 4 owners would require at least 2 etc. for majority control use an odd number of owners. Any `Put` must obey the mutability rules of these types.
-To update such a type the client will `Post` direct (not paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and comes via a group (ClientManagers).
+The network will accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. For avoidance of doubt 2 owners would require at least 1 have signed, 4 owners would require at least 2 etc. for majority control use an odd number of owners. Any `Put` must obey the mutability rules of these types. An initial `Put` *must have version number == 0*.
+
+To update such a type the client will `Put` direct (not paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and comes via a group (ClientManagers). To update a type then there must be an existing type of the same `Identity` and `type` whose owners (or optinally previous owners) includes at least a majority of this new type.
 
 For private data the data filed will be encrypted (at client discretion), for public data this need not be the case as anyone can read that, but only the owner can update it.
+
+##Client perspective 
+
+- Decide on a `type_tag` for a new type.
+- use whichever mechanism to create an `Identity` for this type
+- serialise any structure into `Vec<u8>` and include in data field (can be any structure that is serialisable)
+- store on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
+- Get from network via `routing::Get(Identity: name, Data : type, u64: type_tag);`
 
 ##Security
 
