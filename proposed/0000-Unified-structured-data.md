@@ -17,7 +17,7 @@ This does mean a change to default behaviour and is, therefore a significant cha
 The primary goal is two fold, reduce network traffic (by removing an indirection, of looking up a value
 and using that as a key to lookup next) and also to remove complexity (thereby increasing security).
 
-Another facet of this proposal is extendability. In networks such as SAFE for instance, client app developers can define their own types (say of the `fix` protocol for financial transactions) and instanciate this type on the network. For users creating their own network they may whitelist or blacklist types and type_id's as they wish, but the possibility would exist for network builders (of new networks) to allow extensibility of types.  
+Another facet of this proposal is extendibility. In networks such as SAFE for instance, client app developers can define their own types (say of the `fix` protocol for financial transactions) and instantiate this type on the network. For users creating their own network they may white list or blacklist types and type_id's as they wish, but the possibility would exist for network builders (of new networks) to allow extensibility of types.  
 
 ##What cases does it support?
 
@@ -26,7 +26,7 @@ on the network and how it is handled.
 
 ###Data storage and retrieval
 
-ImmutableData is fixed self validating non mutable chunks. These require StructuredData types to manipulate information. These structured Data types may then create a global application acting on a key value store with very high degrees of availablity and security (i.e. create network scale apps). Such apps could easily include medical condition analysis linked with genomic and proteomic sequencing to advance health based knowledge on a global scale. This proposal allows such systems to certainly be prototyped and tested with a high degree of flexibility.
+ImmutableData is fixed self validating non mutable chunks. These require StructuredData types to manipulate information. These structured Data types may then create a global application acting on a key value store with very high degrees of availability and security (i.e. create network scale apps). Such apps could easily include medical condition analysis linked with genomic and proteomic sequencing to advance health based knowledge on a global scale. This proposal allows such systems to certainly be prototyped and tested with a high degree of flexibility.
 
 ###New protocols
 
@@ -34,7 +34,7 @@ As these data types are now self validating and may contain different informatio
 
 ###Compute
 
-Such a scheme would allow global computation types, possibly a Domain Specific Language (DSL) would define operator types to allow combination of functions. These could be made monotonic and allow out of order processing of programs (disorderly programming) which in itself presents an area that may prove to be well aligned with decentralised 'intelligence' efforts. Linked with 'zk-snarks' to aleviate any 'halting problem' type issues then a global turing complete programming enviroment that optionally acts on semantic ('owl' / 'json-ld' etc.) data is a possible.
+Such a scheme would allow global computation types, possibly a Domain Specific Language (DSL) would define operator types to allow combination of functions. These could be made monotonic and allow out of order processing of programs (disorderly programming) which in itself presents an area that may prove to be well aligned with decentralised 'intelligence' efforts. Linked with 'zk-snarks' to alleviate any 'halting problem' type issues then a global Turing complete programming environment that optionally acts on semantic ('owl' / 'json-ld' etc.) data is a possible.
 
 ##Expected outcome
 
@@ -54,9 +54,9 @@ identifier : NameType // 16Bytes
 data : mut Vec<u8>, // in many cases this is encrypted
 owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of owners)
 version : mut u64, // incrementing (deterministic) version number
-previous_owner_keys : mut Option<vec<crypto::sign::PublicKey>> // n * 32 Bytes (where n is number of
+previous_owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of
 owners) only required when owners change 
-signature : mut Option<Vec<Signature>> // signs the `mut` fields above // 32 bytes (using e2559 sig)
+signature : mut Vec<Signature> // signs the `mut` fields above // 32 bytes (using e2559 sig)
 }
 ```
 __Size of raw packet minus data is 192Bytes leaving 320Bytes if restricted to 512 Bytes__
@@ -67,12 +67,12 @@ Fixed (immutable fields)
 
 ##Validation
 
-- To confirm name (storage location on network) we SHA512(tag_type + identifier). As these are mcuh
+- To confirm name (storage location on network) we SHA512(tag_type + identifier). As these are much
   smaller than the hash it prevents flooding of a network location.
 - To validate data we confirm signature using hash of (tag_type + version) as nonce. Initial `Put`
-  does not require this signature, but does require the owner be set.
+  does not require this signature, but does require the owner contain a value.
 - If previous owners is set then the signature is confirmed using those keys (allows owenr
-  change/transfer etc.). In this case the previou owners is only required on first update and may be
+  change/transfer etc.). In this case the previous owners is only required on first update and may be
   remove in next version if the owners are not changed again.
 - To confirm sender of any `Put` (store or overwrite) then we check the signature of sender using same mechanism. For multiple senders we confirm at least 50% of owners have signed the request for `Put`
 
@@ -115,5 +115,5 @@ Status quo is an option and realistic.
 
 # Unresolved questions
 
-1. size of StructuredData packet, it would be nice if it were perhaps 512Bytes to have the best chance to fit into a single UDP packet, although not guaranteed. Means a payload after serialisation of only a few hundred bytes (maybe less)
+1. Size of StructuredData packet, it would be nice if it were perhaps 512Bytes to have the best chance to fit into a single UDP packet, although not guaranteed. Means a payload after serialisation of only a few hundred bytes (maybe less)
 2. Version conflicts or out of order updates, will upper layers handle this via a wait condition?
