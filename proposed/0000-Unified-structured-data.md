@@ -84,9 +84,9 @@ These types will be limited to 100kB in size (as Immutable Chunks are also limit
 
 If a client requires these be larger than 100kB then the data component will contain a (optionally encrypted) datamap to be able to retrieve chunks of the network.
 
-The network will accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. For avoidance of doubt 2 owners would require at least 1 have signed, 4 owners would require at least 2 etc. for majority control use an odd number of owners. Any `Put` must obey the mutability rules of these types. An initial `Put` *must have version number == 0*.
+The network will accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. For avoidance of doubt 2 owners would require at least 1 have signed, 4 owners would require at least 2 etc. for majority control use an odd number of owners. Any `Put` must obey the mutability rules of these types.
 
-To update such a type the client will `Put` direct (not paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and comes via a group (ClientManagers). To update a type then there must be an existing type of the same `Identity` and `type` whose owners (or optinally previous owners) includes at least a majority of this new type.
+To update such a type the client will `Post` direct (not paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and the version increments. To update a type then there must be an existing type of the same `Identity` and `type` whose owners (or optinally previous owners) includes at least a majority of this new type.
 
 For private data the data filed will be encrypted (at client discretion), for public data this need not be the case as anyone can read that, but only the owner can update it.
 
@@ -96,8 +96,9 @@ For private data the data filed will be encrypted (at client discretion), for pu
 - use whichever mechanism to create an `Identity` for this type
 - serialise any structure into `Vec<u8>` and include in data field (can be any structure that is serialisable)
 - store on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
-- Get from network via `routing::Get(Identity: name, Data : type, u64: type_tag);`
-
+- Get from network via `routing::Get(Identity: name, Data::type : type, u64: type_tag);`
+- Mutate on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
+- Delete from network via `routing::Delete(Identity: name, Data::type : type, u64: type_tag);`
 ##Security
 
 ### Replay attack avoidance
