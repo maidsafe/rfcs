@@ -83,13 +83,13 @@ The sequesnce of steps is as follows:
 1. We send a `FindGroup` message to the group around some location
 2. When the nodes in the group receive this message they respond
    with a `FindGroupResponse` which is roughly isomorphic to a list
-   of (NameType, PublicKey, _additional data_) tuple.
+   of (NameType, PublicKey, _additional data_) tuples.
 
 Notice the analogy with the previous sentinel where the step (1) 
 would correspond to sending the `GetGroupKey` message and step (2)
 would correspond to receiving the group keys. The difference is
 that the `FindGroupResponse` message contains additional information
-apart from the NameType and the PublicKey which are then used
+apart from the NameType and the PublicKey which is then used
 by the Routing library. The rest of the validation procedure
 is analoguous as well.
 
