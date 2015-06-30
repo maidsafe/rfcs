@@ -77,10 +77,37 @@ is the network that decides who belongs to G (by means of the
 parallel send implemented by routing).
 
 ## KeySentinel
-TODO
+
+This sentinel is intended for use when a node wants to find
+a group of nodes at some location. This normally hapens during
+startup before it is connected to anyone.
+
+The sequesnce of steps is as follows:
+
+(1) We send a `FindGroup` message to the group around some location
+(2) When the nodes in the group receive this message they respond
+    with a `FindGroupResponse` which is roughly isomorphic to a list
+    of (NameType, PublicKey, <additional data>) tuple.
+
+Notice the analogy with the previous sentinel where the step (1) 
+would correspond to sending the `GetGroupKey` message and step (2)
+would correspond to receiving the group keys. The difference is
+that the `FindGroupResponse` message contains additional information
+apart from the NameType and the PublicKey which are then used
+by the Routing library. The rest of the validation procedure
+is analoguous as well.
 
 ## AccountSentinel
-TODO
+
+This one is simplest of the three. It is because we're only expecting
+messages to go through this sentinel if they arrive from our own
+close group. As such, it is assumed that we already know public keys
+of the senders so there is no need to explicitly ask for them.
+
+Having said that, the responsibility of this sentinel reduces to
+accumulating messages by a certain key and once a quorum of messages
+with the same key is reached, they are gathered in a list and returned
+for further processing by the Routing library.
 
 # Drawbacks
 
