@@ -83,7 +83,7 @@ The sequesnce of steps is as follows:
 1. We send a `FindGroup` message to the group around some location
 2. When the nodes in the group receive this message they respond
    with a `FindGroupResponse` which is roughly isomorphic to a list
-   of (NameType, PublicKey, <additional data>) tuple.
+   of (NameType, PublicKey, _additional data_) tuple.
 
 Notice the analogy with the previous sentinel where the step (1) 
 would correspond to sending the `GetGroupKey` message and step (2)
