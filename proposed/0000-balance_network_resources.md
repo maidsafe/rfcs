@@ -53,7 +53,7 @@ sends a `Delete` for a safecoin (which the `ClientManager` checks)). The balance
 reduced per `Put`. This `Delete` call will pass through `ClientManagers` who can immediately add the 
 balance and if an `Error` for this `Delete` is returned then reduce the balance and remove the account.
 
-It is assumed clients will pay at least one safecoin to create an account. 
+It is assumed clients will pay at least one safecoin to create an account. This payment will be converted immediately to Mb of storage space and the client can query this figure at any time. 
 
 # Drawbacks
 
