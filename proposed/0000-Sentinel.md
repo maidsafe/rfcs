@@ -20,7 +20,7 @@ they are expected to be as close as possible to a certain HASH address
 within the XOR network.
 
 We generally call such a set a Group(H) where H is the HASH address or
-simply A Group when H is known from the context.
+simply a Group when H is known from the context.
 
 The key idea is the assumption that it is cryptographically hard for an
 adversary to enter an arbitrary group of close nodes. The purpose of the
@@ -29,23 +29,19 @@ nodes really lives in a Group surrounding the given HASH.
 
 # Detailed design
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
-with the network to understand, and for somebody familiar with the code practices to implement.
-This should get into specifics and corner-cases, and include examples of how the feature is used.
-
 Currently we have a need for three kinds of sentinels:
 
-PureSentinel: This sentinel is dedicated to validate `Put` and `Post` messages
+* __PureSentinel__: This sentinel is dedicated to validate `Put` and `Post` messages
 which arrived from a `distant group` (i.e. a group we're not part of).
 
-KeySentinel: This one is in a sense very similar to the `PureSentinel`
+* __KeySentinel__: This one is in a sense very similar to the `PureSentinel`
 but instead of acting on behalf of `Put` and `Post` messages originating
 from arbitrary locations (plural because it originates from a group) in the
 network it acts on behalf of `FindGroupResponse` messages where the
 `FindGroup` request message originated from us. This subtle distinction
 allows us to request fewer network send calls as shall be explained later.
 
-AccountSentinel: This one validates `Refresh` messages which arrived from
+* __AccountSentinel__: This one validates `Refresh` messages which arrived from
 our `close group` (i.e. a group we're part of).
 
 ## PureSentinel
