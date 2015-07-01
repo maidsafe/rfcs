@@ -118,8 +118,34 @@ as such `version` is unused at routing.  Additionally routing has no knowledge
 of the previously stored valid version. The version number is for the user.
 - `tag_type` Routing does not attach meaning to the 8 byte `tag_type` and treats
 all tag_types equal.
+- the signature should sign in order `data`, `version`, `owner_keys` and
+`previous_owner_keys`
 
+## Impact on routing message
 
+Currently `RoutingMessage` has the following declaration with
+an obligatory signature from the `Header::Source::fromNode`
+```rust
+pub struct RoutingMessage {
+    pub message_type: MessageTypeTag,
+    pub message_header: message_header::MessageHeader,
+    pub serialised_body: Vec<u8>,
+    pub signature : types::Signature
+}
+```
+
+As every client connects to the network over a relocated relay node,
+we can keep this obligatory signature and have it signed by the relay node.
+This puts responsibility on the relay node when injecting client messages in
+the network, and keeps consistency that the from_node on the network is always
+the id of a relocated node, not the hash of a 32byte client PublicKey.
+
+RoutingClient will sign RoutingMessages with the generic unrelocated Id
+it self-generates on construction.  This generic Id is unrelated to the keys
+for signing ownership of structured data; it is purely and internally used
+by routing to identify client-relay connections, per session.
+
+##
 
 ### Standard routing behaviour
 
