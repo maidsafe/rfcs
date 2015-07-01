@@ -145,7 +145,28 @@ it self-generates on construction.  This generic Id is unrelated to the keys
 for signing ownership of structured data; it is purely and internally used
 by routing to identify client-relay connections, per session.
 
-##
+## Reducing MessageTypes
+
+Routing can reduce to the following message types; the main motivation
+is to simplify the message handlers.
+
+``` rust
+pub enum MessageTypeTag {
+    ConnectRequest,
+    ConnectResponse,
+    ConnectSuccess,*
+    FindGroup,
+    FindGroupResponse,
+    GetGroupKey,
+    GetGroupKeyResponse,
+    PutPublicId,
+    PutPublicIdResponse,
+    ActionRequest,
+    ActionResponse,
+    Refresh,
+    Unknown,
+}
+```
 
 ### Standard routing behaviour
 
