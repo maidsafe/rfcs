@@ -56,6 +56,7 @@ impl ImmutableData {
         (tag_type + 1) Hash iterations of self.value
     }
 
+    // add lifetime if needed
     pub fn content(&self) -> &[u8] {
         &self.value[..]
     }
@@ -82,7 +83,7 @@ struct StructuredData {
 
 impl StructuredData {
     pub fn new(
-        tag_type: u8,
+        tag_type : [u8; 8],
         identifier : NameType,
         data : Vec<u8>,
         owner_keys : Vec<crypto::sign::PublicKey>,
@@ -104,6 +105,9 @@ impl StructuredData {
         SHA512(tag_type + identifier)
     }
 
+    pub fn content(&self) -> &[u8] {}
+
+    pub fn add_signature(&mut self, private_sign_key : &crypto::sign::SecretKey) {}
 }
 ```
 
