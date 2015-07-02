@@ -216,6 +216,37 @@ pub enum MessageTypeTag {
 }
 ```
 
+Replacing `GetData`, `GetDataResponse`, `PutData`, `PutDataResponse`,
+`Post`, `PostResponse`, `Delete`, `DeleteResponse` with `ActionRequest`
+and `ActionResponse` will make the handling of messages more generic.
+It is a worthwhile, but not a blocking improvement.
+
+We can gradually do this by implementing `Post` and `Delete` according to this
+`Action` paradigm, and after the sprint revisit `Get` and `Put` after evaluation.
+
+``` rust
+pub enum FundamentalData {
+    NoData,
+    Plain(PlainData),
+    Immutable(ImmutableData),
+    Structured(StructuredData)
+}
+
+pub enum Action {
+    _Put,
+    _Get(NameAndTypeId),
+    Post,
+    Delete
+}
+
+struct ActionRequest {
+    data : FundamentalData,
+    action : Action,
+}
+```
+
+#### update NameAndTypeId
+
 ### Standard routing behaviour
 
     <A|B|C>
