@@ -128,6 +128,47 @@ in the following order: `data`, `version`, `owner_keys` and
 
 Corresponding `get` functions for all data fields are implied.
 
+#### logic for valid succession of structured data
+
+The structured data is recursively validated strictly on the preceding version.
+That is the validity of a `StructuredData` of version `n` can only depend
+on the validity of the same `StructuredData` of version `n-1`.  Here "same"
+means "have the same name".  For `StructuredData` of version `n = 0` the
+validity is `true` (and hence ClientManagers can charge an account to create
+new valid `StructuredData_v0`).
+
+The version number must strictly increase by one.
+All structured data must be owned; transfer of ownership is discussed below.
+A majority is 50%, as outlined in the parent RFC
+
+**case : previous owner field is empty**
+
+An empty `previous_owner_keys` vector implies that the `owner_keys`
+of version `n` must match the `owner_keys` of version `n-1`.
+The `previous_owner_keys` of version `n-1` is ignored.
+In this case no transfer of ownership is executed.  The signatures must
+be validatable with a majority of the keys of the current owners of version `n`.
+
+**case : previous owner field is not empty**
+
+A non-empty `previous_owner_keys` vector implies that there is an intent to
+transfer ownership. In this case the `previous_owner_keys` of version `n`
+must match the `owner_keys` of version `n-1`. The signatures must be
+validatable with a majority of the keys of `previous_owner_keys` of version `n`.
+
+#### efficiency consideration when validating the signatures
+
+As outlined above, a signed vector of public keys defines a fixed order of
+the public keys that will be checked to validate the signatures (see above
+on previous owners or not).  On construction of a `StructuredData`
+the `Vec<Signatures>` will be ordered to the fixed order defined by the
+relevant `Vec<PublicKey>`.
+
+Any validation effort will then in sequence iterate over the signatures, and
+in sequence check the keys, starting from the same index.  This is an
+easy algorithm for minimizing the search for matching signatures.  A better
+algorithm can be suggested.
+
 ## Impact on routing message
 
 Currently `RoutingMessage` has the following declaration with
