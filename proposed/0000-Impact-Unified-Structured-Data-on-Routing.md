@@ -72,7 +72,7 @@ We repeat the structure as defined in the parent RFC
 
 ``` rust
 struct StructuredData {
-   tag_type : [u8; 8],
+   tag_type : u64,
    identifier : NameType,
    data : Vec<u8>,
    owner_keys : Vec<crypto::sign::PublicKey>,
@@ -83,7 +83,7 @@ struct StructuredData {
 
 impl StructuredData {
     pub fn new(
-        tag_type : [u8; 8],
+        tag_type : u64,
         identifier : NameType,
         data : Vec<u8>,
         owner_keys : Vec<crypto::sign::PublicKey>,
@@ -108,6 +108,10 @@ impl StructuredData {
     pub fn content(&self) -> &[u8] {}
 
     pub fn add_signature(&mut self, private_sign_key : &crypto::sign::SecretKey) {}
+
+    pub fn is_valid_successor(&self, successor: &StructuredData) -> bool {
+        // see detailed discussion of logic below
+    }
 }
 ```
 
@@ -118,8 +122,11 @@ as such `version` is unused at routing.  Additionally routing has no knowledge
 of the previously stored valid version. The version number is for the user.
 - `tag_type` Routing does not attach meaning to the 8 byte `tag_type` and treats
 all tag_types equal.
-- the signature should sign in order `data`, `version`, `owner_keys` and
-`previous_owner_keys`
+- the signature should sign in bytes that are concatenated
+in the following order: `data`, `version`, `owner_keys` and
+`previous_owner_keys` - purely as a matter of convention.
+
+Corresponding `get` functions for all data fields are implied.
 
 ## Impact on routing message
 
