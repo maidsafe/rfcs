@@ -19,16 +19,24 @@ reduce any confusion or name collisions (although the latter is extremely improb
 # Detailed design
 
 0            --      Login session
-1            --      Private Directory
-2            --      Public directory
-3            --      Shared Directory
-4            --      dns entry
-5
+
+1            --      Backup Session
+
+2            --      Private Directory
+
+3            --      Public directory
+
+4            --      Shared Directory
+
+5            --      dns entry
+
 6
+
 7            --      safecoin
+
 8-10,000     --      Reserved
-10,001
-2^64         --      Available
+
+10,001-2^64  --      Available
 
 The numbers 0-10,000 will be hard coded into vaults for the use of the core network only and will not be likely 
 available to application developers to overwrite their structure. 
