@@ -107,7 +107,9 @@ impl StructuredData {
 
     pub fn content(&self) -> &[u8] {}
 
-    pub fn add_signature(&mut self, private_sign_key : &crypto::sign::SecretKey) {}
+    pub fn add_signature(&mut self,
+        private_sign_key : &crypto::sign::SecretKey,
+        public_sign_key: &crypto::sign::PublicKey) -> Result {}
 
     pub fn is_valid_successor(&self, successor: &StructuredData) -> bool {
         // see detailed discussion of logic below
@@ -224,7 +226,6 @@ need to be updated to a `UnifiedData`.
 - `RoutingClient::Put`, `RoutingClient::Get`, etc
 - `NodeInterface`
 - `ClientInterface`
-
 
 # Drawbacks
 
