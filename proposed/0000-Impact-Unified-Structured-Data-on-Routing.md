@@ -193,74 +193,50 @@ it self-generates on construction.  This generic Id is unrelated to the keys
 for signing ownership of structured data; it is purely and internally used
 by routing to identify client-relay connections, per session.
 
-## Reducing MessageTypes
+## Conservative approach to MessageTypes
 
 Routing can reduce to the following message types; the main motivation
-is to simplify the message handlers.
+is to simplify the message handlers.  However, we will first go for
+a conservative approach and extend the existing paradigm.
+
+This requires updating `GetData`, `GetDataResponse`, `PutData`, `PutDataResponse`.
+It leads to introducing `Post`, `PostResponse`, `Delete`, `DeleteResponse`.
+
+The corresponding handlers need to be updated/written, replacing `serialised_bytes`
+with `UnifiedData`.
 
 ``` rust
-pub enum MessageTypeTag {
-    ConnectRequest,
-    ConnectResponse,
-    ConnectSuccess,*
-    FindGroup,
-    FindGroupResponse,
-    GetGroupKey,
-    GetGroupKeyResponse,
-    PutPublicId,
-    PutPublicIdResponse,
-    ActionRequest,
-    ActionResponse,
-    Refresh,
-    Unknown,
+pub enum UnifiedData {
+    PlainData,
+    ImmutableData(u8),
+    StructuredData(u64)
 }
 ```
 
-Replacing `GetData`, `GetDataResponse`, `PutData`, `PutDataResponse`,
-`Post`, `PostResponse`, `Delete`, `DeleteResponse` with `ActionRequest`
-and `ActionResponse` will make the handling of messages more generic.
-It is a worthwhile, but not a blocking improvement.
+## also update with UnifiedData enumeration
+This list is not exhaustive; all previously `serialised bytes`
+need to be updated to a `UnifiedData`.
 
-We can gradually do this by implementing `Post` and `Delete` according to this
-`Action` paradigm, and after the sprint revisit `Get` and `Put` after evaluation.
+- `NameTypeAndId`
+- `MessageAction`
+- `MethodCall`
+- `RoutingMembrane::Put`, `RoutingMembrane::Get`, etc
+- `RoutingClient::Put`, `RoutingClient::Get`, etc
+- `NodeInterface`
+- `ClientInterface`
 
-``` rust
-pub enum FundamentalData {
-    NoData,
-    Plain(PlainData),
-    Immutable(ImmutableData),
-    Structured(StructuredData)
-}
-
-pub enum Action {
-    _Put,
-    _Get(NameAndTypeId),
-    Post,
-    Delete
-}
-
-struct ActionRequest {
-    data : FundamentalData,
-    action : Action,
-}
-```
-
-#### update NameAndTypeId
-
-### Standard routing behaviour
-
-    <A|B|C>
-
-    MessageAction::SendOn
 
 # Drawbacks
 
 Why should we *not* do this?
+(uncompleted)
 
 # Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
+(uncompleted)
 
 # Unresolved questions
 
 What parts of the design are still to be done?
+(uncompleted)
