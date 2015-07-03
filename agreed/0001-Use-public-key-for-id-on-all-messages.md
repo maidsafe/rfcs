@@ -1,9 +1,8 @@
 - Feature Name: Use public key alone to authorise actions 
 - Type Enhancement
-- Related components routing, maidsafe_types, maidsafe_client, maidsafe_vaults
+- Related components routing, maidsafe_types, maidsafe_client, maidsafe_vault
 - Start Date: 23-06-2015
-- RFC PR: 
-- Issue number: 
+- Issue number: #22 
 
 # Summary
 
@@ -13,7 +12,7 @@ These packets have to be available prior to the client storing data onto the net
 
 As the network must confirm a client has paid the network, either by providing resource
 or via a network token (i.e. safecoin). Then it needs to look up the clients public key 
-and confirm the signatuire of requests come from that client. This is done by querying 
+and confirm the signature of requests come from that client. This is done by querying 
 the client ID (Hash), then looking up the ID packet and downloading it to get the public key.
 
 As such this requires an initial `unauthorised put` as the client is not known to the 

@@ -2,8 +2,7 @@
 - Type new feature
 - Related components maidsafe_vault 
 - Start Date: 25-06-2015 
-- RFC PR: 
-- Issue number: 
+- Issue number: #26 
 
 # Summary
 
