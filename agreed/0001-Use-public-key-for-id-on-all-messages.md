@@ -2,8 +2,7 @@
 - Type Enhancement
 - Related components routing, maidsafe_types, maidsafe_client, maidsafe_vaults
 - Start Date: 23-06-2015
-- RFC PR: 
-- Issue number: 
+- Issue number: #22 
 
 # Summary
 
