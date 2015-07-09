@@ -85,7 +85,7 @@ StructuredData {
 ```
  
 step 4:
-Client-A wants to tranfer ownership of structureddata to Client-B:
+Client-A wants to transfer ownership of Structured Data to Client-B:
 ```
 StructuredData {
     other_fields: Value-22,
