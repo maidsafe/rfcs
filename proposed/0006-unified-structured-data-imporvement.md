@@ -115,7 +115,7 @@ StructuredData {
 ```
  
 **step 7:**
-Vault will use owner field from step-5 == B-PublicKey and signature verification fails. So it will not update anything.
+Vault will use owner field from **step 5** == `B-PublicKey` and signature verification fails. So it will not update anything.
  
 **step 8:**
 Client-B tries to update:
