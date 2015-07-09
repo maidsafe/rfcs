@@ -44,7 +44,7 @@ Fixed (immutable fields)
 
 The following shows Creation, Updation and Transfer-of-ownership of Structured Data:
 
-*step 0:*
+**step 0:**
 Client-A sends:
 ```
 StructuredData {
