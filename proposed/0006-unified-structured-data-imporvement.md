@@ -54,7 +54,7 @@ StructuredData {
 }
 ```
  
-*step 1:*
+**step 1:**
 Vault receives for the first time. So Just Stores it:
 ```
 StructuredData {
@@ -64,7 +64,7 @@ StructuredData {
 }
 ```
  
-*step 2:*
+**step 2:**
 Client-A updates it:
 ```
 StructuredData {
@@ -74,7 +74,7 @@ StructuredData {
 }
 ```
  
-*step 3:*
+**step 3:**
 Vault will check if new data is sent by valid owner. Use `owner_keys` from the stored data in step 1 to verify signature of data in step 2. If valid replace previous data and store new one:
 ```
 StructuredData {
@@ -84,7 +84,7 @@ StructuredData {
 }
 ```
  
-*step 4:*
+**step 4:**
 Client-A wants to transfer ownership of Structured Data to Client-B:
 ```
 StructuredData {
@@ -94,7 +94,7 @@ StructuredData {
 }
 ```
  
-*step 5:*
+**step 5:**
 Vault will check if new data is sent by valid owner. Use `owner_keys` from the stored data in step 3 to verify signature of data in step 4. If valid replace previous data and store new one:
 ```
 StructuredData {
@@ -104,7 +104,7 @@ StructuredData {
 }
 ```
  
-*step 6:*
+**step 6:**
 Client-A tries to update illegally:
 ```
 StructuredData {
@@ -114,10 +114,10 @@ StructuredData {
 }
 ```
  
-*step 7:*
+**step 7:**
 Vault will use owner field from step-5 == B-PublicKey and signature verification fails. So it will not update anything.
  
-*step 8:*
+**step 8:**
 Client-B tries to update:
 ```
 StructuredData {
@@ -127,7 +127,7 @@ StructuredData {
 }
 ```
  
-*step 9:*
+**step 9:**
 Vault will check if new data is sent by valid owner. Use `owner_keys` from the stored data in step 5 to verify signature of data in step 8. If valid replace previous data and store new one:
 ```
 StructuredData {
