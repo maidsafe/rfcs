@@ -1,4 +1,4 @@
-- Feature Name: Unify Structured  data 
+- Feature Name: Unify Structured  data
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
 - Start Date: 13-06-2015
@@ -42,7 +42,7 @@ It is expected removing Transaction Managers from network will reduce complexity
 
 # Detailed design
 
-The design entails reducing all StructuredData types to a single type, therefore it should be able to be recognised by the network as StructuredData and all such sub-types handled exactly in the same manner. 
+The design entails reducing all StructuredData types to a single type, therefore it should be able to be recognised by the network as StructuredData and all such sub-types handled exactly in the same manner.
 
 ##StructuredData
 
@@ -54,7 +54,7 @@ data : mut Vec<u8>, // in many cases this is encrypted
 owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of owners)
 version : mut u64, // incrementing (deterministic) version number
 previous_owner_keys : mut vec<crypto::sign::PublicKey> // n * 32 Bytes (where n is number of
-owners) only required when owners change 
+owners) only required when owners change
 signature : mut Vec<Signature> // signs the `mut` fields above // 32 bytes (using e25519 sig)
 }
 ```
@@ -69,7 +69,7 @@ Fixed (immutable fields)
   smaller than the hash it prevents flooding of a network location.
 - To validate data we confirm signature using hash of (tag_type + version) as nonce. Initial `Put`
   does not require this signature, but does require the owner contain a value.
-- If previous owners is set then the signature is confirmed using those keys (allows owenr
+- If previous owners is set then the signature is confirmed using those keys (allows owner
   change/transfer etc.). In this case the previous owners is only required on first update and may be
   remove in next version if the owners are not changed again.
 - To confirm sender of any `Put` (store or overwrite) then we check the signature of sender using same mechanism. For multiple senders we confirm at least 50% of owners have signed the request for `Put`
@@ -89,7 +89,7 @@ To update such a type the client will `Post` direct (not paying for this again) 
 
 For private data the data filed will be encrypted (at client discretion), for public data this need not be the case as anyone can read that, but only the owner can update it.
 
-##Client perspective 
+##Client perspective
 
 - Decide on a `type_tag` for a new type.
 - use whichever mechanism to create an `Identity` for this type
