@@ -1,17 +1,17 @@
-- Feature Name: Improve Unified Structured  data 
+- Feature Name: Handle Unified Structured data in conjunction with Vaults to prevent collision
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
 - Start Date: 09-07-2015
 
 # Summary
 
-Make Unified Structured Data (Rfc 0000-Unified-structured-data.md) work without the field `previous_owner_keys`.
+Use Unified Structured Data (Rfc 0000-Unified-structured-data.md) `previous_owner_keys` to only prevent collision in vaults.
 
 # Motivation
 
 ##Why?
 
-The field `previous_owner_keys` causes code complexity and cofusion. Unified Structured Data can be made to work without it.
+The field `previous_owner_keys` will be filled only during alteration of existing owners (redunction, addition and transfer) to allow vaults to re-hash a new key to avoid collision.
 
 ##What cases does it support?
 
@@ -19,7 +19,7 @@ This change supports all use of non immutable data (structured data). This cover
 
 ##Expected outcome
 
-Removing the field `previous_owner_keys` simplifies code and reduces logical complexity during Structured Data Updates and ownership-transfers. This might further simplify vault logic in future to avoid Structured Data Collisions even for the same `location` (64 byte network address for the data) as vaults will now have to look only for a single field (`owners`) to make the storage key unique even though `location` wasn't unique.
+Changing the behavior of field `previous_owner_keys` simplifies code and reduces logical complexity during Structured Data Updates and ownership-transfers. This Rfc also shows how this field can improve vault logic in future to avoid Structured Data Collisions even for the same `location` (64 byte network address for the data) as vaults will now have to look only for a single field (`owners`) to make the storage key unique even though `location` wasn't unique.
 
 # Detailed design
 
@@ -32,6 +32,7 @@ struct StructuredData {
     version    : u64,                         // mutable - incrementing (deterministic) version number
     data       : Vec<u8>,                     // mutable - in many cases this is encrypted
     owner_keys : vec<crypto::sign::PublicKey> // mutable - n * 32 Bytes (where n is number of owners)
+
     signatures : Vec<crypto::sign::Signature> // mutable - detached signature of all the `mutable` fields (barring itself) by owners
 }
 ```
