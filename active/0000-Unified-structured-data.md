@@ -11,31 +11,31 @@ This does mean a change to default behaviour and is, therefore a significant cha
 
 # Motivation
 
-##Why?
+## Why?
 
 The primary goal is two fold, reduce network traffic (by removing an indirection, of looking up a value
 and using that as a key to lookup next) and also to remove complexity (thereby increasing security).
 
 Another facet of this proposal is extendibility. In networks such as SAFE for instance, client app developers can define their own types (say of the `fix` protocol for financial transactions) and instantiate this type on the network. For users creating their own network they may white list or blacklist types and type_id's as they wish, but the possibility would exist for network builders (of new networks) to allow extensibility of types.  
 
-##What cases does it support?
+## What cases does it support?
 
 This change supports all use of non immutable data (structured data). This covers all non `content only` data
 on the network and how it is handled.
 
-###Data storage and retrieval
+### Data storage and retrieval
 
 ImmutableData is fixed self validating non mutable chunks. These require StructuredData types to manipulate information. These structured Data types may then create a global application acting on a key value store with very high degrees of availability and security (i.e. create network scale apps). Such apps could easily include medical condition analysis linked with genomic and proteomic sequencing to advance health based knowledge on a global scale. This proposal allows such systems to certainly be prototyped and tested with a high degree of flexibility.
 
-###New protocols
+### New protocols
 
 As these data types are now self validating and may contain different information, such as new protocols, `rdf`/`owl` data types, the limit of new data types and ability to link such data is extremely scalable. Such protocols could indeed easily encompass token based systems (a form of 'crypto-currency'), linked data, natural language learning databases, pre-compilation units, distributed version control systems (git like) etc.
 
-###Compute
+### Compute
 
 Such a scheme would allow global computation types, possibly a Domain Specific Language (DSL) would define operator types to allow combination of functions. These could be made monotonic and allow out of order processing of programs (disorderly programming) which in itself presents an area that may prove to be well aligned with decentralised 'intelligence' efforts. Linked with 'zk-snarks' to alleviate any 'halting problem' type issues then a global Turing complete programming environment that optionally acts on semantic ('owl' / 'json-ld' etc.) data is a possible.
 
-##Expected outcome
+## Expected outcome
 
 
 It is expected removing Transaction Managers from network will reduce complexity, code and increase security on the network, whilst allowing a greater degree of flexibility. These types now allow the users of this network to create their own data types and structures to be securely managed. This is hoped to allow many new types of application to exist.
@@ -44,7 +44,7 @@ It is expected removing Transaction Managers from network will reduce complexity
 
 The design entails reducing all StructuredData types to a single type, therefore it should be able to be recognised by the network as StructuredData and all such sub-types handled exactly in the same manner.
 
-##StructuredData
+## StructuredData
 
 ```
 struct StructuredData {
@@ -63,7 +63,7 @@ Fixed (immutable fields)
 - tag_type
 - identifier
 
-##Validation
+## Validation
 
 - To confirm name (storage location on network) we SHA512(tag_type + identifier). As these are much
   smaller than the hash it prevents flooding of a network location.
@@ -89,7 +89,7 @@ To update such a type the client will `Post` direct (not paying for this again) 
 
 For private data the data filed will be encrypted (at client discretion), for public data this need not be the case as anyone can read that, but only the owner can update it.
 
-##Client perspective
+## Client perspective
 
 - Decide on a `type_tag` for a new type.
 - use whichever mechanism to create an `Identity` for this type
@@ -98,7 +98,7 @@ For private data the data filed will be encrypted (at client discretion), for pu
 - Get from network via `routing::Get(Identity: name, Data::type : type, u64: type_tag);`
 - Mutate on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
 - Delete from network via `routing::Delete(Identity: name, Data::type : type, u64: type_tag);`
-##Security
+## Security
 
 ### Replay attack avoidance
 
