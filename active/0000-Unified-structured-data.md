@@ -85,7 +85,7 @@ If a client requires these be larger than 100kB then the data component will con
 
 The network will accept these types if `Put` by a Group and contains a message signed by at least 50% of owners as indicated. For avoidance of doubt 2 owners would require at least 1 have signed, 4 owners would require at least 2 etc. for majority control use an odd number of owners. Any `Put` must obey the mutability rules of these types.
 
-To update such a type the client will `Post` direct (not paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and the version increments. To update a type then there must be an existing type of the same `Identity` and `type` whose owners (or optinally previous owners) includes at least a majority of this new type.
+To update such a type the client will `Post` direct (not paying for this again) and the network will overwrite the existing data element if the request is signed by the owner and the version increments. To update a type then there must be an existing type of the same `Identity` and `type` whose owners (or optionally previous owners) includes at least a majority of this new type.
 
 For private data the data filed will be encrypted (at client discretion), for public data this need not be the case as anyone can read that, but only the owner can update it.
 
