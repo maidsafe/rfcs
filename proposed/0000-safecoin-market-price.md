@@ -1,7 +1,7 @@
-- Feature Name: (fill me in with a unique identity, my_awesome_feature)
-- Type (new feature, enhancement)
-- Related components (if any)
-- Start Date: (fill me in with today's date, DD-MM-YYYY)
+- Feature Name: SafeCoin_Market_Price
+- Type: New feature
+- Related components: maidsafe_vault, maidsafe_client
+- Start Date: 19-07-2015
 - RFC PR: (leave this empty)
 - Issue number: (leave this empty)
 
