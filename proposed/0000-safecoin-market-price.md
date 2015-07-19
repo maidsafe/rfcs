@@ -9,9 +9,9 @@
 
 This RFC is based on the concerns I’ve read in the MaidSafe forum for the last six months. These are some of them:
 
-https://forum.safenetwork.io/t/lowest-put-price-discovery-and-new-safecoin-issuance/3819
-https://forum.safenetwork.io/t/cost-of-storing-data-on-safe/4285
-https://forum.safenetwork.io/t/the-price-of-safecoin-the-economics-behind-it/844
+* https://forum.safenetwork.io/t/lowest-put-price-discovery-and-new-safecoin-issuance/3819
+* https://forum.safenetwork.io/t/cost-of-storing-data-on-safe/4285
+* https://forum.safenetwork.io/t/the-price-of-safecoin-the-economics-behind-it/844
 
 This RFC is only another point of view (maybe not doable, feel free to reject this RFC) that breaks a lot the main design. Maybe this RFC can be decomposed in several RFC’s, smaller and feasible.
 
@@ -38,15 +38,15 @@ When you want to store data, you specify a max price you’re willing to pay for
 When anyone wants to retrieve or update the data, another transaction is generated. The data owner pays the vaults storing the data. To reduce the amount of transactions, only 1 of 100 Get/Post operations are paid, and the amount paid is multiplied by 100. For example, if the Get price is set to 0.001 coins, there’s a chance of 1/100 to get 0.1 coins in each get/post operation.
 
 Example:
-Owner sets prices in his Account:
-Put -> Max 0.021 coins/chunk per month.
-Get/Post -> Max 0.00004 coins/chunk per operation.
-Vault A sets prices in his Account:
-Put -> Min 0.024 coins/chunk per month
-Get/Post -> Min 0.00003 coins/chunk per operation.
-Vault B sets prices in his Account:
-Put -> Min 0.019 coins/chunk per month
-Get/Post -> Min 0.00002 coins/chunk per operation.
+- Owner sets prices in his Account:
+  * Put -> Max 0.021 coins/chunk per month.
+  * Get/Post -> Max 0.00004 coins/chunk per operation.
+- Vault A sets prices in his Account:
+  * Put -> Min 0.024 coins/chunk per month
+  * Get/Post -> Min 0.00003 coins/chunk per operation.
+- Vault B sets prices in his Account:
+  * Put -> Min 0.019 coins/chunk per month
+  * Get/Post -> Min 0.00002 coins/chunk per operation.
 
 In this case, only Vault B is eligible to store Owner data.
 A Put operation will be done at average price of 0.020 = ( (0.021 + 0.019) / 2)
