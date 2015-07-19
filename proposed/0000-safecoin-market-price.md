@@ -1,6 +1,6 @@
 - Feature Name: SafeCoin_Market_Price
 - Type: New feature
-- Related components: maidsafe_vault, maidsafe_client
+- Related components: maidsafe_vault, maidsafe_client, maidsafe_types
 - Start Date: 19-07-2015
 - RFC PR: (leave this empty)
 - Issue number: (leave this empty)
@@ -69,6 +69,6 @@ New coins are generated every X minutes to expand the monetary system to the max
 
 # Unresolved questions
 
-* How to find new vaults matching prices in ‘Churn events’
+* How to find new vaults in 'Churn events' that match the correct prices.
 * Coin Distribution to app developers, and core developers.
 * Find a way to generate a ‘winner’ every X minutes
