@@ -15,11 +15,11 @@ A significant portion of network traffic is anticipated to result from the stora
 
 # Detailed design
 
-Currently all data associated with a DataMap going through self encryption is held unencrypted in memory. A close call on a SelfEncryption, SE, object initiates encryption and storage of the data via the Storage object passed on creation. In the current iteration it is proposed to maintain a vector of data per file up to a 50Mb limit in memory, while for files that grow larger than this to swap over to using an anonymous memory map up to 1Gb on 32-bit systems and 10Gb on 64-bit systems across all architectures. No noticeable difference should occur for file sizes less than the 50Mb limit already handled in the current implementation, and throughput is expected to be limited on a system by system basis to the number of files that can be open at any given time, clearly this number decreases with increasing file size.    
+Currently all data associated with a DataMap going through self encryption is held unencrypted in memory. A close call on a SelfEncryption, SE, object initiates encryption and storage of the data via the Storage object passed on creation. In the current iteration it is proposed to maintain a vector of data per file up to a 50Mb limit in memory, while for files that grow larger than this to swap over to using an anonymous memory map up to 1Gb across all architectures. No noticeable difference should occur for file sizes less than the 50Mb limit already handled in the current implementation, and throughput is expected to be limited on a system by system basis to the number of files that can be open at any given time, clearly this number decreases with increasing file size.    
 
 # Drawbacks
 
-The 1Gb limit on file size for 32-bit systems is restrictive, however, this will be addressed in some future RFC.
+The 1Gb limit on file size is restrictive, however, this will be addressed in some future RFC.
 
 # Alternatives
 
