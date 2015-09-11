@@ -114,7 +114,7 @@ Account {
 
 **step 3:** Launcher checks the App-ID, reads the path from the `<LOCAL-CONFIG-FILE>` that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
 
-./path/to/XYZ --launcher “port:33000;protocol:udp”
+**./path/to/XYZ --launcher “port:33000;protocol:udp”**
 
 **step 4:** Launcher will wait for a predefined time of 10 seconds for data reception on that port. If it times out it will close the socket (release its binding to it)
 
@@ -159,9 +159,6 @@ TODO The payload format for this response is to be discussed.
 
 ## Misc
 If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his account via Launcher on that machine. However when the App is attempted to be activate on a machine via Launcher where it was not previously added to Launcher then he will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
-
-((Q)) When an application is removed from the launcher, the user should be able to to delete from just that machine or from all the machines ?
-((A)) Spandan - Probably the launcher just needs to modify its association with that App in its `<LOCAL-CONFIG-FILE>` and that will take care of that App not being associated with any binary on that machine. If clicked the user will be asked to associate a binary (file path) for that entry read from session-packet config file, just like what would happen the first time the user would click on that App from a different machine to where he had originally associated it. When reference count (check format of session-packet config file) reaches 0, it will be removed from the session-packet config file and thus no longer listed in any machine.
 
 # Alternatives
 None yet.
