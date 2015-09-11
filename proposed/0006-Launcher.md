@@ -75,14 +75,15 @@ Account {
 **step 1:** Launcher Creates (if it’s the first time it saw this App):
 - Unique Random 64 Byte Id for this app - App-ID (because names of different binaries can be same if they are in different locations on the same machine - thus we need a unique identifier for the binary)
 - Unique Directory Id and an associated Unique Root Directory Listing `<APP-ROOT-DIR>` for this app - `XYZ-Root-Dir`. For directory name conflicts append numbers so that they can exist on a file system - eg., `XYZ-1-Root-Dir`. This shall be created inside `<USER’S-PRIVATE-ROOT-DIRECTORY-ID>/SAFEDrive`.
+- `<APP-ROOT-DIR>` shall be always **unversioned** and **private** (ie., encrypted with App-specific crypto keys). Any requirement for a versioned or public directory from the App can be managed by the App itself by creating further subdirectories.
 - Generate Random Crypto and Sign Keys for this App
 - Append this information in `<LAUNCHER-CONFIG-FILE>` = `<MAIDSAFE-SPEICIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile` (This is what the DNS crate currently does too inside `<MAIDSAFE-SPEICIFIC-CONFIG-ROOT>/DnsReservedDirectory/DnsConfigurationFile`.) - Format shall be CBOR (compact-binary-object-representation).
 ```
 [
     {
         App Name,
-        Random Unique App ID, // 64 Bytes
-        Reference_count,      // How many machines where the App is added to Launcher
+        Random Unique App ID,    // 64 Bytes
+        Vec<SHA512(App-Binary)>, // Also serves to tell how many machines where the App is added to Launcher
         <APP-ROOT_DIR>
         (PublicKeys (sign and encrypt),
          PrivateKey (sign and decrypt)),
@@ -90,8 +91,8 @@ Account {
     }
     {
         App Name,
-        Random Unique App ID, // 64 Bytes
-        Reference_count,      // How many machines where the App is added to Launcher
+        Random Unique App ID,    // 64 Bytes
+        Vec<SHA512(App-Binary)>, // Also serves to tell how many machines where the App is added to Launcher
         <APP-ROOT_DIR>
         (PublicKeys (sign and encrypt),
          PrivateKey (sign and decrypt)),
@@ -114,15 +115,22 @@ Account {
 
 **step 3:** Launcher checks the App-ID, reads the path from the `<LOCAL-CONFIG-FILE>` that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
 
-**./path/to/XYZ --launcher “port:33000;protocol:udp”**
+**./path/to/XYZ --launcher “port:33000;protocol:udp;nonce:<random-u32>”**
 
-**step 4:** Launcher will wait for a predefined time of 10 seconds for data reception on that port. If it times out it will close the socket (release its binding to it)
+**step 4:** Launcher will wait for a predefined time of **15** seconds for data reception on that port. If it times out it will close the socket (release its binding to it)
 
 **step 5:** App responds on the socket asking for Launcher to give keys and its root directory, which Launcher had reserved as `XYZ-Root-Dir`
-TODO The payload format for this requested is to be discussed.
+- The payload format for this request shall be CBOR encoded sturcture of the following:
+```
+struct Request {
+    prefix: u8,  // This must be ASCII of '?' (a question mark)
+    nonce : u32, // This must be the nonce supplied by Launcher
+}
+```
 
 **step 6:** Launcher reads the `<LAUNCHER-CONFIG-FILE>` and creates a mapping in the MaidManagers for associating user’s `MAID Keys <-> App specific Keys` to allow App to PUT/POST on behalf of the user in `<APP-ROOT-DIR>`.
-- The request for mapping un-mapping shall be a command to the `MaidManagers`. For commands to `MaidManagers`, `StructuredData` with special Type-Tag will be reserved. On reception of this `StructuredData` the vaults will check the payload and act upon the request instead of executing a normal reaction to the usual `PUT/DELETES`.
+- The mapping is done only for the ownership key/s (not encryption keys).
+- The request for mapping/un-mapping shall be a command to the `MaidManagers`. For commands to `MaidManagers`, `StructuredData` with special Type-Tag will be reserved. On reception of this `StructuredData` the vaults will check the payload and act upon the request instead of executing a normal reaction to the usual `PUT/DELETES`.
 - `StructuredData` with Tag-Type **9** will be reserved for `Client <-> Vault` messages.
 - The messages will be defined in `safe_vault`.
 - This shall be the format of `Client <-> Vault` messages:
@@ -140,7 +148,17 @@ pub enum ClientVaultMessage {
 ```
 
 **step 7:** Launcher gives the **App Keys** and **App-Dir** to the App and at this point it closes its socket and is no longer associated with the App in anyway.
-TODO The payload format for this response is to be discussed.
+- The payload format for this response shall be CBOR encoded sturcture of the following, followed by hybrid_encrypt of the stream using App-specific-crypto-keys:
+```
+struct Response {
+    root_directory_id    : NameType,
+    root_directory_tag   : u64
+    public_signing_key   : sodiumoxide::crypto::sign::PublicKey,
+    private_signing_key  : sodiumoxide::crypto::sign::SecretKey,
+    public_encrytion_key : sodiumoxide::crypto::box_::PublicKey,
+    private_encrytion_key: sodiumoxide::crypto::box_::SecretKey,
+}
+```
 
 **step 8:** App does what it wants this point onwards.
 
@@ -154,11 +172,12 @@ TODO The payload format for this response is to be discussed.
     ...
 ]
 ```
-- Decrement the reference count from `<LAUNCHER-CONFIG-FILE>`.
-- If the refence count is **0** it means that this is the last machine where the App was present. In that case Launcher shall remove the App entry from the `<LAUNCHER-CONFIG-FILE>`. Launcher shall send a request to `MaidManagers` to un-map user's `MAID-Keys <-> App specific Keys`. The Launcher shall not delete `<APP-ROOT-DIR>` from within `SAFEDrive` folder. It is user's responsibility to do that as it might contain information (like pictures etc) which the user may not want to lose.
+- Remove the SHA512(App-Binary) from the vector in `<LAUNCHER-CONFIG-FILE>`.
+- If the vector-size is **0** it means that this is the last machine where the App was present. In that case Launcher shall remove the App entry from the `<LAUNCHER-CONFIG-FILE>`. Launcher shall send a request to `MaidManagers` to un-map user's `MAID-Keys <-> App specific Keys`. The Launcher shall not delete `<APP-ROOT-DIR>` from within `SAFEDrive` folder. It is user's responsibility to do that as it might contain information (like pictures etc) which the user may not want to lose.
 
 ## Misc
-If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his account via Launcher on that machine. However when the App is attempted to be activate on a machine via Launcher where it was not previously added to Launcher then he will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
+- If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his account via Launcher on that machine. However when the App is attempted to be activate on a machine via Launcher where it was not previously added to Launcher then he will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
+- When the App is started via Launcher, it will first check if the `SHA512(App-Binary)` matches any one of the corresponding entries in the vector in `<LAUNCHER-CONFIG-FILE>`. If it does not Launcher will interpret this as a malacious App that has replaced the App-binary on user's machine, and thus will not pass any credentials to it nor communicate with it.
 
 # Alternatives
 None yet.
