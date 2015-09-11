@@ -185,5 +185,6 @@ struct Response {
 None yet.
 
 # Unresolved questions
-(Q0) How will an App developer register himself?
-(Q1) How will the app developer be recognised by the Vault on behalf of data storage to reward the developer?
+**(Q0)** How will an App developer register himself?
+
+**(Q1)** How will the app developer be recognised by the Vault on behalf of data storage to reward the developer?
