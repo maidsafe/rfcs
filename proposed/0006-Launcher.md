@@ -17,16 +17,22 @@ App's access of the SAFE-Network on behalf of the user is an issue with high sec
 
 SAFE-Launcher
 <1> will allow user to create an account and/or log in the SAFE-Network.
+
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
+
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
+
 <4> along with `safe_vault` will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
 ## Expected outcome
 
 SAFE-Launcher
 <1> will allow user to create an account and/or log in the SAFE-Network.
+
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
+
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
+
 <4> along with `safe_vault` will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
 # Detailed design
@@ -104,18 +110,18 @@ Account {
 ```
 - The format of the config file will be CBOR (compact-binary-object-representation). The name of the config file should be `.launcher-local-config-file`. The config file location flowchart shall be same as that of `crust` crate's.
 
-**step 1:** User activates the app (eg., double click) from within the Launcher.
+**step 2:** User activates the app (eg., double click) from within the Launcher.
 
-**step 2:** Launcher checks the App-ID, reads the path from the local config file that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
+**step 3:** Launcher checks the App-ID, reads the path from the local config file that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
 
 ./path/to/XYZ --launcher “port:33000;protocol:udp”
 
-**step 3:** Launcher will wait for a predefined time of 10 seconds for data reception on that port. If it times out it will close the socket (release its binding to it)
+**step 4:** Launcher will wait for a predefined time of 10 seconds for data reception on that port. If it times out it will close the socket (release its binding to it)
 
-**step 4:** App responds on the socket asking for Launcher to give keys and its root directory, which Launcher had reserved as `XYZ-Root-Dir`
+**step 5:** App responds on the socket asking for Launcher to give keys and its root directory, which Launcher had reserved as `XYZ-Root-Dir`
 TODO The payload format for this requested is to be discussed.
 
-**step 5:** Launcher reads the `<LAUNCHER-CONFIG-FILE>` and creates a mapping in the MaidManagers for associating user’s `MAID Keys <-> App specific Keys` to allow App to PUT/POST on behalf of the user in `<APP-ROOT-DIR>`.
+**step 6:** Launcher reads the `<LAUNCHER-CONFIG-FILE>` and creates a mapping in the MaidManagers for associating user’s `MAID Keys <-> App specific Keys` to allow App to PUT/POST on behalf of the user in `<APP-ROOT-DIR>`.
 - The request for mapping un-mapping shall be a command to the `MaidManagers`. For commands to `MaidManagers`, `StructuredData` with special Type-Tag will be reserved. On reception of this `StructuredData` the vaults will check the payload and act upon the request instead of executing a normal reaction to the usual `PUT/DELETES`.
 - `StructuredData` with Tag-Type **9** will be reserved for `Client <-> Vault` messages.
 - The messages will be defined in `safe_vault`.
@@ -133,10 +139,10 @@ pub enum ClientVaultMessage {
 }
 ```
 
-**step 6:** Launcher gives the **App Keys** and **App-Dir** to the App and at this point it closes its socket and is no longer associated with the App in anyway.
+**step 7:** Launcher gives the **App Keys** and **App-Dir** to the App and at this point it closes its socket and is no longer associated with the App in anyway.
 TODO The payload format for this response is to be discussed.
 
-**step 7:** App does what it wants this point onwards.
+**step 8:** App does what it wants this point onwards.
 
 ## Remove App Flow
 
