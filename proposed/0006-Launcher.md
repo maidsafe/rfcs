@@ -117,7 +117,7 @@ Account {
 
 **step 3:** Launcher checks the App-ID, reads the path from the `<LOCAL-CONFIG-FILE>` that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
 
-**./path/to/XYZ --launcher “port:33000;protocol:udp;nonce:<random-u32>”**
+**./path/to/XYZ --launcher “port:33000;protocol:udp;nonce:random-u32-number”**
 
 **step 4:** Launcher will wait for a predefined time of **15** seconds for data reception on that port. If it times out it will close the socket (release its binding to it)
 
