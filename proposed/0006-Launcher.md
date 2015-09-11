@@ -1,6 +1,6 @@
 - Feature Name: SAFE-Launcher
 - Type: New Product
-- Related components: [safe_client]("https://github.com/maidsafe/safe_client"), [safe_nfs]("https://github.com/maidsafe/safe_nfs"), [safe_vault]("https://github.com/maidsafe/safe_vault")
+- Related components: [safe_client](https://github.com/maidsafe/safe_client), [safe_nfs](https://github.com/maidsafe/safe_nfs), [safe_vault](https://github.com/maidsafe/safe_vault)
 - Start Date: 11-September-2015
 
 # Summary
@@ -23,7 +23,7 @@ SAFE-Launcher
 
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
 
-<4> along with [safe_vault]("https://github.com/maidsafe/safe_vault") will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
+<4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
 ## Expected outcome
 
@@ -35,7 +35,7 @@ SAFE-Launcher
 
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
 
-<4> along with [safe_vault]("https://github.com/maidsafe/safe_vault") will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
+<4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
 # Detailed design
 
@@ -62,13 +62,13 @@ Account {
 
 **step 2:** If it was a log in, Launcher Fetches and decodes User-Session-Packet (USP).
 
-**step 3:** Launcher Fetches Maidsafe Specific Configuration Private Root Directory ID (See Session Packet description) - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
+**step 3:** Launcher Fetches Maidsafe Specific Configuration Private Root Directory ID (See Session Packet description) - if not present Launcher will Create it (via [safe_nfs](https://github.com/maidsafe/safe_nfs) crate)
 
-**step 4:** Launcher Reads the special Directory reserved for it. (See Session Packet Description) - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
+**step 4:** Launcher Reads the special Directory reserved for it. (See Session Packet Description) - if not present Launcher will Create it (via [safe_nfs](https://github.com/maidsafe/safe_nfs) crate)
 
-**step 5:** Launcher Fetches User’s Private root Dir - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
+**step 5:** Launcher Fetches User’s Private root Dir - if not present Launcher will Create it (via [safe_nfs](https://github.com/maidsafe/safe_nfs) crate)
 
-**step 6:** Launcher Checks for special Directory named `SAFEDrive` inside the user’s root directory - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
+**step 6:** Launcher Checks for special Directory named `SAFEDrive` inside the user’s root directory - if not present Launcher will Create it (via [safe_nfs](https://github.com/maidsafe/safe_nfs) crate)
 
 ## Add App Flow
 
@@ -134,7 +134,7 @@ struct Request {
 - The mapping is done only for the ownership key/s (not encryption keys).
 - The request for mapping/un-mapping shall be a command to the `MaidManagers`. For commands to `MaidManagers`, `StructuredData` with special Type-Tag will be reserved. On reception of this `StructuredData` the vaults will check the payload and act upon the request instead of executing a normal reaction to the usual `PUT/DELETES`.
 - `StructuredData` with Tag-Type **9** will be reserved for `Client <-> Vault` messages.
-- The messages will be defined in [safe_vault]("https://github.com/maidsafe/safe_vault").
+- The messages will be defined in [safe_vault](https://github.com/maidsafe/safe_vault).
 - This shall be the format of `Client <-> Vault` messages:
 ```
 pub enum ClientVaultMessage {
@@ -166,7 +166,7 @@ struct Response {
 
 ## Remove App Flow
 
-**step 0:** Launcher removes the App as follows:
+**procedure 0:** Launcher removes the App as follows:
 - Delete from `<LOCAL-CONFIG-FILE>` (on the user's machine) the following:
 ```
 [
@@ -176,6 +176,8 @@ struct Response {
 ```
 - Remove the SHA512(App-Binary) from the vector in `<LAUNCHER-CONFIG-FILE>`.
 - If the vector-size is **0** it means that this is the last machine where the App was present. In that case Launcher shall remove the App entry from the `<LAUNCHER-CONFIG-FILE>`. Launcher shall send a request to `MaidManagers` to un-map user's `MAID-Keys <-> App specific Keys`. The Launcher shall not delete `<APP-ROOT-DIR>` from within `SAFEDrive` folder. It is user's responsibility to do that as it might contain information (like pictures etc) which the user may not want to lose.
+
+**procedure 1:** While the other procedure would work, but there might be occassions when the user wants to immediately remove the app completely (which also translates as revoke App's permission to mutate network on user's behalf). He may not have access to other machines where the App was installed and maybe currently running and the previous procedure requires him to remove it from all machines to actually perform un-mapping of keys in `Vaults`. Thus there shall be an option in Launcher to remove App completely irrespective of if it is installed and/or running in other machines. In such cases Launcher will purge `Vec<SHA512(App-Binary)>` and proceed as above for the detection of empty vector.
 
 ## Misc
 - If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his account via Launcher on that machine. However when the App is attempted to be activate on a machine via Launcher where it was not previously added to Launcher then he will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
