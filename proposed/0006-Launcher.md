@@ -146,7 +146,7 @@ TODO The payload format for this response is to be discussed.
 
 ## Remove App Flow
 
-**step 0:** Launcher Creates (if it’s the first time it saw this App):
+**step 0:** Launcher removes the App as follows:
 - Delete from local config file (on the user's machine) the following:
 ```
 [
