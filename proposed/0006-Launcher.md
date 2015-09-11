@@ -38,7 +38,7 @@ SAFE-Launcher
 # Detailed design
 
 ## User's Login Session Packet (for reference)
-This is only for reference and to provide context to the references to it below. This might change in future without affecting this RFC (ie., only a small portion of this is actually relevant for this RFC).
+This is only to provide a context to the references to it below. This might change in future without affecting this RFC (ie., only a small portion of this is actually relevant for this RFC).
 ```
 Account {
     an_maid,
@@ -47,7 +47,7 @@ Account {
     an_ampid,
     mpid,
     public_mpid,
-    Option<USER’S-PRIVATE-ROOT-DIRECTORY-ID> // This is easily accessible to the user (ie., mounted as a drive etc.).
+    Option<USER’S-PRIVATE-ROOT-DIRECTORY-ID>, // This is easily accessible to the user (ie., mounted as a drive etc.).
     Option<MAIDSAFE-SPEICIFIC-CONFIG-ROOT>   // This is accessible only if specifically asked and come with a warning to not directly modify it.
 }
 ```
