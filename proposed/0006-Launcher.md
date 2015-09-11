@@ -108,11 +108,11 @@ Account {
     ... etc.,
 ]
 ```
-- The format of the config file will be CBOR (compact-binary-object-representation). The name of the config file should be `.launcher-local-config-file`. The config file location flowchart shall be same as that of `crust` crate's.
+- The format of the config file will be CBOR (compact-binary-object-representation). The name of the local config file should be `<LOCAL-CONFIG-FILE> = .launcher-local-config-file`. The config file location flowchart shall be same as that of `crust` crate's.
 
 **step 2:** User activates the app (eg., double click) from within the Launcher.
 
-**step 3:** Launcher checks the App-ID, reads the path from the local config file that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
+**step 3:** Launcher checks the App-ID, reads the path from the `<LOCAL-CONFIG-FILE>` that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
 
 ./path/to/XYZ --launcher “port:33000;protocol:udp”
 
@@ -147,7 +147,7 @@ TODO The payload format for this response is to be discussed.
 ## Remove App Flow
 
 **step 0:** Launcher removes the App as follows:
-- Delete from local config file (on the user's machine) the following:
+- Delete from `<LOCAL-CONFIG-FILE>` (on the user's machine) the following:
 ```
 [
     { App-ID, “/path/to/XYZ” }, // Remove this, other entries are untouched.
@@ -158,10 +158,10 @@ TODO The payload format for this response is to be discussed.
 - If the refence count is **0** it means that this is the last machine where the App was present. In that case Launcher shall remove the App entry from the `<LAUNCHER-CONFIG-FILE>`. Launcher shall send a request to `MaidManagers` to un-map user's `MAID-Keys <-> App specific Keys`. The Launcher shall not delete `<APP-ROOT-DIR>` from within `SAFEDrive` folder. It is user's responsibility to do that as it might contain information (like pictures etc) which the user may not want to lose.
 
 ## Misc
-If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his account via Launcher on that machine. However when the App is attempted to be activate on a machine via Launcher where it was not previously added to Launcher then he will be prompted to associate a binary. Once done, the information as usual will go into the local config file on that machine and the user won't be prompted the next time.
+If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his account via Launcher on that machine. However when the App is attempted to be activate on a machine via Launcher where it was not previously added to Launcher then he will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
 
 ((Q)) When an application is removed from the launcher, the user should be able to to delete from just that machine or from all the machines ?
-((A)) Spandan - Probably the launcher just needs to modify its association with that App in its local config file and that will take care of that App not being associated with any binary on that machine. If clicked the user will be asked to associate a binary (file path) for that entry read from session-packet config file, just like what would happen the first time the user would click on that App from a different machine to where he had originally associated it. When reference count (check format of session-packet config file) reaches 0, it will be removed from the session-packet config file and thus no longer listed in any machine.
+((A)) Spandan - Probably the launcher just needs to modify its association with that App in its `<LOCAL-CONFIG-FILE>` and that will take care of that App not being associated with any binary on that machine. If clicked the user will be asked to associate a binary (file path) for that entry read from session-packet config file, just like what would happen the first time the user would click on that App from a different machine to where he had originally associated it. When reference count (check format of session-packet config file) reaches 0, it will be removed from the session-packet config file and thus no longer listed in any machine.
 
 # Alternatives
 None yet.
