@@ -1,6 +1,6 @@
 - Feature Name: SAFE-Launcher
 - Type: New Product
-- Related components: safe_client, safe_nfs, safe_vault
+- Related components: [safe_client]("https://github.com/maidsafe/safe_client"), [safe_nfs]("https://github.com/maidsafe/safe_nfs"), [safe_vault]("https://github.com/maidsafe/safe_vault")
 - Start Date: 11-September-2015
 
 # Summary
@@ -16,24 +16,26 @@ App's access of the SAFE-Network on behalf of the user is an issue with high sec
 ## What cases does it support?
 
 SAFE-Launcher
+
 <1> will allow user to create an account and/or log in the SAFE-Network.
 
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
 
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
 
-<4> along with `safe_vault` will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
+<4> along with [safe_vault]("https://github.com/maidsafe/safe_vault") will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
 ## Expected outcome
 
 SAFE-Launcher
+
 <1> will allow user to create an account and/or log in the SAFE-Network.
 
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
 
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
 
-<4> along with `safe_vault` will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
+<4> along with [safe_vault]("https://github.com/maidsafe/safe_vault") will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
 # Detailed design
 
@@ -60,13 +62,13 @@ Account {
 
 **step 2:** If it was a log in, Launcher Fetches and decodes User-Session-Packet (USP).
 
-**step 3:** Launcher Fetches Maidsafe Specific Configuration Private Root Directory ID (See Session Packet description) - if not present Launcher will Create it (via `safe_nfs` crate)
+**step 3:** Launcher Fetches Maidsafe Specific Configuration Private Root Directory ID (See Session Packet description) - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
 
-**step 4:** Launcher Reads the special Directory reserved for it. (See Session Packet Description) - if not present Launcher will Create it (via `safe_nfs` crate)
+**step 4:** Launcher Reads the special Directory reserved for it. (See Session Packet Description) - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
 
-**step 5:** Launcher Fetches User’s Private root Dir - if not present Launcher will Create it (via `safe_nfs` crate)
+**step 5:** Launcher Fetches User’s Private root Dir - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
 
-**step 6:** Launcher Checks for special Directory named `SAFEDrive` inside the user’s root directory - if not present Launcher will Create it (via `safe_nfs` crate)
+**step 6:** Launcher Checks for special Directory named `SAFEDrive` inside the user’s root directory - if not present Launcher will Create it (via [safe_nfs]("https://github.com/maidsafe/safe_nfs") crate)
 
 ## Add App Flow
 
@@ -132,7 +134,7 @@ struct Request {
 - The mapping is done only for the ownership key/s (not encryption keys).
 - The request for mapping/un-mapping shall be a command to the `MaidManagers`. For commands to `MaidManagers`, `StructuredData` with special Type-Tag will be reserved. On reception of this `StructuredData` the vaults will check the payload and act upon the request instead of executing a normal reaction to the usual `PUT/DELETES`.
 - `StructuredData` with Tag-Type **9** will be reserved for `Client <-> Vault` messages.
-- The messages will be defined in `safe_vault`.
+- The messages will be defined in [safe_vault]("https://github.com/maidsafe/safe_vault").
 - This shall be the format of `Client <-> Vault` messages:
 ```
 pub enum ClientVaultMessage {
