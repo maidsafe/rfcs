@@ -36,7 +36,7 @@ struct dns {
 long_name: String
 encrytion_key: crypto::encrypt::public_key
 //      service, location
-HashMap<String, Identity>
+HashMap<String, (NameType, u64, bool, bool)> // As Directories are identified by a tuple of 4 parameters (NameType, tag, if private/encrypted, if versioned) it makes sense to have the 4 identifies stored for better scalability.
 }
 
 Initially this `HashMap` will likely contain www, blog and micro-blog. Application developers may add services to enhance 
