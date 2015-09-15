@@ -21,7 +21,7 @@ SAFE-Launcher
 
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
 
-<3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
+<3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his/her SAFE-Account via Launcher, he/she will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his/her behalf.
 
 <4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
@@ -33,7 +33,7 @@ SAFE-Launcher
 
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
 
-<3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his SAFE-Account via Launcher, he will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his behalf.
+<3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his/her SAFE-Account via Launcher, he/she will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his/her behalf.
 
 <4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of crypto and ownership keys for the App (if the App requires to mutate the network on the user's behalf)
 
@@ -62,7 +62,7 @@ Account {
 
 **step 2:** If it was a log in, Launcher Fetches and decodes User-Session-Packet (USP).
 
-**step 3:** Launcher Fetches Maidsafe Specific Configuration Private Root Directory ID (See Session Packet description) - if not present Launcher will Create it (via [safe_nfs](https://github.com/maidsafe/safe_nfs) crate)
+**step 3:** Launcher Fetches MaidSafe Specific Configuration Private Root Directory ID (See Session Packet description) - if not present Launcher will Create it (via [safe_nfs](https://github.com/maidsafe/safe_nfs) crate)
 
 **step 4:** Launcher Reads the special Directory reserved for it. (See Session Packet Description) - if not present Launcher will Create it (via [safe_nfs](https://github.com/maidsafe/safe_nfs) crate)
 
@@ -180,7 +180,7 @@ struct Response {
 **procedure 1:** While the other procedure would work, but there might be occassions when the user wants to immediately remove the app completely (which also translates as revoke App's permission to mutate network on user's behalf). He may not have access to other machines where the App was installed and maybe currently running and the previous procedure requires him to remove it from all machines to actually perform un-mapping of keys in `Vaults`. Thus there shall be an option in Launcher to remove App completely irrespective of if it is installed and/or running in other machines. In such cases Launcher will purge `Vec<SHA512(App-Binary)>` and proceed as above for the detection of empty vector.
 
 ## Misc
-- If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his account via Launcher on that machine. However when the App is attempted to be activate on a machine via Launcher where it was not previously added to Launcher then he will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
+- If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his/her account via Launcher on that machine. However when the App is attempted to be activated on a machine via Launcher where it was not previously added to Launcher then he/she will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
 - When the App is started via Launcher, it will first check if the `SHA512(App-Binary)` matches any one of the corresponding entries in the vector in `<LAUNCHER-CONFIG-FILE>`. If it does not Launcher will interpret this as a malacious App that has replaced the App-binary on user's machine, and thus will not pass any credentials to it nor communicate with it.
 
 # Alternatives
