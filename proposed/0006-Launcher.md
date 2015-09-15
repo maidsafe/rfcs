@@ -111,7 +111,7 @@ Account {
     ... etc.,
 ]
 ```
-- The format of the config file will be CBOR (compact-binary-object-representation). The name of the local config file should be `<LOCAL-CONFIG-FILE> = .launcher-local-config-file`. The config file location flowchart shall be same as that of `crust` crate's.
+- The format of the config file will be CBOR (compact-binary-object-representation). The name of the local config file should be `<LOCAL-CONFIG-FILE> = launcher.config`. The config file location flowchart shall be same as that of `crust` crate's.
 
 **step 2:** User activates the app (eg., double click) from within the Launcher.
 
