@@ -50,7 +50,7 @@ Account {
     mpid,
     public_mpid,
     Option<USER’S-PRIVATE-ROOT-DIRECTORY-ID>, // This is easily accessible to the user (ie., mounted as a drive etc.).
-    Option<MAIDSAFE-SPECIFIC-CONFIG-ROOT>   // This is accessible only if specifically asked and come with a warning to not directly modify it.
+    Option<MAIDSAFE-SPECIFIC-CONFIG-ROOT>     // This is accessible only if specifically asked and comes with a warning to not directly modify it.
 }
 ```
 
