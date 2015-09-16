@@ -17,7 +17,7 @@ App's access of the SAFE-Network on behalf of the user is an issue with high sec
 
 SAFE-Launcher
 
-<1> will allow user to create an account and/or log in the SAFE-Network.
+<1> will allow user to create an account and/or log into the SAFE-Network.
 
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
 
@@ -29,7 +29,7 @@ SAFE-Launcher
 
 SAFE-Launcher
 
-<1> will allow user to create an account and/or log in the SAFE-Network.
+<1> will allow user to create an account and/or log into the SAFE-Network.
 
 <2> will authenticate a user installed App to access SAFE-Network on the user's behalf.
 
@@ -46,11 +46,11 @@ Account {
     an_maid,
     maid,
     public_maid,
-    an_ampid,
+    an_mpid,
     mpid,
     public_mpid,
     Option<USER’S-PRIVATE-ROOT-DIRECTORY-ID>, // This is easily accessible to the user (ie., mounted as a drive etc.).
-    Option<MAIDSAFE-SPEICIFIC-CONFIG-ROOT>   // This is accessible only if specifically asked and come with a warning to not directly modify it.
+    Option<MAIDSAFE-SPECIFIC-CONFIG-ROOT>   // This is accessible only if specifically asked and come with a warning to not directly modify it.
 }
 ```
 
@@ -79,7 +79,7 @@ Account {
 - Unique Directory Id and an associated Unique Root Directory Listing `<APP-ROOT-DIR>` for this app - `XYZ-Root-Dir`. For directory name conflicts append numbers so that they can exist on a file system - eg., `XYZ-1-Root-Dir`. This shall be created inside `<USER’S-PRIVATE-ROOT-DIRECTORY-ID>/SAFEDrive`.
 - `<APP-ROOT-DIR>` shall be always **unversioned** and **private** (ie., encrypted with App-specific crypto keys). Any requirement for a versioned or public directory from the App can be managed by the App itself by creating further subdirectories.
 - Generate Random Crypto and Sign Keys for this App
-- Append this information in `<LAUNCHER-CONFIG-FILE>` = `<MAIDSAFE-SPEICIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile` (This is what the DNS crate currently does too inside `<MAIDSAFE-SPEICIFIC-CONFIG-ROOT>/DnsReservedDirectory/DnsConfigurationFile`.) - Format shall be CBOR (compact-binary-object-representation).
+- Append this information in `<LAUNCHER-CONFIG-FILE>` = `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile` (This is what the DNS crate currently does too inside `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/DnsReservedDirectory/DnsConfigurationFile`.) - Format shall be CBOR (compact-binary-object-representation).
 ```
 [
     {
