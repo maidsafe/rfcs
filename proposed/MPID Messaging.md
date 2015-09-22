@@ -33,8 +33,9 @@ This is a simple data structure for now and will be a ```std::map``` ordered by 
 struct MpidMessage {
   PublicMpid::Name sender;
   PublicMpid::Name recipient;
-  std::string message_head, message_body;
-  Identity id, parent_id;
+  BoundedString<0, MAX_HEADER_SIZE> message_head;
+  BoundedString<0, MAX_BODY_SIZE> message_body;
+  Identity message_id, parent_id;
 };
 
 ```
@@ -48,11 +49,26 @@ The network inbox is an even simpler structure and will be again named with the 
 
 ```c++
 struct MpidAlert {
-  Identity message_id;
+  Identity alert_id;
+  Identity message_id, parent_id;
   PublicMpid::Name sender;
   BoundedString<0, MAX_HEADER_SIZE> message_head;
 };
 ```
+
+Messaging Format among nodes
+--------------
+The above defined ourbox/inbox and MpidMessage/MpidAlert structs are to be used internally in MpidManager and client.
+The messaging format being used between client to network and among MpmidManagers is utilising structured data :
+StructuredData (type_tag = 51000, identity = mpid_message.message_id, version = 0,
+                data = mpid_message.serialised(),
+                current_owner_keys = vec![mpid_message.sender],
+                previous_owner_keys = vec![], singing_key = None)
+StructuredData (type_tag = 51001, identity = mpid_alert.alert_id, version = 0,
+                data = mpid_alert.serialised(),
+                current_owner_keys = vec![mpid_alert.sender],
+                previous_owner_keys = vec![], singing_key = None)
+
 
 Message Flow
 ------------
@@ -63,15 +79,15 @@ Mpid (A) -> - *                                    * - <-Mpid (B)
            \  *                                    * /
 
 ```
-1. The user at Mpid(A) sends MpidMessage to MpidManager(A) signed with the recipient included
-2. The MpidManagers(A) sync this message and perform the action() which sends the MpidAlert to MpidManagers(B) [the ```MpidAlert::message_id``` at this stage is hash of the MpidMessage.
-3. MpidManager(B) stores the MpidAlert and sends the alert to Mpid(B) as soon as it is found online.
-4. On receving the alert, Mpid(B) sends a ```retrieve_message``` to MpidManagers(B) which is forwarded to MpidManagers(A).
+1. The user at Mpid(A) sends MpidMessage to MpidManager(A) signed with the recipient included, with a Put request.
+2. The MpidManagers(A) stores this message and perform the action() which sends the mpid_alert to MpidManagers(B) [the ```MpidAlert::alert_id``` at this stage is hash of the MpidMessage.
+3. MpidManager(B) stores the mpid_alert and forwards it to Mpid(B) as soon as the client found online.
+4. On receving the alert, Mpid(B) sends a ```retrieve_message``` to MpidManagers(B) via a Get request, which will be forwarded to MpidManagers(A).
 5. MpidManagers(A) sends the message to MpidManagers(B) which is forwarded to MPid(B) if MPid(B) is online.
-6. On receiving the message, Mpid(B) sends a remove request to MpidManagers(B), MpidManagers(B) sync remove the corresponding alert and forward the remove request to MpidManager(A). MpidManagers(A) sync remove the corresponding entry.
+6. On receiving the message, Mpid(B) sends a remove request to MpidManagers(B) via Delete, MpidManagers(B) remove the corresponding alert and forward the remove request to MpidManager(A). MpidManagers(A) then remove the corresponding entry.
 7. When Mpid(A) decides to remove the MpidMessage from the OutBox, if the message hasn't been retrived by Mpid(B) yet. The MpidManagers(A) group should not only remove the correspondent MpidMessage from their OutBox of Mpid(A), but also send a notification to the group of MpidManagers(B) so they can remove the correspodent MpidAlert from their InBox of Mpid(B).
 
-_MPid(A)_ =>> |__MPidManager(A)__ (Put.Sync)(Alert.So) *->> | __MPidManager(B)__  (Store(Alert).Sync)(Online(Mpid(B)) ? Alert.So : (WaitForOnlineB)(Alert.So)) *-> | _Mpid(B)_ So.Retreive ->> | __MpidManager(B)__ *-> | __MpidManager(A)__ So.Message *->> | __MpidManager(B)__ Online(Mpid(B)) ? Message.So *-> | _Mpid(B)_ Remove.So ->> | __MpidManager(B)__ {Remove(Alert).Sync, Remove.So} *->> | __MpidManager(A)__ Remove.Sync
+_MPid(A)_ =>> |__MPidManager(A)__ (Put)(Alert.So) *->> | __MPidManager(B)__  (Store(Alert))(Online(Mpid(B)) ? Alert.So : (WaitForOnlineB)(Alert.So)) *-> | _Mpid(B)_ So.Retreive ->> | __MpidManager(B)__ *-> | __MpidManager(A)__ So.Message *->> | __MpidManager(B)__ Online(Mpid(B)) ? Message.So *-> | _Mpid(B)_ Remove.So ->> | __MpidManager(B)__ {Remove(Alert), Remove.So} *->> | __MpidManager(A)__ Remove
 
 MPID Messaging Client
 --------------
@@ -86,7 +102,25 @@ When ```PUSH``` model is used, nfs_mpid_client is expected to have it's own rout
 
 Such seperate routing object is not required when ```PULL``` model is used. It may also have the benefit of saving the battery life on mobile device as the client app doesn't need to keeps nfs_mpid_client running all the time.
 
-Future Works
+Planned Work
 ============
+1, Vault
+    a, MpidManager::OutBox
+    b, MpidManager::InBox
+    c, detecting of client, when PUSH model used
+    d, sending message flow
+    e, retrieving message flow
+    f, deleting message flow
 
-This proposal implements a container as a std::map, it is assumed this will fall over to become a Structured Data Version ([SDV](https://github.com/maidsafe/MaidSafe-Common/blob/next/include/maidsafe/common/data_types/structured_data_versions.h)) when/if SDV is able to insert/delete single elements in a branch (possibly doubly linked list type). This is considered premature optimisation at this stage of development and requires measuring of the performance/size hit on adding two pointers per node.
+2, Routing
+    a, Authority::MpidManager
+    b, PUSH model
+        Notifying client with mpid_alert when client join
+        This is not required if PULL model is used
+
+3, Client
+    a, Send Message
+    b, Get Message (or Accept Message)
+        This shall also includes the work of removing correspondent mpid_alerts
+    c, Delete Message
+
