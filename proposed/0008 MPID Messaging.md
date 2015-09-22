@@ -148,7 +148,7 @@ Such seperate routing object is not required when ```PULL``` model is used. It m
 ## Planned Work
 
 1, Vault
-'''
+```
     a, MpidManager::OutBox
     b, MpidManager::InBox
     c, detecting of client, when PUSH model used
@@ -157,9 +157,9 @@ Such seperate routing object is not required when ```PULL``` model is used. It m
     f, deleting message flow
     g, churn handling and refreshing for account_transfer
     h, mpid_client addressing (if mpid address registratioin procedure to be undertaken)
-'''
+```
 2, Routing
-'''
+```
     a, Authority::MpidManager
     b, PUSH model
         Notifying client with mpid_alert when client join
@@ -169,16 +169,16 @@ Such seperate routing object is not required when ```PULL``` model is used. It m
     e, Support Delete (for StructuredData only)
     f, address relocation (if allows client using fixed mpid address connecting network)
         not required if 1.h is implemented
-'''
+```
 3, Client
-'''
+```
     a, Send Message
     b, Get Message (or Accept Message)
         This shall also includes the work of removing correspondent mpid_alerts
     c, Delete Message
     d, address relocation (if allows client using fixed mpid address connecting network)
         not required if 1.h is implemented
-'''
+```
 
 # Drawbacks
 
