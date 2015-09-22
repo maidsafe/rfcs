@@ -1,6 +1,6 @@
 - Feature Name: MPID Messaging System
 - Type: New Feature
-- Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client)
+- Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client), [routing](https://github.com/maidsafe/routing)
 - Start Date: 22-09-2015
 - RFC PR:
 - Issue number:
@@ -42,8 +42,10 @@ Broadly speaking, the [`MpidHeader`][1] contains metadata and the [`MpidMessage`
 ### Consts
 
 ```rust
+pub const MPID_MESSAGE_TAG: u64 = 51000;
+pub const MPID_HEADER_TAG: u64 = 51001;
 pub const MAX_SUBJECT_SIZE: usize = 128;  // bytes
-pub const MAX_OUTBOX_SIZE: usize = 1 << 27  // bytes, i.e. 128 MiB
+pub const MAX_BOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB, max total of outbox AND inbox
 ```
 
 ### `MpidHeader`
@@ -55,6 +57,7 @@ pub struct MpidHeader {
     pub index: u32,
     pub parent_index: Option<u32>,
     pub subject: Vec<u8>,
+    pub fn name(self) -> { hash(self.serialised()) }
 }
 ```
 
@@ -66,8 +69,10 @@ The `subject` field must not exceed `MAX_SUBJECT_SIZE` bytes.
 
 ```rust
 pub struct MpidMessage {
-    pub signed_header: Vec<u8>,
+    pub serialised_header: Vec<u8>,
     pub signed_body: Vec<u8>,
+    pub fn name(self) -> { hash(self.serialised()) }
+    pub fn header_name(self) -> { hash(self.serialised_header) }
 }
 ```
 Each `MpidMessage` instance only targets one recipient.  For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below).  This is to ensure spammers will run out of limited resources quickly.
@@ -82,17 +87,31 @@ This is an even simpler structure and again there will be one per MPID (owner). 
 
 ## Messaging Format Among Nodes
 
-The above defined outbox/inbox and MpidMessage/MpidAlert structs are to be used internally in MpidManager and client.
-The messaging format being used between client to network and among MpmidManagers is utilising structured data :
-StructuredData (type_tag = 51000, identity = mpid_message.message_id, version = 0,
-                data = mpid_message.serialised(),
-                current_owner_keys = vec![mpid_message.sender],
-                previous_owner_keys = vec![], singing_key = None)
-StructuredData (type_tag = 51001, identity = mpid_alert.alert_id, version = 0,
-                data = mpid_alert.serialised(),
-                current_owner_keys = vec![mpid_alert.sender],
-                previous_owner_keys = vec![], singing_key = None)
+The above defined outbox/inbox and MpidMessage/MpidHeader structs are to be used internally in MpidManager and client.
 
+The messaging format being used between client to network and among MpmidManagers is utilising structured data :
+```rust
+let sd_for_mpid_message = StructuredData {
+    type_tag : MPID_MESSAGE_TAG,
+    identity : mpid_message.name(),
+    previous_owner_keys = vec![],
+    version : 0,
+    data : mpid_message.serialised(),
+    current_owner_keys : vec![mpid_message.sender],    
+    previous_owner_signatures : vec![]
+}
+```
+```rust
+let sd_for_mpid_header = StructuredData {
+    type_tag : MPID_HEADER_TAG,
+    identity : mpid_message.header_name(), // or mpid_header.name()
+    previous_owner_keys : vec![],
+    version : 0,
+    data : mpid_message.serialised_header, // or mpid_header.serialised()
+    current_owner_keys : vec![mpid_message.sender], // or vec![mpid_header.sender] 
+    previous_owner_signatures : vec![]
+}
+```
 
 ## Message Flow
 
@@ -104,14 +123,14 @@ Mpid (A) -> - *                                    * - <-Mpid (B)
 
 ```
 1. The user at Mpid(A) sends MpidMessage to MpidManager(A) signed with the recipient included, with a Put request.
-2. The MpidManagers(A) stores this message and perform the action() which sends the mpid_alert to MpidManagers(B) [the ```MpidAlert::alert_id``` at this stage is hash of the MpidMessage.
-3. MpidManager(B) stores the mpid_alert and forwards it to Mpid(B) as soon as the client found online.
-4. On receving the alert, Mpid(B) sends a ```retrieve_message``` to MpidManagers(B) via a Get request, which will be forwarded to MpidManagers(A).
+2. The MpidManagers(A) stores this message and perform the action() which sends the mpid_header to MpidManagers(B).
+3. MpidManager(B) stores the mpid_header and forwards it to Mpid(B) as soon as the client found online.
+4. On receving the notification, Mpid(B) sends a ```retrieve_message``` to MpidManagers(B) via a Get request, which will be forwarded to MpidManagers(A).
 5. MpidManagers(A) sends the message to MpidManagers(B) which is forwarded to MPid(B) if MPid(B) is online.
-6. On receiving the message, Mpid(B) sends a remove request to MpidManagers(B) via Delete, MpidManagers(B) remove the corresponding alert and forward the remove request to MpidManager(A). MpidManagers(A) then remove the corresponding entry.
-7. When Mpid(A) decides to remove the MpidMessage from the OutBox, if the message hasn't been retrived by Mpid(B) yet. The MpidManagers(A) group should not only remove the correspondent MpidMessage from their OutBox of Mpid(A), but also send a notification to the group of MpidManagers(B) so they can remove the correspodent MpidAlert from their InBox of Mpid(B).
+6. On receiving the message, Mpid(B) sends a remove request to MpidManagers(B) via Delete, MpidManagers(B) remove the corresponding header and forward the remove request to MpidManager(A). MpidManagers(A) then remove the corresponding entry.
+7. When Mpid(A) decides to remove the MpidMessage from the OutBox, if the message hasn't been retrived by Mpid(B) yet. The MpidManagers(A) group should not only remove the correspondent MpidMessage from their OutBox of Mpid(A), but also send a notification to the group of MpidManagers(B) so they can remove the correspodent mpid_header from their InBox of Mpid(B).
 
-_MPid(A)_ =>> |__MPidManager(A)__ (Put)(Alert.So) *->> | __MPidManager(B)__  (Store(Alert))(Online(Mpid(B)) ? Alert.So : (WaitForOnlineB)(Alert.So)) *-> | _Mpid(B)_ So.Retreive ->> | __MpidManager(B)__ *-> | __MpidManager(A)__ So.Message *->> | __MpidManager(B)__ Online(Mpid(B)) ? Message.So *-> | _Mpid(B)_ Remove.So ->> | __MpidManager(B)__ {Remove(Alert), Remove.So} *->> | __MpidManager(A)__ Remove
+_MPid(A)_ =>> |__MPidManager(A)__ (Put)(Header.So) *->> | __MPidManager(B)__  (Store(Header))(Online(Mpid(B)) ? Header.So : (WaitForOnlineB)(header.So)) *-> | _Mpid(B)_ So.Retreive ->> | __MpidManager(B)__ *-> | __MpidManager(A)__ So.Message *->> | __MpidManager(B)__ Online(Mpid(B)) ? Message.So *-> | _Mpid(B)_ Remove.So ->> | __MpidManager(B)__ {Remove(Header), Remove.So} *->> | __MpidManager(A)__ Remove
 
 ## MPID Messaging Client
 
@@ -120,7 +139,7 @@ The messaging client, as described as Mpid(X) in the above section, can be named
 1. Send Message (Put from sender)
 2. Retrieve Full Message (Get from receiver)
 3. Remove sent Message (Delete from sender)
-4. Accept Message Alert (when ```PUSH``` model used) and/or Retrive Message Alert (when ```PULL``` model used)
+4. Accept Message header (when ```PUSH``` model used) and/or Retrive Message Alert (when ```PULL``` model used)
 
 When ```PUSH``` model is used, nfs_mpid_client is expected to have it's own routing object (not sharing with maid_nfs). So it can connect to network directly allowing the MpidManagers around it to tell the connection status directly.
 
@@ -129,25 +148,37 @@ Such seperate routing object is not required when ```PULL``` model is used. It m
 ## Planned Work
 
 1, Vault
+'''
     a, MpidManager::OutBox
     b, MpidManager::InBox
     c, detecting of client, when PUSH model used
     d, sending message flow
     e, retrieving message flow
     f, deleting message flow
-
+    g, churn handling and refreshing for account_transfer
+    h, mpid_client addressing (if mpid address registratioin procedure to be undertaken)
+'''
 2, Routing
+'''
     a, Authority::MpidManager
     b, PUSH model
         Notifying client with mpid_alert when client join
         This is not required if PULL model is used
-
+    c, Definition of MPID_MESSAGE_TAG and MPID_HEADER_TAG
+    d, Definition of MpidMessage and MpidHeader
+    e, Support Delete (for StructuredData only)
+    f, address relocation (if allows client using fixed mpid address connecting network)
+        not required if 1.h is implemented
+'''
 3, Client
+'''
     a, Send Message
     b, Get Message (or Accept Message)
         This shall also includes the work of removing correspondent mpid_alerts
     c, Delete Message
-
+    d, address relocation (if allows client using fixed mpid address connecting network)
+        not required if 1.h is implemented
+'''
 
 # Drawbacks
 
