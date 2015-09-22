@@ -11,13 +11,37 @@ Establish directed routing network connections in conjunction with crust.
 
 # Motivation
 
-Why are we doing this? What use cases does it support? What is the expected outcome?
+The notion of a clearly defined connection phase is required. Also, both outgoing and incoming connections are created to peers with unknown direction. The code should be updated to store timed 'State' in-line with crust connection handling changes for connections in either direction. This will allow us to determine unambiguously who the connection initiator is and act accordingly.
 
 # Detailed design
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
-with the network to understand, and for somebody familiar with the code practices to implement.
-This should get into specifics and corner-cases, and include examples of how the feature is used.
+Bootstrap connection handling can be seen as a separate stage of network interaction from active/passive connection handling. Crust has put in place the separation by providing a start and end of bootstrapping phase over the crust event channel. We therefore have,
+
+1. Remove bootstrap handling specific functions, completely if logic permits, to favour connection specific functions in routing. For this we'll require a State object in routing_core along the, preliminary, lines of,
+
+pub enum Phase {
+    Disconnected(bool),
+    Bootstrapping(bool),
+    Connected(bool),
+    Terminated(bool),
+}
+
+pub struct State {
+    phase: Phase
+}
+
+The routing_node fn's handle_new_connection and handle_new_bootstrap_connection can presumably be merged in the process.
+
+2. For active/passive connections we require a new type,
+
+enum ExpectedConnection {
+    ConnectRequest(ConnectRequest),
+    ConnectResponse(ConnectResponse)
+}
+
+3. For active/passive connections a timed filter object is required for key type 'crust::Connection', and value ExpectedConnection.
+
+4. In the event of disconnect allow re-boostrapping.
 
 # Drawbacks
 
