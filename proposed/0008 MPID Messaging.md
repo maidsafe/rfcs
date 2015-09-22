@@ -1,31 +1,39 @@
-MPID Messaging system
-=========
+- Feature Name: MPID Messaging System
+- Type: New Feature
+- Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client)
+- Start Date: 22-09-2015
+- RFC PR:
+- Issue number:
 
-Design document 1.0
+# Summary
 
-Introduction
-============
+This RFC outlines the system componenets and design for general communications infrastructure and security on the SAFE Network.
 
-In MaidSafe the ability for secured messaging is obvious and may take many forms, mail like, IM like etc. This document outlines the system componenets and design for general communications infrastructure and security.
+# Motivation
 
-Motivation
-==========
+## Rationale
 
-The motivation for a messaging system is an obvious one, but a wider motivation is, as always in MaidSafe, a messaging system that is secure and private without the possibility of snooping tracking or being abused in any way. A large abuse of modern day digital communications is the ability for immoral entities such as spammers and the less than ethical marketing companies to flood the Internet with levels of unsolicited email to a level of circa 90%. This is a waste of good bandwidth and also a nuisance of significant proportions.
+A messaging system on the SAFE Network will obviously be useful.  Over and above this, the propsed messaging system is secure and private without the possibility of snooping or tracking.
 
-A MaidSafe messaging system will attempt to eradicate unwanted and intrusive communications. This would seem counter intuative to a network that purports to be more efficient, cheaper and faster than today's mechanisms. The flip side of this is the network's ability to work autonomously and follow pre-programmed rules. With such rules then the network can take care of people's inboxes and outboxes for incoming and outgoing mail respectively.
+A large abuse of modern day digital communications is the ability of spammers and less than ethical marketing companies to flood the Internet with levels of unsolicited email to a level of circa 90%.  This is a waste of bandwidth and a significant nuisance.
 
-This design outlines a mechanism where the cost of messaging is with the sender as this would seem more natural. To achieve this, the sender will maintain messages in the network outbox until they are retrived by the recipient. If the email is unwanted the recipient simply does not retrieve the message. The sender will quickly fill their own outbox with undelivered mail and be forced to clean this up, themselves.
+## Supported Use-Cases
 
-This paradigm shift will mean that the obligation to un-subscribe from mailing lists etc. is now with the owner of these lists. If people are not picking up mail, it is because they do not want it. So the sender has to do a better job. It is assumed this shift of responsibilities will lead to a better managed bandwidth solution and considerably less stress on the network and the users of the network.
+The system will support secure, private, bi-directional communications between pairs of Clients, pairs of Vaults, or between a Client and Vault.
 
-Overview
-========
+## Expected Outcome
 
-A good way to look at the solution is that, rather than charging for unwanted mail with cash, the network charges with a limited resource and then prevents further abuse. In another apsect this is regulation of entities by the users of the system affected by that entity. Rather than build a ranking system to prevent bad behaviour, this proposal is actually the affected people acting independently. This protects the minorites who may suffer from system wide rules laid down by any designer of such rules.
+The provision of a secure messaging system which will eradicate unwanted and intrusive communications.
 
-Network OutBox
---------------
+# Detailed design
+
+## Overview
+
+A fundamental principle is that the cost of messaging is with the sender, primarily to deter unsolicited messages.  To achieve this, the sender will maintain messages in a network outbox until they are retrived by the recipient.  If the message is unwanted, the recipient simply does not retrieve the message.  The sender will thus quickly fill their own outbox with undelivered mail and be forced to clean this up, themselves before being able to send further messages.
+
+This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists. If people are not picking up mail, it is because they do not want it.  So the sender has to do a better job.  It is assumed this shift of responsibilities will lead to a better managed bandwidth solution and considerably less stress on the network and the users of the network.
+
+## Network Outbox
 
 This is a simple data structure for now and will be a ```std::map``` ordered by the hash of the serialised and encrypted ```MpidMessage```  and with a user defined object to represent the message (value). The map will be named with the ID of the MPID it represents (owner). The data structure for the value will be
 
@@ -42,8 +50,7 @@ struct MpidMessage {
 
 It needs to be highlighted that each above MpidMessage only targets one recipient. When a sender sending a message to multiple recipients, multiple MpidMessages will be created in the ```OutBox``` . This is to ensure spammers will run out of limited resource quickly, so the network doesn't have to suffer from abused usage.
 
-Network Inbox
--------------
+## Network Inbox
 
 The network inbox is an even simpler structure and will be again named with the MpidName of the owner. This can be represented via a ```std::vector<MpidAlert>```
 
@@ -56,9 +63,9 @@ struct MpidAlert {
 };
 ```
 
-Messaging Format among nodes
---------------
-The above defined ourbox/inbox and MpidMessage/MpidAlert structs are to be used internally in MpidManager and client.
+## Messaging Format among nodes
+
+The above defined outbox/inbox and MpidMessage/MpidAlert structs are to be used internally in MpidManager and client.
 The messaging format being used between client to network and among MpmidManagers is utilising structured data :
 StructuredData (type_tag = 51000, identity = mpid_message.message_id, version = 0,
                 data = mpid_message.serialised(),
@@ -70,8 +77,8 @@ StructuredData (type_tag = 51001, identity = mpid_alert.alert_id, version = 0,
                 previous_owner_keys = vec![], singing_key = None)
 
 
-Message Flow
-------------
+## Message Flow
+
 ```
         MpidManagers (A)                           MpidManagers (B)
            /  *                                    * \
@@ -89,8 +96,8 @@ Mpid (A) -> - *                                    * - <-Mpid (B)
 
 _MPid(A)_ =>> |__MPidManager(A)__ (Put)(Alert.So) *->> | __MPidManager(B)__  (Store(Alert))(Online(Mpid(B)) ? Alert.So : (WaitForOnlineB)(Alert.So)) *-> | _Mpid(B)_ So.Retreive ->> | __MpidManager(B)__ *-> | __MpidManager(A)__ So.Message *->> | __MpidManager(B)__ Online(Mpid(B)) ? Message.So *-> | _Mpid(B)_ Remove.So ->> | __MpidManager(B)__ {Remove(Alert), Remove.So} *->> | __MpidManager(A)__ Remove
 
-MPID Messaging Client
---------------
+## MPID Messaging Client
+
 The messaging client, as described as Mpid(X) in the above section, can be named as nfs_mpid_client. It shall provide following key functionalities :
 
 1. Send Message (Put from sender)
@@ -102,8 +109,8 @@ When ```PUSH``` model is used, nfs_mpid_client is expected to have it's own rout
 
 Such seperate routing object is not required when ```PULL``` model is used. It may also have the benefit of saving the battery life on mobile device as the client app doesn't need to keeps nfs_mpid_client running all the time.
 
-Planned Work
-============
+## Planned Work
+
 1, Vault
     a, MpidManager::OutBox
     b, MpidManager::InBox
@@ -123,4 +130,19 @@ Planned Work
     b, Get Message (or Accept Message)
         This shall also includes the work of removing correspondent mpid_alerts
     c, Delete Message
+
+
+# Drawbacks
+
+None identified, other than increased complexity of Vault and Client codebase.
+
+# Alternatives
+
+No other in-house alternatives have been documented as yet.
+
+If we were to _not_ implement some form of secure messaging system, a third party would be likely to implement a similar system using the existing interface to the SAFE Network.  This would be unlikely to be as efficient as the system proposed here, since this will be "baked into" the Vault protocols.
+
+We also have identified a need for some form of secure messaging in order to implement safecoin, so failure to implement this RFC would impact on that too.
+
+# Unresolved questions
 
