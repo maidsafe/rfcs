@@ -19,7 +19,7 @@ A large abuse of modern day digital communications is the ability of spammers an
 
 ## Supported Use-Cases
 
-The system will support secure, private, bi-directional communications between pairs of Clients, pairs of Vaults, or between a Client and Vault.
+The system will support secure, private, bi-directional communications between pairs of Clients.
 
 ## Expected Outcome
 
@@ -33,37 +33,54 @@ A fundamental principle is that the cost of messaging is with the sender, primar
 
 This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists. If people are not picking up mail, it is because they do not want it.  So the sender has to do a better job.  It is assumed this shift of responsibilities will lead to a better managed bandwidth solution and considerably less stress on the network and the users of the network.
 
-## Network Outbox
+## Details of Structs and Consts
 
-This is a simple data structure for now and will be a ```std::map``` ordered by the hash of the serialised and encrypted ```MpidMessage```  and with a user defined object to represent the message (value). The map will be named with the ID of the MPID it represents (owner). The data structure for the value will be
+The two relevant structs (other than the MPID itself which is a [standard Client key][0]) are the [`MpidHeader`][1] and the [`MpidMessage`][2].
 
-```c++
-struct MpidMessage {
-  PublicMpid::Name sender;
-  PublicMpid::Name recipient;
-  BoundedString<0, MAX_HEADER_SIZE> message_head;
-  BoundedString<0, MAX_BODY_SIZE> message_body;
-  Identity message_id, parent_id;
-};
+Broadly speaking, the [`MpidHeader`][1] contains metadata and the [`MpidMessage`][2] contains a signed header and message.  We also want to define some upper limits which will be described later.
 
+### Consts
+
+```rust
+pub const MAX_SUBJECT_SIZE: usize = 128;  // bytes
+pub const MAX_OUTBOX_SIZE: usize = 1 << 27  // bytes, i.e. 128 MiB
 ```
 
-It needs to be highlighted that each above MpidMessage only targets one recipient. When a sender sending a message to multiple recipients, multiple MpidMessages will be created in the ```OutBox``` . This is to ensure spammers will run out of limited resource quickly, so the network doesn't have to suffer from abused usage.
+### `MpidHeader`
 
-## Network Inbox
-
-The network inbox is an even simpler structure and will be again named with the MpidName of the owner. This can be represented via a ```std::vector<MpidAlert>```
-
-```c++
-struct MpidAlert {
-  Identity alert_id;
-  Identity message_id, parent_id;
-  PublicMpid::Name sender;
-  BoundedString<0, MAX_HEADER_SIZE> message_head;
-};
+```rust
+pub struct MpidHeader {
+    pub sender: ::routing::NameType,
+    pub recipient: ::routing::NameType,
+    pub index: u32,
+    pub parent_index: Option<u32>,
+    pub subject: Vec<u8>,
+}
 ```
 
-## Messaging Format among nodes
+The `sender` and `recipient` fields are hopefully self-explanatory.  The `index` and `parent_index` are intended to allow threading or sequencing of messages, while `subject` allows passing arbitrary data (e.g. a subject line).
+
+The `subject` field must not exceed `MAX_SUBJECT_SIZE` bytes.
+
+### `MpidMessage`
+
+```rust
+pub struct MpidMessage {
+    pub signed_header: Vec<u8>,
+    pub signed_body: Vec<u8>,
+}
+```
+Each `MpidMessage` instance only targets one recipient.  For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below).  This is to ensure spammers will run out of limited resources quickly.
+
+## Outbox
+
+This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s.  There will be one such map per MPID (owner).
+
+## Inbox
+
+This is an even simpler structure and again there will be one per MPID (owner).  This can be implemented as a `Vec<MpidHeader>`.
+
+## Messaging Format Among Nodes
 
 The above defined outbox/inbox and MpidMessage/MpidAlert structs are to be used internally in MpidManager and client.
 The messaging format being used between client to network and among MpmidManagers is utilising structured data :
@@ -146,3 +163,24 @@ We also have identified a need for some form of secure messaging in order to imp
 
 # Unresolved questions
 
+
+
+# Future Work
+
+It might be required to provide Vault-to-Vault, Client-to-Vault ot Vault-to-Client communications in the future.  Potential use cases for this are:
+
+1. Vault-to-Client notification of a successful safecoin mining attempt
+1. Client-to-Vault request to take ownership of the Vault
+1. Vault-to-Client alert of low resources on the Vault
+
+In this case, the existing library infrastructure would probably need significant changes to allow a Vault to act as an MPID Client (e.g. the MPID struct is defined in the SAFE Client library).
+
+
+
+
+
+[0]: https://github.com/maidsafe/safe_client/blob/c4dbca0e5ee8122a6a7e9441c4dcb65f9ef96b66/src/client/user_account.rs#L27-L29
+[1]: #mpidheader
+[2]: #mpidmessage
+[3]: #outbox
+[4]: #inbox
