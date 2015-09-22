@@ -139,7 +139,7 @@ The messaging client, as described as Mpid(X) in the above section, can be named
 1. Send Message (Put from sender)
 2. Retrieve Full Message (Get from receiver)
 3. Remove sent Message (Delete from sender)
-4. Accept Message header (when ```PUSH``` model used) and/or Retrive Message Alert (when ```PULL``` model used)
+4. Accept Message header (when ```PUSH``` model used) and/or Retrive Message Header (when ```PULL``` model used)
 
 When ```PUSH``` model is used, nfs_mpid_client is expected to have it's own routing object (not sharing with maid_nfs). So it can connect to network directly allowing the MpidManagers around it to tell the connection status directly.
 
@@ -162,7 +162,7 @@ Such seperate routing object is not required when ```PULL``` model is used. It m
 ```
     a, Authority::MpidManager
     b, PUSH model
-        Notifying client with mpid_alert when client join
+        Notifying client with mpid_header when client join
         This is not required if PULL model is used
     c, Definition of MPID_MESSAGE_TAG and MPID_HEADER_TAG
     d, Definition of MpidMessage and MpidHeader
@@ -174,7 +174,7 @@ Such seperate routing object is not required when ```PULL``` model is used. It m
 ```
     a, Send Message
     b, Get Message (or Accept Message)
-        This shall also includes the work of removing correspondent mpid_alerts
+        This shall also includes the work of removing correspondent mpid_headers
     c, Delete Message
     d, address relocation (if allows client using fixed mpid address connecting network)
         not required if 1.h is implemented
@@ -202,7 +202,7 @@ It might be required to provide Vault-to-Vault, Client-to-Vault ot Vault-to-Clie
 
 1. Vault-to-Client notification of a successful safecoin mining attempt
 1. Client-to-Vault request to take ownership of the Vault
-1. Vault-to-Client alert of low resources on the Vault
+1. Vault-to-Client notification of low resources on the Vault
 
 In this case, the existing library infrastructure would probably need significant changes to allow a Vault to act as an MPID Client (e.g. the MPID struct is defined in the SAFE Client library).
 
