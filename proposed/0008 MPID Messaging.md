@@ -85,7 +85,6 @@ The `subject` field must not exceed `MAX_SUBJECT_SIZE` bytes.
 
 ```rust
 pub struct MpidMessage {
-    pub recipient: ::routing::NameType,
     pub signed_header: Vec<u8>,
     pub signed_body: Vec<u8>,
 }
@@ -95,6 +94,8 @@ Each `MpidMessage` instance only targets one recipient.  For multiple recipients
 ## Outbox
 
 This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s.  There will be one such map per MPID (owner).
+
+It needs to be mentioned that to figure out the recipient, a sign::verify call is required each time. The efficient can be improved by having an explicit `recipient` member data in the MpidMessage struct, however this will be in the spacial and bandwidth cost in storage and messaging among nodes.
 
 ## Inbox
 
