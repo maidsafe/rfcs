@@ -91,7 +91,7 @@ Account {
         (PublicKeys (sign and encrypt),
          PrivateKey (sign and decrypt)),
         Vec<(DirectoryKey, CryptoKeys)> // Other directories this App is allowed to access in a shared fashion - DirectoryKey = (NameType, tag, public/private, versioned/unversioned)
-        OtherMetadata,
+        OtherMetadata, // For Future Use
     }
     {
         App Name,
@@ -102,7 +102,7 @@ Account {
         (PublicKeys (sign and encrypt),
          PrivateKey (sign and decrypt)),
         Vec<(DirectoryKey, CryptoKeys)> // Other directories this App is allowed to access in a shared fashion - DirectoryKey = (NameType, tag, public/private, versioned/unversioned)
-        OtherMetadata,
+        OtherMetadata, // For Future Use
     },
     … etc
 ]
@@ -165,6 +165,7 @@ pub enum ClientVaultMessage {
 struct Response {
     root_directory_id    : NameType,
     root_directory_tag   : u64
+    shared_directories   : Vec<(DirectoryKey, CryptoKeys)>,
     public_signing_key   : sodiumoxide::crypto::sign::PublicKey,
     private_signing_key  : sodiumoxide::crypto::sign::SecretKey,
     public_encrytion_key : sodiumoxide::crypto::box_::PublicKey,
@@ -176,7 +177,7 @@ struct Response {
 
 ## Share Directory App Flow
 
-- User can grant an App a read access to a directory. When this is done the `DirectoryKey` is appended to `Vec<DirectoryKey>` for the App in `<LAUNCHER-CONFIG-FILE>`. At this point the Launcher will fetch that directory, decrypt/decode it and append crypto key for the App to allow Read Access. After that the Launcher will encrypt/encode the directory and put it back in the Netowrk. So from this point onwards, the current App along with other Apps whose crypto keys are used in encryption will be able to read the contents. Write access will be possessed by only one App which would have the ownership keys.
+- User can grant an App a read and/or write access to a directory. When this is done the information is appended to `Vec<(DirectoryKey, CryptoKeys)>` for the App in `<LAUNCHER-CONFIG-FILE>`.
 
 ## Remove App Flow
 
@@ -210,3 +211,5 @@ None yet.
 **(Q2)** The Launcher is attempting to provide a sort of sandboxed environment. The Launcher will relenquish the control once the Application has been started and given its keys and directories. Since every application will sort of keep everything encrypted with its own unique crypto and ownership keys, there cannot be two applications mutating same data. Eg., there cannot be two VFS applications etc, unless they completely share the crypto as well as ownership keys. Is this ideal ? For crypto keys there can be a roundabout way to use multiple keys so that any one can decrypt, but for mutating, we might not be able to do the same thing for the ownership keys for network mutation.
 
 **(Q3)** We could use symmetric ciphers for all cases above reducing the complexity associated with asymmetric box keys. Why are we not using symmetric keys ? Also why are MAID-encryption keys asymmetric instead of symmetric ?
+
+**(Q4)** How do we revoke shared access for an App ? The brute force way is by decrypting and re-encrypting all Directory Listings with another key not known to the particular App whose authority we want to revoke. Is there any other, less cumbersome way ?
