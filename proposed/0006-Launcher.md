@@ -143,7 +143,7 @@ struct Request {
 
 **step 6:** Launcher reads the `<LAUNCHER-CONFIG-FILE>` and creates a mapping in the MaidManagers for associating user’s `MAID Keys <-> App specific Keys` to allow App to PUT/POST on behalf of the user in `<APP-ROOT-DIR>`.
 - The mapping is done only for the ownership key/s (not encryption keys).
-- The request for mapping/un-mapping shall be a command to the `MaidManagers`. For commands to `MaidManagers`, `StructuredData` with special Type-Tag will be reserved. On reception of this `StructuredData` the vaults will check the payload and act upon the request instead of executing a normal reaction to the usual `PUT/DELETES`.
+- The request for mapping/un-mapping shall be a command to the `MaidManagers`. For commands to `MaidManagers`, `StructuredData` with special Type-Tag will be reserved. On reception of this `StructuredData` via a `POST` message explicity directed towards MaidManagers the vaults will check the payload and act upon the request instead of executing a normal reaction to the usual `POST`s.
 - `StructuredData` with Tag-Type **9** shall be reserved for `Client <-> Vault` messages.
 - The messages will be defined in [safe_vault](https://github.com/maidsafe/safe_vault).
 - This shall be the format of `Client <-> Vault` messages:
@@ -163,13 +163,14 @@ pub enum ClientVaultMessage {
 - The payload format for this response shall be CBOR encoded sturcture of the following, followed by hybrid_encrypt of the stream using App-specific-crypto-keys:
 ```
 struct Response {
-    root_directory_id    : NameType,
-    root_directory_tag   : u64
-    shared_directories   : Vec<(DirectoryKey, CryptoKeys)>,
-    public_signing_key   : sodiumoxide::crypto::sign::PublicKey,
-    private_signing_key  : sodiumoxide::crypto::sign::SecretKey,
-    public_encrytion_key : sodiumoxide::crypto::box_::PublicKey,
-    private_encrytion_key: sodiumoxide::crypto::box_::SecretKey,
+    root_directory_id      : NameType,
+    root_directory_tag     : u64
+    shared_directories     : Vec<(DirectoryKey, CryptoKeys)>,
+    public_signing_key     : sodiumoxide::crypto::sign::PublicKey,
+    private_signing_key    : sodiumoxide::crypto::sign::SecretKey,
+    public_encrytion_key   : sodiumoxide::crypto::box_::PublicKey,
+    private_encrytion_key  : sodiumoxide::crypto::box_::SecretKey,
+    user_public_signing_key: sodiumoxide::crypto::sign::PublicKey, // This will allow the App to reach the correct MaidManagers
 }
 ```
 
