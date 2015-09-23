@@ -100,7 +100,7 @@ This is a simple data structure for now and will be a hash map of serialised and
 
 This is an even simpler structure and again there will be one per MPID (owner).
 
-On recipient's MpidManager, this can be implemented as a `Vec<(sender: NameType, Vec<signed_header: Vec<u8>)>`.
+On recipient's MpidManager, this can be implemented as a `Vec<(sender: NameType, signed_header: Vec<u8>)>`.
 
 
 ## Messaging Format Among Nodes
