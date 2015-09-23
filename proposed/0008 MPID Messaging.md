@@ -45,7 +45,22 @@ Broadly speaking, the [`MpidHeader`][1] contains metadata and the [`MpidMessage`
 pub const MPID_MESSAGE_TAG: u64 = 51000;
 pub const MPID_HEADER_TAG: u64 = 51001;
 pub const MAX_SUBJECT_SIZE: usize = 128;  // bytes
-pub const MAX_BOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB, max total of outbox AND inbox
+pub const MAX_INBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
+pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
+
+pub fn mpid_header_name(signed_header: &Vec<u8>) -> NameType {
+    ::crypto::hash::sha512::hash(signed_header)
+}
+pub fn mpid_message_name(mpid_message: &MpidMessage) -> NameType {
+    mpid_header_name(mpid_message.signed_header)
+}
+
+pub fn sign_mpid_header(mpid_header: &MpidHeader, priv_key: PrivateKey) -> Vec<u8> {
+    ::sodiumoxide::crypto::sign::sign(encode(mpid_header), priv_key)
+}
+pub fn parse_signed_header(signed_header: &Vec<u8>, pub_key: PublicKey) -> MpidHeader {
+    decode::<MpidHeader>(::sodiumoxide::crypto::sign::verify(signed_header, priv_key).unwrap())
+}
 ```
 
 ### `MpidHeader`
@@ -57,11 +72,12 @@ pub struct MpidHeader {
     pub index: u32,
     pub parent_index: Option<u32>,
     pub subject: Vec<u8>,
-    pub fn name(self) -> { hash(self.serialised()) }
 }
 ```
 
-The `sender` and `recipient` fields are hopefully self-explanatory.  The `index` and `parent_index` are intended to allow threading or sequencing of messages, while `subject` allows passing arbitrary data (e.g. a subject line).
+The `sender` and `recipient` fields are hopefully self-explanatory. However, the only purpose they are being put into MpidHeader is to increase the randomness of the message name to be calculated so conflicts having a much lower chance to happen.
+
+The `index` and `parent_index` are intended to allow threading or sequencing of messages, while `subject` allows passing arbitrary data (e.g. a subject line).
 
 The `subject` field must not exceed `MAX_SUBJECT_SIZE` bytes.
 
@@ -69,10 +85,9 @@ The `subject` field must not exceed `MAX_SUBJECT_SIZE` bytes.
 
 ```rust
 pub struct MpidMessage {
-    pub serialised_header: Vec<u8>,
+    pub recipient: ::routing::NameType,
+    pub signed_header: Vec<u8>,
     pub signed_body: Vec<u8>,
-    pub fn name(self) -> { hash(self.serialised()) }
-    pub fn header_name(self) -> { hash(self.serialised_header) }
 }
 ```
 Each `MpidMessage` instance only targets one recipient.  For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below).  This is to ensure spammers will run out of limited resources quickly.
@@ -83,7 +98,10 @@ This is a simple data structure for now and will be a hash map of serialised and
 
 ## Inbox
 
-This is an even simpler structure and again there will be one per MPID (owner).  This can be implemented as a `Vec<MpidHeader>`.
+This is an even simpler structure and again there will be one per MPID (owner).
+
+On recipient's MpidManager, this can be implemented as a `Vec<(sender: NameType, signed_header: Vec<u8>)>`.
+
 
 ## Messaging Format Among Nodes
 
@@ -93,10 +111,10 @@ The messaging format being used between client to network and among MpmidManager
 ```rust
 let sd_for_mpid_message = StructuredData {
     type_tag : MPID_MESSAGE_TAG,
-    identity : mpid_message.name(),
+    identity : mpid_message_name(mpid_message),
     previous_owner_keys = vec![],
     version : 0,
-    data : mpid_message.serialised(),
+    data : encode(mpid_message),
     current_owner_keys : vec![mpid_message.sender],    
     previous_owner_signatures : vec![]
 }
@@ -104,10 +122,10 @@ let sd_for_mpid_message = StructuredData {
 ```rust
 let sd_for_mpid_header = StructuredData {
     type_tag : MPID_HEADER_TAG,
-    identity : mpid_message.header_name(), // or mpid_header.name()
+    identity : mpid_message_name(mpid_message), // or mpid_header_name(signed_header)
     previous_owner_keys : vec![],
     version : 0,
-    data : mpid_message.serialised_header, // or mpid_header.serialised()
+    data : mpid_message.signed_header,
     current_owner_keys : vec![mpid_message.sender], // or vec![mpid_header.sender] 
     previous_owner_signatures : vec![]
 }
@@ -116,19 +134,19 @@ let sd_for_mpid_header = StructuredData {
 ## Message Flow
 
 ```
-        MpidManagers (A)                           MpidManagers (B)
-           /  *                                    * \
-Mpid (A) -> - *                                    * - <-Mpid (B)
-           \  *                                    * /
+               MpidManagers (A)    MpidManagers (B)
+              /      *                   *         \
+Mpid (A) ->  -       *                   *          -  <- Mpid (B)
+              \      *                   *         /
 
 ```
 1. The user at Mpid(A) sends MpidMessage to MpidManager(A) signed with the recipient included, with a Put request.
-2. The MpidManagers(A) stores this message and perform the action() which sends the mpid_header to MpidManagers(B).
-3. MpidManager(B) stores the mpid_header and forwards it to Mpid(B) as soon as the client found online.
+2. The MpidManagers(A) stores this message and perform the action() which sends the signed_header to MpidManagers(B).
+3. MpidManager(B) stores the (sender, signed_header) and forwards it to Mpid(B) as soon as the client found online.
 4. On receving the notification, Mpid(B) sends a ```retrieve_message``` to MpidManagers(B) via a Get request, which will be forwarded to MpidManagers(A).
 5. MpidManagers(A) sends the message to MpidManagers(B) which is forwarded to MPid(B) if MPid(B) is online.
 6. On receiving the message, Mpid(B) sends a remove request to MpidManagers(B) via Delete, MpidManagers(B) remove the corresponding header and forward the remove request to MpidManager(A). MpidManagers(A) then remove the corresponding entry.
-7. When Mpid(A) decides to remove the MpidMessage from the OutBox, if the message hasn't been retrived by Mpid(B) yet. The MpidManagers(A) group should not only remove the correspondent MpidMessage from their OutBox of Mpid(A), but also send a notification to the group of MpidManagers(B) so they can remove the correspodent mpid_header from their InBox of Mpid(B).
+7. When Mpid(A) decides to remove the MpidMessage from the OutBox, if the message hasn't been retrived by Mpid(B) yet. The MpidManagers(A) group should not only remove the correspondent MpidMessage from their OutBox of Mpid(A), but also send a notification to the group of MpidManagers(B) so they can remove the correspodent signed_header from their InBox of Mpid(B).
 
 _MPid(A)_ =>> |__MPidManager(A)__ (Put)(Header.So) *->> | __MPidManager(B)__  (Store(Header))(Online(Mpid(B)) ? Header.So : (WaitForOnlineB)(header.So)) *-> | _Mpid(B)_ So.Retreive ->> | __MpidManager(B)__ *-> | __MpidManager(A)__ So.Message *->> | __MpidManager(B)__ Online(Mpid(B)) ? Message.So *-> | _Mpid(B)_ Remove.So ->> | __MpidManager(B)__ {Remove(Header), Remove.So} *->> | __MpidManager(A)__ Remove
 
