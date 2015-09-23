@@ -23,7 +23,7 @@ SAFE-Launcher
 
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his/her SAFE-Account via Launcher, he/she will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his/her behalf.
 
-<4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of crypto and ownership keys for an App (if the App requires to mutate the network on the user's behalf)
+<4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of ownership keys for an App (if the App requires to mutate the network on the user's behalf)
 
 ## Expected outcome
 
@@ -35,7 +35,7 @@ SAFE-Launcher
 
 <3> will manage metadata related to Apps to give uniformity in experience when shifting from one machine to another - eg., if App `A` is installed in machine 1 then when the user logs into machine 2 using his/her SAFE-Account via Launcher, he/she will be presented with a union of all the Apps that were installed on all the machines which access the SAFE-Network on his/her behalf.
 
-<4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of crypto and ownership keys for an App (if the App requires to mutate the network on the user's behalf)
+<4> along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of ownership keys for an App (if the App requires to mutate the network on the user's behalf)
 
 # Detailed design
 
