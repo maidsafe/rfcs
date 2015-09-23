@@ -90,7 +90,7 @@ Account {
         <APP-ROOT-DIR>
         (PublicKeys (sign and encrypt),
          PrivateKey (sign and decrypt)),
-	Vec<DirectoryKey> // Other directories this App is allowed to Read Access in a shared fashion - DirectoryKey = (NameType, tag, public/private, versioned/unversioned)
+        Vec<(DirectoryKey, CryptoKeys)> // Other directories this App is allowed to access in a shared fashion - DirectoryKey = (NameType, tag, public/private, versioned/unversioned)
         OtherMetadata,
     }
     {
@@ -101,11 +101,18 @@ Account {
         <APP-ROOT-DIR>
         (PublicKeys (sign and encrypt),
          PrivateKey (sign and decrypt)),
-	Vec<DirectoryKey> // Other directories this App is allowed to Read Access in a shared fashion - DirectoryKey = (NameType, tag, public/private, versioned/unversioned)
+        Vec<(DirectoryKey, CryptoKeys)> // Other directories this App is allowed to access in a shared fashion - DirectoryKey = (NameType, tag, public/private, versioned/unversioned)
         OtherMetadata,
     },
     … etc
 ]
+
+struct CryptoKeys {
+    box_keys: Option<(sodiumoxide::crypto::box_::PublicKey,
+                      sodiumoxide::crypto::box_::SecretKey)>,       // For Read-Only Access
+    ownership_keys: Option<(sodiumoxide::crypto::sign::PublicKey,
+                            sodiumoxide::crypto::sign::SecretKey)>, // For Write-Only Access
+}
 ```
 - Create/Append to local config file (on the user's machine) the following:
 ```
@@ -200,4 +207,6 @@ None yet.
 
 **(Q1)** How will the app developer be recognised by the Vault on behalf of data storage to reward the developer?
 
-**(Q2)** The Launcher is attempting to provide a sort of sandboxed environment. Usually this is sort of provided by the mother application that runs children, eg., Operating Systems etc. In that case every request goes through the mother application which then decides whether the operation is legal or not. Here the case is different. The Launcher will sort of relenquish the control once the Application has been started and given its keys and directories. Since every application will sort of keep everything encrypted with its own unique crypto and ownership keys, there cannot be two applications mutating same data. Eg., there cannot be two VFS applications etc, unless they completely share the crypto as well as ownership keys. Is this ideal ? For crypto keys there can be a roundabout way to use multiple keys so that any one can decrypt, but for mutating, we might not be able to do the same thing for the ownership keys for network mutation.
+**(Q2)** The Launcher is attempting to provide a sort of sandboxed environment. The Launcher will relenquish the control once the Application has been started and given its keys and directories. Since every application will sort of keep everything encrypted with its own unique crypto and ownership keys, there cannot be two applications mutating same data. Eg., there cannot be two VFS applications etc, unless they completely share the crypto as well as ownership keys. Is this ideal ? For crypto keys there can be a roundabout way to use multiple keys so that any one can decrypt, but for mutating, we might not be able to do the same thing for the ownership keys for network mutation.
+
+**(Q3)** We could use symmetric ciphers for all cases above reducing the complexity associated with asymmetric box keys. Why are we not using symmetric keys ? Also why are MAID-encryption keys asymmetric instead of symmetric ?
