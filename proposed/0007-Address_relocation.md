@@ -23,9 +23,9 @@ In it's current form the process ensures that a joining node cannot occupy a pos
 
 ## Implementation
 
-The RoutingNode function handle_request_network_name calculates a relocated name for a node joining the network. The utils.rs function `pub fn calculate_relocated_name(mut close_nodes: Vec<::NameType>, original_name: &::NameType) -> Result<::NameType, ::error::RoutingError>`, takes the close nodes from the routing table and original name, K, as arguments, returning H(K + N1 + N2) = N, in the notation above, and is used for this purpose.
+The `RoutingNode` function `handle_request_network_name` calculates a relocated name for a node joining the network. The utils.rs function `pub fn calculate_relocated_name(mut close_nodes: Vec<::NameType>, original_name: &::NameType) -> Result<::NameType, ::error::RoutingError>`, takes the close nodes from the routing table and original name, K, as arguments, returning H(K + N1 + N2) = N, in the notation above, and is used for this purpose.
 
-Add a vector of node names used in address relocations to RoutingCore. Move the function calculate_relocated_name to RoutingCore with signature taking K as argument. Rework the code from calculate_relocated_name to return a `::error::RoutingError` if any of the names in the added vector will be used during the current name relocation calculation, otherwise add the two new names used in the calculation to the vector and return the calculated name.
+Add a vector of node names used in address relocations to `RoutingCore`. Move the function `calculate_relocated_name` to `RoutingCore` with signature taking K as argument. Rework the code from `calculate_relocated_name` to return a `::error::RoutingError` if any of the names in the added vector will be used during the current name relocation calculation, otherwise add the two new names used in the calculation to the vector and return the calculated name.
 
 # Drawbacks
 
