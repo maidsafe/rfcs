@@ -29,11 +29,13 @@ The provision of a secure messaging system which will eradicate unwanted and int
 
 ## Overview
 
-A fundamental principle is that the cost of messaging is with the sender, primarily to deter unsolicited messages.  To achieve this, the sender will maintain messages in a network outbox until they are retrived by the recipient.  If the message is unwanted, the recipient simply does not retrieve the message.  The sender will thus quickly fill their own outbox with undelivered mail and be forced to clean this up, themselves before being able to send further messages.
+A fundamental principle is that the cost of messaging is with the sender, primarily to deter unsolicited messages.  To achieve this, the sender will maintain messages in a network [outbox][3] until they are retrieved by the recipient.  The recipient will have a network [inbox][4] comprising a list of metadata relating to messages which are trying to be delivered to it.
+
+If the message is unwanted, the recipient simply does not retrieve the message.  The sender will thus quickly fill their own outbox with undelivered mail and be forced to clean this up, themselves before being able to send further messages.
 
 This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists. If people are not picking up mail, it is because they do not want it.  So the sender has to do a better job.  It is assumed this shift of responsibilities will lead to a better managed bandwidth solution and considerably less stress on the network and the users of the network.
 
-## Details of Structs and Consts
+## Implementation Details
 
 The two relevant structs (other than the MPID itself which is a [standard Client key][0]) are the [`MpidHeader`][1] and the [`MpidMessage`][2].
 
@@ -47,20 +49,6 @@ pub const MPID_HEADER_TAG: u64 = 51001;
 pub const MAX_SUBJECT_SIZE: usize = 128;  // bytes
 pub const MAX_INBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
-
-pub fn mpid_header_name(signed_header: &Vec<u8>) -> NameType {
-    ::crypto::hash::sha512::hash(signed_header)
-}
-pub fn mpid_message_name(mpid_message: &MpidMessage) -> NameType {
-    mpid_header_name(mpid_message.signed_header)
-}
-
-pub fn sign_mpid_header(mpid_header: &MpidHeader, priv_key: PrivateKey) -> Vec<u8> {
-    ::sodiumoxide::crypto::sign::sign(encode(mpid_header), priv_key)
-}
-pub fn parse_signed_header(signed_header: &Vec<u8>, pub_key: PublicKey) -> MpidHeader {
-    decode::<MpidHeader>(::sodiumoxide::crypto::sign::verify(signed_header, priv_key).unwrap())
-}
 ```
 
 ### `MpidHeader`
@@ -75,7 +63,7 @@ pub struct MpidHeader {
 }
 ```
 
-The `sender` and `recipient` fields are hopefully self-explanatory. However, the only purpose they are being put into MpidHeader is to increase the randomness of the message name to be calculated so conflicts having a much lower chance to happen.
+The `sender` and `recipient` fields are hopefully self-explanatory.  However, the only purpose for them existing in the `MpidHeader` is to increase the randomness of the derived message name so conflicts have a much lower chance of happening.
 
 The `index` and `parent_index` are intended to allow threading or sequencing of messages, while `subject` allows passing arbitrary data (e.g. a subject line).
 
@@ -91,78 +79,93 @@ pub struct MpidMessage {
 ```
 Each `MpidMessage` instance only targets one recipient.  For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below).  This is to ensure spammers will run out of limited resources quickly.
 
+### Functions
+
+```rust
+pub fn mpid_header_name(signed_header: &Vec<u8>) -> ::routing::NameType {
+    ::crypto::hash::sha512::hash(signed_header)
+}
+pub fn mpid_message_name(mpid_message: &MpidMessage) -> ::routing::NameType {
+    mpid_header_name(mpid_message.signed_header)
+}
+
+pub fn sign_mpid_header(mpid_header: &MpidHeader, private_key: PrivateKey) -> Vec<u8> {
+    ::sodiumoxide::crypto::sign::sign(encode(mpid_header), private_key)
+}
+pub fn parse_signed_header(signed_header: &Vec<u8>, public_key: PublicKey) -> Result<MpidHeader, ::routing::error::Error> {
+    decode::<MpidHeader>(::sodiumoxide::crypto::sign::verify(signed_header, public_key))
+}
+```
+
 ## Outbox
 
-This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s.  There will be one such map per MPID (owner).
-
-It needs to be mentioned that to figure out the recipient, a sign::verify call is required each time. The efficient can be improved by having an explicit `recipient` member data in the MpidMessage struct, however this will be in the spacial and bandwidth cost in storage and messaging among nodes.
+This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s.  There will be one such map per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
 ## Inbox
 
-This is an even simpler structure and again there will be one per MPID (owner).
+This is an even simpler structure and again there will be one per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
-On recipient's MpidManager, this can be implemented as a `Vec<(sender: NameType, signed_header: Vec<u8>)>`.
-
+This can be implemented as a `Vec<(sender: ::routing::NameType, signed_header: Vec<u8>)>`.
 
 ## Messaging Format Among Nodes
 
-The above defined outbox/inbox and MpidMessage/MpidHeader structs are to be used internally in MpidManager and client.
-
-The messaging format being used between client to network and among MpmidManagers is utilising structured data :
+Messages between Clients and MpidManagers will utilise [`::routing::structured_data::StructuredData`][5]:
 ```rust
 let sd_for_mpid_message = StructuredData {
-    type_tag : MPID_MESSAGE_TAG,
-    identity : mpid_message_name(mpid_message),
-    previous_owner_keys = vec![],
-    version : 0,
-    data : encode(mpid_message),
-    current_owner_keys : vec![mpid_message.sender],    
-    previous_owner_signatures : vec![]
+    type_tag: MPID_MESSAGE_TAG,
+    identifier: mpid_message_name(mpid_message),
+    data: encode(mpid_message),
+    previous_owner_keys: vec![],
+    version: 0,
+    current_owner_keys: vec![mpid_message.sender],
+    previous_owner_signatures: vec![]
 }
 ```
 ```rust
 let sd_for_mpid_header = StructuredData {
-    type_tag : MPID_HEADER_TAG,
-    identity : mpid_message_name(mpid_message), // or mpid_header_name(signed_header)
-    previous_owner_keys : vec![],
-    version : 0,
-    data : mpid_message.signed_header,
-    current_owner_keys : vec![mpid_message.sender], // or vec![mpid_header.sender] 
-    previous_owner_signatures : vec![]
+    type_tag: MPID_HEADER_TAG,
+    identifier: mpid_message_name(mpid_message),  // or mpid_header_name(signed_header)
+    data: mpid_message.signed_header,
+    previous_owner_keys: vec![],
+    version: 0,
+    current_owner_keys: vec![mpid_message.sender],  // or vec![mpid_header.sender]
+    previous_owner_signatures: vec![]
 }
 ```
 
 ## Message Flow
 
 ```
-               MpidManagers (A)    MpidManagers (B)
-              /      *                   *         \
-Mpid (A) ->  -       *                   *          -  <- Mpid (B)
-              \      *                   *         /
+                    MpidManagers(A)    MpidManagers(B)
+                   /      *                   *        \
+MpidClient(A) ->  -       *                   *         -  <- MpidClient(B)
+                   \      *                   *        /
 
 ```
-1. The user at Mpid(A) sends MpidMessage to MpidManager(A) signed with the recipient included, with a Put request.
-2. The MpidManagers(A) stores this message and perform the action() which sends the signed_header to MpidManagers(B).
-3. MpidManager(B) stores the (sender, signed_header) and forwards it to Mpid(B) as soon as the client found online.
-4. On receving the notification, Mpid(B) sends a ```retrieve_message``` to MpidManagers(B) via a Get request, which will be forwarded to MpidManagers(A).
-5. MpidManagers(A) sends the message to MpidManagers(B) which is forwarded to MPid(B) if MPid(B) is online.
-6. On receiving the message, Mpid(B) sends a remove request to MpidManagers(B) via Delete, MpidManagers(B) remove the corresponding header and forward the remove request to MpidManager(A). MpidManagers(A) then remove the corresponding entry.
-7. When Mpid(A) decides to remove the MpidMessage from the OutBox, if the message hasn't been retrived by Mpid(B) yet. The MpidManagers(A) group should not only remove the correspondent MpidMessage from their OutBox of Mpid(A), but also send a notification to the group of MpidManagers(B) so they can remove the correspodent signed_header from their InBox of Mpid(B).
+1. `MpidClient(A)` sends an `MpidMessage` to `MpidManagers(A)` as a Put request.
+1. `MpidManagers(A)` store this message in their outbox for A and send the `signed_header` component to `MpidManagers(B)` as a Put request, unless the outbox is full in which case a PutFailure response is returned to `MpidClient(A)`.
+1. `MpidManagers(B)` try to store the `(sender, signed_header)` in their inbox for B.  If successful, they forward it to `MpidClient(B)` as a Put request immediately or as soon as it appears online.  If unsuccessful (e.g. the inbox is full or sender has been blacklisted), they reply to `MpidManagers(A)` with a PutFailure, who then remove the message from the outbox and send a PutFailure response to `MpidClient(A)`.
+1. To retrieve the message from the network, `MpidClient(B)` sends a Get request to `MpidManagers(B)`, which is forwarded to `MpidManagers(A)`.
+1. `MpidManagers(A)` send a GetResponse to `MpidManagers(B)` which is forwarded to `MPidClient(B)` if `MPidClient(B)` is online (otherwise it's dropped).
+1. On receiving the message, `MpidClient(B)` sends a remove request to `MpidManagers(B)` via a Delete.
+1. `MpidManagers(B)` remove the corresponding entry from the inbox for B and forward the remove request to `MpidManagers(A)`.  `MpidManagers(A)` then remove the corresponding entry from the outbox for A.
 
-_MPid(A)_ =>> |__MPidManager(A)__ (Put)(Header.So) *->> | __MPidManager(B)__  (Store(Header))(Online(Mpid(B)) ? Header.So : (WaitForOnlineB)(header.So)) *-> | _Mpid(B)_ So.Retreive ->> | __MpidManager(B)__ *-> | __MpidManager(A)__ So.Message *->> | __MpidManager(B)__ Online(Mpid(B)) ? Message.So *-> | _Mpid(B)_ Remove.So ->> | __MpidManager(B)__ {Remove(Header), Remove.So} *->> | __MpidManager(A)__ Remove
+`MpidClient(A)` might decide to remove the `MpidMessage` from the outbox if the message hasn't been retrieved by `MpidClient(B)` yet.  In this case, `MpidManagers(A)` should not only remove the corresponding `MpidMessage` from their outbox for A, but also send a notification to the group of `MpidManagers(B)` so they can remove the corresponding entry from their inbox of B.  These messages will all be Delete requests.
 
-## MPID Messaging Client
+_MPidClient(A)_ =>> |__MPidManagers(A)__ (Put)(Header.So) *->> | __MPidManagers(B)__  (Store(Header))(Online(MpidClient(B)) ? Header.So : (WaitForOnlineB)(header.So)) *-> | _MpidClient(B)_ So.Retrieve ->> | __MpidManagers(B)__ *-> | __MpidManagers(A)__ So.Message *->> | __MpidManagers(B)__ Online(MpidClient(B)) ? Message.So *-> | _MpidClient(B)_ Remove.So ->> | __MpidManagers(B)__ {Remove(Header), Remove.So} *->> | __MpidManagers(A)__ Remove
 
-The messaging client, as described as Mpid(X) in the above section, can be named as nfs_mpid_client. It shall provide following key functionalities :
+## MPID Client
+
+The MPID Client shall provide the following key functionalities :
 
 1. Send Message (Put from sender)
-2. Retrieve Full Message (Get from receiver)
-3. Remove sent Message (Delete from sender)
-4. Accept Message header (when ```PUSH``` model used) and/or Retrive Message Header (when ```PULL``` model used)
+1. Retrieve Full Message (Get from receiver)
+1. Remove sent Message (Delete from sender)
+1. Accept Message header (if the "push" model is used) and/or Retrieve Message Header (if the "pull" model is used)
 
-When ```PUSH``` model is used, nfs_mpid_client is expected to have it's own routing object (not sharing with maid_nfs). So it can connect to network directly allowing the MpidManagers around it to tell the connection status directly.
+If the "push" model is used, an MPID Client is expected to have its own routing object (not shared with the MAID Client).  In this way it can directly connect to its own MpidManagers, allowing them to know its online status and hence they can push message headers to it as and when they arrive.
 
-Such seperate routing object is not required when ```PULL``` model is used. It may also have the benefit of saving the battery life on mobile device as the client app doesn't need to keeps nfs_mpid_client running all the time.
+Such a separate routing object is not required if the "pull" model is used.  This is where the MPID Client periodically polls its network inbox for new headers.  It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
 
 ## Planned Work
 
@@ -175,7 +178,7 @@ Such seperate routing object is not required when ```PULL``` model is used. It m
     e, retrieving message flow
     f, deleting message flow
     g, churn handling and refreshing for account_transfer
-    h, mpid_client addressing (if mpid address registratioin procedure to be undertaken)
+    h, mpid_client addressing (if mpid address registration procedure to be undertaken)
 ```
 2, Routing
 ```
@@ -213,6 +216,8 @@ We also have identified a need for some form of secure messaging in order to imp
 
 # Unresolved questions
 
+1. It needs to be mentioned that to figure out the recipient, a `sign::verify` call is required each time.  The efficiency can be improved by having an explicit `recipient` member data in the MpidMessage struct, however this will be in the spacial and bandwidth cost in storage and messaging among nodes.
+1.
 
 
 # Future Work
@@ -234,3 +239,4 @@ In this case, the existing library infrastructure would probably need significan
 [2]: #mpidmessage
 [3]: #outbox
 [4]: #inbox
+[5]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/structured_data.rs#L22-L34
