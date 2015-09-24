@@ -183,7 +183,7 @@ In both cases above if the App-count is reduced to zero, the Launcher shall inst
 - When the App is started via Launcher, it will first check if the `SHA512(App-Binary)` matches any one of the corresponding entries in the vector in `<LAUNCHER-CONFIG-FILE>`. If it does not Launcher will interpret this as a malacious App that has replaced the App-binary on user's machine, and thus will show a dialog to the user for confirmation  of whether to still continue, because there can be genuine reasons for binary not matching - like the App was updated etc.
 
 # Alternatives
-None yet.
+The main Launcher PR.
 
 # Unresolved questions
 
