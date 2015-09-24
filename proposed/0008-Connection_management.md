@@ -1,56 +1,79 @@
-- Feature Name: Improved connection management.
-- Type enhancement
-- Related components routing, crust
-- Start Date: (fill me in with today's date, DD-MM-YYYY)
+- Feature Name: Improved Connection Management
+- Type: Enhancement
+- Related Components: routing, crust
+- Start Date: 23-09-2015
 - RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- Issue Number: (leave this empty)
 
 # Summary
 
-Establish directed routing network connections in conjunction with crust.
+Introduce the notion of clearly defined connection phases and establish directed routing network connections in conjunction with crust.
 
 # Motivation
 
-The notion of a clearly defined connection phase is required. Also, both outgoing and incoming connections are created to peers with unknown direction. The code should be updated to store timed 'State' in-line with crust connection handling changes for connections in either direction. This will allow us to determine unambiguously who the connection initiator is and act accordingly.
+Both outgoing and incoming connections are created to peers with unknown direction. Use the connect/accept connection code available from crust to store timed state in-line with crust connection handling changes for connections in either direction. This will allow us to determine unambiguously who the connection initiator is and act accordingly.
 
 # Detailed design
 
-Bootstrap connection handling can be seen as a separate stage of network interaction from active/passive connection handling. Crust has put in place the separation by providing a start and end of bootstrapping phase over the crust event channel. We therefore have,
+1. Introduce a `State` object to `RoutingCore` representing the distinct phases of execution for network entities characterised as follows.
 
-1. Remove bootstrap handling specific functions, completely if logic permits, to favour connection specific functions in routing. For this we'll require a State object in routing_core along the, preliminary, lines of,
+a. Initially client/node in disconnected state, and when all connections are dropped/lost.
+b. Bootstrapping, initiated in constructor by calling crust service function and halted by crust event sent over channel.
+c. If non-client node, connected phase adds connections to routing table.
+d. In order to prevent any further network activity a terminated state.
 
+```rust
 pub enum Phase {
     Disconnected(bool),
     Bootstrapping(bool),
     Connected(bool),
     Terminated(bool),
 }
+```
 
+```rust
 pub struct State {
     phase: Phase
 }
+```
 
-The routing_node fn's handle_new_connection and handle_new_bootstrap_connection can presumably be merged in the process.
+2. Merge the `RoutingNode` functions `handle_new_connection` and `handle_new_bootstrap_connection`.
 
-2. For active/passive connections we require a new type,
+3. For connections, add to utils folder a timed `ConnectionFilter` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. An object of type `ConnectionFilter<Connection, ExpectedConnection>` replaces the current `connection_filter` in `RoutingNode`.
 
-enum ExpectedConnection {
-    ConnectRequest(ConnectRequest),
-    ConnectResponse(ConnectResponse)
+```rust
+pub struct Connection {
+    transport_protocol: Protocol,
+    peer_addr: SocketAddrW,
+    local_addr: SocketAddrW,
 }
 
-3. For active/passive connections a timed filter object is required for key type 'crust::Connection', and value ExpectedConnection.
+enum ExpectedConnection {
+    InternalRequest::Connect(ConnectRequest),
+    InternalResponse::Connect(ConnectResponse, SignedToken)
+}
 
-4. In the event of disconnect allow re-boostrapping.
+pub struct ConnectionFilter<K, V> {
+    ...
+}
+```
+
+For incoming connect requests, we want to handle, store the `ExpectedConnection::ConnectRequest(ConnectRequest)` in the timed filter and try to connect. For incoming connect responses check the returned `ConnectRequest` was sent by us and store the `ExpectedConnection::ConnectResponse(ConnectResponse)` in the timed filter and try to connect. On receipt of a crust OnConnect/OnAccept event within the time limit for the stored expected `ConnectRequest/ConnectResponse` add the connection to the routing table and remove from filter.
+
+4. Update Hello.
+
+5. Remove `Unidentified` connections from `ConnectionName`.
+
+6. In the event of disconnect implement re-bootstrapping.
 
 # Drawbacks
 
-Why should we *not* do this?
+N/A
 
 # Alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+As an enhancement to current design, over crust network protocol handling, when hole-punching is complete the proposed design will explicitly cater for it.
 
 # Unresolved questions
 
-What parts of the design are still to be done?
+Testing should clear up any collaborative issues between routing and crust that may arise.
