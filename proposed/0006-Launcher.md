@@ -95,7 +95,7 @@ Account {
         Random Unique App ID,    // 64 Bytes
         Vec<SHA512(App-Binary)>, // Also serves to tell how many machines where the App is added to Launcher
         <APP-ROOT-DIR-Key>,
-	Option<SAFEDrive-Directory-Key>,
+        Option<SAFEDrive-Directory-Key>,
         OtherMetadata, // For Future Use
     }
     {
@@ -104,7 +104,7 @@ Account {
         Random Unique App ID,    // 64 Bytes
         Vec<SHA512(App-Binary)>, // Also serves to tell how many machines where the App is added to Launcher
         <APP-ROOT-DIR-Key>,
-	Option<SAFEDrive-Directory-Key>,
+        Option<SAFEDrive-Directory-Key>,
         OtherMetadata, // For Future Use
     },
     … etc
