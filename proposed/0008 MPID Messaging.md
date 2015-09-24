@@ -125,7 +125,7 @@ let sd_for_mpid_message = StructuredData {
 let sd_for_mpid_header = StructuredData {
     type_tag: MPID_HEADER_TAG,
     identifier: mpid_message_name(mpid_message),  // or mpid_header_name(signed_header)
-    data: mpid_message.signed_header,
+    data: mpid_message.signed_header,  // or inbox.signed_header
     previous_owner_keys: vec![],
     version: 0,
     current_owner_keys: vec![mpid_message.sender],  // or vec![inbox.sender]
@@ -152,7 +152,7 @@ MpidClient(A) ->  -       *                   *         -  <- MpidClient(B)
 
 `MpidClient(A)` might decide to remove the `MpidMessage` from the outbox if the message hasn't been retrieved by `MpidClient(B)` yet.  In this case, `MpidManagers(A)` should not only remove the corresponding `MpidMessage` from their outbox for A, but also send a notification to the group of `MpidManagers(B)` so they can remove the corresponding entry from their inbox of B.  These messages will all be Delete requests.
 
-_MPidClient(A)_ =>> |__MPidManagers(A)__ (Put)(Header.So) *->> | __MPidManagers(B)__  (Store(Header))(Online(MpidClient(B)) ? Header.So : (WaitForOnlineB)(header.So)) *-> | _MpidClient(B)_ So.Retrieve ->> | __MpidManagers(B)__ *-> | __MpidManagers(A)__ So.Message *->> | __MpidManagers(B)__ Online(MpidClient(B)) ? Message.So *-> | _MpidClient(B)_ Remove.So ->> | __MpidManagers(B)__ {Remove(Header), Remove.So} *->> | __MpidManagers(A)__ Remove
+_MPidClient(A)_ =>> |__MPidManagers(A)__ (Put)(Header.So) *->> | __MPidManagers(B)__  (Store(Header))(Online(MpidClient(B)) ? Header.So : (WaitForOnlineB)(header.So)) *-> | _MpidClient(B)_ So.Retrieve ->> | __MpidManagers(A)__ So.Message *-> | _MpidClient(B)_ Remove.So ->> | __MpidManagers(B)__ {Remove(Header), Remove.So} *->> | __MpidManagers(A)__ Remove
 
 ## MPID Client
 
@@ -172,19 +172,19 @@ Such a separate routing object is not required if the "pull" model is used.  Thi
 1. Vault
     1. outbox
     1. inbox
-    1. detecting of Client, if "push" model used
     1. sending message flow
     1. retrieving message flow
     1. deleting message flow
     1. churn handling and refreshing for account_transfer
+    1. detecting of Client, if "push" model used
     1. MPID Client addressing (if MPID address registration procedure is to be undertaken - i.e. in "pull" model)
 
 1. Routing
     1. `Authority::MpidManager`
-    1. if "push" model, notifying Client with `MpidHeader` when Client joins
     1. definition of `MPID_MESSAGE_TAG` and `MPID_HEADER_TAG`
     1. definition of `MpidMessage` and `MpidHeader`
     1. support Delete (for StructuredData only)
+    1. if "push" model: notify vault when a client joins and notifying Client with `MpidHeader`
     1. address relocation (allows Client to use a fixed MPID address to connect to the network and allows "push" model - not required for "pull" model)
 
 1. Client
