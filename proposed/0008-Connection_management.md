@@ -17,10 +17,10 @@ Both outgoing and incoming connections are created to peers with unknown directi
 
 1. Introduce a `State` object to `RoutingCore` representing the distinct phases of execution for network entities characterised as follows.
 
-a. Initially client/node in disconnected state, and when all connections are dropped/lost.
-b. Bootstrapping, initiated in constructor by calling crust service function and halted by crust event sent over channel.
-c. If non-client node, connected phase adds connections to routing table.
-d. In order to prevent any further network activity a terminated state.
+- Initially client/node in disconnected state, and when all connections are dropped/lost.
+- Bootstrapping, initiated in constructor by calling crust service function and halted by crust event sent over channel.
+- If non-client node, connected phase adds connections to routing table.
+- In order to prevent any further network activity a terminated state.
 
 ```rust
 pub enum Phase {
@@ -37,9 +37,9 @@ pub struct State {
 }
 ```
 
-2. Merge the `RoutingNode` functions `handle_new_connection` and `handle_new_bootstrap_connection`.
+1. Merge the `RoutingNode` functions `handle_new_connection` and `handle_new_bootstrap_connection`.
 
-3. For connections, add to utils folder a timed `ConnectionFilter` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. An object of type `ConnectionFilter<Connection, ExpectedConnection>` replaces the current `connection_filter` in `RoutingNode`.
+1. For connections, add to utils folder a timed `ConnectionFilter` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. An object of type `ConnectionFilter<Connection, ExpectedConnection>` replaces the current `connection_filter` in `RoutingNode`.
 
 ```rust
 pub struct Connection {
@@ -60,11 +60,11 @@ pub struct ConnectionFilter<K, V> {
 
 For incoming connect requests, we want to handle, store the `ExpectedConnection::ConnectRequest(ConnectRequest)` in the timed filter and try to connect. For incoming connect responses check the returned `ConnectRequest` was sent by us and store the `ExpectedConnection::ConnectResponse(ConnectResponse)` in the timed filter and try to connect. On receipt of a crust OnConnect/OnAccept event within the time limit for the stored expected `ConnectRequest/ConnectResponse` add the connection to the routing table and remove from filter.
 
-4. Update Hello.
+1. Update Hello.
 
-5. Remove `Unidentified` connections from `ConnectionName`.
+1. Remove `Unidentified` connections from `ConnectionName`.
 
-6. In the event of disconnect implement re-bootstrapping.
+1. In the event of disconnect implement re-bootstrapping.
 
 # Drawbacks
 
