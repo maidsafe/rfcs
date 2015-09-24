@@ -128,7 +128,7 @@ let sd_for_mpid_header = StructuredData {
     data: mpid_message.signed_header,
     previous_owner_keys: vec![],
     version: 0,
-    current_owner_keys: vec![mpid_message.sender],  // or vec![mpid_header.sender]
+    current_owner_keys: vec![mpid_message.sender],  // or vec![inbox.sender]
     previous_owner_signatures: vec![]
 }
 ```
@@ -145,8 +145,8 @@ MpidClient(A) ->  -       *                   *         -  <- MpidClient(B)
 1. `MpidClient(A)` sends an `MpidMessage` to `MpidManagers(A)` as a Put request.
 1. `MpidManagers(A)` store this message in their outbox for A and send the `signed_header` component to `MpidManagers(B)` as a Put request, unless the outbox is full in which case a PutFailure response is returned to `MpidClient(A)`.
 1. `MpidManagers(B)` try to store the `(sender, signed_header)` in their inbox for B.  If successful, they forward it to `MpidClient(B)` as a Put request immediately or as soon as it appears online.  If unsuccessful (e.g. the inbox is full or sender has been blacklisted), they reply to `MpidManagers(A)` with a PutFailure, who then remove the message from the outbox and send a PutFailure response to `MpidClient(A)`.
-1. To retrieve the message from the network, `MpidClient(B)` sends a Get request to `MpidManagers(B)`, which is forwarded to `MpidManagers(A)`.
-1. `MpidManagers(A)` send a GetResponse to `MpidManagers(B)` which is forwarded to `MPidClient(B)` if `MPidClient(B)` is online (otherwise it's dropped).
+1. To retrieve the message from the network, `MpidClient(B)` sends a Get request to `MpidManagers(A)`.
+1. `MpidManagers(A)` send a GetResponse to `MPidClient(B)`.
 1. On receiving the message, `MpidClient(B)` sends a remove request to `MpidManagers(B)` via a Delete.
 1. `MpidManagers(B)` remove the corresponding entry from the inbox for B and forward the remove request to `MpidManagers(A)`.  `MpidManagers(A)` then remove the corresponding entry from the outbox for A.
 
@@ -169,38 +169,31 @@ Such a separate routing object is not required if the "pull" model is used.  Thi
 
 ## Planned Work
 
-1, Vault
-```
-    a, MpidManager::OutBox
-    b, MpidManager::InBox
-    c, detecting of client, when PUSH model used
-    d, sending message flow
-    e, retrieving message flow
-    f, deleting message flow
-    g, churn handling and refreshing for account_transfer
-    h, mpid_client addressing (if mpid address registration procedure to be undertaken)
-```
-2, Routing
-```
-    a, Authority::MpidManager
-    b, PUSH model
-        Notifying client with mpid_header when client join
-        This is not required if PULL model is used
-    c, Definition of MPID_MESSAGE_TAG and MPID_HEADER_TAG
-    d, Definition of MpidMessage and MpidHeader
-    e, Support Delete (for StructuredData only)
-    f, address relocation (if allows client using fixed mpid address connecting network)
-        not required if 1.h is implemented
-```
-3, Client
-```
-    a, Send Message
-    b, Get Message (or Accept Message)
-        This shall also includes the work of removing correspondent mpid_headers
-    c, Delete Message
-    d, address relocation (if allows client using fixed mpid address connecting network)
-        not required if 1.h is implemented
-```
+1. Vault
+    1. outbox
+    1. inbox
+    1. detecting of Client, if "push" model used
+    1. sending message flow
+    1. retrieving message flow
+    1. deleting message flow
+    1. churn handling and refreshing for account_transfer
+    1. MPID Client addressing (if MPID address registration procedure is to be undertaken - i.e. in "pull" model)
+
+1. Routing
+    1. `Authority::MpidManager`
+    1. if "push" model, notifying Client with `MpidHeader` when Client joins
+    1. definition of `MPID_MESSAGE_TAG` and `MPID_HEADER_TAG`
+    1. definition of `MpidMessage` and `MpidHeader`
+    1. support Delete (for StructuredData only)
+    1. address relocation (allows Client to use a fixed MPID address to connect to the network and allows "push" model - not required for "pull" model)
+
+1. Client
+    1. Put `MpidMessage`
+    1. Get all `MpidHeader`s (pull model) or accept all/single `MpidHeader` (push model)
+    1. Get `MpidMessage`.  This shall also include the work of removing corresponding `MpidHeader`s
+    1. Delete `MpidMessage`
+    1. address relocation (allows Client to use a fixed MPID address to connect to the network and allows "push" model - not required for "pull" model)
+    1. address registration (not required if address relocation is used)
 
 # Drawbacks
 
@@ -214,15 +207,71 @@ If we were to _not_ implement some form of secure messaging system, a third part
 
 We also have identified a need for some form of secure messaging in order to implement safecoin, so failure to implement this RFC would impact on that too.
 
-# Unresolved questions
+# Unresolved Questions
 
-1. It needs to be mentioned that to figure out the recipient, a `sign::verify` call is required each time.  The efficiency can be improved by having an explicit `recipient` member data in the MpidMessage struct, however this will be in the spacial and bandwidth cost in storage and messaging among nodes.
-1.
+1. Should we use the "push" or "pull" model?  At the moment, Qi and Fraser prefer the pull model on the basis that it involves less work: "address registration" or "address relocation" procedures are not required as the MPID Manager is always responding to requests from the MPID Client directly.  Furthermore, changing from the pull to push model at a later stage would appear to involve less wasted coding effort than vice versa.
 
+1. `MpidMessage` and `MpidHeader` are wrapped in `StructuredData` instances in order to allow Delete requests on them and to allow them to be given different tags (otherwise they could be ImmutableData, since they don't mutate).  Should Routing, which already has to define these two types, be made "aware" of these two types?  (i.e. should they get added to the [`::routing::data::Data` enum][6])
+
+    Identified pros:
+    - less wrapping/parsing, so simpler for Vaults and Clients to deal with
+    - more efficient (smaller messages to transmit and store)
+    - no need for Routing to publicly expose `MPID_MESSAGE_TAG` or `MPID_HEADER_TAG`
+
+    Identified cons:
+    - increased complexity in Routing
+    - would need to add the sender's public key to the header Put flow
+
+    Qi prefers using `StructuredData`, Fraser prefers not using `StructuredData` unless the effort required by Routing to accommodate the new types is significant.
+
+1. By having the `recipient` field inside `MpidMessage::signed_header`, a `sign::verify` call is required at every hop to parse the header and identify the recipient.  An alternative is to duplicate the `recipient` field in the `MpidMessage` itself.
+
+    Identified pros of the alternative are:
+    - avoids the computational cost of unnecessary signature verification
+    - avoids the computational cost of parsing the header
+
+    Identified cons of the alternative are:
+    - increased message size (affects transmission and storage of the message)
+    - requires a check at whatever stage the header is parsed that the duplicated `recipient` fields match
+
+    So, should we use the proposed version of `MpidMessage` or should we add a `recipient` field?  Qi and Fraser prefer adding the field if benchmarking shows it's worthwhile
+
+1. Should we give the MPID Client the ability to retrieve the full list of `MpidMessage`s or their corresponding `MpidHeader`s from its own network inbox?  This would take the form of a Get for `StructuredData` either with a new tag type specifically for this action or by targeting the Get at the Client's own ID rather than a specific Message ID.
+
+    Identified pros:
+    - useful to allow the Client to not have to guess which messages have been delivered
+
+    Identified cons:
+    - more coding required
+
+    Qi and Fraser would prefer to add this.
+
+1. Should we give the MPID Client the ability to retrieve a single `MpidHeader` from its own network inbox?  This would take the form of a Get for `StructuredData` with tag type `MPID_HEADER_TAG` (identical to a Client trying to retrieve a message which was sent to it except tag for that Get request is `MPID_MESSAGE_TAG`)
+
+    Identified pros:
+    - useful to allow the Client to not have to guess if a single message has been delivered
+
+    Identified cons:
+    - more coding required
+
+    Qi and Fraser would prefer to add this.
+
+1. Should we replace the `index`, `parent_index` and `sender` fields of `MpidHeader` with a required timestamp field?
+
+    Identified pros:
+    - it's user-friendly since it avoids the user having to encode it into the message contents or header `subject` field
+    - almost all messaging systems have timestamps associated with the messages whereas not all systems have a need for threading (which the index fields allow) - we'd be more similar to norms if we did this
+    - it would decrease the likelihood of a name collision of message headers
+    - more efficient (smaller messages to transmit and store)
+
+    Identified cons:
+    - gives the wrong impression that the network will do something about the timestamp (e.g. drop old messages)
+
+    Qi and Fraser prefer this.
 
 # Future Work
 
-It might be required to provide Vault-to-Vault, Client-to-Vault ot Vault-to-Client communications in the future.  Potential use cases for this are:
+It might be required to provide Vault-to-Vault, Client-to-Vault or Vault-to-Client communications in the future.  Potential use cases for this are:
 
 1. Vault-to-Client notification of a successful safecoin mining attempt
 1. Client-to-Vault request to take ownership of the Vault
@@ -230,6 +279,9 @@ It might be required to provide Vault-to-Vault, Client-to-Vault ot Vault-to-Clie
 
 In this case, the existing library infrastructure would probably need significant changes to allow a Vault to act as an MPID Client (e.g. the MPID struct is defined in the SAFE Client library).
 
+Another point is that (as with MAID accounts), there is no cleanup done by the network of MpidMessages if the user decides to stop using SAFE.
+
+Also, not exactly within the scope of this RFC, but related to it; MPID packets at the moment have no human-readable name.  It would be more user-friendly to provide this functionality.
 
 
 
@@ -240,3 +292,5 @@ In this case, the existing library infrastructure would probably need significan
 [3]: #outbox
 [4]: #inbox
 [5]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/structured_data.rs#L22-L34
+[6]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/data.rs#L24-L33
+[7]: #messaging-format-among-nodes
