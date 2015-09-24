@@ -7,13 +7,13 @@
 
 # Summary
 
-This RFC outlines the system componenets and design for general communications infrastructure and security on the SAFE Network.
+This RFC outlines the system components and design for general communications infrastructure and security on the SAFE Network.
 
 # Motivation
 
 ## Rationale
 
-A messaging system on the SAFE Network will obviously be useful.  Over and above this, the propsed messaging system is secure and private without the possibility of snooping or tracking.
+A messaging system on the SAFE Network will obviously be useful.  Over and above this, the proposed messaging system is secure and private without the possibility of snooping or tracking.
 
 A large abuse of modern day digital communications is the ability of spammers and less than ethical marketing companies to flood the Internet with levels of unsolicited email to a level of circa 90%.  This is a waste of bandwidth and a significant nuisance.
 
@@ -31,15 +31,15 @@ The provision of a secure messaging system which will eradicate unwanted and int
 
 A fundamental principle is that the cost of messaging is with the sender, primarily to deter unsolicited messages.  To achieve this, the sender will maintain messages in a network [outbox][3] until they are retrieved by the recipient.  The recipient will have a network [inbox][4] comprising a list of metadata relating to messages which are trying to be delivered to it.
 
-If the message is unwanted, the recipient simply does not retrieve the message.  The sender will thus quickly fill their own outbox with undelivered mail and be forced to clean this up, themselves before being able to send further messages.
+If the message is unwanted, the recipient simply does not retrieve the message.  The sender will thus quickly fill their own outbox with undelivered mail and be forced to clean this up themselves before being able to send further messages.
 
-This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists. If people are not picking up mail, it is because they do not want it.  So the sender has to do a better job.  It is assumed this shift of responsibilities will lead to a better managed bandwidth solution and considerably less stress on the network and the users of the network.
+This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists.  If people are not picking up messages, it is because they do not want them.  So the sender has to do a better job.  It is assumed this shift of responsibilities will lead to a better-managed bandwidth solution and considerably less stress on the network and the users of the network.
 
 ## Implementation Details
 
 The two relevant structs (other than the MPID itself which is a [standard Client key][0]) are the [`MpidHeader`][1] and the [`MpidMessage`][2].
 
-Broadly speaking, the [`MpidHeader`][1] contains metadata and the [`MpidMessage`][2] contains a signed header and message.  We also want to define some upper limits which will be described later.
+Broadly speaking, the `MpidHeader` contains metadata and the `MpidMessage` contains a signed header and message.  We also want to define some upper limits which will be described later.
 
 ### Consts
 
@@ -293,4 +293,3 @@ Also, not exactly within the scope of this RFC, but related to it; MPID packets 
 [4]: #inbox
 [5]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/structured_data.rs#L22-L34
 [6]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/data.rs#L24-L33
-[7]: #messaging-format-among-nodes
