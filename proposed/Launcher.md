@@ -67,7 +67,7 @@ Account {
 
 ## Add App Flow
 
-**step 0:** User drags `XYZ` App binary into the Launcher to add it.
+**step 0:** User drags `XYZ` App binary into the Launcher to add it. Launcher will ask the user if the app should have access to `SAFEDrive`.
 
 **step 1:** Launcher creates (if it’s the first time it saw this App):
 1. Unique random 64 byte ID for this app - App-ID (because names of different binaries can be same if they are in different locations on the same machine - thus we need a unique identifier for the binary across all machines)
@@ -115,13 +115,11 @@ Account {
 
 **step 3:** Launcher checks the App-ID, reads the path from the `<LOCAL-CONFIG-FILE>` that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
 
-`/path/to/app/binary --launcher "udp:<random-utf8-port>:<random-utf8-string>"`
+`/path/to/app/binary --launcher "tcp:<Laucher-IP:Launcher-Port>"`
 
 All parameters are UTF-8 strings.
 
-**step 4:** Launcher will wait for a predefined time of **15** seconds for data reception on that port. If it times out it will close the socket (release its binding to it)
-
-**step 5:** App generates a random asymmetric encryption keypair - `<App-Asymm-Keys>`. Then it responds on the socket asking for Launcher to give it an `<App-Specific-Symm-Key>`, its root directory-key and SAFEDrive directory-key, which Launcher had reserved as `XYZ-Root-Dir`
+**step 4:** App generates a random asymmetric encryption keypair - `<App-Asymm-Keys>`. Then it connects to Launcher on the given endpoint asking for Launcher to give it an `<App-Specific-Symm-Key>`, its root directory-key and SAFEDrive directory-key, which Launcher had reserved as `XYZ-Root-Dir`
 - The payload format for this request shall be a CBOR encoded structure of the following:
 ```
 struct Request {
@@ -131,35 +129,35 @@ struct Request {
 }
 ```
 
-**step 6:** The Launcher verifies the `launcher_string` field above and generates a strong random symmetric encryption key `<App-Specific-Symm-Key>`. This is encrypted using App's `public_encrytion_key` and `nonce` above.
+**step 5:** The Launcher verifies the `launcher_string` field above and generates a strong random symmetric encryption key `<App-Specific-Symm-Key>`. This is encrypted using app's `public_encrytion_key` and `nonce` above.
 
-**step 7:** Launcher gives the App what it requested.
+**step 6:** Launcher gives the App what it requested.
 - The payload format for this response shall be a CBOR encoded structure of the following:
 ```
 struct Response {
     cipher_text       : Vec<u8>, // encrypted symmetric keys
     app_root_dir_key  : DirectoryKey,
-    safe_drive_dir_key: Option<DirectoryKey>,
+    safe_drive_dir_key: Option<DirectoryKey>, // if user gave permission
     tcp_listening_port: u16, // <Laucher-Port>
 }
 ```
 where `DirectoryKey` is defined [here](https://github.com/ustulation/safe_nfs/blob/master/src/metadata/directory_key.rs).
 
-- At this point Launcher closes the UDP socket (i.e. is no longer bound to it).
+- From this point onwards any data in the `data` field of a `StructuredData` ([reference](https://github.com/maidsafe/rfcs/blob/master/active/0000-Unified-structured-data.md)) with private accessibility should be exchanged using the `<App-Specific-Symm-Key>` for this socket.
 
 ## Reads and Mutations by the App
 
-**step 0:** App will connect to the Launcher using `<Launcher-IP>:<Launcher-Port>`.
-
-**step 1:** All `GET/PUT/POST/DELETE`s will go via the Launcher. The App will essentially encrypt using `<App-Specific-Symm-Key>` and pass it to Launcher Background Process which will decrypt and re-encrypt and sign it using normal process (currently MAID-keys). For `GET`s it will be the reverse - Launcher will eventually encrypt using `<App-Specific-Symm-Key>` before handing the data over to the App.
+- All `GET/PUT/POST/DELETE`s will go via the Launcher. The app will essentially encrypt the `data` field of `StructuredData` using `<App-Specific-Symm-Key>` if the access level for the `StructuredData` happens to be `Private` and pass it to Launcher which will decrypt and re-encrypt and sign it using normal process (currently MAID-keys). For `GET`s it will be the reverse - Launcher will eventually encrypt using `<App-Specific-Symm-Key>` before handing the data over to the App. For `Public` accessed `StructuredData` no such encryption translation will be done by Launcher. `ImmutableData` shall not be inspected by Launcher - it will merely be put or got `PUT/GET` as-is. The motivation for this is `ImmutableData` are expected to be protected via self-encryption. Thus the app has a choice to fetch `ImmutableData` or `StructuredData` directly from the Network if it deems fit. E.g. app can fetch publicly-accessed DNS records without going through Launcher and browsers working with SAFE protocol will definitely do this.
 
 Since `<App-Specific-Symm-Key>` is recognised by Launcher only for current session, there is no security risk and the App will not be able to trick Launcher the next time it starts to use the previous keys to mutate network or read data on its behalf.
 
 ## Share Directory App Flow
 
 Every time the App tries to access `SAFEDrive` Launcher will check the permission in `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile`.
+
 ### Grant and Revoke Access
-- User can grant the app read/write access to the `SAFEDrive` directory or revoke that access by adding or removing ... respectively
+
+- User can grant the app read/write access to the `SAFEDrive` directory or revoke that access by asking the Launcher to do so.
 
 ## Remove App Flow
 
@@ -187,6 +185,4 @@ In both procedures, Launcher will terminate the TCP connection with the App and 
 There is an RFC proposal for a simplified version of the Launcher which does not go to as deep an extent to cover all facets of security.
 
 # Unresolved questions
-**(Q0)** How will an App developer register himself?
-
-**(Q1)** How will the app developer be recognised by the Vault on behalf of data storage to reward the developer?
+**(Q0)** Once the user has revoked an app's permission to use `SAFEDrive`, how will the Launcher ascertain that `StructuredData` that the app is asking the Launcher to `PUT/POST` to the Network is not related to some directory listing inside the `SAFEDrive` directory ?
