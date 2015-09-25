@@ -1,6 +1,6 @@
 - Feature Name: Prevent any single address being used more than once during address relocation.
 - Type enhancement
-- Related components routing, safe_vault
+- Related components routing
 - Start Date: 21-09-2015
 - RFC PR: (leave this empty)
 - Issue number: (leave this empty)
