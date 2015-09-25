@@ -39,10 +39,8 @@ Account {
     an_mpid,
     mpid,
     public_mpid,
-    Option<USER’S-PRIVATE-ROOT-DIRECTORY-ID>, // This is easily accessible to the user
-                                              // (i.e. mounted as a drive etc.)
-    Option<MAIDSAFE-SPECIFIC-CONFIG-ROOT>     // This is accessible only if specifically
-	                                      // asked and comes with a warning to not directly modify it.
+    Option<USER’S-PRIVATE-ROOT-DIRECTORY-ID>,
+    Option<MAIDSAFE-SPECIFIC-CONFIG-ROOT>,
 }
 ```
 - The Root Directories are encrypted with MAID-keys.
@@ -79,20 +77,18 @@ Account {
 [
     {
         App Name,
-        Reference Count,
+        Reference Count, // How many machines this app in installed on
         Random Unique App ID,    // 64 Bytes
-        Vec<SHA512(App-Binary)>, // Also serves to tell how many machines where the App is added
-                                 // to Launcher
+        Vec<SHA512(App-Binary)>,
         <APP-ROOT-DIR-Key>,
         Option<SAFEDrive-Directory-Key>,
         OtherMetadata, // For Future Use
     }
     {
         App Name,
-        Reference Count,
+        Reference Count, // How many machines this app in installed on
         Random Unique App ID,    // 64 Bytes
-        Vec<SHA512(App-Binary)>, // Also serves to tell how many machines where the App is added
-                                 // to Launcher
+        Vec<SHA512(App-Binary)>,
         <APP-ROOT-DIR-Key>,
         Option<SAFEDrive-Directory-Key>,
         OtherMetadata, // For Future Use
@@ -143,7 +139,17 @@ struct Response {
 ```
 where `DirectoryKey` is defined [here](https://github.com/ustulation/safe_nfs/blob/master/src/metadata/directory_key.rs).
 
-- From this point onwards any data in the `data` field of a `StructuredData` ([reference](https://github.com/maidsafe/rfcs/blob/master/active/0000-Unified-structured-data.md)) with private accessibility should be exchanged using the `<App-Specific-Symm-Key>` for this socket.
+- From this point onwards any data in the `data` field of a `StructuredData` ([reference](https://github.com/maidsafe/rfcs/blob/master/active/0000-Unified-structured-data.md)) with private accessibility should be exchanged using the `<App-Specific-Symm-Key>` for this socket. The following shall be the format of Launcher-App messages:
+```
+enum LauncherMessage {
+    // Optional fields mean that they will be sent to the default authority which should
+    // suffice for most cases.
+    Get(routing::data::DataRequest, Option<routing::authority::Authority>),
+    Put(routing::data::Data, Option<routing::authority::Authority>),
+    Post(routing::data::Data, Option<routing::authority::Authority>),
+    Delete(routing::data::Data, Option<routing::authority::Authority>),
+}
+```
 
 ## Reads and Mutations by the App
 
