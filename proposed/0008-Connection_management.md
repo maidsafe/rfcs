@@ -30,6 +30,7 @@ pub enum State {
     Bootstrapping,
     Connected,
     Terminated,
+}
 ```
 
 ## Expected Connections
