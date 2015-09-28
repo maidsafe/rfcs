@@ -32,9 +32,9 @@ pub enum State {
     Terminated,
 ```
 
-## Connection Filter
+## Expected Connections
 
-For connections, add to utils folder a timed `ExpectedConnections` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. An object of type `ExpectedConnections<Connection, ExpectedConnection>` replaces the current `connection_filter` in `RoutingNode`.
+For connections, create and add to utils folder a timed `ExpectedConnections` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. An object of type `ExpectedConnections` replaces the current `connection_filter` in `RoutingNode`.
 
 ```rust
 pub struct Connection {
@@ -48,12 +48,13 @@ enum ExpectedConnection {
     InternalResponse::Connect(ConnectResponse, SignedToken)
 }
 
-pub struct ExpectedConnections<K, V> {
-    ...
+pub struct ExpectedConnections {
+    lru_cache: LruCache<Connection, ExpectedConnection>
 }
 ```
 
-For incoming connect requests, we want to handle, store the `ExpectedConnection::ConnectRequest(ConnectRequest)` in the timed filter and try to connect. For incoming connect responses check the returned `ConnectRequest` was sent by us and store the `ExpectedConnection::ConnectResponse(ConnectResponse)` in the timed filter and try to connect. On receipt of a crust OnConnect/OnAccept event within the time limit for the stored expected `ConnectRequest/ConnectResponse` add the connection to the routing table and remove from filter.
+For incoming connect requests, we want to handle, store the `ExpectedConnection::ConnectRequest(ConnectRequest)` in the timed `ExpectedConnections` then set-up and try to rendezvous connect to the peer. For incoming connect responses check the returned `ConnectRequest` was sent by us and store the `ExpectedConnection::ConnectResponse(ConnectResponse)` in the timed `ExpectedConnections` then set-up and try to rendezvous connect to peer. The rendezvous connection set-up and establishment will be initiated by routing and handled by crust, successful completion resulting in receipt of a crust OnConnect/OnAccept event within the time limit for the stored expected `ConnectRequest/ConnectResponse`. The new connection details can then be added to the routing table and removed from `ExpectedConnections`.
+ 
 
 ## Updates to Existing Code
 
