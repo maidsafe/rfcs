@@ -157,11 +157,11 @@ Value = StructuredData {
 ## Change in the Definition of GETs
 The above shows the cases for PUTs, POSTs and DELETEs. There will be a change in the signature of GETs to achieve the above no-collision scheme. GETs for StructuredData need to be changed from:
 ```
-GET(Name, DataRequest::StructuredData(u64))
+GET(Name, DataRequest::StructuredData(NameType, u64))
 ```
 to
 ```
-GET(Name, DataRequest::StructuredData(SHA512(PublicKeys)))
+GET(Name, DataRequest::StructuredData(NameType, u64, SHA512(PublicKeys)))
 ```
 For ordinary cases where `data-PUTers` themselves are fetching thier data (majority of clients) this does not mean much as the client engine will inject this silently as it already has the knowledge of user public-keys. The only time it does not have the knowledge is during the fetching of the session packet. The solution for this is easy as login packet has a dedicated maidasafe-type-tag and vaults can recognise it and make special allowance for it to be stored with `Key = Name` instead of `Key = (sha512(PublicKeys), Name)` as in above.
 
