@@ -11,7 +11,7 @@ Prevent a potential attack where a node gains overall/majority influence in a gr
 
 # Motivation
 
-An attack exist for a node to generate public-private key pairs off-line to derived identities close to a specific target. It would then be able to connect close to a desired target. Repeating this would enable an actor to connect a majority of nodes close to the targeted region in address space. For this reason Address Relocation has been designed and implemented.  Address Relocation blocks offline generation of identities as the network is an active part of irreversibly and deterministically establishing a uniformly distributed location for the node to connect to the network.
+An attack exists for a node to generate public-private key pairs off-line to derived identities close to a specific target. It would then be able to connect close to a desired target. Repeating this would enable an actor to connect a majority of nodes close to the targeted region in address space. For this reason Address Relocation has been designed and implemented.  Address Relocation blocks off-line generation of identities as the network is an active part of irreversibly and deterministically establishing a uniformly distributed location for the node to connect to the network.
 
 # Detailed design
 
