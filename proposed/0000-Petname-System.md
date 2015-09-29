@@ -189,7 +189,12 @@ Compare that to a scenario in which Bob had chosen *not* to change the Nickname 
 Imagine if you would, getting an HTML encoded email:
 
 ```
-Congratulations Alice! You submitted the winning bid for the mixing bowl and measuring cup set on eBay! To make your payment final and to recieve these amazing items, please submit your information to Paypa1 now! **-- click here to pay --**
+Congratulations Alice! 
+
+You submitted the winning bid for the mixing bowl and measuring cup set on eBay!
+
+To make your payment final and to recieve these amazing items, please submit your information to Paypa1 now!
+**-- click here to pay --**
 ```
 
 There's two things wrong with this. First of all, it's impossible to see upfront where the link is redirecting the user to. Either the link would be taken at it's word, or have to be examined to see where it was leading to user to. This is a reason why I view HTML encoding as a threat. Not everything is as it seems.
@@ -199,7 +204,12 @@ Also, if you thought "Paypa1" looked weird, give yourself a pat on the back. The
 Let's look at the same email as a email-type message on a SAFE Network that implements the Petname System.
 
 ```
-Congratulations Alice! You submitted the winning bid for the mixing bowl and measuring cup set on [Testing this site - SAFEbAY]! To make your payment final and to recieve these amazing items, please submit your information to Paypa1@155F now! **--click on the referral to pay --**
+Congratulations Alice!
+
+You submitted the winning bid for the mixing bowl and measuring cup set on [Testing this site - SAFEbAY]! 
+
+To make your payment final and to recieve these amazing items, please submit your information to Paypa1@155F now!
+**--click on the referral to pay --**
 ```
 
 A couple differences from above. Inside of the brackets, you can see that Alice has already denotated a Petname for this site. That Petname being "Testing this site - SAFEbAY". It appears that she wanted to remind herself that she was only testing the site, perhaps to see if it was a scam? Let's see what she found out.
