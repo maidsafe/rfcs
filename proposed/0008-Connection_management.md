@@ -7,9 +7,11 @@
 
 # Summary
 
-Introduce the notion of clearly defined connection phases and establish directed routing network connections in conjunction with crust.
+Introduce the notion of clearly defined connection phases and establish directed routing network connections in conjunction with crust version 0.3 and later. The combined objective with crust proposed here for routing is to prepare for NAT traversal using UDP/uTP.
 
 # Motivation
+
+Starting with crust version 0.3, the API provides directional information on newly established connections.  This information is helpful for establishing a routing network with the correct topology. Already at bootstrapping it simplifies the logic for the routing node. No artificial distinction is needed for a "new bootstrap connection", as that depends on the state of the node and whether the node accepts or has connected to another node.
 
 Both outgoing and incoming connections are created to peers with unknown direction. Use the connect/accept connection code available from crust to store timed state in-line with crust connection handling changes for connections in either direction. This will allow us to determine unambiguously who the connection initiator is and act accordingly.
 
@@ -26,16 +28,24 @@ Introduce a `State` object to `RoutingCore` representing the distinct phases of 
 
 ```rust
 pub enum State {
+    /// there are no connections
     Disconnected,
-    Bootstrapping,
+    /// there are only bootstrap connections, and we do not yet have a name
+    Bootstrapped,
+    /// there are only bootstrap connections, and we have received a name
+    Relocated,
+    /// there are 0 < n < GROUP_SIZE routing connections, and we have a name
     Connected,
+    /// there are n >= GROUP_SIZE routing connections, and we have a name
+    GroupConnected,
+    /// ::stop() has been called
     Terminated,
 }
 ```
 
 ## Expected Connections
 
-For connections, create and add to utils folder a timed `ExpectedConnections` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. An object of type `ExpectedConnections` replaces the current `connection_filter` in `RoutingNode`.
+For connections, create and add to utils folder a timed `ExpectedConnections` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. A
 
 ```rust
 pub struct Connection {
@@ -55,7 +65,33 @@ pub struct ExpectedConnections {
 ```
 
 For incoming connect requests, we want to handle, store the `ExpectedConnection::ConnectRequest(ConnectRequest)` in the timed `ExpectedConnections` then set-up and try to rendezvous connect to the peer. For incoming connect responses check the returned `ConnectRequest` was sent by us and store the `ExpectedConnection::ConnectResponse(ConnectResponse)` in the timed `ExpectedConnections` then set-up and try to rendezvous connect to peer. The rendezvous connection set-up and establishment will be initiated by routing and handled by crust, successful completion resulting in receipt of a crust OnConnect/OnAccept event within the time limit for the stored expected `ConnectRequest/ConnectResponse`. The new connection details can then be added to the routing table and removed from `ExpectedConnections`.
- 
+
+-----------------------------
+```rust
+fn handle_on_accept(&mut self, connection) {
+    match self.core.state() {
+        State::Disconnected => {
+            self.core.assign_name(self_relocated_name);
+        },
+        State::Bootstrapped => { return; /* refuse connection */ },
+        State::Connected => { },
+        State::Terminated => { return; },
+    };
+    self.core.add_unknown_connection(connection);
+    self.send_hello();
+}
+
+fn handle_on_accept(&mut self, connection) {
+    match self.core.state() {
+        State::Disconnected => {
+
+        },
+        State::Bootstrapped => { return; /* refuse connection */ },
+        State::Connected => { },
+        State::Terminated => { return; },
+    };
+}
+```
 
 ## Updates to Existing Code
 
