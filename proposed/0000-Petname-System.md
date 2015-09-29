@@ -143,6 +143,78 @@ There is already an implementation planned for Personas, and that is to have a n
 
 This proposed system will use the Public Key as the Identifier under the hood, and present the user with the Nickname that the Public Key corresponds with. If a user wishes, they may inspect the Key to determine the unique identifier of that Persona. However, once an action is taken on that Persona, the Petname system will prompt the user to assign that Persona a Nickname. This ensures a memorable association with that Persona.
 
+# Examples
+
+Since this impacts the user-facing interface most significantly, it may be beneficial to show a mock-up of what this may look like in the most straightforward of examples.
+
+## IM Chat screen
+
+In this scenario, a entity having the Persona "Bob" has a Petname "Hill" for a specific Persona that he knows. The Nickname for that Persona is "Hillary"
+
+```
+"Hill" has initiated a chat with you ->
+
+<Hill> Hi @Bob!
+<Bob> Hi @Hill
+<Hill> On my screen, my name that you just typed shows up as "Hillary"
+<Hill> What does it show on yours?
+<Bob> Hill
+<Hill> You can call me whatever you want @Bob,
+<Hill> Just don't call me late for dinner!
+<Bob> And what do you see my name as?
+<Hill> Oh, you're just plain ol' "Bob". ;)
+```
+
+Compare that to a scenario in which Bob had chosen *not* to change the Nickname when assigning the Petname.
+
+```
+"Hillary" has initiated a chat with you ->
+
+<Hillary> Hi @Bob!
+<Bob> Hi @Hillary
+<Hillary> On my screen, my name shows up as "Hillary"
+<Hillary> What does it show on yours?
+<Bob> Hillary
+<Hillary> I see that I chose a good Nickname!
+<Hillary> Hopefully it spreads all throughout the network,
+<Hillary> Then I'd be the best-known "Hillary" out there!
+<Bob> And what do you see my name as
+<Hillary> "Bob w/o punctuation"
+<Hillary> The other "Bob" I know writes as well as Shakespeare himself!
+<Hillary> If you ever get around to cleaning up your act I might have to change it! ;)
+```
+
+## Referrals
+
+Imagine if you would, getting an HTML encoded email:
+
+```
+Congratulations Alice! You submitted the winning bid for the mixing bowl and measuring cup set on eBay! To make your payment final and to recieve these amazing items, please submit your information to Paypa1 now! **-- click here to pay --**
+```
+
+There's two things wrong with this. First of all, it's impossible to see upfront where the link is redirecting the user to. Either the link would be taken at it's word, or have to be examined to see where it was leading to user to. This is a reason why I view HTML encoding as a threat. Not everything is as it seems.
+
+Also, if you thought "Paypa1" looked weird, give yourself a pat on the back. The lowercase "l" that is expected at the end of the word has been replaced by a number one "1". Didn't catch it? Well, don't worry, phishing and other cybercrimes rely on social engineering to "lure" victims into their traps. A relevant example is typo squatting. In the existing internet, when someone wants to look up `wikipedia.org`, but accidently types `wikiepdia.org`, whoever registered that misspelled name will now have direct access to the user's browser.
+
+Let's look at the same email as a email-type message on a SAFE Network that implements the Petname System.
+
+```
+Congratulations Alice! You submitted the winning bid for the mixing bowl and measuring cup set on [Testing this site - SAFEbAY]! To make your payment final and to recieve these amazing items, please submit your information to Paypa1@155F now! **--click on the referral to pay --**
+```
+
+A couple differences from above. Inside of the brackets, you can see that Alice has already denotated a Petname for this site. That Petname being "Testing this site - SAFEbAY". It appears that she wanted to remind herself that she was only testing the site, perhaps to see if it was a scam? Let's see what she found out.
+
+As a bit of background, Alice had been using Paypal's services on the SAFE Network for a while, and stuck with the original Nickname of "Paypal". So when the Nickname+Identifier popped up, she knew *automatically* that the link was **not** to the site which she was familiar with. Rather, this was a site that she had not made a Petname for, and had probably never visited before.
+
+Lastly, since this is not HTML encoded, the link is the referral - Nickname+Identifier - and nothing else.
+
+## Physical World Petnames
+
+From [Mark Stiegler's outline](http://www.skyhunter.com/marcs/petnames/IntroPetNames.html):
+
+> Humans have been using parts of petname systems since before the invention of the written word. Human faces were used as keys. These keys resisted forgery far better than most things that pass for security today on computers (except in episodes of Mission Impossible, and the occasional Shakespearian comedy like 12th Night). The referral, "Joe, this is my son Billy, he's great with a club," transferred a key/alleged-name pair. The recipient of this referral typically accepts the alleged name as a petname, though in some cases the recipient may instead choose other petnames, such as, "Bob's big dumb dufus of a son", which is a strictly private petname.
+
+The Petname System has been used throughout the entire history of humanity, almost transparently! This gives me great hope that if a digital system were to completely fulfill the requirements of creating an implementation of the Petname System, it would be an unmitigated success. It would truly grant secure access for everyone.
 
 # Unresolved questions
 
