@@ -140,7 +140,6 @@ which is already connected to a remote peer, we could also use it to communicate
 with other peers as the hole has already been punched. Problem with this approach is 
 that it would only help with `Full-cone NAT` types because it is the only NAT
 type where a hole punched to one peer/host can be reused with another peers/hosts.
- resulting in slower code (re
 
 # Unresolved questions
 
