@@ -13,42 +13,35 @@ Introduce the notion of clearly defined connection phases and establish directed
 
 Starting with crust version 0.3, the API provides directional information on newly established connections.  This information is helpful for establishing a routing network with the correct topology. Already at bootstrapping it simplifies the logic for the routing node. No artificial distinction is needed for a "new bootstrap connection", as that depends on the state of the node and whether the node accepts or has connected to another node.
 
-Both outgoing and incoming connections are created to peers with unknown direction. Use the connect/accept connection code available from crust to store timed state in-line with crust connection handling changes for connections in either direction. This will allow us to determine unambiguously who the connection initiator is and act accordingly.
-
 # Detailed design
 
 ## State
 
-Introduce a `State` object to `RoutingCore` representing the distinct phases of execution for network entities characterised as follows.
-
-1. Initially client/node in disconnected state, and when all connections are dropped/lost.
-1. Bootstrapping, initiated in constructor by calling crust service function and halted by crust event sent over channel.
-1. If non-client node, connected phase adds connections to routing table.
-1. In order to prevent any further network activity a terminated state.
+Introduce a `State` object to `RoutingCore` representing the distinct states of connectedness for network entities, characterised as follows.
 
 ```rust
 pub enum State {
-    /// there are no connections
+    /// There are no connections.
     Disconnected,
-    /// there are only bootstrap connections, and we do not yet have a name
+    /// There are only bootstrap connections, and we do not yet have a name.
     Bootstrapped,
-    /// there are only bootstrap connections, and we have received a name
+    /// There are only bootstrap connections, and we have received a name.
     Relocated,
-    /// there are 0 < n < GROUP_SIZE routing connections, and we have a name
+    /// There are 0 < n < GROUP_SIZE routing connections, and we have a name.
     Connected,
-    /// there are n >= GROUP_SIZE routing connections, and we have a name
+    /// There are n >= GROUP_SIZE routing connections, and we have a name.
     GroupConnected,
-    /// ::stop() has been called
+    /// ::stop() has been called.
     Terminated,
 }
 ```
 
 ## Expected Connections
 
-For connections, create and add to utils folder a timed `ExpectedConnections` object for key type `crust::Connection`, and value, new type, `ExpectedConnection`. A
+The following types and events form an integral part of the connection management proposal.
 
 ```rust
-pub struct Connection {
+pub struct crust::Connection {
     transport_protocol: Protocol,
     peer_addr: SocketAddrW,
     local_addr: SocketAddrW,
@@ -60,13 +53,17 @@ enum ExpectedConnection {
 }
 
 pub struct ExpectedConnections {
-    lru_cache: LruCache<Connection, ExpectedConnection>
+    lru_cache: LruCache<crust::Connection, ExpectedConnection>
 }
+
+::crust::Event::OnConnect(::crust::Connection)
+::crust::Event::OnAccept(::crust::Connection)
+::crust::Event::BootstrapFinished
+::crust::Event::ExternalEndpoints(::crust::Endpoint)
 ```
 
-For incoming connect requests, we want to handle, store the `ExpectedConnection::ConnectRequest(ConnectRequest)` in the timed `ExpectedConnections` then set-up and try to rendezvous connect to the peer. For incoming connect responses check the returned `ConnectRequest` was sent by us and store the `ExpectedConnection::ConnectResponse(ConnectResponse)` in the timed `ExpectedConnections` then set-up and try to rendezvous connect to peer. The rendezvous connection set-up and establishment will be initiated by routing and handled by crust, successful completion resulting in receipt of a crust OnConnect/OnAccept event within the time limit for the stored expected `ConnectRequest/ConnectResponse`. The new connection details can then be added to the routing table and removed from `ExpectedConnections`.
+------------ Include the details Ben and I jotted down on paper here ---------------
 
------------------------------
 ```rust
 fn handle_on_accept(&mut self, connection) {
     match self.core.state() {
@@ -74,18 +71,16 @@ fn handle_on_accept(&mut self, connection) {
             self.core.assign_name(self_relocated_name);
         },
         State::Bootstrapped => { return; /* refuse connection */ },
-        State::Connected => { },
+        State::Connected => {},
         State::Terminated => { return; },
     };
     self.core.add_unknown_connection(connection);
     self.send_hello();
 }
 
-fn handle_on_accept(&mut self, connection) {
+fn handle_on_connect(&mut self, connection) {
     match self.core.state() {
-        State::Disconnected => {
-
-        },
+        State::Disconnected => {},
         State::Bootstrapped => { return; /* refuse connection */ },
         State::Connected => { },
         State::Terminated => { return; },
@@ -98,7 +93,7 @@ fn handle_on_accept(&mut self, connection) {
 1. Merge the `RoutingNode` functions `handle_new_connection` and `handle_new_bootstrap_connection`.
 1. Remove `Unidentified` connections from `ConnectionName`.
 1. In the event of disconnect implement re-bootstrapping.
-1. Update Hello in line with crust events.
+1. Integrate `Hello` in line with crust events and updated methodology.
 
 # Drawbacks
 
@@ -106,8 +101,8 @@ N/A
 
 # Alternatives
 
-As an enhancement to current design, over crust network protocol handling, when hole-punching is complete the proposed design will explicitly cater for it.
+What other designs have been considered? What is the impact of not doing this?
 
 # Unresolved questions
 
-Testing should clear up any collaborative issues between routing and crust that may arise.
+What parts of the design are still to be done?
