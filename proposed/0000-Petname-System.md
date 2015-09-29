@@ -147,7 +147,7 @@ This proposed system will use the Public Key as the Identifier under the hood, a
 
 Since this impacts the user-facing interface most significantly, it may be beneficial to show a mock-up of what this may look like in the most straightforward of examples.
 
-## IM Chat screen
+## IM Chat
 
 In this scenario, a entity having the Persona "Bob" has a Petname "Hill" for a specific Persona that he knows. The Nickname for that Persona is "Hillary"
 
@@ -218,7 +218,7 @@ As a bit of background, Alice had been using Paypal's services on the SAFE Netwo
 
 Lastly, since this is not HTML encoded, the link is the referral - Nickname+Identifier - and nothing else.
 
-## Physical World Petnames
+## Physical World
 
 From [Mark Stiegler's outline](http://www.skyhunter.com/marcs/petnames/IntroPetNames.html):
 
