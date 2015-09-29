@@ -65,9 +65,9 @@ Account {
 
 ## Add App Flow
 
-**step 0:** User drags `XYZ` App binary into the Launcher to add it. Launcher will ask the user if the app should have access to `SAFEDrive`.
+**step 0:** User drags `XYZ` app binary into the Launcher to add it. Launcher will ask the user if the app should have access to `SAFEDrive`.
 
-**step 1:** Launcher creates (if it’s the first time it saw this App):
+**step 1:** Launcher creates (if it’s the first time it saw this app):
 1. Unique random 64 byte ID for this app - App-ID (because names of different binaries can be same if they are in different locations on the same machine - thus we need a unique identifier for the binary across all machines)
 2. Unique Directory Id (a 64 byte ID associated with a directory) and an associated unique Root [Directory Listing](https://github.com/maidsafe/safe_nfs/blob/master/src/directory_listing/mod.rs) `<APP-ROOT-DIR>` for this app - `XYZ-Root-Dir`. For directory name conflicts append numbers so that they can exist on a file system - e.g. `XYZ-1-Root-Dir`. This shall be created inside `<USER’S-PRIVATE-ROOT-DIRECTORY-ID>/`.
 - `<APP-ROOT-DIR>` shall be always **unversioned** and **private** (i.e. encrypted with app-specific crypto keys). Any requirement for a versioned or public directory from the app can be managed by the app itself by creating further subdirectories.
@@ -111,7 +111,7 @@ Account {
 
 **step 3:** Launcher checks the App-ID, reads the path from the `<LOCAL-CONFIG-FILE>` that it made and starts the app as an independent process. The Launcher supplies a random port on which it will listen to this app via command line options.
 
-`/path/to/app/binary --launcher "tcp:<Laucher-IP:Launcher-Port>"`
+`/path/to/app/binary --launcher "tcp:<Laucher-IP:Launcher-Port>:<random-launcher-string>"`
 
 All parameters are UTF-8 strings.
 
@@ -127,7 +127,7 @@ struct Request {
 
 **step 5:** The Launcher verifies the `launcher_string` field above and generates a strong random symmetric encryption key `<App-Specific-Symm-Key>`. This is encrypted using app's `public_encrytion_key` and `nonce` above.
 
-**step 6:** Launcher gives the App what it requested.
+**step 6:** Launcher gives the app what it requested.
 - The payload format for this response shall be a CBOR encoded structure of the following:
 ```
 struct Response {
@@ -153,13 +153,13 @@ enum LauncherMessage {
 
 ## Reads and Mutations by the App
 
-- All `GET/PUT/POST/DELETE`s will go via the Launcher. The app will essentially encrypt the `data` field of `StructuredData` using `<App-Specific-Symm-Key>` if the access level for the `StructuredData` happens to be `Private` and pass it to Launcher which will decrypt and re-encrypt and sign it using normal process (currently MAID-keys). For `GET`s it will be the reverse - Launcher will eventually encrypt using `<App-Specific-Symm-Key>` before handing the data over to the App. For `Public` accessed `StructuredData` no such encryption translation will be done by Launcher. `ImmutableData` shall not be inspected by Launcher - it will merely be put or got `PUT/GET` as-is. The motivation for this is `ImmutableData` are expected to be protected via self-encryption. Thus the app has a choice to fetch `ImmutableData` or `StructuredData` directly from the Network if it deems fit. E.g. app can fetch publicly-accessed DNS records without going through Launcher and browsers working with SAFE protocol will definitely do this.
+- All `GET/PUT/POST/DELETE`s will go via the Launcher. The app will essentially encrypt the `data` field of `StructuredData` using `<App-Specific-Symm-Key>` if the access level for the `StructuredData` happens to be `Private` and pass it to Launcher which will decrypt and re-encrypt and sign it using normal process (currently MAID-keys). For `GET`s it will be the reverse - Launcher will eventually encrypt using `<App-Specific-Symm-Key>` before handing the data over to the app. For `Public` accessed `StructuredData` no such encryption translation will be done by Launcher. `ImmutableData` shall not be inspected by Launcher - it will merely be put or got `PUT/GET` as-is. The motivation for this is `ImmutableData` are expected to be protected via self-encryption. Thus the app has a choice to fetch `ImmutableData` or `StructuredData` directly from the Network if it deems fit. E.g. app can fetch publicly-accessed DNS records without going through Launcher and browsers working with SAFE protocol will definitely do this.
 
-Since `<App-Specific-Symm-Key>` is recognised by Launcher only for current session, there is no security risk and the App will not be able to trick Launcher the next time it starts to use the previous keys to mutate network or read data on its behalf.
+Since `<App-Specific-Symm-Key>` is recognised by Launcher only for current session, there is no security risk and the app will not be able to trick Launcher the next time it starts to use the previous keys to mutate network or read data on its behalf.
 
 ## Share Directory App Flow
 
-Every time the App tries to access `SAFEDrive` Launcher will check the permission in `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile`.
+Every time the app tries to access `SAFEDrive` Launcher will check the permission in `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile`.
 
 ### Grant and Revoke Access
 
@@ -167,7 +167,7 @@ Every time the App tries to access `SAFEDrive` Launcher will check the permissio
 
 ## Remove App Flow
 
-**procedure 0:** Launcher removes the App as follows:
+**procedure 0:** Launcher removes the app as follows:
 - Delete from `<LOCAL-CONFIG-FILE>` (on the user's machine) the following:
 ```
 [
@@ -177,15 +177,15 @@ Every time the App tries to access `SAFEDrive` Launcher will check the permissio
 ```
 - Remove the SHA512(App-Binary) from the vector in `<LAUNCHER-CONFIG-FILE>`.
 - Decrement `Reference Count` from `<LAUNCHER-CONFIG-FILE>`.
-- If the `Reference Count` is **0** it means that this is the last machine where the App was present. The Launcher shall not delete `<APP-ROOT-DIR>` from within `SAFEDrive` folder. It is user's responsibility to do that as it might contain information (like pictures, etc.) which the user may not want to lose. Instead the Launcher will ask if the user wants to do that and act accordingly. Similarly only after user confirmation will Launcher remove the App entry from the `<LAUNCHER-CONFIG-FILE>`, as it contains necessary metadata to decrypt the App specific directories.
+- If the `Reference Count` is **0** it means that this is the last machine where the app was present. The Launcher shall not delete `<APP-ROOT-DIR>`. It is user's responsibility to do that as it might contain information (like pictures, etc.) which the user may not want to lose. Instead the Launcher will ask if the user wants to do that and act accordingly. Similarly only after user confirmation will Launcher remove the app entry from the `<LAUNCHER-CONFIG-FILE>`, as it contains necessary metadata to decrypt the app specific directories.
 
-**procedure 1:** While the other procedure would work, there might be occassions when the user wants to immediately remove the app completely (which also translates as revoke App's permission to mutate network on user's behalf). He may not have access to other machines where the App was installed and may be currently running and the previous procedure requires the user to remove it from all machines. Thus there shall be an option in Launcher to remove App completely irrespective of if it is installed and/or running in other machines. In such cases Launcher will reduce `Reference Count` to 0 and proceed as above for the detection of zero reference count.
+**procedure 1:** While the other procedure would work, there might be occassions when the user wants to immediately remove the app completely (which also translates as revoke app's permission to mutate network on user's behalf). He may not have access to other machines where the app was installed and may be currently running and the previous procedure requires the user to remove it from all machines. Thus there shall be an option in Launcher to remove app completely irrespective of if it is installed and/or running in other machines. In such cases Launcher will reduce `Reference Count` to 0 and proceed as above for the detection of zero reference count.
 
-In both procedures, Launcher will terminate the TCP connection with the App and forget the `<App-Specific-Symm-Keys>` so effect of removal and hence revocation is immediate.
+In both procedures, Launcher will terminate the TCP connection with the app and forget the `<App-Specific-Symm-Keys>` so effect of removal and hence revocation is immediate.
 
 ## Misc
-- If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his/her account via Launcher on that machine. However when the App is attempted to be activated on a machine via Launcher where it was not previously added to Launcher then he/she will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
-- When the App is started via Launcher, it will first check if the `SHA512(App-Binary)` matches any one of the corresponding entries in the vector in `<LAUNCHER-CONFIG-FILE>`. If it does not Launcher will interpret this as a malacious App that has replaced the App-binary on user's machine, and thus will show a dialog to the user for confirmation  of whether to still continue, because there can be genuine reasons for binary not matching like the App was updated etc.
+- If the app is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his/her account via Launcher on that machine. However when the app is attempted to be activated on a machine via Launcher where it was not previously added to Launcher then he/she will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
+- When the app is started via Launcher, it will first check if the `SHA512(App-Binary)` matches any one of the corresponding entries in the vector in `<LAUNCHER-CONFIG-FILE>`. If it does not Launcher will interpret this as a malacious app that has replaced the App-binary on user's machine, and thus will show a dialog to the user for confirmation  of whether to still continue, because there can be genuine reasons for binary not matching like the app was updated etc.
 
 # Alternatives
 There is an RFC proposal for a simplified version of the Launcher which does not go to as deep an extent to cover all facets of security.
