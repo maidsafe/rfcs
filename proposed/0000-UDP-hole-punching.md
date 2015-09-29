@@ -166,7 +166,7 @@ Here are the available options:
    many libraries already ship with these patterns abstracted (think of functions
    like `when_any` or `when_all`). That said, they have the disadvantage
    that they combine blocking and non blocking paradigms, resulting in 
-   slower code (read [this](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3747.pdf) for
+   slower code (read [this](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4045.pdf) for
    more info on the topic).
 
 4. Continuation Passing Style: Callbacks are ligthweight, fast and offer
