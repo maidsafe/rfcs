@@ -31,6 +31,13 @@ gives a nice overview.
 
 # Detailed design
 
+The UDP hole punching process described here consists of two steps:
+
+1. Finding an external mapping of a UDP socket
+2. Do the actual hole punching.
+
+## Finding an external mapping of a UDP socket
+
 Suppose, we have two nodes `A` and `B`, where each one is possibly behind a NAT and
 they want to connect to each other.  Routing needs to send `A` an endpoint of `B` and
 vice versa. But `A` and `B` don’t know their public
@@ -66,13 +73,16 @@ where `MappedUdpSocket` is defined as
 
 Once upper layers receive such event, they can send/route `MappedUdpSocket::public_address`
 to node `B`. Once `B` does the same, and upper layers receive `B`’s public endpoint, upper
-layers shall call
+layers are ready for the actual hole punching.
+
+## Hole punching
+
+The act of hole punching shall be initiated by a function with the following signature:
 
     Service::udp_punch_hole(udp_socket : UdpSocket,
                             secret: Option<[u8; 4]>,
                             peer_addr : mut SocketAddr /* of node B */,
                             callback: FnBox<(UdpSocket, io::Result<SocketAddr>)>)
-
 
 This call will initiate reading on the `udp_socket` and will also
 start periodically sending small datagrams to the `peer_addr`.
@@ -108,11 +118,14 @@ once ((1) or (2)) is true, we check whether we've received a datagram,
 if we did, we call the `callback` with `(udp_socket, Ok(peer_addr))`,
 otherwise we call it with an appropriate `io::Error`.
 
+## Using the punched hole
+
 After a successful hole-punch, it is assumed that the two peers can communicate
-with each other. Users can take the `udp_socket` and assign it to e.g.
-`UtpSocket` from the rust-utp library, on which, standard `connect` and
-`accept` functions can be called (AFAIK rust-utp library doesn't
-yet support rendezvous connect).
+with each other over the unreliable UDP protocol. At this point we'd like to
+use that UDP socket with protocols such as uTP for added reliability.
+
+Unfortunatelly, the rust-utp library doesn't currently support rendezvous
+connections, so this functionality will need to be added.
 
 # Drawbacks
 
