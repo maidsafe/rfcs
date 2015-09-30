@@ -62,17 +62,20 @@ pub struct ExpectedConnections {
 ::crust::Event::ExternalEndpoints(::crust::Endpoint)
 ```
 
------------- Include the details Ben and I jotted down on paper here ---------------
+## On accept and on connect
 
 ```rust
 fn handle_on_accept(&mut self, connection) {
     match self.core.state() {
         State::Disconnected => {
+            // on assigning a name, we become State::Relocated
             self.core.assign_name(self_relocated_name);
         },
-        State::Bootstrapped => { return; /* refuse connection */ },
+        State::Bootstrapped => { self.service.drop_node(connection); return; },
+        State::Relocated => {},
         State::Connected => {},
-        State::Terminated => { return; },
+        State::GroupConnected => {},
+        State::Terminated => { self.service.drop_node(connection); return; },
     };
     self.core.add_unknown_connection(connection);
     self.send_hello();
@@ -81,10 +84,23 @@ fn handle_on_accept(&mut self, connection) {
 fn handle_on_connect(&mut self, connection) {
     match self.core.state() {
         State::Disconnected => {},
-        State::Bootstrapped => { return; /* refuse connection */ },
-        State::Connected => { },
-        State::Terminated => { return; },
+        State::Bootstrapped => { self.service.drop_node(connection); return;
+            /* refuse connection, only have one bootstrap connection */ },
+        State::Relocated => {},
+        State::Connected => {},
+        State::GroupConnection => {},
+        State::Terminated => { self.service.drop_node(connection); return; },
     };
+    self.core.add_unknown_connection(connection);
+    self.send_hello();
+}
+```
+
+## Hello
+
+```rust
+fn handle_hello(&mut self, connection, ::direct_message::Hello) {
+
 }
 ```
 
