@@ -193,6 +193,9 @@ There is an RFC proposal for a simplified version of Launcher which does not go 
 # Current Limitations and Future Scope
 - All apps need to be started from within Launcher. This is a current limitation and possible future solution is to have Launcher write it's listening TCP endpoint to publicly readable file in a fixed location. The app-devs will be asked to construct shortcuts to their apps such that when activated the shortcut points to a binary that reads the current endpoints from the mentioned file, connects to the Launcher there passing it the path to the actual app binary and finally terminating itself. Launcher then checks for this path's validity in its local config file and starts the app as usual (as described in this RFC). An alternative to a file containing public readable endpoints could be a fixed UDP endpoint on which Launcher listens for path to binaries given by app-shortcuts.
 - There is no provision for an app that is required to be started at system start up. For this we can have Launcher marked as a startup process and all apps (which make use of Launcher) that need to be activated at system start up be marked thus in Launcher. Launcher would then activate these once it has itself been successfully activated.
+- 
 
 # Unresolved questions
 **(Q0)** Once the user has revoked an app's permission to use `SAFEDrive`, how will Launcher ascertain that `StructuredData` that the app is asking Launcher to `PUT/POST` to the Network is not related to some directory listing inside the `SAFEDrive` directory ?
+
+**(Q1)** A local background service process to channel all requests through while maybe ok for desktop platforms, might definitely need a feasibility check on mobile platforms. Would this approach work for mobiles ?
