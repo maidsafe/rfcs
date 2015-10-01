@@ -64,6 +64,18 @@ pub struct ExpectedConnections {
 ::crust::Event::ExternalEndpoints(::crust::Endpoint)
 ```
 
+## On ConnectRequest and on ConnectResponse
+
+fn handle_on_connect_request(&mut self, connect_request) {
+    if self.core.check_routing_node(&connect_request.requester)
+        // address relocation currently still works through the connection_cache
+        // this should be checked here
+        && self.connection_cache.contains_key(&connect_request.requester) {
+            
+        }
+    }
+}
+
 ## On accept and on connect
 
 ```rust
@@ -111,7 +123,19 @@ fn handle_on_connect(&mut self, connection) {
 
 ```rust
 fn handle_hello(&mut self, connection, ::direct_message::Hello) {
-
+    match self.core.match_unknown_connection(connection) {
+        Some(unknown_connection) => {
+            if hello.contains_verified_connect_response() {
+                match self.core.match_request_with_response(hello, connection) {
+                    Some(confirmed_connection) => self.confirm_connection(confirmed_connection);
+                    None => { self.service.drop_node(connection); return; }
+                };
+            } else {
+                unknown_connection.insert_hello(hello);
+            };
+        },
+        None => { self.service.drop_node(connection); return; },
+    };
 }
 ```
 
@@ -124,8 +148,7 @@ fn handle_hello(&mut self, connection, ::direct_message::Hello) {
 
 # Drawbacks
 
-N/A
-
+A double connection is established to ensure that a connection can be made in either direction.
 # Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
