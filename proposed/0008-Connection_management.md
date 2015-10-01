@@ -66,15 +66,26 @@ pub struct ExpectedConnections {
 
 ## On ConnectRequest and on ConnectResponse
 
+```rust
 fn handle_on_connect_request(&mut self, connect_request) {
     if self.core.check_routing_node(&connect_request.requester)
         // address relocation currently still works through the connection_cache
-        // this should be checked here
+        // this should be checked here.
+        // This cache can be removed after Address Relocation has been corrected
         && self.connection_cache.contains_key(&connect_request.requester) {
-            
-        }
+        self.service.connect(connect_request.external_endpoints);
+        self.core.expect_connection(connect_request.clone());
+        self.send_connect_response(connect_request);
     }
 }
+
+fn handle_on_connect_response(&mut self, connect_response) {
+    if self.verify_response(&connect_response) {
+        self.service.connect(connect_response.external_endpoints);
+        self.core.expect_connection(connect_response.clone());
+    }
+}
+```
 
 ## On accept and on connect
 
@@ -148,7 +159,8 @@ fn handle_hello(&mut self, connection, ::direct_message::Hello) {
 
 # Drawbacks
 
-A double connection is established to ensure that a connection can be made in either direction.
+A double connection is established to ensure that a connection can be made in both direction. On cryptographically establishing the valid two-way-established connection, the original connection (from network to requester) is confirmed and the secondary connection is dropped.  This imposes more work to establishing a connection, but is fundamental to ensure the correct routing topology.  It is argued that without this secondary connection it is not possible to cryptographically ensure that IP-connection is authentic to the routing connection.
+
 # Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
