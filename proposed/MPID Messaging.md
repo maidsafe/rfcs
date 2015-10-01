@@ -135,24 +135,7 @@ let sd_for_mpid_header = StructuredData {
 
 ## Message Flow
 
-```
-                    MpidManagers(A)    MpidManagers(B)
-                   /      *                   *        \
-MpidClient(A) ->  -       *                   *         -  <- MpidClient(B)
-                   \      *                   *        /
-
-```
-1. `MpidClient(A)` sends an `MpidMessage` to `MpidManagers(A)` as a Put request.
-1. `MpidManagers(A)` store this message in their outbox for A and send the `signed_header` component to `MpidManagers(B)` as a Put request, unless the outbox is full in which case a PutFailure response is returned to `MpidClient(A)`.
-1. `MpidManagers(B)` try to store the `(sender, signed_header)` in their inbox for B.  If successful, they forward it to `MpidClient(B)` as a Put request immediately or as soon as it appears online.  If unsuccessful (e.g. the inbox is full or sender has been blacklisted), they reply to `MpidManagers(A)` with a PutFailure, who then remove the message from the outbox and send a PutFailure response to `MpidClient(A)`.
-1. To retrieve the message from the network, `MpidClient(B)` sends a Get request to `MpidManagers(A)`.
-1. `MpidManagers(A)` send a GetResponse to `MPidClient(B)`.
-1. On receiving the message, `MpidClient(B)` sends a remove request to `MpidManagers(B)` via a Delete.
-1. `MpidManagers(B)` remove the corresponding entry from the inbox for B and forward the remove request to `MpidManagers(A)`.  `MpidManagers(A)` then remove the corresponding entry from the outbox for A.
-
-`MpidClient(A)` might decide to remove the `MpidMessage` from the outbox if the message hasn't been retrieved by `MpidClient(B)` yet.  In this case, `MpidManagers(A)` should not only remove the corresponding `MpidMessage` from their outbox for A, but also send a notification to the group of `MpidManagers(B)` so they can remove the corresponding entry from their inbox of B.  These messages will all be Delete requests.
-
-_MPidClient(A)_ =>> |__MPidManagers(A)__ (Put)(Header.So) *->> | __MPidManagers(B)__  (Store(Header))(Online(MpidClient(B)) ? Header.So : (WaitForOnlineB)(header.So)) *-> | _MpidClient(B)_ So.Retrieve ->> | __MpidManagers(A)__ So.Message *-> | _MpidClient(B)_ Remove.So ->> | __MpidManagers(B)__ {Remove(Header), Remove.So} *->> | __MpidManagers(A)__ Remove
+![Flowchart showing MPID Message flow through the SAFE Network](MPID%20Message%20Flow.png)
 
 ## MPID Client
 
