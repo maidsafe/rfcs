@@ -15,6 +15,8 @@ Starting with crust version 0.3, the API provides directional information on new
 
 # Detailed design
 
+# Implementation blueprint
+
 ## State
 
 Introduce a `State` object to `RoutingCore` representing the distinct states of connectedness for network entities, characterised as follows.
@@ -78,12 +80,16 @@ fn handle_on_accept(&mut self, connection) {
         State::Terminated => { self.service.drop_node(connection); return; },
     };
     self.core.add_unknown_connection(connection);
-    self.send_hello();
 }
 
 fn handle_on_connect(&mut self, connection) {
     match self.core.state() {
-        State::Disconnected => {},
+        State::Disconnected => {
+            // accept as bootstrap connection
+            self.core.add_bootstrap_connection(connection.clone());
+            self.send_hello(connection);
+            return;
+        },
         State::Bootstrapped => { self.service.drop_node(connection); return;
             /* refuse connection, only have one bootstrap connection */ },
         State::Relocated => {},
@@ -91,8 +97,13 @@ fn handle_on_connect(&mut self, connection) {
         State::GroupConnection => {},
         State::Terminated => { self.service.drop_node(connection); return; },
     };
-    self.core.add_unknown_connection(connection);
-    self.send_hello();
+    match self.core.match_expected_connection(connection) {
+        Some(ref mut expected_connection) => {
+            expected_connection.insert_connection(connection.clone());
+            self.send_hello(connection);
+        },
+        None => { self.service.drop_node(connection); return; },
+    };
 }
 ```
 
