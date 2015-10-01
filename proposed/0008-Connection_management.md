@@ -15,6 +15,8 @@ Starting with crust version 0.3, the API provides directional information on new
 
 # Detailed design
 
+## Rebootstrapping
+
 A first objective is the replacement of previous conditional variables with a clean flow through states.  This enables rebootstrapping, ie. when the connections to the network are lost, routing can automatically reconnect.  The states proposed in flow-order are `Disconnected`, `Bootstrapped`, `Relocated`, `Connected`, `GroupConnected`, `Terminated`.
 
 A full node will start at `Disconnected` and follow the states in the above order until `GroupConnected`. If a node would get disconnected then the cycle can restart at `Disconnected`.  Only when the user calls `::stop()`, does routing enter `Terminated`.  At `Terminated` the node remains active but does not accept new messages and terminates his connections to the network.
@@ -22,6 +24,14 @@ A full node will start at `Disconnected` and follow the states in the above orde
 A full node that cannot bootstrap (as such `Disconnected`), but accepts a connection from another node, will jump from `Disconnected` to `Relocated` by assigning itself a name.  Otherwise its behaviour is identical to normal behaviour.
 
 A client will have a reduced cycle: `Disconnected`, `Bootstrapped`, `Terminated`.  Rebootstrapping is achieved through cycling through the first two states.
+
+## improved connection management
+
+We consider first the case where the connection is not started through crust bootstrapping.  We assume that a node `A` is either already connected into the network, or has established a relay node in the network through crust bootstrapping.  [TO BE CONTINUED]
+
+## integration of Address Relocation into connection management
+
+
 
 # Implementation blueprint
 
