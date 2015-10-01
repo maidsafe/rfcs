@@ -130,7 +130,7 @@ fn handle_on_connect(&mut self, connection) {
 }
 ```
 
-## Hello
+## Hello and confirmation
 
 ```rust
 fn handle_hello(&mut self, connection, ::direct_message::Hello) {
@@ -147,6 +147,24 @@ fn handle_hello(&mut self, connection, ::direct_message::Hello) {
         },
         None => { self.service.drop_node(connection); return; },
     };
+}
+
+fn on_confirmation(&mut self, confirmation, connection) {
+    // a confirmation must always be sent on the primary connection
+    match self.core.match_unknown_connection(connection) {
+        Some(unknown_connection) => {
+            if unknown_connection.claimant == confirmation.claimant {
+                match self.core.contains_expected_connection_response(
+                    confirmation.claimant) {
+                    Some(secondary_connection) => {
+                        self.service.
+                        [TO BE CONTINUED]
+                    }
+                }
+
+            }
+        }
+    }
 }
 ```
 
