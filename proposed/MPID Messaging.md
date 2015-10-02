@@ -71,7 +71,7 @@ The `metadata` field allows passing arbitrary user/app data.  It must not exceed
 
 ```rust
 pub struct RecipientAndBody {
-    pub recipient: ::routing::NameType,
+    pub recipient: ::routing::Authority::Client ,
     pub body: Vec<u8>,
 }
 
@@ -93,7 +93,7 @@ This can be implemented as a `Vec<MpidMessage>`.
 
 This is an even simpler structure and again there will be one per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
-This can be implemented as a `Vec<(sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, signed_header: Vec<u8>)>`. Or `Vec<(sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<signed_header: Vec<u8>>)>`, which having the headers from the same sender grouped (however this may incur a performance slow down when looking up for a particual mpid_header)
+This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, signed_header: Vec<u8>)>`. Or `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<signed_header: Vec<u8>>)>`, which having the headers from the same sender grouped (however this may incur a performance slow down when looking up for a particual mpid_header)
 
 ## Messaging Format Among Nodes
 
@@ -152,7 +152,7 @@ Such a separate routing object is not required if only "pull" operatioin exists.
     1. sending message flow
     1. retrieving message flow
     1. deleting message flow
-    1. churn handling and refreshing for account_transfer
+    1. churn handling and refreshing for account_transfer (Inbox and Outbox)
     1. MPID Client addressing (if MPID address registration procedure is to be undertaken - i.e. for "pull")
 
 1. Routing
@@ -220,7 +220,8 @@ We also have identified a need for some form of secure messaging in order to imp
 To send an MPID Message, a client would do something like:
 
 ```rust
-let mpid_message = MpidMessage::new(my_mpid, their_mpid_name, metadata, body);
+let mpid_message = MpidMessage::new(my_mpid: Mpid, recipient: ::routing::Authority::Client,
+                                    metadata: Vec<u8>, body: Vec<u8>);
 
 ```
 
@@ -233,8 +234,10 @@ struct MpidMessageAccount {
     pub total_size: u64,
 }
 struct MpidHeaderAccount {
-    pub recipient: ::routing::NameType,
-    pub headers: Vec<(sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, signed_header: Vec<u8>)>,
+    pub recipient: ::routing::Authority::Client,
+    pub headers: Vec<(sender_name: ::routing::NameType,
+                      sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
+                      signed_header: Vec<u8>)>,
     pub total_size: u64,
 }
 ```
