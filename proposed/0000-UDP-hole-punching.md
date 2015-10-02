@@ -215,7 +215,7 @@ fn State::generate_request_id(&mut self: State) -> u32
 /// Returns a vector of SocketAddrs pointing to U(C(X)),
 /// the vector should be sorted so that addresses that
 /// are not on our LAN are first (use `getifaddr` here).
-fn sort_helping_nodes_by_preference() -> Vec<SocketAddr>
+fn State::sort_helping_nodes_by_preference(&self) -> Vec<SocketAddr>
 
 struct PeriodicSender {
   udp_socket: UdpSocket,
@@ -258,7 +258,7 @@ fn blocking_get_mapped_udp_socket(request_id: u32, helper_nodes: Vec<SocketAddr>
           break;
         },
         Ok(datagram) => {
-          if datagram.request_id != request { continue }
+          if datagram.request_id != request_id { continue }
           if datagram.from != cx { continue }
           datagram.ext_address
         }
