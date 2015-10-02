@@ -212,11 +212,6 @@ multiple `C(X)`s would disable port prediction.
 /// reached, next number will be 0.
 fn State::generate_request_id(&mut self: State) -> u32
 
-/// Starts a thread and periodically sends
-/// echo requests to the peer specified with the `to` parameter.
-fn keep_sending_datagrams(udp_socket: UdpSocket, request_id: u32, to: SocketAddr)
-  -> CancelationToken;
-
 /// Returns a vector of SocketAddrs pointing to U(C(X)),
 /// the vector should be sorted so that addresses that
 /// are not on our LAN are first (use `getifaddr` here).
