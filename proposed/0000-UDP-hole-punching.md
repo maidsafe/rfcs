@@ -289,19 +289,16 @@ fn blocking_udp_punch_hole(request_id: u32, // Note: this is not the result toke
                            peer_addr : mut SocketAddr /* of node B */)
       -> (UdpSocket, Result<SocketAddr> /* peer's address */) {
   const TIMES_TO_SEND = 5;
-  let mut received = false;
   let mut periodic_sender = PeriodicSender(udp_socket);
   periodic_sender.start(peer_addr,
                         TIMES_TO_SEND,
-                        HolePunch::new(request_id, secret, received));
+                        HolePunch::new(request_id, secret, false));
 
   loop {
     match udp_socket.timed_blocking_read(2000ms) {
       Ok(datagram) => {
         if datagram.request_id != request_id { continue }
         if datagram.secret != secret { continue }
-
-        received = true;
 
         if datagram.ack {
           // He received our packet and we received his, we're done.
@@ -312,11 +309,11 @@ fn blocking_udp_punch_hole(request_id: u32, // Note: this is not the result toke
           peer_addr = datagram.from;
           periodic_sender.start(peer_addr,
                                 TIMES_TO_SEND,
-                                HolePunch::new(request_id, secret, received));
+                                HolePunch::new(request_id, secret, true));
         }
         else {
           // New payload with `received` set to true.
-          periodic_sender.reset_payload(HolePunch::new(request_id, secret, received));
+          periodic_sender.reset_payload(HolePunch::new(request_id, secret, true));
         }
  
         periodic_sender.block_until_finished();
