@@ -153,7 +153,7 @@ Such a separate routing object (or the registering procedure) is not required if
     1. retrieving message flow
     1. deleting message flow
     1. churn handling and refreshing for account_transfer (Inbox and Outbox)
-    1. MPID Client addressing (if MPID address registration procedure is to be undertaken - i.e. for "pull")
+    1. MPID Client registering (when GetAllHeader request received)
 
 1. Routing
     1. `Authority::MpidManager`
@@ -161,7 +161,6 @@ Such a separate routing object (or the registering procedure) is not required if
     1. definition of `MpidMessage` and `MpidHeader`
     1. support Delete (for StructuredData only)
     1. support push to client
-    1. support register ClientManager with MpidManagers
 
 1. Client
     1. Put `MpidMessage`
@@ -230,14 +229,14 @@ let mpid_message = MpidMessage::new(my_mpid: Mpid, recipient: ::routing::Authori
 Account types held by MpidManagers
 
 ```rust
-struct MpidMessageAccount {
+struct Outbox {
     pub sender: ::routing::NameType,
     pub mpid_messages: Vec<MpidMessage>,
     pub total_size: u64,
 }
-struct MpidHeaderAccount {
+struct Inbox {
     pub recipient_name: ::routing::NameType,
-    pub recipient_proxy: ::routing::Authority::Client,
+    pub recipient_proxy: Option<::routing::Authority::Client>,
     pub headers: Vec<(sender_name: ::routing::NameType,
                       sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
                       signed_header: Vec<u8>)>,
