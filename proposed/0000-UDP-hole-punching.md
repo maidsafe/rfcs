@@ -189,3 +189,6 @@ If we allow for `C(X)` to be more than one node, we could get a reponse quicker
 and more reliable. Additionally getting more than one response can reveal
 the information whether we're behind a Symmetric NAT as two different
 `C(X)` nodes will disagree in port number in such cases.
+
+On the other hand, if X is behind a Symmetric NAT, then contacting
+multiple `C(X)`s would disable port prediction.
