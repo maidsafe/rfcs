@@ -309,3 +309,37 @@ fn blocking_udp_punch_hole(udp_socket : UdpSocket,
   Ok((udp_socket, peer_addr))
 }
 ```
+
+# Room for improvements
+
+## More robustness on devices with multiple network interfaces
+
+When `X` connects to `C(X)`, the handshake exchanged contains `U(C(X))`. The
+handshake represents `U(C(X))` like the following:
+
+```rust
+struct Handshake {
+    ucx: Vec<u16> // `U(C(X))`
+}
+```
+
+There is a scenario where this representation may cause trouble. This scenario
+is when the running device contains more than one network interface, and each of
+these interfaces was connected to a different gateway (NAT). In this scenario,
+it's possible that UPnP IGD is running only on one interface, but `X` is
+connected to `C(X)` using the other interface, then the wrong address is
+assumed.
+
+The problem is that port doesn't replace the socket address. It's unlikely that
+this problem would be solved just by the replacement of `u16` with
+`SocketAddr`. We'd need to properly identify our public address (using UPnP IGD,
+the internal Crust messaging infrastructure or other techniques) and the process
+may fail (so it'd be good if we keep the possibility of just sending the port).
+
+This problem is not solved in this RFC and we go with the structure presented
+previously that might cause trouble. The problem happens in a scenario that is
+really uncommon for PCs. So it's fine to keep it for now and increase robustness
+later.
+
+Before we do enhance the protocol/behaviour, we need to have all corner cases
+sorted.
