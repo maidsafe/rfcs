@@ -244,7 +244,7 @@ impl PeriodicSender {
 impl Drop for PeriodicSender;
 
 fn blocking_get_mapped_udp_socket(request_id: u32, helper_nodes: Vec<SocketAddr>)
-    -> Result<(UdpSocket, Result<SocketAddr>)>
+    -> (UdpSocket, Result<SocketAddr>)
   const TIMES_TO_SEND = 5;
   let udp_socket = UdpSocket::bind("0.0.0.0:0");
   let periodic_sender = PeriodicSender::new(udp_socket);
