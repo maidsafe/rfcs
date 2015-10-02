@@ -160,6 +160,7 @@ Such a separate routing object is not required if only "pull" operatioin exists.
     1. definition of `MPID_MESSAGE_TAG` and `MPID_HEADER_TAG`
     1. definition of `MpidMessage` and `MpidHeader`
     1. support Delete (for StructuredData only)
+    1. support push to client
 
 1. Client
     1. Put `MpidMessage`
