@@ -89,7 +89,6 @@ start periodically sending small datagrams to the `peer_addr`.
 These datagrams will be of type:
 
     struct HolePunch {
-        request_id: u32,
         secret: Option<[u8; 4]>,
         ack: bool,
     }
@@ -283,8 +282,7 @@ pub fn Service::get_mapped_udp_socket(&self, result_token: u32) {
   });
 }
 
-fn blocking_udp_punch_hole(request_id: u32, // Note: this is not the result token
-                           udp_socket : UdpSocket,
+fn blocking_udp_punch_hole(udp_socket : UdpSocket,
                            secret: Option<[u8; 4]>,
                            peer_addr : mut SocketAddr /* of node B */)
       -> (UdpSocket, Result<SocketAddr> /* peer's address */) {
@@ -292,12 +290,11 @@ fn blocking_udp_punch_hole(request_id: u32, // Note: this is not the result toke
   let mut periodic_sender = PeriodicSender(udp_socket);
   periodic_sender.start(peer_addr,
                         TIMES_TO_SEND,
-                        HolePunch::new(request_id, secret, false));
+                        HolePunch::new(secret, false));
 
   loop {
     match udp_socket.timed_blocking_read(2000ms) {
       Ok(datagram) => {
-        if datagram.request_id != request_id { continue }
         if datagram.secret != secret { continue }
 
         if datagram.ack {
@@ -309,11 +306,11 @@ fn blocking_udp_punch_hole(request_id: u32, // Note: this is not the result toke
           peer_addr = datagram.from;
           periodic_sender.start(peer_addr,
                                 TIMES_TO_SEND,
-                                HolePunch::new(request_id, secret, true));
+                                HolePunch::new(secret, true));
         }
         else {
           // New payload with `received` set to true.
-          periodic_sender.reset_payload(HolePunch::new(request_id, secret, true));
+          periodic_sender.reset_payload(HolePunch::new(secret, true));
         }
  
         periodic_sender.block_until_finished();
@@ -335,12 +332,10 @@ pub fn Service::udp_punch_hole(&self,
                                secret: Option<[u8,4]>,
                                peer_addr: mut SocketAddr /* of  node B */) {
   Self::push(&self.cmd_sender, move |state| {
-    let request_id = generate_request_id();
     let event_sender = state.event_sender.clone();
 
     thread::spawn(move || {
-      let (socket, peer_addr) = blocking_udp_punch_hole(request_id,
-                                                        udp_socket,
+      let (socket, peer_addr) = blocking_udp_punch_hole(udp_socket,
                                                         secret,
                                                         peer_addr);
       event_sender.send(Event::OnHolePunched(HolePunchResult::new(result_token,
