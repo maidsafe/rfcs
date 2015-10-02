@@ -271,7 +271,7 @@ fn blocking_get_mapped_udp_socket(request_id: u32, helper_nodes: Vec<SocketAddr>
 
 // The non blocking version that users of the Crust library will use.
 pub fn Service::get_mapped_udp_socket(&self, result_token: u32) {
-  send_job_to_state_thread(move |state| {
+  Self::push(&self.cmd_sender, move |state| {
     let request_id = generate_request_id();
     let event_sender = state.event_sender.clone();
     let helpers = self.sort_helping_nodes_by_preference();
@@ -337,7 +337,7 @@ pub fn Service::udp_punch_hole(&self,
                                udp_socket: UdpSocket,
                                secret: Option<[u8,4]>,
                                peer_addr: mut SocketAddr /* of  node B */) {
-  send_job_to_state_thread(move |state| {
+  Self::push(&self.cmd_sender, move |state| {
     let request_id = generate_request_id();
     let event_sender = state.event_sender.clone();
 
