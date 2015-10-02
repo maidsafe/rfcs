@@ -57,7 +57,7 @@ pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 
 ```rust
 pub struct MpidHeader {
-    pub sender: ::sodiumoxide::crypto::sign::PublicKey,
+    pub sender_name: ::routing::NameType,
     pub guid: [u8, 16],
     pub metadata: Vec<u8>,
 }
@@ -71,11 +71,12 @@ The `metadata` field allows passing arbitrary user/app data.  It must not exceed
 
 ```rust
 pub struct RecipientAndBody {
-    pub recipient: ::routing::NameType,
+    pub recipient: ::routing::Authority::Client ,
     pub body: Vec<u8>,
 }
 
 pub struct MpidMessage {
+    pub sender_public_key: ::sodiumoxide::crypto::sign::PublicKey;
     pub signed_header: Vec<u8>,
     pub signed_recipient_and_body: Vec<u8>,
 }
@@ -86,11 +87,13 @@ Each `MpidMessage` instance only targets one recipient.  For multiple recipients
 
 This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s.  There will be one such map per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
+This can be implemented as a `Vec<MpidMessage>`.
+
 ## Inbox
 
 This is an even simpler structure and again there will be one per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
-This can be implemented as a `Vec<(sender: ::routing::NameType, signed_header: Vec<u8>)>`.
+This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, signed_header: Vec<u8>)>`. Or `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<signed_header: Vec<u8>>)>`, which having the headers from the same sender grouped (however this may incur a performance slow down when looking up for a particual mpid_header)
 
 ## Messaging Format Among Nodes
 
@@ -99,10 +102,10 @@ Messages between Clients and MpidManagers will utilise [`::routing::structured_d
 let sd_for_mpid_message = StructuredData {
     type_tag: MPID_MESSAGE_TAG,
     identifier: mpid_message_name(mpid_message),
-    data: encode(mpid_message),
+    data: ::utils::encode(mpid_message),
     previous_owner_keys: vec![],
     version: 0,
-    current_owner_keys: vec![mpid_message.sender],
+    current_owner_keys: vec![mpid_message.sender_public_key],
     previous_owner_signatures: vec![]
 }
 ```
@@ -113,7 +116,7 @@ let sd_for_mpid_header = StructuredData {
     data: mpid_message.signed_header,  // or inbox.signed_header
     previous_owner_keys: vec![],
     version: 0,
-    current_owner_keys: vec![mpid_message.sender],  // or vec![inbox.sender]
+    current_owner_keys: vec![mpid_message.sender_public_key],  // or vec![inbox.sender_public_key]
     previous_owner_signatures: vec![]
 }
 ```
@@ -129,15 +132,17 @@ When handling churn, MpidManagers will synchronise their outboxes by sending eac
 The MPID Client shall provide the following key functionalities :
 
 1. Send Message (Put from sender)
+1. Accept Message header (Push from MpidManagers to recipient)
 1. Retrieve Full Message (Get from receiver)
-1. Remove sent Message (Delete from sender)
-1. Accept Message header (if the "push" model is used) and/or Retrieve Message Header (if the "pull" model is used)
 1. Query own inbox to get list of all remaining MpidHeaders
 1. Query own inbox for a vector of specific MpidHeaders to see whether they remain in the outbox or not.
+1. Remove unwanted MpidHeader (Delete from recipient)
+1. Query own outbox to get list of all remaining MpidMessages
+1. Remove sent Message (Delete from sender)
 
-If the "push" model is used, an MPID Client is expected to have its own routing object (not shared with the MAID Client).  In this way it can directly connect to its own MpidManagers, allowing them to know its online status and hence they can push message headers to it as and when they arrive.
+If the "push" is used, an MPID Client is expected to have its own routing object (not shared with the MAID Client).  In this way it can directly connect to its own MpidManagers, allowing them to know its online status and hence they can push message headers to it as and when they arrive.
 
-Such a separate routing object is not required if the "pull" model is used.  This is where the MPID Client periodically polls its network inbox for new headers.  It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
+Such a separate routing object is not required if only "pull" operatioin exists.  This is where the MPID Client periodically polls its network inbox for new headers.  It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
 
 ## Planned Work
 
@@ -147,25 +152,24 @@ Such a separate routing object is not required if the "pull" model is used.  Thi
     1. sending message flow
     1. retrieving message flow
     1. deleting message flow
-    1. churn handling and refreshing for account_transfer
-    1. detecting of Client, if "push" model used
-    1. MPID Client addressing (if MPID address registration procedure is to be undertaken - i.e. in "pull" model)
+    1. churn handling and refreshing for account_transfer (Inbox and Outbox)
+    1. MPID Client addressing (if MPID address registration procedure is to be undertaken - i.e. for "pull")
 
 1. Routing
     1. `Authority::MpidManager`
     1. definition of `MPID_MESSAGE_TAG` and `MPID_HEADER_TAG`
     1. definition of `MpidMessage` and `MpidHeader`
     1. support Delete (for StructuredData only)
-    1. if "push" model: notify vault when a client joins and notifying Client with `MpidHeader`
-    1. address relocation (allows Client to use a fixed MPID address to connect to the network and allows "push" model - not required for "pull" model)
+    1. support push to client
 
 1. Client
     1. Put `MpidMessage`
-    1. Get all `MpidHeader`s (pull model) or accept all/single `MpidHeader` (push model)
+    1. Get all `MpidHeader`s (pull)
+    1. accept all/single `MpidHeader` (push)
     1. Get `MpidMessage`.  This shall also include the work of removing corresponding `MpidHeader`s
     1. Delete `MpidMessage`
-    1. address relocation (allows Client to use a fixed MPID address to connect to the network and allows "push" model - not required for "pull" model)
-    1. address registration (not required if address relocation is used)
+    1. Delete `MpidHeader`
+
 
 # Drawbacks
 
@@ -180,8 +184,6 @@ If we were to _not_ implement some form of secure messaging system, a third part
 We also have identified a need for some form of secure messaging in order to implement safecoin, so failure to implement this RFC would impact on that too.
 
 # Unresolved Questions
-
-1. Should we use the "push" or "pull" model?
 
 1. `MpidMessage` and `MpidHeader` are wrapped in `StructuredData` instances in order to allow Delete requests on them and to allow them to be given different tags (otherwise they could be ImmutableData, since they don't mutate).  Should Routing, which already has to define these two types, be made "aware" of these two types?  (i.e. should they get added to the [`::routing::data::Data` enum][6])
 
@@ -219,7 +221,8 @@ We also have identified a need for some form of secure messaging in order to imp
 To send an MPID Message, a client would do something like:
 
 ```rust
-let mpid_message = MpidMessage::new(my_mpid, their_mpid_name, metadata, body);
+let mpid_message = MpidMessage::new(my_mpid: Mpid, recipient: ::routing::Authority::Client,
+                                    metadata: Vec<u8>, body: Vec<u8>);
 
 ```
 
@@ -229,11 +232,14 @@ Account types held by MpidManagers
 struct MpidMessageAccount {
     pub sender: ::routing::NameType,
     pub mpid_messages: Vec<MpidMessage>,
+    pub total_size: u64,
 }
 struct MpidHeaderAccount {
-    pub recipient: ::routing::NameType,
-    pub senders: Vec<::routing::NameType>,
-    pub mpid_headers: Vec<signed_header: Vec<u8>>,
+    pub recipient: ::routing::Authority::Client,
+    pub headers: Vec<(sender_name: ::routing::NameType,
+                      sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
+                      signed_header: Vec<u8>)>,
+    pub total_size: u64,
 }
 ```
 
@@ -251,7 +257,7 @@ pub fn sign_mpid_header(mpid_header: &MpidHeader, private_key: PrivateKey) -> Ve
     ::sodiumoxide::crypto::sign::sign(encode(mpid_header), private_key)
 }
 pub fn parse_signed_header(signed_header: &Vec<u8>, public_key: PublicKey) -> Result<MpidHeader, ::routing::error::Error> {
-    decode::<MpidHeader>(::sodiumoxide::crypto::sign::verify(signed_header, public_key))
+    ::utils::decode::<MpidHeader>(::sodiumoxide::crypto::sign::verify(signed_header, public_key))
 }
 ```
 
