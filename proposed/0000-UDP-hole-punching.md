@@ -364,7 +364,7 @@ handshake represents `U(C(X))` like the following:
 
 ```rust
 struct Handshake {
-    ucx: Vec<u16> // `U(C(X))`
+    ucx: u16 // `U(C(X))`
 }
 ```
 
@@ -380,6 +380,11 @@ this problem would be solved just by the replacement of `u16` with
 `SocketAddr`. We'd need to properly identify our public address (using UPnP IGD,
 the internal Crust messaging infrastructure or other techniques) and the process
 may fail (so it'd be good if we keep the possibility of just sending the port).
+
+Also, this update would give us a list of public endpoints to report, not just a
+single one. Then we also need to update `ucx` to be a list of addresses, not
+just a single address. Some of the addresses might be unusable, but we report
+them all anyway because it's too costy to detect which ones are undesirable.
 
 This problem is not solved in this RFC and we go with the structure presented
 previously that might cause trouble. The problem happens in a scenario that is
