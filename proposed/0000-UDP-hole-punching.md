@@ -122,11 +122,11 @@ otherwise we call it with an appropriate `io::Error`.
 Result of this call shall be sent to the user as an `Event::OnHolePunched` holding
 the following structure:
 
-  struct HolePunchResult {
-    result_token: u32,
-    udp_socket: UdpSocket,
-    peer_addr: io::Result<SocketAddr>,
-  }
+    struct HolePunchResult {
+      result_token: u32,
+      udp_socket: UdpSocket,
+      peer_addr: io::Result<SocketAddr>,
+    }
 
 ## Using the punched hole
 
