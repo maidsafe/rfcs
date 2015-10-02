@@ -210,7 +210,7 @@ fn keep_sending_datagrams(udp_socket: UdpSocket, request_id: u32, to: SocketAddr
 
 /// Returns a vector of SocketAddrs pointing to U(C(X)),
 /// the vector should be sorted so that addresses that
-/// are not on our LAN are first.
+/// are not on our LAN are first (use `getifaddr` here).
 fn sort_helping_nodes_by_preference() -> Vec<SocketAddr>
 
 struct PeriodicSender {
@@ -233,7 +233,7 @@ impl PeriodicSender {
 /// Stop sending when the sender is dropped.
 impl Drop for PeriodicSender;
 
-fn get_mapped_udp_socket() -> Result<MappedUdpSocket>
+fn blocking_get_mapped_udp_socket() -> Result<MappedUdpSocket>
   const TIMES_TO_SEND = 5;
 
   let udp_socket = UdpSocket::bind("0.0.0.0:0");
@@ -256,20 +256,18 @@ fn get_mapped_udp_socket() -> Result<MappedUdpSocket>
           datagram.ext_address
         }
       }
-      return Ok((udp_socket, our_ext_address));
+      return Ok(MappedUdpSocket::new(udp_socket, our_ext_address));
     }
   }
   Err
 }
 
-fn udp_punch_hole(udp_socket : UdpSocket,
-                  secret: Option<[u8; 4]>,
-                  peer_addr : mut SocketAddr /* of node B */,
-                  callback: FnBox<(UdpSocket, io::Result<SocketAddr>)>) {
+fn blocking_udp_punch_hole(udp_socket : UdpSocket,
+                           secret: Option<[u8; 4]>,
+                           peer_addr : mut SocketAddr /* of node B */) {
   const TIMES_TO_SEND = 5;
   let request_id = generate_request_id();
   let mut received = false;
-  let mut he_received = false;
   let mut periodic_sender = PeriodicSender(udp_socket);
   periodic_sender.start(peer_addr,
                         TIMES_TO_SEND,
@@ -282,7 +280,11 @@ fn udp_punch_hole(udp_socket : UdpSocket,
         if datagram.secret != secret { continue }
 
         received = true;
-        if !he_received { he_received = datagram.ack; }
+
+        if datagram.ack {
+          // He received our packet and we received his, we're done.
+          return Ok((udp_socket, datagram.from));
+        }
 
         if datagram.from != peer_addr {
           peer_addr = datagram.from;
@@ -295,18 +297,15 @@ fn udp_punch_hole(udp_socket : UdpSocket,
           periodic_sender.reset_payload(HolePunch::new(request_id, secret, received));
         }
  
+        periodic_sender.block_until_finished();
         break;
       },
-      Err(_) => {
+      Err(what) => {
+        return Err(what);
       },
     }
   }
 
-  // If we've not received a confirmation that the other end received
-  // our packets, the best we can do is to wait till all TIMES_TO_SEND
-  // of our packets are sent.
-  if !he_received {
-    cancel_token.wait();
-  }
+  Ok((udp_socket, peer_addr))
 }
 ```
