@@ -67,7 +67,7 @@ And the result of such call shall be an event `OnUdpSocketMapped` holding a stru
     struct MappedUdpSocket {
         result_token: u32,
         udp_socket: UdpSocket,
-        public_address: SocketAddr, // of node A
+        public_addresses: BTreeSet<SocketAddr>, // of node A
     }
 
 Once upper layers receive such event, they can send/route `MappedUdpSocket::public_address`
@@ -243,10 +243,18 @@ impl PeriodicSender {
 impl Drop for PeriodicSender;
 
 fn blocking_get_mapped_udp_socket(request_id: u32, helper_nodes: Vec<SocketAddr>)
-    -> (UdpSocket, Result<SocketAddr>)
+    -> (UdpSocket, BTreeSet<SocketAddr>)
   const TIMES_TO_SEND = 5;
   let udp_socket = UdpSocket::bind("0.0.0.0:0");
+  let mut addrs = BTreeSet::new();
   let periodic_sender = PeriodicSender::new(udp_socket);
+
+  // This happens when `sort_helping_nodes_by_preference` returns an empty
+  // vector. An empty vector is given when only nodes from the same network are
+  // found.
+  if helper_nodes.len() == 0 {
+    // use `getifaddrs` to return the addresses of our interfaces
+  }
 
   for cx in helper_nodes {
     periodic_sender.start(cx, TIMES_TO_SEND, GetExtAddr::new(request_id));
@@ -262,10 +270,11 @@ fn blocking_get_mapped_udp_socket(request_id: u32, helper_nodes: Vec<SocketAddr>
           datagram.ext_address
         }
       }
-      return (udp_socket, Ok(our_ext_address));
+      addrs.insert(our_ext_address);
+      return (udp_socket, addrs);
     }
   }
-  (udp_socket, Err(...))
+  (udp_socket, addrs)
 }
 
 // The non blocking version that users of the Crust library will use.
@@ -276,8 +285,8 @@ pub fn Service::get_mapped_udp_socket(&self, result_token: u32) {
     let helpers = self.sort_helping_nodes_by_preference();
 
     thread::spawn(move || {
-      let (socket, mapped_address) = blocking_get_mapped_udp_socket(request_id, helpers);
-      event_sender.send(Event::OnUdpSocketMapped(MappedUdpSocket::new(result_token, socket, mapped_address)));
+      let (socket, mapped_addresses) = blocking_get_mapped_udp_socket(request_id, helpers);
+      event_sender.send(Event::OnUdpSocketMapped(MappedUdpSocket::new(result_token, socket, mapped_addresses)));
     });
   });
 }
@@ -330,17 +339,19 @@ pub fn Service::udp_punch_hole(&self,
                                result_token: u32,
                                udp_socket: UdpSocket,
                                secret: Option<[u8,4]>,
-                               peer_addr: mut SocketAddr /* of  node B */) {
+                               peer_addrs: mut BTreeSet<SocketAddr> /* of  node B */) {
   Self::push(&self.cmd_sender, move |state| {
     let event_sender = state.event_sender.clone();
 
     thread::spawn(move || {
-      let (socket, peer_addr) = blocking_udp_punch_hole(udp_socket,
-                                                        secret,
-                                                        peer_addr);
-      event_sender.send(Event::OnHolePunched(HolePunchResult::new(result_token,
-                                                                  udp_socke,
-                                                                  peer_addr)));
+      for peer_addr in peer_addrs {
+        let (socket, peer_addr) = blocking_udp_punch_hole(udp_socket,
+                                                          secret,
+                                                          peer_addr);
+        event_sender.send(Event::OnHolePunched(HolePunchResult::new(result_token,
+                                                                    udp_socke,
+                                                                    peer_addr)));
+      }
     });
   });
 }
