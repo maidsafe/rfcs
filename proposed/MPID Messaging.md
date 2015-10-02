@@ -93,7 +93,7 @@ This can be implemented as a `Vec<MpidMessage>`.
 
 Again this will be one per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
-This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, signed_header: Vec<u8>)>`. Or `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<signed_header: Vec<u8>>)>`, which having the headers from the same sender grouped (however this may incur a performance slow down when looking up for a particual mpid_header).
+This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, signed_header: Vec<u8>)>` or having the headers from the same sender grouped: `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<signed_header: Vec<u8>>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
 
 ## Messaging Format Among Nodes
 
@@ -140,9 +140,9 @@ The MPID Client shall provide the following key functionalities :
 1. Query own outbox to get list of all remaining MpidMessages
 1. Remove sent Message (Delete from sender)
 
-If the "push" is used, an MPID Client is expected to have its own routing object (not shared with the MAID Client).  In this way it can directly connect to its own MpidManagers (or the connected ClientManager register itself as the proxy to the correspondent MpidManagers ), allowing them to know its online status and hence they can push message headers to it as and when they arrive. 
+If the "push" model is used, an MPID Client is expected to have its own routing object (not shared with the MAID Client).  In this way it can directly connect to its own MpidManagers (or the connected ClientManager will register itself as the proxy to the corresponding MpidManagers), allowing them to know its online status and hence they can push message headers to it as and when they arrive.
 
-Such a separate routing object (or the registering procedure) is not required if only "pull" operatioin exists.  This is where the MPID Client periodically polls its network inbox for new headers.  It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
+Such a separate routing object (or the registering procedure) is not required if the "pull" model is employed.  This is where the MPID Client periodically polls its network inbox for new headers.  It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
 
 ## Planned Work
 
@@ -236,7 +236,7 @@ struct Outbox {
 }
 struct Inbox {
     pub recipient_name: ::routing::NameType,
-    pub recipient_proxy: Option<::routing::Authority::Client>,
+    pub recipient_clients: Vec<::routing::Authority::Client>,
     pub headers: Vec<(sender_name: ::routing::NameType,
                       sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
                       signed_header: Vec<u8>)>,
