@@ -278,7 +278,7 @@ pub fn Service::get_mapped_udp_socket(&self, result_token: u32) {
 
     thread::spawn(move || {
       let (socket, mapped_address) = blocking_get_mapped_udp_socket(request_id, helpers);
-      event_sender.send(Event::OnUdpSocketMapped(result_token, socket, mapped_address));
+      event_sender.send(Event::OnUdpSocketMapped(MappedUdpSocket::new(result_token, socket, mapped_address)));
     });
   });
 }
