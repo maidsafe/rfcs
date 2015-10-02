@@ -89,6 +89,7 @@ start periodically sending small datagrams to the `peer_addr`.
 These datagrams will be of type:
 
     struct HolePunch {
+        request_id: u32,
         secret: Option<[u8; 4]>,
         ack: bool,
     }
@@ -212,31 +213,100 @@ fn keep_sending_datagrams(udp_socket: UdpSocket, request_id: u32, to: SocketAddr
 /// are not on our LAN are first.
 fn sort_helping_nodes_by_preference() -> Vec<SocketAddr>
 
+struct PeriodicSender {
+  udp_socket: UdpSocket,
+  payload: Vec<u8>,
+  times_sent: u32,
+  // Specifies how many times the payload should be sent.
+  // If set to None, sends indefinitely.
+  times_to_send: Option<u32>,
+}
+
+impl PeriodicSender {
+  /// Starts periodicaly sending `what` `times_to_send` times.
+  fn start<T: Serializable>(&mut self, where: SockAddr, times_to_send: Option<u32>, what: T);
+  fn stop();
+  /// Resets the payload, `times_sent` will remain unchainged.
+  fn reset_payload<T: Serializable>(&mut self, what: T);
+}
+
+/// Stop sending when the sender is dropped.
+impl Drop for PeriodicSender;
+
 fn get_mapped_udp_socket() -> Result<MappedUdpSocket>
+  const TIMES_TO_SEND = 5;
+
   let udp_socket = UdpSocket::bind("0.0.0.0:0");
   let request_id = generate_request_id();
   let cxs = sort_helping_nodes_by_preference();
 
+  let periodic_sender = PeriodicSender::new(udp_socket);
+
   for cx in cxs {
-    let cancel_token = keep_sending_datagrams(udp_socket,
-                                              request_id,
-                                              cx.echo_server_socket_addr());
+    periodic_sender.start(cx, TIMES_TO_SEND, GetExtAddr::new(request_id));
+
     loop {
       let our_ext_address = match udp_socket.timed_blocking_read(2000ms) {
         Err(_) => {
-          cancel_token.cancel();
           break;
         },
         Ok(datagram) => {
           if datagram.request_id != request { continue }
+          if datagram.from != cx { continue }
           datagram.ext_address
         }
       }
-      cancel_token.cancel();
       return Ok((udp_socket, our_ext_address));
     }
   }
-  cancel_token.cancel();
   Err
+}
+
+fn udp_punch_hole(udp_socket : UdpSocket,
+                  secret: Option<[u8; 4]>,
+                  peer_addr : mut SocketAddr /* of node B */,
+                  callback: FnBox<(UdpSocket, io::Result<SocketAddr>)>) {
+  const TIMES_TO_SEND = 5;
+  let request_id = generate_request_id();
+  let mut received = false;
+  let mut he_received = false;
+  let mut periodic_sender = PeriodicSender(udp_socket);
+  periodic_sender.start(peer_addr,
+                        TIMES_TO_SEND,
+                        HolePunch::new(request_id, secret, received));
+
+  loop {
+    match udp_socket.timed_blocking_read(2000ms) {
+      Ok(datagram) => {
+        if datagram.request_id != request_id { continue }
+        if datagram.secret != secret { continue }
+
+        received = true;
+        if !he_received { he_received = datagram.ack; }
+
+        if datagram.from != peer_addr {
+          peer_addr = datagram.from;
+          periodic_sender.start(peer_addr,
+                                TIMES_TO_SEND,
+                                HolePunch::new(request_id, secret, received));
+        }
+        else {
+          // New payload with `received` set to true.
+          periodic_sender.reset_payload(HolePunch::new(request_id, secret, received));
+        }
+ 
+        break;
+      },
+      Err(_) => {
+      },
+    }
+  }
+
+  // If we've not received a confirmation that the other end received
+  // our packets, the best we can do is to wait till all TIMES_TO_SEND
+  // of our packets are sent.
+  if !he_received {
+    cancel_token.wait();
+  }
 }
 ```
