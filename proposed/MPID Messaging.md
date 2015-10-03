@@ -44,8 +44,7 @@ Broadly speaking, the `MpidHeader` contains metadata and the `MpidMessage` conta
 ### Consts
 
 ```rust
-pub const MPID_MESSAGE_TAG: u64 = 51000;
-pub const MPID_HEADER_TAG: u64 = 51001;
+pub const MPID_MESSAGE: u64 = 51000;
 pub const MAX_HEADER_METADATA_SIZE: usize = 128;  // bytes
 pub const MAX_BODY_SIZE: usize =
     ::routing::structured_data::MAX_STRUCTURED_DATA_SIZE_IN_BYTES - 512 - MAX_HEADER_METADATA_SIZE;
@@ -57,9 +56,10 @@ pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 
 ```rust
 pub struct MpidHeader {
-    pub sender_name: ::routing::NameType,
-    pub guid: [u8, 16],
-    pub metadata: Vec<u8>,
+    sender_name: ::NameType,
+    guid: [u8; 16],
+    metadata: Vec<u8>,
+    signature: ::sodiumoxide::crypto::sign::Signature,
 }
 ```
 
@@ -70,15 +70,11 @@ The `metadata` field allows passing arbitrary user/app data.  It must not exceed
 ### `MpidMessage`
 
 ```rust
-pub struct RecipientAndBody {
-    pub recipient: ::routing::NameType,
-    pub body: Vec<u8>,
-}
-
 pub struct MpidMessage {
-    pub sender_public_key: ::sodiumoxide::crypto::sign::PublicKey;
-    pub signed_header: Vec<u8>,
-    pub signed_recipient_and_body: Vec<u8>,
+    header: ::MpidHeader,
+    recipient: ::NameType,
+    body: Vec<u8>,
+    recipient_and_body_signature: ::sodiumoxide::crypto::sign::Signature,
 }
 ```
 Each `MpidMessage` instance only targets one recipient.  For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below).  This is to ensure spammers will run out of limited resources quickly.
@@ -99,24 +95,13 @@ This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_publ
 
 Messages between Clients and MpidManagers will utilise [`::routing::structured_data::StructuredData`][5], for example:
 ```rust
-let sd_for_mpid_message = StructuredData {
-    type_tag: MPID_MESSAGE_TAG,
+let sd = StructuredData {
+    type_tag: MPID_MESSAGE,
     identifier: mpid_message_name(mpid_message),
     data: ::utils::encode(mpid_message),
     previous_owner_keys: vec![],
     version: 0,
-    current_owner_keys: vec![mpid_message.sender_public_key],
-    previous_owner_signatures: vec![]
-}
-```
-```rust
-let sd_for_mpid_header = StructuredData {
-    type_tag: MPID_HEADER_TAG,
-    identifier: mpid_message_name(mpid_message),  // or mpid_header_name(signed_header)
-    data: mpid_message.signed_header,  // or inbox.signed_header
-    previous_owner_keys: vec![],
-    version: 0,
-    current_owner_keys: vec![mpid_message.sender_public_key],  // or vec![inbox.sender_public_key]
+    current_owner_keys: vec![sender_public_key],
     previous_owner_signatures: vec![]
 }
 ```
@@ -217,6 +202,199 @@ We also have identified a need for some form of secure messaging in order to imp
 # Appendix
 
 ### Further Implementation Details
+
+All MPID-related messages will be in the form of a Put, Post or Delete of a `StructuredData`.
+
+This will be:
+
+```rust
+
+StructuredData {
+    type_tag: MPID_MESSAGE,
+    identifier: mpid_message_name(mpid_message),  // or mpid_header_name(signed_header)
+    data: XXX,
+    previous_owner_keys: vec![],
+    version: 0,
+    current_owner_keys: vec![sender_public_key],
+    previous_owner_signatures: vec![],
+}
+
+```
+
+where XXX is indicated in the following list of all MPID-related messages:
+
+Sent from Client:
+
+| Message | From ==> To |
+|:===|:===|
+| Post[Online] |           Either Client    ==> Own Managers |
+| Put[Message] |           Sender Client    ==> Own Managers |
+| Post[Has[Vec<Header>]] | Sender Client    ==> Own Managers |
+| Post[GetAllHeaders] |    Sender Client    ==> Own Managers |
+| Delete[Header] |         Either Client    ==> Own Managers (try to delete from inbox and outbox) |
+| Delete[Header] |         Recipient Client ==> Sender's Managers |
+
+
+Sent from Vault:
+
+| Message | From ==> To |
+|:===|:===|
+| PutResponse[Error[Message]] |              Sender's Managers (outbox)   ==> Sender Client |
+| Put[Header] |                              Sender's Managers (outbox)   ==> Recipient's Managers (inbox) |
+| PutResponse[Error[Header]] |               Recipient's Managers (inbox) ==> Sender's Managers (outbox) |
+| Post[GetMessage[Header]] |                 Recipient's Managers (inbox) ==> Sender's Managers (outbox) |
+| PostResponse[Error[GetMessage[Header]]] |  Sender's Managers (outbox)   ==> Recipient's Managers (inbox) |
+| Post[Message] |                            Sender's Managers (outbox)   ==> Recipient's Managers (inbox) |
+| Post[Message] |                            Recipient's Managers (inbox) ==> Recipient Client |
+| Post[HasResponse[Vec<Header>]] |           Sender's Managers (outbox)   ==> Sender Client |
+| Post[GetAllHeadersResponse[Vec<Header>]] | Sender's Managers (outbox)   ==> Sender Client |
+
+
+The various different types for `StructuredData::data` can be enumerated as:
+
+```rust
+#[allow(variant_size_differences)]
+enum MpidMessageWrapper {
+    /// Notification that the MPID Client has just connected to the network
+    Online,
+    /// Try to retrieve the message corresponding to the included header
+    GetMessage(MpidHeader),
+    /// List of headers to check for continued existence of corresponding messages in Sender's outbox
+    Has(Vec<MpidHeader>),
+    /// Subset of list from Has request which still exist in Sender's outbox
+    HasResponse(Vec<MpidHeader>),
+    /// Retrieve the list of headers of all messages in Sender's outbox
+    GetAllHeaders,
+    /// The list of headers of all messages in Sender's outbox
+    GetAllHeadersResponse(Vec<MpidHeader>),
+}
+```
+
+
+MPID Header:
+
+```rust
+/// Maximum allowed size for `MpidHeader::metadata`
+pub const MAX_HEADER_METADATA_SIZE: usize = 128;  // bytes
+
+const GUID_SIZE: usize = 16;
+
+/// MpidHeader
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, RustcDecodable, RustcEncodable)]
+pub struct MpidHeader {
+    sender_name: ::NameType,
+    guid: [u8; GUID_SIZE],
+    metadata: Vec<u8>,
+    signature: ::sodiumoxide::crypto::sign::Signature,
+}
+
+impl MpidHeader {
+    pub fn new(sender_name: ::NameType,
+               metadata: Vec<u8>,
+               secret_key: &::sodiumoxide::crypto::sign::SecretKey)
+               -> Result<MpidHeader, ::error::RoutingError> {
+        use rand::Rng;
+        if metadata.len() > MAX_HEADER_METADATA_SIZE {
+            return Err(::error::RoutingError::ExceededBounds);
+        }
+        let mut guid = [0u8; GUID_SIZE];
+        ::rand::thread_rng().fill_bytes(&mut guid);
+
+        let encoded = Self::encode(&sender_name, &guid, &metadata);
+        Ok(MpidHeader{
+            sender_name: sender_name,
+            guid: guid,
+            metadata: metadata,
+            signature: ::sodiumoxide::crypto::sign::sign_detached(&encoded, secret_key),
+        })
+    }
+
+    pub fn sender_name(&self) -> &::NameType {
+        &self.sender_name
+    }
+
+    pub fn guid(&self) -> &[u8; GUID_SIZE] {
+        &self.guid
+    }
+
+    pub fn metadata(&self) -> &Vec<u8> {
+        &self.metadata
+    }
+
+    pub fn signature(&self) -> &::sodiumoxide::crypto::sign::Signature {
+        &self.signature
+    }
+
+    pub fn verify(&self, public_key: &::sodiumoxide::crypto::sign::PublicKey) -> bool {
+        let encoded = Self::encode(&self.sender_name, &self.guid, &self.metadata);
+        ::sodiumoxide::crypto::sign::verify_detached(&self.signature, &encoded, public_key)
+    }
+
+    fn encode(sender_name: &::NameType, guid: &[u8; GUID_SIZE], metadata: &Vec<u8>) -> Vec<u8> {
+        ::utils::encode(&(sender_name, guid, metadata)).unwrap_or(vec![])
+    }
+}
+```
+
+MPID Message:
+
+```rust
+/// Maximum allowed size for `MpidMessage::body`.
+pub const MAX_BODY_SIZE: usize = ::structured_data::MAX_STRUCTURED_DATA_SIZE_IN_BYTES - 512 -
+                                 ::mpid_header::MAX_HEADER_METADATA_SIZE;
+
+/// MpidMessage
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, RustcDecodable, RustcEncodable)]
+pub struct MpidMessage {
+    header: ::MpidHeader,
+    recipient: ::NameType,
+    body: Vec<u8>,
+    recipient_and_body_signature: ::sodiumoxide::crypto::sign::Signature,
+}
+
+impl MpidMessage {
+    pub fn new(header: ::MpidHeader,
+               recipient: ::NameType,
+               body: Vec<u8>,
+               secret_key: &::sodiumoxide::crypto::sign::SecretKey)
+               -> Result<MpidMessage, ::error::RoutingError> {
+        if body.len() > MAX_BODY_SIZE {
+            return Err(::error::RoutingError::ExceededBounds);
+        }
+
+        let recipient_and_body = Self::encode(&recipient, &body);
+        Ok(MpidMessage {
+            header: header,
+            recipient: recipient,
+            body: body,
+            recipient_and_body_signature:
+                ::sodiumoxide::crypto::sign::sign_detached(&recipient_and_body, secret_key),
+        })
+    }
+
+    pub fn header(&self) -> &::MpidHeader {
+        &self.header
+    }
+
+    pub fn recipient(&self) -> &::NameType {
+        &self.recipient
+    }
+
+    pub fn body(&self) -> &Vec<u8> {
+        &self.body
+    }
+
+    pub fn verify(&self, public_key: &::sodiumoxide::crypto::sign::PublicKey) -> bool {
+        let encoded = Self::encode(&self.recipient, &self.body);
+        ::sodiumoxide::crypto::sign::verify_detached(&self.recipient_and_body_signature, &encoded,
+                                                     public_key) && self.header.verify(public_key)
+    }
+
+    fn encode(recipient: &::NameType, body: &Vec<u8>) -> Vec<u8> {
+        ::utils::encode(&(recipient, body)).unwrap_or(vec![])
+    }
+}
+```
 
 To send an MPID Message, a client would do something like:
 
