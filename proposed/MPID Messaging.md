@@ -226,7 +226,7 @@ where XXX is indicated in the following list of all MPID-related messages:
 Sent from Client:
 
 | Message | From ==> To |
-|:===|:===|
+|:---|:---|
 | Post[Online] |           Either Client    ==> Own Managers |
 | Put[Message] |           Sender Client    ==> Own Managers |
 | Post[Has[Vec<Header>]] | Sender Client    ==> Own Managers |
@@ -238,7 +238,7 @@ Sent from Client:
 Sent from Vault:
 
 | Message | From ==> To |
-|:===|:===|
+|:---|:---|
 | PutResponse[Error[Message]] |              Sender's Managers (outbox)   ==> Sender Client |
 | Put[Header] |                              Sender's Managers (outbox)   ==> Recipient's Managers (inbox) |
 | PutResponse[Error[Header]] |               Recipient's Managers (inbox) ==> Sender's Managers (outbox) |
