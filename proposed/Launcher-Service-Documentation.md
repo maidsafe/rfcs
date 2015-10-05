@@ -38,6 +38,15 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
     "version": x.y // where x.y could be 2.10 etc
 }
 ```
+- Errors
+```
+{
+    "error": {
+        "error_code": Integer, // This shall be whatever Into trait provides in various modules
+        "error_description": String
+    }
+}
+```
 
 ## Module-Specific
 - Modules
