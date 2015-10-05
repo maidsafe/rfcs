@@ -373,7 +373,7 @@ pub struct AppSession {
     stream          : std::net::TcpStream,
     remote_peer     : std::net::SocketAddr,
     share_permission: Permission,
-    states          : Vec<Box<SessionState>>,
+    states          : Vec<Box<SessionState>>, // will be popped at each stage
 }
 
 pub struct VerifyLauncherNonce;
