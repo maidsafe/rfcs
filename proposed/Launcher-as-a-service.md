@@ -380,4 +380,4 @@ impl SessionState for RSAKeyExchange { ... }
 pub struct SecureCommunication;
 impl SessionState for SecureCommunication { ... }
 ```
-`SecureCommunication` could spawn a new thread for `GET`s and wait for the result. It can either timeout or wait indefinitely and can be dynamically configured by the app. The app should also get a chance to cancel all pending `GET`s. This is where a cloned `std::sync::mpsc::sender` could be useful.
+`SecureCommunication` could spawn a new thread for `GET`s and wait for the result. It can either timeout or wait indefinitely and can be dynamically configured by the app. The app should also get a chance to cancel all pending `GET`s. This is where a cloned `std::sync::mpsc::sender` from `safe_client::client::response_getter::ResponseGetter` could be useful.
