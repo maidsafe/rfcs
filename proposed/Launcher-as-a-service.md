@@ -351,3 +351,33 @@ Apart from this FFI will evolve more and more as Launcher-UI takes shape in futu
 This module will contain rust code to be invoked when apps are dropped into Launcher, are removed from it or have related parameters (`SAFEDrive` authorisation) changed. This module will be responsible for handling of `LauncherConfigurationFile` and local config file. Some hint of this can already be found in the way `safe_dns` handles `DnsConfigurationFile` [here](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/dns_configuration.rs#L29).
 
 ### ipc
+```
+pub enum Permission {
+    None,
+    ReadOnly,
+    Full,
+}
+
+pub trait SessionState {
+    fn execute(remaining_states: Vec<Box<SessionState>>);
+    fn terminate();
+}
+
+pub struct AppSession {
+    client          : std::sync::Arc<std::sync::Mutex<safe_client::client::Client>>,
+    stream          : std::net::TcpStream,
+    remote_peer     : std::net::SocketAddr,
+    share_permission: Permission,
+    states          : Vec<Box<SessionState>>,
+}
+
+pub struct VerifyLauncherNonce;
+impl SessionState for VerifyLauncherNonce { ... }
+
+pub struct RSAKeyExchange;
+impl SessionState for RSAKeyExchange { ... }
+
+pub struct SecureCommunication;
+impl SessionState for SecureCommunication { ... }
+```
+`SecureCommunication` could spawn a new thread for `GET`s and wait for the result. It can either timeout or wait indefinitely and can be dynamically configured by the app. The app should also get a chance to cancel all pending `GET`s. This is where a cloned `std::sync::mpsc::sender` could be useful.
