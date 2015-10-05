@@ -247,17 +247,17 @@ Requests composed by Client:
 
 Requests composed by Client:
 
-| Request      | Usage Scenario                                             | Content                                              | From Authority | Destination Authority |
-|:-------------|:-----------------------------------------------------------|:-----------------------------------------------------|:---------------|:----------------------|
-| PutResponse  | put failure (outbox or inbox full)                         | `Error(Wrapper::MpidMessage)`                        | Managers(A)    | Client(A)             |
-| Put          | new message notification                                   | `Wrapper::MpidHeader`                                | Managers(A)    | Managers(B)           |
-| PutResponse  | put failure (inbox full)                                   | `Error(Wrapper::MpidHeader)`                         | Managers(B)    | Managers(A)           |
-| Post         | retrieve message from sender's outbox to pass to recipient | `Wrapper::GetMessage(Header.name)`                   | Managers(B)    | Managers(A)           |
-| PostResponse | requested message no longer available in sender's outbox   | `Error(Wrapper::GetMessage(Header.name))`            | Managers(A)    | Managers(B)           |
-| Post         | pass message from sender's outbox to recipient's managers  | `Wrapper::MpidMessage`                               | Managers(A)    | Managers(B)           |
-| Post         | push message to intended recipient                         | `Wrapper::MpidMessage`                               | Managers(B)    | Client(B)             |
-| Post         | reply to client's `OutboxHas` request                      | `Wrapper::OutboxHasResponse(Vec<MpidHeader>)`        | Managers(A)    | Client(A)             |
-| Post         | reply to client's `GetOutboxHeaders` request               | `Wrapper::GetOutboxHeadersResponse(Vec<MpidHeader>)` | Managers(A)    | Client(A)             |
+| Request      | Usage Scenario                                             | Content                                                 | From Authority | Destination Authority |
+|:-------------|:-----------------------------------------------------------|:--------------------------------------------------------|:---------------|:----------------------|
+| PutResponse  | put failure (outbox or inbox full)                         | `Error(Wrapper::MpidMessage)`                           | Managers(A)    | Client(A)             |
+| Put          | new message notification                                   | `Wrapper::MpidHeader`                                   | Managers(A)    | Managers(B)           |
+| PutResponse  | put failure (inbox full)                                   | `Error(Wrapper::MpidHeader)`                            | Managers(B)    | Managers(A)           |
+| Post         | retrieve message from sender's outbox to pass to recipient | `Wrapper::GetMessage(Header.name)`                      | Managers(B)    | Managers(A)           |
+| PostResponse | requested message no longer available in sender's outbox   | `Error(Wrapper::GetMessage(` `Header.name))`            | Managers(A)    | Managers(B)           |
+| Post         | pass message from sender's outbox to recipient's managers  | `Wrapper::MpidMessage`                                  | Managers(A)    | Managers(B)           |
+| Post         | push message to intended recipient                         | `Wrapper::MpidMessage`                                  | Managers(B)    | Client(B)             |
+| Post         | reply to client's `OutboxHas` request                      | `Wrapper::OutboxHasResponse(` `Vec<MpidHeader>)`        | Managers(A)    | Client(A)             |
+| Post         | reply to client's `GetOutboxHeaders` request               | `Wrapper::GetOutboxHeadersResponse(` `Vec<MpidHeader>)` | Managers(A)    | Client(A)             |
 
 MPID Header:
 
