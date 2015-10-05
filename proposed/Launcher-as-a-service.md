@@ -150,7 +150,7 @@ All parameters are UTF-8 strings.
 - The services provided by Launcher and their format are prone to change, hence every new document will have a version information. An app may do a version negotiation anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher may default to the latest version. The version negotiation will happen via documented JSON format - e.g. of probable format:
 ```
 {
-    "version": "x.y.z" // where x.y.z could be 2.10.39 etc
+    "version": x.y // where x.y could be 2.10 etc
 }
 ```
 - The reqest shall identify a module and an action as a minimum and then a payload, which could be a nested structure, for the corresponding action. The following is not a specification but just an e.g.
