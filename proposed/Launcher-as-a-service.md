@@ -261,8 +261,8 @@ safe_nfs  safe_client
   ipc        app_handling           ffi
 ```
 
-## FFI
-This module is intended to interface with code written in other languages especially for Launcher-UI. FFI to self-authentication must be provided as these will provide the client-engine necessary to do anything useful in the SAFE Network:
+## ffi
+This module is intended to interface with code written in other languages especially for Launcher-UI. FFI for self-authentication must be provided as this will provide the client-engine necessary to do anything useful in the SAFE Network:
 ```
 /// Create an unregistered client. This or any one of the other companion functions to get a
 /// client must be called before initiating any operation allowed by this crate.
@@ -335,3 +335,12 @@ fn cast_from_client_ffi_handle(client_handle: *const libc::c_void) -> std::sync:
 }
 ```
 These are already stable and coded in [safe_ffi crate](https://github.com/maidsafe/safe_ffi/blob/master/src/lib.rs) and code there can be resused. Obtained `client_handle` must be passed around and carefully destroyed when shutting down Launcher.
+
+Another approach (instead of passing `client_handle` to and fro the FFI) could be to populate the obtained client_handle into a singleton pointer and access that from various modules. A quick reference to form a singleton cna be found in [safe_client crate here](https://github.com/maidsafe/safe_client/blob/master/src/client/non_networking_test_framework/mod.rs#L48).
+
+Apart from this FFI will evolve more and more as Launcher-UI takes shape in future. It will provide convenient ways to interface with other core Launcher modules.
+
+## app_handling
+This module will contain rust code to be invoked when apps are dropped into Launcher, are removed from it or have related parameters (`SAFEDrive` authorisation) changed. This module will be responsible for handling of `LauncherConfigurationFile` and local config file. Some hint of this can already be found in the way `safe_dns` handles `DnsConfigurationFile` [here](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/dns_configuration.rs#L29).
+
+## ipc
