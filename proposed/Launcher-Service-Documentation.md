@@ -57,8 +57,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Create Directory
 ```
 {
-    "module": String, // e.g. "NFS"
-    "action": String, // e.g. "create-dir"
+    "module": "NFS"
+    "action": "create-dir"
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
@@ -80,8 +80,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Delete Directory
 ```
 {
-    "module": String, // e.g. "NFS"
-    "action": String, // e.g. "create-dir"
+    "module": "NFS"
+    "action": "delete-dir"
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
