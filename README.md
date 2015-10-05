@@ -1,15 +1,11 @@
 # Project SAFE RFCs
 
-There is a chat room for this repository here.
-
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/maidsafe/rfcs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 _This process attempts to emulate the success of the Rust programming language
 and as such has almost mirrored the [RFC process the Rust developers
 use](https://github.com/rust-lang/rfcs), which is tried and tested and appears
 to work very well._
 
-#Introduction
+# Introduction
 
 Many changes, including bug fixes and documentation improvements can be
 implemented and reviewed via the normal GitHub pull request workflow.
