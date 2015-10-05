@@ -170,19 +170,6 @@ We also have identified a need for some form of secure messaging in order to imp
 
 # Unresolved Questions
 
-1. `MpidMessage` and `MpidHeader` are wrapped in `StructuredData` instances in order to allow Delete requests on them and to allow them to be given different tags (otherwise they could be ImmutableData, since they don't mutate).  Should Routing, which already has to define these two types, be made "aware" of these two types?  (i.e. should they get added to the [`::routing::data::Data` enum][6])
-
-    Identified pros:
-    - less wrapping/parsing, so simpler for Vaults and Clients to deal with
-    - more efficient (smaller messages to transmit and store)
-    - no need for Routing to publicly expose `MPID_MESSAGE_TAG` or `MPID_HEADER_TAG`
-
-    Identified cons:
-    - increased complexity in Routing
-    - would need to add the sender's public key to the header Put flow
-
-    Qi prefers using `StructuredData`, Fraser prefers not using `StructuredData` unless the effort required by Routing to accommodate the new types is significant.
-
 # Future Work
 
 - This RFC doesn't address how Clients get to "know about" each other.  Future work will include details of how Clients can exchange MPIDs in order to build an address book of peers.
@@ -205,7 +192,7 @@ We also have identified a need for some form of secure messaging in order to imp
 
 All MPID-related messages will be in the form of a Put, Post or Delete of a `StructuredData`.
 
-This will be:
+Such `StructuredData` will be:
 
 ```rust
 
@@ -221,35 +208,6 @@ StructuredData {
 
 ```
 
-where XXX is indicated in the following list of all MPID-related messages:
-
-Sent from Client:
-
-| Message | From ==> To |
-|:---|:---|
-| Post[Online] |           Either Client    ==> Own Managers |
-| Put[Message] |           Sender Client    ==> Own Managers |
-| Post[Has[Vec<Header>]] | Sender Client    ==> Own Managers |
-| Post[GetAllHeaders] |    Sender Client    ==> Own Managers |
-| Delete[Header] |         Either Client    ==> Own Managers (try to delete from inbox and outbox) |
-| Delete[Header] |         Recipient Client ==> Sender's Managers |
-
-
-Sent from Vault:
-
-| Message | From ==> To |
-|:---|:---|
-| PutResponse[Error[Message]] |              Sender's Managers (outbox)   ==> Sender Client |
-| Put[Header] |                              Sender's Managers (outbox)   ==> Recipient's Managers (inbox) |
-| PutResponse[Error[Header]] |               Recipient's Managers (inbox) ==> Sender's Managers (outbox) |
-| Post[GetMessage[Header]] |                 Recipient's Managers (inbox) ==> Sender's Managers (outbox) |
-| PostResponse[Error[GetMessage[Header]]] |  Sender's Managers (outbox)   ==> Recipient's Managers (inbox) |
-| Post[Message] |                            Sender's Managers (outbox)   ==> Recipient's Managers (inbox) |
-| Post[Message] |                            Recipient's Managers (inbox) ==> Recipient Client |
-| Post[HasResponse[Vec<Header>]] |           Sender's Managers (outbox)   ==> Sender Client |
-| Post[GetAllHeadersResponse[Vec<Header>]] | Sender's Managers (outbox)   ==> Sender Client |
-
-
 The various different types for `StructuredData::data` can be enumerated as:
 
 ```rust
@@ -257,19 +215,49 @@ The various different types for `StructuredData::data` can be enumerated as:
 enum MpidMessageWrapper {
     /// Notification that the MPID Client has just connected to the network
     Online,
+    /// Send out an MpidMessage
+    PutMessage(MpidMessage),
+    /// Send out an MpidHeader and sender's original SignedToken to allow response to sender's Put
+    PutHeader(MpidHeader, Option<SignedToken>),
     /// Try to retrieve the message corresponding to the included header
     GetMessage(MpidHeader),
     /// List of headers to check for continued existence of corresponding messages in Sender's outbox
-    Has(Vec<MpidHeader>),
+    OutboxHas(Vec<MpidHeader.name()>),
     /// Subset of list from Has request which still exist in Sender's outbox
-    HasResponse(Vec<MpidHeader>),
+    OutboxHasResponse(Vec<MpidHeader>),
     /// Retrieve the list of headers of all messages in Sender's outbox
-    GetAllHeaders,
+    GetOutboxHeaders,
     /// The list of headers of all messages in Sender's outbox
-    GetAllHeadersResponse(Vec<MpidHeader>),
+    GetOutboxHeadersResponse(Vec<MpidHeader>),
 }
 ```
 
+The following list of all MPID-related messages show how this enum is used.  (In these tables, Client(A) is the original sender, Client(B) is the recipient, and Managers(A) and Managers(B) are their respective MpidManagers ).
+
+Requests composed by Client:
+
+| Request | Usage Scenario                                                      | Content                                | Destination Authority           |
+|:--------|:--------------------------------------------------------------------|:---------------------------------------|:--------------------------------|
+| Put     | Client(A) creating a new message                                    | `Wrapper::MpidMessage`                 | Managers(A)                     |
+| Post    | Client(A) checking existence of list of sent messages in own outbox | `Wrapper::OutboxHas(Vec<Header.name>)` | Managers(A)                     |
+| Post    | Client(A) getting list of all messages still in own outbox          | `Wrapper::GetOutboxHeaders`            | Managers(A)                     |
+| Delete  | Client(A) or (B) deleting from own outbox or inbox respectively     | `NameType`                             | Managers(A) or (B) respectively |
+| Delete  | Client(B) deleting a "read" message from sender's outbox            | `NameType`                             | Managers(A)                     |
+| Post    | Client announcing to Managers it's connected to network             | `Wrapper::Online`                      | Managers                        |
+
+Requests composed by Client:
+
+| Request      | Usage Scenario                                             | Content                                              | From Authority | Destination Authority |
+|:-------------|:-----------------------------------------------------------|:-----------------------------------------------------|:---------------|:----------------------|
+| PutResponse  | put failure (outbox or inbox full)                         | `Error(Wrapper::MpidMessage)`                        | Managers(A)    | Client(A)             |
+| Put          | new message notification                                   | `Wrapper::MpidHeader`                                | Managers(A)    | Managers(B)           |
+| PutResponse  | put failure (inbox full)                                   | `Error(Wrapper::MpidHeader)`                         | Managers(B)    | Managers(A)           |
+| Post         | retrieve message from sender's outbox to pass to recipient | `Wrapper::GetMessage(Header.name)`                   | Managers(B)    | Managers(A)           |
+| PostResponse | requested message no longer available in sender's outbox   | `Error(Wrapper::GetMessage(Header.name))`            | Managers(A)    | Managers(B)           |
+| Post         | pass message from sender's outbox to recipient's managers  | `Wrapper::MpidMessage`                               | Managers(A)    | Managers(B)           |
+| Post         | push message to intended recipient                         | `Wrapper::MpidMessage`                               | Managers(B)    | Client(B)             |
+| Post         | reply to client's `OutboxHas` request                      | `Wrapper::OutboxHasResponse(Vec<MpidHeader>)`        | Managers(A)    | Client(A)             |
+| Post         | reply to client's `GetOutboxHeaders` request               | `Wrapper::GetOutboxHeadersResponse(Vec<MpidHeader>)` | Managers(A)    | Client(A)             |
 
 MPID Header:
 
