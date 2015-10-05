@@ -459,11 +459,11 @@ impl MpidManager {
 
     // get messages or headers on request:
     pub fn handle_get(from, to, name, token) {
-        if out_box.has_account(name) {
+        if outbox.has_account(name) {
             // sender asking for the headers of existing messages
-            reply to the requester(from) with out_box.find_account(name).get_headers() via routing.post;
+            reply to the requester(from) with outbox.find_account(name).get_headers() via routing.post;
         }
-        if in_box.has_account(name) {
+        if inbox.has_account(name) {
             // triggering pushing all existing messages to client, first needs to fetch them
             let recipient_account = inbox_storage.find_account(to);
             if recipient_account.recipient_clients.len() > 0 { // indicates there is connected client
@@ -475,7 +475,7 @@ impl MpidManager {
         }
     }
 
-    // revoming message or header on request:
+    // removing message or header on request:
     //     1, remove_message: delete request from recipient B to sender's MpidManagers(A)
     //     2, remove_header: delete request from recipient B to MpidManagers(B)
     pub fn handle_delete(from, to, name) {
@@ -500,7 +500,7 @@ impl MpidManager {
                 send a get request to the sender's MpidManager asking for the full message;
             }
             let mut sender_account = outbox.find_account(mpid_name);
-            sender_account.register_on_line(mpid_client);
+            sender_account.register_online(mpid_client);
         }
         if replying {  // MpidManager(A) replies to MpidManager(B) with the requested mpid_message
             let account = inbox.find_account(to_name);
@@ -510,9 +510,9 @@ impl MpidManager {
             }
         }
         if fetching {
-            if out_box.has_message(name) {
+            if outbox.has_message(name) {
                 // recipient's MpidManager asking for a particular message and it exists
-                if the requester is the recipient, reply message to the requester(from) with out_box.find_message(name) via routing.post;
+                if the requester is the recipient, reply message to the requester(from) with outbox.find_message(name) via routing.post;
             } else {
                 // recipient's MpidManager asking for a particular message but not exists
                 reply failure to the requester(from);
@@ -577,7 +577,7 @@ pub fn send_mpid_message(my_mpid: Mpid, recipient: ::routing::Authority::Client,
                                ::routing::data::Data::StructuredData(sd));
 }
 
-/// Client register to be on-line
+/// Client register to be online
 pub fn register_online(my_mpid: Mpid) {
     let sd = StructuredData {
         type_tag: MPID_MESSAGE,
@@ -633,7 +633,7 @@ General functions
 
 ```rust
 pub fn mpid_header_name(mpid_header: &MpidHeader) -> ::routing::NameType {
-    ::crypto::hash::sha512::hash(::util::encode(mpid_header))
+    ::crypto::hash::sha512::hash(::utils::encode(mpid_header))
 }
 pub fn mpid_message_name(mpid_message: &MpidMessage) -> ::routing::NameType {
     mpid_header_name(mpid_message.mpid_header)
