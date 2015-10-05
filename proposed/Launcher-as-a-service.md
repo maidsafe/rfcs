@@ -26,9 +26,9 @@ Launcher
 
 3. will manage metadata related to apps to give uniformity in experience when shifting from one machine to another - e.g. if app `A` is installed in machine 1 then when the user logs into machine 2 using his/her SAFE Account via Launcher, he/she will be presented with a union of all the apps that were installed on all the machines which access the SAFE Network on his/her behalf.
 
-4. not allow apps to mutate each other's configs.
+4. must not allow apps to mutate each other's configs.
 
-5. easily revoke app's ability to read and mutate the Network on user's behalf.
+5. shall easily revoke app's ability to read and mutate the Network on user's behalf.
 
 # Detailed design
 
@@ -236,19 +236,102 @@ There is an RFC proposal for a simplified version of Launcher which does not go 
 
 # Implementation hints
 
+- Crate level design:
+
 ```
-    safe_launcher_ui
-         |
-    safe_launcher_core (will internally house an FFI module for the UI)
-                            |
-   -----------------------------------------------------
-  |                      |             |                |
-safe_dns             safe_nfs      safe_client    safe_launcher_ipc
+            safe_launcher_ui
+                    |
+            safe_launcher_core
+                    |
+   ------------------------------------
+  |                      |             |
+safe_dns             safe_nfs      safe_client
     |                    |
  -----------         safe_client
 |           |
 safe_nfs  safe_client
 ```
 
-## IPC
+- Module level design:
+```
+            safe_launcher_core
+                    |
+    ---------------------------------
+   |               |                 |
+  ipc        app_handling           ffi
+```
 
+## FFI
+This module is intended to interface with code written in other languages especially for Launcher-UI. FFI to self-authentication must be provided as these will provide the client-engine necessary to do anything useful in the SAFE Network:
+```
+/// Create an unregistered client. This or any one of the other companion functions to get a
+/// client must be called before initiating any operation allowed by this crate.
+#[no_mangle]
+pub extern fn create_unregistered_client(client_handle: *mut *const libc::c_void) -> libc::int32_t {
+    unsafe {
+        *client_handle = cast_to_client_ffi_handle(ffi_try!(safe_client::client::Client::create_unregistered_client()));
+    }
+
+    0
+}
+
+/// Create a registered client. This or any one of the other companion functions to get a
+/// client must be called before initiating any operation allowed by this crate. `client_handle` is
+/// a pointer to a pointer and must point to a valid pointer not junk, else the consequences are
+/// undefined.
+#[no_mangle]
+pub extern fn create_account(c_keyword    : *const libc::c_char,
+                             c_pin        : *const libc::c_char,
+                             c_password   : *const libc::c_char,
+                             client_handle: *mut *const libc::c_void) -> libc::int32_t {
+    let client = ffi_try!(safe_client::client::Client::create_account(ffi_try!(implementation::c_char_ptr_to_string(c_keyword)),
+                                                                      ffi_try!(implementation::c_char_ptr_to_string(c_pin)),
+                                                                      ffi_try!(implementation::c_char_ptr_to_string(c_password))));
+    unsafe { *client_handle = cast_to_client_ffi_handle(client); }
+
+    0
+}
+
+/// Log into a registered client. This or any one of the other companion functions to get a
+/// client must be called before initiating any operation allowed by this crate. `client_handle` is
+/// a pointer to a pointer and must point to a valid pointer not junk, else the consequences are
+/// undefined.
+#[no_mangle]
+pub extern fn log_in(c_keyword    : *const libc::c_char,
+                     c_pin        : *const libc::c_char,
+                     c_password   : *const libc::c_char,
+                     client_handle: *mut *const libc::c_void) -> libc::int32_t {
+    let client = ffi_try!(safe_client::client::Client::log_in(ffi_try!(implementation::c_char_ptr_to_string(c_keyword)),
+                                                              ffi_try!(implementation::c_char_ptr_to_string(c_pin)),
+                                                              ffi_try!(implementation::c_char_ptr_to_string(c_password))));
+    unsafe { *client_handle = cast_to_client_ffi_handle(client); }
+
+    0
+}
+
+/// Discard and clean up the previously allocated client. Use this only if the client is obtained
+/// from one of the client obtainment functions in this crate (`crate_account`, `log_in`,
+/// `create_unregistered_client`). Using `client_handle` after a call to this functions is
+/// undefined behaviour.
+#[no_mangle]
+pub extern fn drop_client(client_handle: *const libc::c_void) {
+    let _ = unsafe { std::mem::transmute::<_, Box<std::sync::Arc<std::sync::Mutex<safe_client::client::Client>>>>(client_handle) };
+}
+
+fn cast_to_client_ffi_handle(client: safe_client::client::Client) -> *const libc::c_void {
+    let boxed_client = Box::new(std::sync::Arc::new(std::sync::Mutex::new(client)));
+    unsafe { std::mem::transmute(boxed_client) }
+}
+
+fn cast_from_client_ffi_handle(client_handle: *const libc::c_void) -> std::sync::Arc<std::sync::Mutex<safe_client::client::Client>> {
+    let boxed_client: Box<std::sync::Arc<std::sync::Mutex<safe_client::client::Client>>> = unsafe {
+        std::mem::transmute(client_handle)
+    };
+
+    let client = (*boxed_client).clone();
+    std::mem::forget(boxed_client);
+
+    client
+}
+```
+These are already stable and coded in [safe_ffi crate](https://github.com/maidsafe/safe_ffi/blob/master/src/lib.rs) and code there can be resused. Obtained `client_handle` must be passed around and carefully destroyed when shutting down Launcher.
