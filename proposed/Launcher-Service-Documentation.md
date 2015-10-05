@@ -54,6 +54,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 "create-file"
 "delete-file"
 ```
+
 - Create Directory
 ```
 {
@@ -96,8 +97,81 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 - Create File
 ```
+{
+    "module": "NFS"
+    "action": "create-file"
+    "parameters": {
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
+                              // e.g. false
+        "path": String, // Path root will be interpreted according
+                        // the parameter above. The last token in
+                        // the path will be interpreted as the name
+                        // of file to be created.
+                        // e.g. "/path/to/a/new_file.ext"
+        "user_metadata": [ uint8 ... ] // Any additional metadata.
+                                       // e.g. [ 20, 30, 255, 254, 0, 119 ]
+    }
+}
 ```
 
 - Delete File
 ```
+{
+    "module": "NFS"
+    "action": "delete-file"
+    "parameters": {
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
+                              // e.g. false
+        "path": String, // Path root will be interpreted according
+                        // the parameter above. The last token in
+                        // the path will be interpreted as the name
+                        // of file to be deleted.
+                        // e.g. "/path/to/an/existing_file.ext"
+    }
+}
+```
+
+### DNS
+- Actions
+```
+"register-dns"
+"add-service"
+```
+
+- Register DNS
+```
+{
+    "module": "DNS"
+    "action": "register-dns"
+    "parameters": {
+        "long_name": String, // e.g. "new-name.com"
+        "service_name": String, // e.g. "www"
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
+                              // e.g. false
+        "service_home_dir_path": String // Path root will be interpreted according
+                                        // the parameter above. The last token in
+                                        // the path will be interpreted as the name
+                                        // of the home directory for the service.
+                                        // e.g. "/path/to/an/existing_directory_www"
+    }
+}
+```
+
+- Add service
+```
+{
+    "module": "DNS"
+    "action": "add-service"
+    "parameters": {
+        "long_name": String, // e.g. "existing-name.com"
+        "service_name": String, // e.g. "blog"
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
+                              // e.g. false
+        "service_home_dir_path": String // Path root will be interpreted according
+                                        // the parameter above. The last token in
+                                        // the path will be interpreted as the name
+                                        // of the home directory for the service.
+                                        // e.g. "/path/to/an/existing_directory_blog"
+    }
+}
 ```
