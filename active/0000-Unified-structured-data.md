@@ -129,13 +129,6 @@ Status quo is an option and realistic.
 --------------------------------------------------------------------------------
 # Addendum
 
-- Feature Name: impact_unified_structured_data_on_routing
-- Type: Enhancement
-- Related components: routing and sentinel
-- Start Date: 30-06-2015
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
-
 # Summary
 
 [RFC Unified Structured Data](https://github.com/dirvine/rfcs/blob/unified-structured-data/proposed/0000-Unified-structured-data.md) introduces `StructuredData` as a fundamental type for the network.
