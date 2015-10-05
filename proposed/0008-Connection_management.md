@@ -27,11 +27,15 @@ A client will have a reduced cycle: `Disconnected`, `Bootstrapped`, `Terminated`
 
 ## improved connection management
 
-We consider first the case where the connection is not started through crust bootstrapping.  We assume that a node `A` is either already connected into the network, or has established a relay node in the network through crust bootstrapping.  [TO BE CONTINUED]
+We consider first the case where the connection is not started through crust bootstrapping.  We assume that a node `A` is either already connected into the network, or has established a relay node in the network through crust bootstrapping.  
 
 ## integration of Address Relocation into connection management
 
+The current mechanism of Address Relocation is compatible with the proposal here.  To activate Address Relocation a new proposal will be written that integrates Address Relocation into the `ConnectRequest`.
 
+For clients it can be of interest to announce their relay location to the ClientManager group.  This can also be done with the `ConnectRequest`.
+
+![Flowchart for Connection Management](Connection%20Management.png)
 
 # Implementation blueprint
 
