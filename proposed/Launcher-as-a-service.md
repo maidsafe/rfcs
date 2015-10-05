@@ -71,7 +71,6 @@ Account {
 1. Unique random 64 byte ID for this app - App-ID (because names of different binaries can be same if they are in different locations on the same machine - thus we need a unique identifier for the binary across all machines)
 2. Unique Directory Id (a 64 byte ID associated with a directory) and an associated unique Root [Directory Listing](https://github.com/maidsafe/safe_nfs/blob/master/src/directory_listing/mod.rs) `<APP-ROOT-DIR>` for this app - `XYZ-Root-Dir`. For directory name conflicts append numbers so that they can exist on a file system - e.g. `XYZ-1-Root-Dir`. This shall be created inside `<USER’S-PRIVATE-ROOT-DIRECTORY-ID>/`.
 - `<APP-ROOT-DIR>` shall be always **unversioned** and **private** (i.e. encrypted with app-specific crypto keys). Any requirement for a versioned or public directory from the app can be managed by the app itself by creating further subdirectories.
-- The user is asked if this app should be given read/write access to the `SAFEDrive` directory.
 - Append this information in `<LAUNCHER-CONFIG-FILE>` = `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile` (This is what the DNS crate currently does too inside `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/DnsReservedDirectory/DnsConfigurationFile`.) - format shall be CBOR (concise-binary-object-representation).
 ```
 [
@@ -81,7 +80,7 @@ Account {
         Random Unique App ID,    // 64 Bytes
         Vec<SHA512(App-Binary)>,
         <APP-ROOT-DIR-Key>,
-        Option<SAFEDrive-Directory-Key>,
+        bool, // if access to SAFEDrive is allowed
         OtherMetadata, // For Future Use
     }
     {
@@ -90,7 +89,7 @@ Account {
         Random Unique App ID,    // 64 Bytes
         Vec<SHA512(App-Binary)>,
         <APP-ROOT-DIR-Key>,
-        Option<SAFEDrive-Directory-Key>,
+        bool, // if access to SAFEDrive is allowed
         OtherMetadata, // For Future Use
     },
     … etc
@@ -127,33 +126,68 @@ struct Request {
 
 **step 5:** Launcher verifies the `launcher_string` field above and generates a strong random symmetric encryption key `<App-Specific-Symm-Key>`. This is encrypted using app's `public_encrytion_key` and `nonce` above.
 
-**step 6:** Launcher gives the app what it requested.
+**step 6:** Launcher gives the app what it requested concluding the RSA key exchange procedure.
 - The payload format for this response shall be a CBOR encoded structure of the following:
 ```
 struct Response {
     cipher_text       : Vec<u8>, // encrypted symmetric keys
-    app_root_dir_key  : DirectoryKey,
-    safe_drive_dir_key: Option<DirectoryKey>, // if user gave permission
-    tcp_listening_port: u16, // <Launcher-Port>
 }
 ```
-where `DirectoryKey` is defined [here](https://github.com/ustulation/safe_nfs/blob/master/src/metadata/directory_key.rs).
 
-- From this point onwards any data in the `data` field of a `StructuredData` ([reference](https://github.com/maidsafe/rfcs/blob/master/active/0000-Unified-structured-data.md)) with private accessibility should be exchanged using the `<App-Specific-Symm-Key>` for this socket. The following shall be the format of Launcher-App messages:
-```
-enum LauncherMessage {
-    // Optional fields mean that they will be sent to the default authority which should
-    // suffice for most cases.
-    Get(routing::data::DataRequest, Option<routing::authority::Authority>),
-    Put(routing::data::Data, Option<routing::authority::Authority>),
-    Post(routing::data::Data, Option<routing::authority::Authority>),
-    Delete(routing::data::Data, Option<routing::authority::Authority>),
-}
-```
+- From this point onwards all data exchanges between Launcher and the app will happen in JSON format, subsequently encrypted by `<App-Specific-Symm-Key>`.
 
 ## Reads and Mutations by the App
 
-- All `GET/PUT/POST/DELETE`s will go via Launcher. The app will essentially encrypt the `data` field of `StructuredData` using `<App-Specific-Symm-Key>` if the access level for the `StructuredData` happens to be `Private` and pass it to Launcher which will decrypt and re-encrypt and sign it using normal process (currently MAID-keys). For `GET`s it will be the reverse - Launcher will eventually encrypt using `<App-Specific-Symm-Key>` before handing the data over to the app. For `Public` accessed `StructuredData` no such encryption translation will be done by Launcher. `ImmutableData` shall not be inspected by Launcher - it will merely be put or got `PUT/GET` as-is. The motivation for this is `ImmutableData` are expected to be protected via self-encryption. Thus the app has a choice to fetch `ImmutableData` or `StructuredData` directly from the Network if it deems fit. E.g. app can fetch publicly-accessed DNS records without going through Launcher and browsers working with SAFE protocol will definitely do this.
+- Every service provided by Launcher will be documented in Launcher service document (a separate RFC). The communication between Launcher and an app shall be in JSON subsequently encrypted by `<App-Specific-Symm-Key>`.
+- The services provided by Launcher and their format are prone to change, hence every new document will have a version information. The version negotiation can happen anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher will default to the latest version. The version negotiation will happen via documented JSON format - e.g. of probable format:
+```
+{
+    "version": "x.y.z" // where x.y.z could be 2.10.39 etc
+}
+```
+- The reqest must identify a module and an action as a minimum and then a payload, which may be a nested structure, for the corresponding action. The following is not a specification but just an e.g.
+```
+Modules {
+    "NFS",
+    "DNS"
+}
+
+NfsActions {
+    "create-directory",
+    "delete-directory",
+    "create-file",
+    "delete-file"
+}
+
+// Request from app to Launcher:
+{
+    "module": "NFS",
+    "action": "create-directory",
+    "payload": {
+        "is_shared": true, // if path starts from SAFEDrive (true)
+                           // or APP-ROOT-DIR (false)
+        "path": "/path/to/example-directory", // path root will be interpreted according
+                                              // the parameter above. The last token in
+                                              // the path will be interpreted as the name
+                                              // of directory to be created.
+        "is_private": true,
+        "is_versioned": false,
+        "user_metadata": [       // array of uint8 - could represent binary data
+            38,
+            65,
+            255
+        ]
+    }
+}
+```
+- Errors will be given back. This is again an e.g. and not a specification:
+```
+// Error Response from Launcher to app:
+{
+    "error_code": 15,
+    "details": "ClientError::AsymmetricDecipherFailure"
+}
+```
 
 Since `<App-Specific-Symm-Key>` is recognised by Launcher only for current session, there is no security risk and the app will not be able to trick Launcher the next time it starts to use the previous keys to mutate network or read data on its behalf.
 
@@ -193,9 +227,9 @@ There is an RFC proposal for a simplified version of Launcher which does not go 
 # Current Limitations and Future Scope
 - All apps need to be started from within Launcher. This is a current limitation and possible future solution is to have Launcher write it's listening TCP endpoint to publicly readable file in a fixed location. The app-devs will be asked to construct shortcuts to their apps such that when activated the shortcut points to a binary that reads the current endpoints from the mentioned file, connects to the Launcher there passing it the path to the actual app binary and finally terminating itself. Launcher then checks for this path's validity in its local config file and starts the app as usual (as described in this RFC). An alternative to a file containing public readable endpoints could be a fixed UDP endpoint on which Launcher listens for path to binaries given by app-shortcuts.
 - There is no provision for an app that is required to be started at system start up. For this we can have Launcher marked as a startup process and all apps (which make use of Launcher) that need to be activated at system start up be marked thus in Launcher. Launcher would then activate these once it has itself been successfully activated.
-- 
 
 # Unresolved questions
-**(Q0)** Once the user has revoked an app's permission to use `SAFEDrive`, how will Launcher ascertain that `StructuredData` that the app is asking Launcher to `PUT/POST` to the Network is not related to some directory listing inside the `SAFEDrive` directory ?
+**(Q0)** A local background service process to channel all requests through while maybe ok for desktop platforms, might definitely need a feasibility check on mobile platforms. Would this approach work for mobiles ?
 
-**(Q1)** A local background service process to channel all requests through while maybe ok for desktop platforms, might definitely need a feasibility check on mobile platforms. Would this approach work for mobiles ?
+# Implementation hints
+
