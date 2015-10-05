@@ -234,7 +234,9 @@ There is an RFC proposal for a simplified version of Launcher which does not go 
 # Unresolved questions
 **(Q0)** A local background service process to channel all requests through while may be ok for desktop platforms, might definitely need a feasibility check on mobile platforms. Would this approach work for mobiles ?
 
-# Implementation hints
+# Appendix
+
+## Implementation hints
 
 - Crate level design:
 
@@ -261,7 +263,7 @@ safe_nfs  safe_client
   ipc        app_handling           ffi
 ```
 
-## ffi
+### ffi
 This module is intended to interface with code written in other languages especially for Launcher-UI. FFI for self-authentication must be provided as this will provide the client-engine necessary to do anything useful in the SAFE Network:
 ```
 /// Create an unregistered client. This or any one of the other companion functions to get a
@@ -340,7 +342,7 @@ Another approach (instead of passing `client_handle` to and fro the FFI) could b
 
 Apart from this FFI will evolve more and more as Launcher-UI takes shape in future. It will provide convenient ways to interface with other core Launcher modules.
 
-## app_handling
+### app_handling
 This module will contain rust code to be invoked when apps are dropped into Launcher, are removed from it or have related parameters (`SAFEDrive` authorisation) changed. This module will be responsible for handling of `LauncherConfigurationFile` and local config file. Some hint of this can already be found in the way `safe_dns` handles `DnsConfigurationFile` [here](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/dns_configuration.rs#L29).
 
-## ipc
+### ipc
