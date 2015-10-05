@@ -7,6 +7,9 @@
 
 Launcher will be a gateway for any app that wants to work on the SAFE Network on a user's behalf. It will run as a background process and will be responsible for decrypting data from the Network and re-encrypting using app specific keys while fetching data on app's behalf and vice-versa during app's request to put/post/delete data on the Network.
 
+# Conventions
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
+
 # Motivation
 
 ## Why?
@@ -118,7 +121,7 @@ All parameters are UTF-8 strings.
 - The payload format for this request shall be a CBOR encoded structure of the following:
 ```
 struct Request {
-    launcher_string      : String, // This must be the one supplied by Launcher
+    launcher_string      : String, // This shall be the one supplied by Launcher
     nonce                : sodiumoxide::crypto::box_::Nonce,
     public_encryption_key: sodiumoxide::crypto::box_::PublicKey, // from <App-Asymm-Keys>
 }
@@ -139,13 +142,13 @@ struct Response {
 ## Reads and Mutations by the App
 
 - Every service provided by Launcher will be documented in Launcher service document (a separate RFC). The communication between Launcher and an app shall be in JSON subsequently encrypted by `<App-Specific-Symm-Key>`.
-- The services provided by Launcher and their format are prone to change, hence every new document will have a version information. The version negotiation can happen anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher will default to the latest version. The version negotiation will happen via documented JSON format - e.g. of probable format:
+- The services provided by Launcher and their format are prone to change, hence every new document will have a version information. An app may do a version negotiation anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher may default to the latest version. The version negotiation will happen via documented JSON format - e.g. of probable format:
 ```
 {
     "version": "x.y.z" // where x.y.z could be 2.10.39 etc
 }
 ```
-- The reqest must identify a module and an action as a minimum and then a payload, which may be a nested structure, for the corresponding action. The following is not a specification but just an e.g.
+- The reqest shall identify a module and an action as a minimum and then a payload, which could be a nested structure, for the corresponding action. The following is not a specification but just an e.g.
 ```
 Modules {
     "NFS",
@@ -211,9 +214,9 @@ Every time the app tries to access `SAFEDrive` Launcher will check the permissio
 ```
 - Remove the SHA512(App-Binary) from the vector in `<LAUNCHER-CONFIG-FILE>`.
 - Decrement `Reference Count` from `<LAUNCHER-CONFIG-FILE>`.
-- If the `Reference Count` is **0** it means that this is the last machine where the app was present. Launcher shall not delete `<APP-ROOT-DIR>`. It is user's responsibility to do that as it might contain information (like pictures, etc.) which the user may not want to lose. Instead Launcher will ask if the user wants to do that and act accordingly. Similarly only after user confirmation will Launcher remove the app entry from the `<LAUNCHER-CONFIG-FILE>`, as it contains necessary metadata to decrypt the app specific directories.
+- If the `Reference Count` is **0** it means that this is the last machine where the app was present. Launcher shall not delete `<APP-ROOT-DIR>` without user intervention. It is user's responsibility to do that as it might contain information (like pictures, etc.) which the user might not want to lose. Instead Launcher will ask if the user wants to do that and act accordingly. Similarly only after user confirmation will Launcher remove the app entry from the `<LAUNCHER-CONFIG-FILE>`, as it contains necessary metadata to decrypt the app specific directories.
 
-**procedure 1:** While the other procedure would work, there might be occassions when the user wants to immediately remove the app completely (which also translates as revoke app's permission to mutate network on user's behalf). He may not have access to other machines where the app was installed and may be currently running and the previous procedure requires the user to remove it from all machines. Thus there shall be an option in Launcher to remove app completely irrespective of if it is installed and/or running in other machines. In such cases Launcher will reduce `Reference Count` to 0 and proceed as above for the detection of zero reference count.
+**procedure 1:** While the other procedure would work, there might be occassions when the user wants to immediately remove the app completely (which also translates as revoke app's permission to mutate network on user's behalf). The user might not have access to other machines where the app was installed and could be currently running and the previous procedure requires the user to remove it from all machines. Thus there shall be an option in Launcher to remove app completely irrespective of if it is installed and/or running in other machines. In such cases Launcher will reduce `Reference Count` to 0 and proceed as above for the detection of zero reference count.
 
 In both procedures, Launcher will terminate the TCP connection with the app and forget the `<App-Specific-Symm-Keys>` so effect of removal and hence revocation is immediate.
 
@@ -229,7 +232,7 @@ There is an RFC proposal for a simplified version of Launcher which does not go 
 - There is no provision for an app that is required to be started at system start up. For this we can have Launcher marked as a startup process and all apps (which make use of Launcher) that need to be activated at system start up be marked thus in Launcher. Launcher would then activate these once it has itself been successfully activated.
 
 # Unresolved questions
-**(Q0)** A local background service process to channel all requests through while maybe ok for desktop platforms, might definitely need a feasibility check on mobile platforms. Would this approach work for mobiles ?
+**(Q0)** A local background service process to channel all requests through while may be ok for desktop platforms, might definitely need a feasibility check on mobile platforms. Would this approach work for mobiles ?
 
 # Implementation hints
 
@@ -246,3 +249,6 @@ safe_dns             safe_nfs      safe_client    safe_launcher_ipc
 |           |
 safe_nfs  safe_client
 ```
+
+## IPC
+
