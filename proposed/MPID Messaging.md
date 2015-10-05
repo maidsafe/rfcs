@@ -524,6 +524,10 @@ impl MpidManager {
     pub fn handle_post_failure(from, to, response) {
         if no_record {  // MpidManager(A) replies to MpidManager(B) that the requested mpid_message doesn't exists
             remove the header (bearing the ori_mpid_header_name) from the account of to.name;
+            if on_going_gets.has(ori_mpid_header_name) {
+                let (reply_to, token) = on_going_gets.find(ori_mpid_header_name);
+                send failure to client via routing.get_failure using (reply_to, token, mpid_header);
+            }
         }
         if inbox_full {  // MpidManager(B) replies to MpidManager(A) that inbox is full
             remove the message (bearing the ori_mpid_header.name()) from the account of to.name;
