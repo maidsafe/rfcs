@@ -528,7 +528,7 @@ impl MpidManager {
         if inbox_full {  // MpidManager(B) replies to MpidManager(A) that inbox is full
             remove the message (bearing the ori_mpid_header.name()) from the account of to.name;
             let (reply_to, token) = on_going_puts.find(ori_mpid_header.name());
-            send failure to client via routing.post_response using (reply_to, token);
+            send failure to client via routing.put_failure using (reply_to, token, message);
         }
     }
     
