@@ -244,7 +244,7 @@ The various different types for `StructuredData::data` can be enumerated as:
 #[allow(variant_size_differences)]
 enum MpidMessageWrapper {
     /// Notification that the MPID Client has just connected to the network
-    Online,
+    Online(mpid_name: NameType),
     /// Try to retrieve the message corresponding to the included header
     GetMessage(MpidHeader),
     /// List of headers to check for continued existence of corresponding messages in Sender's outbox
@@ -403,7 +403,7 @@ struct InboxAccount {
 }
 ```
 
-MpidManager:
+Pseudo-code for MpidManager:
 
 ```rust
 pub struct MpidManager {
@@ -512,11 +512,82 @@ impl MpidManager {
 
 ```
 
-To send an MPID Message, a client would do something like:
+Pseudo-code for MpidClient:
 
 ```rust
-let mpid_message = MpidMessage::new(my_mpid: Mpid, recipient: ::routing::Authority::Client,
-                                    metadata: Vec<u8>, body: Vec<u8>);
+/// Client send out an mpid_message to recipient
+pub fn send_mpid_message(my_mpid: Mpid, recipient: ::routing::Authority::Client,
+                         metadata: Vec<u8>, body: Vec<u8>) {
+    let mpid_message = MpidMessage::new(my_mpid, recipient, metadata: Vec<u8>, body);
+    let sd = StructuredData {
+        type_tag: MPID_MESSAGE,
+        identifier: mpid_message_name(mpid_message),
+        data: ::utils::encode(mpid_message),
+        previous_owner_keys: vec![],
+        version: 0,
+        current_owner_keys: vec![my_mpid.public_key],
+        previous_owner_signatures: vec![]
+    }
+    client_routing.put_request(::mpid_manager::Authority(my_mpid.name),
+                               ::routing::data::Data::StructuredData(sd));
+}
+
+/// Client register to be on-line
+pub fn register_online(my_mpid: Mpid) {
+    let sd = StructuredData {
+        type_tag: MPID_MESSAGE,
+        identifier: mpid_message_name(mpid_message),
+        data: ::utils::encode(MpidMessageWrapper::Online(my_mpid.name)),,
+        previous_owner_keys: vec![],
+        version: 0,
+        current_owner_keys: vec![my_mpid.public_key],
+        previous_owner_signatures: vec![]
+    }
+    client_routing.post_request(::mpid_manager::Authority(my_mpid.name),
+                                ::routing::data::Data::StructuredData(sd));
+}
+
+/// Client as sender get all headers of existing messages
+pub fn get_headers_from_outbox(my_mpid: Mpid) {
+    send get request targeting my_mpid.name (using client_routing.get_request or wrap the get into client_routing.post_request);
+}
+
+/// Client as recipient get all existing headers
+pub fn get_headers_from_inbox(my_mpid: Mpid) {
+    send get request targeting my_mpid.name (using client_routing.get_request or wrap the get into client_routing.post_request);
+}
+
+/// Client as recipient get one particular message
+pub fn get_message(my_mpid: Mpid, mpid_header: MpidHeader) {
+    send get request targeting mpid_header.name() (using client_routing.get_request or wrap the get into client_routing.post_request) to ::mpid_manager::Authority(mpid_header.sender());
+}
+
+pub fn delete_message(my_mpid: Mpid, mpid_header: MpidHeader) {
+    client_routing.delete_request(::mpid_manager::Authority(mpid_header.sender), mpid_header.name());
+}
+
+fn on_post(sd) {
+    match parse_what_inside_sd(sd.data) {
+        MpidMessage(mpid_message) => {
+            // Client as recipient receiving an incoming message
+            handle receiving an incoming message;
+            delete_message(my_mpid, mpid_message.mpid_header);
+            delete_header(my_mpid, mpid_message.name());
+        }
+        Outbox(mpid_headers) => {
+            // Client as sender receiving a header list of existing messages
+            handle receiving a header list of existing messages;
+        }
+    }
+}
+
+fn on_put_failure() {
+    handle_failure;
+}
+
+fn on_post_failure() {
+    handle_failure;
+}
 
 ```
 
