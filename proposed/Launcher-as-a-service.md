@@ -351,6 +351,11 @@ Apart from this FFI will evolve more and more as Launcher-UI takes shape in futu
 This module will contain rust code to be invoked when apps are dropped into Launcher, are removed from it or have related parameters (`SAFEDrive` authorisation) changed. This module will be responsible for handling of `LauncherConfigurationFile` and local config file. Some hint of this can already be found in the way `safe_dns` handles `DnsConfigurationFile` [here](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/dns_configuration.rs#L29).
 
 ### ipc
+A TCP listener would try and bind to `127.0.9.9:30000`. If unsuccessfull keep incrementing the port number. Once that reaches 65535 and still no available ports are found, increment the IP and repeat the procedure for `127.0.9.10:30000`. Once bound to an endpoint, keep a note of it to be returned when asked by `app_handling` module for invoking an app with command line parameters.
+```
+pub fn get_launcher_endpoint() -> std::net::SocketAddr;
+```
+Each incoming TCP connection request will spawn a new thread and pass the socket details to a new instance of `AppSession` below. An `AppSession` instance uniquely represents a single Launcher-App session. Cleanup codes should preferably be _lazy_.
 ```
 pub enum Permission {
     None,
@@ -381,3 +386,5 @@ pub struct SecureCommunication;
 impl SessionState for SecureCommunication { ... }
 ```
 `SecureCommunication` could spawn a new thread for `GET`s and wait for the result. It can either timeout or wait indefinitely and can be dynamically configured by the app. The app should also get a chance to cancel all pending `GET`s. This is where a cloned `std::sync::mpsc::sender` from `safe_client::client::response_getter::ResponseGetter` ([reference](https://github.com/maidsafe/safe_client/blob/master/src/client/response_getter.rs#L71)) could be useful.
+
+Also `SecureCommunication` could have composition of a type that marshalls data to and from Rust-structures and JSON. This should preferably be modularised (as parsers usually are).
