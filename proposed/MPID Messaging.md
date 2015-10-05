@@ -89,7 +89,7 @@ This can be implemented as a `Vec<MpidMessage>`.
 
 Again this will be one per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
-This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, signed_header: Vec<u8>)>` or having the headers from the same sender grouped: `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<signed_header: Vec<u8>>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
+This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, mpid_header: MpidHeader)>` or having the headers from the same sender grouped: `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<mpid_header: MpidHeader>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
 
 ## Messaging Format Among Nodes
 
@@ -170,18 +170,6 @@ We also have identified a need for some form of secure messaging in order to imp
 
 # Unresolved Questions
 
-1. `MpidMessage` and `MpidHeader` are wrapped in `StructuredData` instances in order to allow Delete requests on them and to allow them to be given different tags (otherwise they could be ImmutableData, since they don't mutate).  Should Routing, which already has to define these two types, be made "aware" of these two types?  (i.e. should they get added to the [`::routing::data::Data` enum][6])
-
-    Identified pros:
-    - less wrapping/parsing, so simpler for Vaults and Clients to deal with
-    - more efficient (smaller messages to transmit and store)
-    - no need for Routing to publicly expose `MPID_MESSAGE_TAG` or `MPID_HEADER_TAG`
-
-    Identified cons:
-    - increased complexity in Routing
-    - would need to add the sender's public key to the header Put flow
-
-    Qi prefers using `StructuredData`, Fraser prefers not using `StructuredData` unless the effort required by Routing to accommodate the new types is significant.
 
 # Future Work
 
@@ -211,7 +199,7 @@ This will be:
 
 StructuredData {
     type_tag: MPID_MESSAGE,
-    identifier: mpid_message_name(mpid_message),  // or mpid_header_name(signed_header)
+    identifier: mpid_message_name(mpid_message),  // or mpid_header_name(mpid_header)
     data: XXX,
     previous_owner_keys: vec![],
     version: 0,
@@ -407,17 +395,17 @@ let mpid_message = MpidMessage::new(my_mpid: Mpid, recipient: ::routing::Authori
 Account types held by MpidManagers
 
 ```rust
-struct Outbox {
+struct OutboxAccount {
     pub sender: ::routing::NameType,
     pub mpid_messages: Vec<MpidMessage>,
     pub total_size: u64,
 }
-struct Inbox {
+struct InboxAccount {
     pub recipient_name: ::routing::NameType,
     pub recipient_clients: Vec<::routing::Authority::Client>,
     pub headers: Vec<(sender_name: ::routing::NameType,
                       sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
-                      signed_header: Vec<u8>)>,
+                      mpid_header: MpidHeader)>,
     pub total_size: u64,
 }
 ```
@@ -425,18 +413,11 @@ struct Inbox {
 General functions
 
 ```rust
-pub fn mpid_header_name(signed_header: &Vec<u8>) -> ::routing::NameType {
-    ::crypto::hash::sha512::hash(signed_header)
+pub fn mpid_header_name(mpid_header: &MpidHeader) -> ::routing::NameType {
+    ::crypto::hash::sha512::hash(::util::encode(mpid_header))
 }
 pub fn mpid_message_name(mpid_message: &MpidMessage) -> ::routing::NameType {
-    mpid_header_name(mpid_message.signed_header)
-}
-
-pub fn sign_mpid_header(mpid_header: &MpidHeader, private_key: PrivateKey) -> Vec<u8> {
-    ::sodiumoxide::crypto::sign::sign(encode(mpid_header), private_key)
-}
-pub fn parse_signed_header(signed_header: &Vec<u8>, public_key: PublicKey) -> Result<MpidHeader, ::routing::error::Error> {
-    ::utils::decode::<MpidHeader>(::sodiumoxide::crypto::sign::verify(signed_header, public_key))
+    mpid_header_name(mpid_message.mpid_header)
 }
 ```
 
