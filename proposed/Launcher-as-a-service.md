@@ -118,22 +118,27 @@ Account {
 All parameters are UTF-8 strings.
 
 **step 4:** App generates a random asymmetric encryption keypair - `<App-Asymm-Keys>`. Then it connects to Launcher on the given endpoint asking for Launcher to give it an `<App-Specific-Symm-Key>`, its root directory-key and SAFEDrive directory-key, which Launcher had reserved as `XYZ-Root-Dir`
-- The payload format for this request shall be a CBOR encoded structure of the following:
+- The payload format for this request shall be a JSON encoded structure of the following:
 ```
-struct Request {
-    launcher_string      : String, // This shall be the one supplied by Launcher
-    nonce                : sodiumoxide::crypto::box_::Nonce,
-    public_encryption_key: sodiumoxide::crypto::box_::PublicKey, // from <App-Asymm-Keys>
+{
+    "rsa_key_exchange_request": {
+        "launcher_string"      : String,        // This shall be the one supplied by Launcher
+        "nonce"                : [ uint8 ... ], // sodiumoxide::crypto::box_::Nonce,
+        "public_encryption_key": [ uint8 ... ]  // sodiumoxide::crypto::box_::PublicKey from
+                                                // <App-Asymm-Keys>
+    }
 }
 ```
 
 **step 5:** Launcher verifies the `launcher_string` field above and generates a strong random symmetric encryption key `<App-Specific-Symm-Key>`. This is encrypted using app's `public_encrytion_key` and `nonce` above.
 
 **step 6:** Launcher gives the app what it requested concluding the RSA key exchange procedure.
-- The payload format for this response shall be a CBOR encoded structure of the following:
+- The payload format for this response shall be a JSON encoded structure of the following:
 ```
-struct Response {
-    cipher_text       : Vec<u8>, // encrypted symmetric keys
+{
+    "rsa_key_exchange_response": {
+        "cipher_text": [ uint8 ... ] // encrypted symmetric keys
+    }
 }
 ```
 
