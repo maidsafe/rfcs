@@ -234,12 +234,12 @@ There is an RFC proposal for a simplified version of Launcher which does not go 
 # Implementation hints
 
 ```
-    safe_launcher_ui                                                            safe_apps
-         |                                                                          |
-    safe_launcher_core (will internally house an FFI module for the UI)             |
-                            |                                                       |
-   -----------------------------------------------------      ----------------------
-  |                      |             |                |    |
+    safe_launcher_ui
+         |
+    safe_launcher_core (will internally house an FFI module for the UI)
+                            |
+   -----------------------------------------------------
+  |                      |             |                |
 safe_dns             safe_nfs      safe_client    safe_launcher_ipc
     |                    |
  -----------         safe_client
