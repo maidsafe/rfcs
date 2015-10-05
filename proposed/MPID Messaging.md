@@ -384,19 +384,12 @@ impl MpidMessage {
 }
 ```
 
-To send an MPID Message, a client would do something like:
-
-```rust
-let mpid_message = MpidMessage::new(my_mpid: Mpid, recipient: ::routing::Authority::Client,
-                                    metadata: Vec<u8>, body: Vec<u8>);
-
-```
-
 Account types held by MpidManagers
 
 ```rust
 struct OutboxAccount {
     pub sender: ::routing::NameType,
+    pub sender_clients: Vec<::routing::Authority::Client>,
     pub mpid_messages: Vec<MpidMessage>,
     pub total_size: u64,
 }
@@ -408,6 +401,123 @@ struct InboxAccount {
                       mpid_header: MpidHeader)>,
     pub total_size: u64,
 }
+```
+
+MpidManager:
+
+```rust
+pub struct MpidManager {
+    outbox_storage: Vec<OutboxAccount>,
+    inbox_storage: Vec<InboxAccount>,
+    routing: Routing,
+}
+
+impl MpidManager {
+    // sending message:
+    //     1, messaging: put request from sender A to its MpidManagers(A)
+    //     2, notifying: from MpidManagers(A) to MpidManagers(B)
+    pub fn handle_put(from, to, sd) {
+        if messaging {  // sd.data holds MpidMessage
+            // insert received mpid_message into the outbox_storage
+            if outbox_storage.insert(from, mpid_message) {
+                forward mpid_message.mpid_header to the recipient via routing;
+            } else {
+                // outbox full or other failure
+                reply failure to the sender (Client);
+            }
+        }
+        if notifying {  // sd.data holds MpidHeader
+            // insert received mpid_header into the inbox_storage
+            if inbox_storage.insert(to, mpid_header) {
+                let recipient_account = inbox_storage.find_account(to);
+                if recipient_account.recipient_clients.len() > 0 { // indicates there is connected client
+                    for header in recipient_account.headers {
+                        send a get request to the sender's MpidManager asking for the full message;
+                    }
+                }
+            } else {
+                // inbox full or other failure
+                reply failure to the sender (MpidManagers);
+            }
+        }
+    }
+    
+    // get message or header(s) on request:
+    // NOTE: Get requests can also be wrapped in POST, which makes this function will be called by handle_post
+    pub fn handle_get(from, to, name) {
+        if out_box.has_account(name) {
+            // sender asking for the headers of existing messages
+            reply to the requester(from) with out_box.find_account(name).get_headers() via routing.post_response;
+        }
+        if in_box.has_account(name) {
+            // recipient asking for the existing headers
+            reply to the requester(from) with in_box.find_account(name).get_headers() via routing.post_response;
+        }
+        if out_box.has_message(name) {
+            // recipient's MpidManager asking for a particular message
+            reply to the requester(from) with out_box.find_message(name) via routing.post_response;
+        }
+    }
+    
+    // revoming message or header on request:
+    //     1, remove_message: delete request from recipient B to sender's MpidManagers(A)
+    //     2, remove_header: delete request from recipient B to MpidManagers(B)
+    pub fn handle_delete(from, to, name) {
+        if remove_message {  // from.name != to.name
+            remove the message (bearing the name) from sender(to.name)'s account if the message's specified recipient is the requester (from);
+        }
+        if remove_header {  // from.name == to.name
+            remove the header (bearing the name) from recipient(from.name)'s account;
+        }
+    }
+    
+    // handle_post:
+    //     1, register_on_line: client sends a POST request to claim it is online
+    //     2, replying: MpidManager(A) forward full message to MpidManager(B) on request
+    pub fn handle_post(from, sd) {
+        if register_on_line {
+            let (mpid_name, mpid_client) = (parse_mpid_name(sd), from);
+            let mut recipient_account = inbox.find_account(mpid_name);
+            recipient_account.register_on_line(mpid_client);
+            for header in recipient_account.headers {
+                send a get request to the sender's MpidManager asking for the full message;
+            }
+            let mut sender_account = outbox.find_account(mpid_name);
+            sender_account.register_on_line(mpid_client);
+        }
+        if replying {  // MpidManager(A) replies to MpidManager(B) with the requested mpid_message
+            let account = inbox.find_account(to_name);
+            if account.has_header(mpid_message.name()) {
+                for client in account.recipient_clients {
+                    foward the mpid_message to client via routing.post_response;
+                }
+            }
+        }
+    }
+
+    // handle_post_response:
+    //     1, no_record: response contains Error msg holding the original get request which has ori_mpid_header_name
+    //     2, inbox_full: response contains Error msg holding the original put request which has ori_mpid_header
+    pub fn handle_post_failure(from, to, response) {
+        if no_record {  // MpidManager(A) replies to MpidManager(B) that the requested mpid_message doesn't exists
+            remove the header (bearing the ori_mpid_header_name) from the account of to.name;
+        }
+        if inbox_full {  // MpidManager(B) replies to MpidManager(A) that inbox is full
+            remove the message (bearing the ori_mpid_header.name()) from the account of to.name;
+            send failure to each sender_client in outbox.find_account(to.name).sender_clients via routing.post_response;
+        }
+    }
+
+}
+
+```
+
+To send an MPID Message, a client would do something like:
+
+```rust
+let mpid_message = MpidMessage::new(my_mpid: Mpid, recipient: ::routing::Authority::Client,
+                                    metadata: Vec<u8>, body: Vec<u8>);
+
 ```
 
 General functions
