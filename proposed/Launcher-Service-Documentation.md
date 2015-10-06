@@ -300,11 +300,15 @@ Associated response
             // value against them.
             "name": String,
             "modification_time_sec": Integer, // Number of sec after beginning of epoch.
-            "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
+            "modification_time_nsec": Integer, // Number of nano-sec offset from
+                                               // modification_time_sec.
             "content": {
                 // The following fields are mandatory should `content` field be present.
-                "offset": Integer, // Offset in bytes to start writing from. Will be an error if out
-                                   // of bounds. E.g. 0
+                "offset": Integer, // Offset in bytes to start writing from. If negative or
+                                   // greater than the size of the file, the given bytes will
+                                   // be appended. Otherwise the file would be truncated from
+                                   // (offset, EOF] and then the given bytes be appended.
+                                   // E.g. 0 (overwrites the entire file)
                 "bytes": [ uint8 ... ]
             },
             "user_metadata": [ uint8 ... ]
