@@ -55,7 +55,7 @@ The objective of this two-way connection cycle is to ensure that any node can co
 
 ## Asynchronous flowchart for connection management for bootstrapping
 
-With the asynchronous behaviour lined out above
+With the asynchronous behaviour outlined above for two named nodes, a node can connect as a client when it has not yet obtained a name from the network, or has no desire to obtain a network name.  Bootstrapping is essential when starting up, as the node does not yet have connections to the network.  It hence has no knowledge of the nodes that exist on the network or their IP locations on the internet.  To overcome this start-up problem, the node will rely on the decentralised mechanisms provided by crust.
 
 ![Asynchronous flowchart for Connection Management for bootstrapping](Connection%20Management%20for%20Bootstrapping.png)
 
