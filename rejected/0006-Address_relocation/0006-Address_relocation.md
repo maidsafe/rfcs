@@ -2,8 +2,7 @@
 - Type enhancement
 - Related components routing
 - Start Date: 21-09-2015
-- RFC PR: (leave this empty)
-- Issue number: PR #40
+- RFC PR: #40
 
 # Summary
 
