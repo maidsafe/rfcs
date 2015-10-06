@@ -25,7 +25,7 @@ A full node that cannot bootstrap (as such `Disconnected`), but accepts a connec
 
 A client will have a reduced cycle: `Disconnected`, `Bootstrapped`, `Terminated`.  Rebootstrapping is achieved through cycling through the first two states.
 
-## Improved connection management
+## Asynchronous flowchart for connection management
 
 We consider first the case where the connection is not started through crust bootstrapping.  We assume that a node `A` is either already connected into the network, or has established a relay node in the network through crust bootstrapping.  
 
@@ -51,11 +51,15 @@ On dropping the primary connection, any related state can be erased and the conn
 
 The objective of this two-way connection cycle is to ensure that any node can connect to A, and any node can connect to B, as the connection map of the network is an integral part of the routing network.  All nodes partaking need to ensure that they are fully connectible to minimise deviation from the desired connection map imposed by the routing table.
 
-## Asynchronous flowchart for connection management
-
 ![Asynchronous flowchart for Connection Management](Connection%20Management.png)
 
-## integration of Address Relocation into connection management
+## Asynchronous flowchart for connection management for bootstrapping
+
+With the asynchronous behaviour lined out above
+
+![Asynchronous flowchart for Connection Management for bootstrapping](Connection%20Management%20for%20Bootstrapping.png)
+
+## Integration of Address Relocation into connection management
 
 The current mechanism of Address Relocation is compatible with the proposal here.  To activate Address Relocation a new proposal will be written that integrates Address Relocation into the `ConnectRequest`.
 
