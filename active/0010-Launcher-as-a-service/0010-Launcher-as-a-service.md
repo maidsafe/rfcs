@@ -3,7 +3,7 @@
 - Related components: [safe_client](https://github.com/maidsafe/safe_client), [safe_nfs](https://github.com/maidsafe/safe_nfs)
 - Start Date: 11-September-2015
 - RFC PR: #42
-- Issue number: Agreed - #51
+- Issue number: Active - #51
 
 # Summary
 
