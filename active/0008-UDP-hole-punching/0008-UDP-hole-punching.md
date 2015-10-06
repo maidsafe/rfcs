@@ -2,8 +2,8 @@
 - Type new: feature
 - Related components: crust
 - Start Date: 22-09-2015
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- RFC PR: #46
+- Issue number: Active - #49
 
 # Summary
 
