@@ -129,7 +129,7 @@ Associated response
     }
 }
 ```
-    - Associated response
+Associated response
 ```javascript
 {
     "id": [ uint8 ... ], // SHA512(JSON-request-string)
@@ -147,7 +147,7 @@ Associated response
                 "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
                 "is_private": Boolean,
                 "is_versioned": Boolean,
-                "user_metadata": [ uint8 ... ],
+                "user_metadata": [ uint8 ... ]
             },
             ...
         ],
@@ -157,7 +157,7 @@ Associated response
                 "size": Integer,
                 "creation_time_sec": Integer, // Number of sec after beginning of epoch.
                 "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
-                "user_metadata": [ uint8 ... ],
+                "user_metadata": [ uint8 ... ]
             },
             ...
         ]
@@ -168,9 +168,8 @@ Associated response
 - Create File
 ```javascript
 {
-    "module": "NFS",
-    "action": "create-file",
-    "parameters": {
+    "endpoint": "safe-api/v1.0/nfs/create-file",
+    "data": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
                               // e.g. false
         "path": String, // Path root will be interpreted according
@@ -187,9 +186,8 @@ Associated response
 - Delete File
 ```javascript
 {
-    "module": "NFS",
-    "action": "delete-file",
-    "parameters": {
+    "endpoint": "safe-api/v1.0/nfs/delete-file",
+    "data": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
                               // e.g. false
         "path": String // Path root will be interpreted according
@@ -204,9 +202,8 @@ Associated response
 - Get File
 ```javascript
 {
-    "module": "NFS",
-    "action": "get-file",
-    "parameters": {
+    "endpoint": "safe-api/v1.0/nfs/get-file",
+    "data": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
                               // e.g. false
         "path": String, // Path root will be interpreted according
@@ -216,15 +213,33 @@ Associated response
                         // e.g. "/path/to/an/existing_file.ext"
         "offset": Integer, // Offset in bytes to start reading from. Will be an error if out
                            // of bounds.
-        "length": Integer // Number of bytes to read starting from the given offset above. If
-                          // offset + length >= file-size then complete file will be read starting
-                          // from the offset. If negative, then complete file will be read
-                          // starting from the offset.
+        "length": Integer, // Number of bytes to read starting from the given offset above. If
+                           // offset + length >= file-size then complete file will be read starting
+                           // from the offset. If negative, then complete file will be read
+                           // starting from the offset.
+        "include_metadata": Boolean // false if only the raw content is to be given,
+                                    // true otherwise. E.g. false
     }
 }
 ```
-### DNS
-- Actions
+Associated response
+```javascript
+{
+    "id": [ uint8 ... ], // SHA512(JSON-request-string)
+    "data": {
+        "content": [ uint8 ... ],
+        "metadata": { // This field will be absent if `include_metadata` was false in the request.
+            "name": String,
+            "size": Integer,
+            "creation_time_sec": Integer, // Number of sec after beginning of epoch.
+            "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+            "user_metadata": [ uint8 ... ]
+        }
+    }
+}
+```
+## dns
+- Requests
 ```
 "register-dns"
 "add-service"
@@ -233,9 +248,8 @@ Associated response
 - Register DNS
 ```javascript
 {
-    "module": "DNS",
-    "action": "register-dns",
-    "parameters": {
+    "endpoint": "safe-api/v1.0/dns/register-dns",
+    "data": {
         "long_name": String, // e.g. "new-name.com"
         "service_name": String, // e.g. "www"
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
@@ -252,8 +266,7 @@ Associated response
 - Add service
 ```javascript
 {
-    "module": "DNS",
-    "action": "add-service",
+    "endpoint": "safe-api/v1.0/dns/add-service",
     "parameters": {
         "long_name": String, // e.g. "existing-name.com"
         "service_name": String, // e.g. "blog"
