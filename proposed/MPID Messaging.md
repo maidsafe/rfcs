@@ -219,8 +219,9 @@ enum MpidMessageWrapper {
     Online,
     /// Send out an MpidMessage
     PutMessage(MpidMessage),
-    /// Send out an MpidHeader and sender's original SignedToken to allow response to sender's Put
-    PutHeader(MpidHeader, Option<SignedToken>),
+    /// Send out an MpidHeader and sender's original Authority and SignedToken to allow response
+    /// to sender's Put
+    PutHeader(MpidHeader, Authority, Option<SignedToken>),
     /// Try to retrieve the message corresponding to the included header
     GetMessage(MpidHeader),
     /// List of headers to check for continued existence of corresponding messages in Sender's outbox
@@ -410,10 +411,6 @@ Pseudo-code for MpidManager:
 pub struct MpidManager {
     outbox_storage: Vec<OutboxAccount>,
     inbox_storage: Vec<InboxAccount>,
-    on_going_puts: lru_time_cache<message_name: NameType, (sender_client: ::routing::Authority::Client,
-                                                           token: Option<::routing::SignedToken>)>,
-    on_going_gets: lru_time_cache<message_name: NameType, (recipient_client: ::routing::Authority::Client,
-                                                           token: Option<::routing::SignedToken>)>,
     routing: Routing,
 }
 
@@ -425,7 +422,6 @@ impl MpidManager {
         if messaging {  // sd.data holds MpidMessage
             // insert received mpid_message into the outbox_storage
             if outbox_storage.insert(from, mpid_message) {
-                on_going_puts.insert(mpid_message_name(mpid_message), (from, token));
                 let forward_sd = StructuredData {
                     type_tag: MPID_MESSAGE,
                     identifier: mpid_message_name(mpid_message),
@@ -468,7 +464,6 @@ impl MpidManager {
             let recipient_account = inbox_storage.find_account(to);
             if recipient_account.recipient_clients.len() > 0 { // indicates there is connected client
                 for header in recipient_account.headers {
-                    on_going_gets.insert(mpid_header_name(header.mpid_header), (from, token));
                     get_message(header);
                 }
             }
@@ -480,7 +475,8 @@ impl MpidManager {
     //     2, remove_header: delete request from recipient B to MpidManagers(B)
     pub fn handle_delete(from, to, name) {
         if remove_message {  // from.name != to.name
-            remove the message (bearing the name) from sender(to.name)'s account if the message's specified recipient is the requester (from);
+            remove the message (bearing the name) from sender(to.name)'s account if the message's
+            specified recipient is the requester (from);
         }
         if remove_header {  // from.name == to.name
             remove the header (bearing the name) from recipient(from.name)'s account;
@@ -505,14 +501,14 @@ impl MpidManager {
         if replying {  // MpidManager(A) replies to MpidManager(B) with the requested mpid_message
             let account = inbox.find_account(to_name);
             if account.has_header(mpid_message.name()) {
-                let (reply_to, token) = on_going_gets.find(mpid_message.name());
-                foward the mpid_message to client via routing.post using (reply_to, token);
+                forward the mpid_message to client via routing.post using (reply_to, token);
             }
         }
         if fetching {
             if outbox.has_message(name) {
                 // recipient's MpidManager asking for a particular message and it exists
-                if the requester is the recipient, reply message to the requester(from) with outbox.find_message(name) via routing.post;
+                if the requester is the recipient, reply message to the requester(from) with
+                outbox.find_message(name) via routing.post;
             } else {
                 // recipient's MpidManager asking for a particular message but not exists
                 reply failure to the requester(from);
@@ -521,19 +517,18 @@ impl MpidManager {
     }
 
     // handle_post_response:
-    //     1, no_record: response contains Error msg holding the original get request which has ori_mpid_header_name
-    //     2, inbox_full: response contains Error msg holding the original put request which has ori_mpid_header
+    //     1, no_record: response contains Error msg holding the original get request which has
+    //        original_mpid_header_name
+    //     2, inbox_full: response contains Error msg holding the original put request which has
+    //        original_mpid_header
     pub fn handle_post_failure(from, to, response) {
-        if no_record {  // MpidManager(A) replies to MpidManager(B) that the requested mpid_message doesn't exists
-            remove the header (bearing the ori_mpid_header_name) from the account of to.name;
-            if on_going_gets.has(ori_mpid_header_name) {
-                let (reply_to, token) = on_going_gets.find(ori_mpid_header_name);
-                send failure to client via routing.get_failure using (reply_to, token, mpid_header);
-            }
+        if no_record {
+            // MpidManager(A) replies to MpidManager(B) that the requested mpid_message doesn't exist
+            remove the header (bearing the original_mpid_header_name) from the account of to.name;
         }
         if inbox_full {  // MpidManager(B) replies to MpidManager(A) that inbox is full
-            remove the message (bearing the ori_mpid_header.name()) from the account of to.name;
-            let (reply_to, token) = on_going_puts.find(ori_mpid_header.name());
+            remove the message (bearing the original_mpid_header.name()) from the account of to.name;
+            original sender's `reply_to` and `token` will be available in this incoming message
             send failure to client via routing.put_failure using (reply_to, token, message);
         }
     }
