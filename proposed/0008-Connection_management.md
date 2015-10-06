@@ -29,13 +29,21 @@ A client will have a reduced cycle: `Disconnected`, `Bootstrapped`, `Terminated`
 
 We consider first the case where the connection is not started through crust bootstrapping.  We assume that a node `A` is either already connected into the network, or has established a relay node in the network through crust bootstrapping.  
 
+Node A can initiate the connection without keeping state.  As a simple measure of congestion management a filter prevents A from repeating the same `ConnectRequest` within a small time frame.  On reception of the `ConnectRequest` node B needs to query the routing table (RT) and the connection cache (AR) for the address relocation validity of the new connection to A.  If B refuses the ConnectRequest for any reason, it suffices to drop the message.
+
+On acceptance of the ConnectRequest from A, B will keep the ConnectRequest and both try to connect to A, and also send a ConnectResponse back to A.
+
+On establishing a primary connection initiated by B, B will match this connection to the Expected Connections (which can be either ConnectRequests or ConnectResponses); upon a successful match B will store this connection in the ConnectRequest/ConnectResponse and identify itself on this connection with a direct `Hello` message.  Node A will accept the connection as an unknown connection.  On reception of the `Hello` message it can store this information together with the unknown connection.  On a successful match, the node should
+
+## Asynchronous flowchart for connection management
+
+![Asynchronous flowchart for Connection Management](Connection%20Management.png)
+
 ## integration of Address Relocation into connection management
 
 The current mechanism of Address Relocation is compatible with the proposal here.  To activate Address Relocation a new proposal will be written that integrates Address Relocation into the `ConnectRequest`.
 
 For clients it can be of interest to announce their relay location to the ClientManager group.  This can also be done with the `ConnectRequest`.
-
-![Flowchart for Connection Management](Connection%20Management.png)
 
 # Implementation blueprint
 
