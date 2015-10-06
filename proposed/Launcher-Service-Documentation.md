@@ -69,8 +69,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Create Directory
 ```javascript
 {
-    "module": "NFS"
-    "action": "create-dir"
+    "module": "NFS",
+    "action": "create-dir",
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
@@ -79,9 +79,9 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
                         // the path will be interpreted as the name
                         // of directory to be created.
                         // e.g. "/path/to/a/new_directory"
-        "is_private": Boolean // true if the created directory must be encrypted, false if
-                              // publicly viewable.
-                              // e.g. true
+        "is_private": Boolean, // true if the created directory must be encrypted, false if
+                               // publicly viewable.
+                               // e.g. true
         "is_versioned": Boolean, // e.g. false
         "user_metadata": [ uint8 ... ] // Any additional metadata.
                                        // e.g. [ 20, 30, 255, 254, 0, 119 ]
@@ -92,16 +92,16 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Delete Directory
 ```javascript
 {
-    "module": "NFS"
-    "action": "delete-dir"
+    "module": "NFS",
+    "action": "delete-dir",
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
-        "path": String, // Path root will be interpreted according
-                        // the parameter above. The last token in
-                        // the path will be interpreted as the name
-                        // of directory to be deleted.
-                        // e.g. "/path/to/an/existing_directory"
+        "path": String // Path root will be interpreted according
+                       // the parameter above. The last token in
+                       // the path will be interpreted as the name
+                       // of directory to be deleted.
+                       // e.g. "/path/to/an/existing_directory"
     }
 }
 ```
@@ -109,16 +109,16 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Get Directory
 ```javascript
 {
-    "module": "NFS"
-    "action": "get-dir"
+    "module": "NFS",
+    "action": "get-dir",
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
-        "path": String, // Path root will be interpreted according
-                        // the parameter above. The last token in
-                        // the path will be interpreted as the name
-                        // of directory to be read.
-                        // e.g. "/path/to/an/existing_directory"
+        "path": String // Path root will be interpreted according
+                       // the parameter above. The last token in
+                       // the path will be interpreted as the name
+                       // of directory to be read.
+                       // e.g. "/path/to/an/existing_directory"
     }
 }
 ```
@@ -126,8 +126,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Create File
 ```javascript
 {
-    "module": "NFS"
-    "action": "create-file"
+    "module": "NFS",
+    "action": "create-file",
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
@@ -145,16 +145,16 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Delete File
 ```javascript
 {
-    "module": "NFS"
-    "action": "delete-file"
+    "module": "NFS",
+    "action": "delete-file",
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
-        "path": String, // Path root will be interpreted according
-                        // the parameter above. The last token in
-                        // the path will be interpreted as the name
-                        // of file to be deleted.
-                        // e.g. "/path/to/an/existing_file.ext"
+        "path": String // Path root will be interpreted according
+                       // the parameter above. The last token in
+                       // the path will be interpreted as the name
+                       // of file to be deleted.
+                       // e.g. "/path/to/an/existing_file.ext"
     }
 }
 ```
@@ -162,8 +162,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Get File
 ```javascript
 {
-    "module": "NFS"
-    "action": "get-file"
+    "module": "NFS",
+    "action": "get-file",
     "parameters": {
         "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
                               // e.g. false
@@ -174,10 +174,10 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
                         // e.g. "/path/to/an/existing_file.ext"
         "offset": Integer, // Offset in bytes to start reading from. Will be an error if out
                            // of bounds.
-        "length": Integer, // Number of bytes to read starting from the given offset above. If
-                           // offset + length >= file-size then complete file will be read starting
-                           // from the offset. If negative, then complete file will be read
-                           // starting from the offset.
+        "length": Integer // Number of bytes to read starting from the given offset above. If
+                          // offset + length >= file-size then complete file will be read starting
+                          // from the offset. If negative, then complete file will be read
+                          // starting from the offset.
     }
 }
 ```
@@ -191,8 +191,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Register DNS
 ```javascript
 {
-    "module": "DNS"
-    "action": "register-dns"
+    "module": "DNS",
+    "action": "register-dns",
     "parameters": {
         "long_name": String, // e.g. "new-name.com"
         "service_name": String, // e.g. "www"
@@ -210,8 +210,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Add service
 ```javascript
 {
-    "module": "DNS"
-    "action": "add-service"
+    "module": "DNS",
+    "action": "add-service",
     "parameters": {
         "long_name": String, // e.g. "existing-name.com"
         "service_name": String, // e.g. "blog"
