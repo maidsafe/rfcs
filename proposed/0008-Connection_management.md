@@ -25,7 +25,7 @@ A full node that cannot bootstrap (as such `Disconnected`), but accepts a connec
 
 A client will have a reduced cycle: `Disconnected`, `Bootstrapped`, `Terminated`.  Rebootstrapping is achieved through cycling through the first two states.
 
-## improved connection management
+## Improved connection management
 
 We consider first the case where the connection is not started through crust bootstrapping.  We assume that a node `A` is either already connected into the network, or has established a relay node in the network through crust bootstrapping.  
 
@@ -33,7 +33,23 @@ Node A can initiate the connection without keeping state.  As a simple measure o
 
 On acceptance of the ConnectRequest from A, B will keep the ConnectRequest and both try to connect to A, and also send a ConnectResponse back to A.
 
-On establishing a primary connection initiated by B, B will match this connection to the Expected Connections (which can be either ConnectRequests or ConnectResponses); upon a successful match B will store this connection in the ConnectRequest/ConnectResponse and identify itself on this connection with a direct `Hello` message.  Node A will accept the connection as an unknown connection.  On reception of the `Hello` message it can store this information together with the unknown connection.  On a successful match, the node should
+On establishing a primary connection initiated by B, B will match this connection to the Expected Connections (which can be either ConnectRequests or ConnectResponses); upon a successful match B will store this connection in the ConnectRequest/ConnectResponse and identify itself on this connection with a direct `Hello` message.  Node A will accept the connection as an unknown connection.  On reception of the `Hello` message it can store this information together with the unknown connection.  On a successful match for the Hello, the node should attempt to match the unknown connection (which received an identifier claim in `Hello`) with a ConnectRequest or ConnectResponse in `match()`.
+
+On establishing the first connection, it will be the initiating node `A` that will accept an unknown connection.  At this point node `A` might already have a signed ConnectResponse from B, that will also include the original ConnectRequest signed by A itself.  Either A does, or does not yet have this ConnectResponse, but it will know it does not have a matching ConnectRequest from B, and as such does not act.
+
+Upon receiving the ConnectResponse from B, A needs to verify that the attached ConnectRequest has been correctly signed by A itself.  Upon success, A will store the ConnectResponse and try to connect to B with the connection information provided.
+
+When this secondary connection is established on the connecting side, node A can match this new connection with the expected ConnectResponse that has been stored and send an identifying `Hello` message directly on this connection to B.
+
+The same cycle for the unknown connection now repeats on the side of node B.  At the end of any matched unknown connection after a `Hello` directly on a connection, or a match of a new connection with an expected connection as intended through signed routing messages, the node needs to evaluate the full `match()`.
+
+On `match()` the node will verify that both at routing level with a connection assigned to the signed `ConnectRequest` and a connection established as an unknown accepted connection, but again signed by the counterparty, in order to consolidate the primary connection and then drop the secondary connection.  At this point, this node will also confirm this is now a consolidated connection between node B and node A.
+
+On confirmation node A will match that it received both the signed ConnectResponse with a secondary connection (potentially already dropped at this point) and accepted a connection that claimed to be node B.
+
+On dropping the primary connection, any related state can be erased and the connection attempt failed.  All state is kept in temporary storage with a limitation on the number of active elements too.  On clearing any element from this state, the optionally corresponding connections should be dropped.
+
+The objective of this two-way connection cycle is to ensure that any node can connect to A, and any node can connect to B, as the connection map of the network is an integral part of the routing network.  All nodes partaking need to ensure that they are fully connectible to minimise deviation from the desired connection map imposed by the routing table.
 
 ## Asynchronous flowchart for connection management
 
