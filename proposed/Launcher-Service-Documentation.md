@@ -129,41 +129,41 @@ Associated response
     }
 }
 ```
-    - Associated response
-    ```javascript
-    {
-        "id": [ uint8 ... ], // SHA512(JSON-request-string)
-        "data": {
-            "name": String,
-            "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-            "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
-            "is_private": Boolean,
-            "is_versioned": Boolean,
-            "user_metadata": [ uint8 ... ],
-            "sub-directories": [
-                {
-                    "name": String,
-                    "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-                    "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
-                    "is_private": Boolean,
-                    "is_versioned": Boolean,
-                    "user_metadata": [ uint8 ... ],
-                },
-                ...
-            ],
-            "files": [
-                {
-                    "name": String,
-                    "size": Integer,
-                    "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-                    "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
-                    "user_metadata": [ uint8 ... ],
-                },
-                ...
-            ]
-        }
+Associated response
+```javascript
+{
+    "id": [ uint8 ... ], // SHA512(JSON-request-string)
+    "data": {
+        "name": String,
+        "creation_time_sec": Integer, // Number of sec after beginning of epoch.
+        "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+        "is_private": Boolean,
+        "is_versioned": Boolean,
+        "user_metadata": [ uint8 ... ],
+        "sub-directories": [
+            {
+                "name": String,
+                "creation_time_sec": Integer, // Number of sec after beginning of epoch.
+                "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+                "is_private": Boolean,
+                "is_versioned": Boolean,
+                "user_metadata": [ uint8 ... ],
+            },
+            ...
+        ],
+        "files": [
+            {
+                "name": String,
+                "size": Integer,
+                "creation_time_sec": Integer, // Number of sec after beginning of epoch.
+                "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+                "user_metadata": [ uint8 ... ],
+            },
+            ...
+        ]
     }
-    ```
+}
+```
 
 - Create File
 ```javascript
