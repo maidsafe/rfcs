@@ -10,14 +10,15 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 # Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 - `String` means UTF-8 encoded string unless specifically noted to be otherwise.
+- Unless specifically mentioned, all JSON key-value pairs shall be considered mandatory.
 
 # Detailed design
 
-- `endpoint` shall follow `<id>/<version>/<disambiguator>/<request>` pattern. E.g. `safe-api/v1.29/nfs/create-dir`.
-- Allowed `disambiguator`s are:
+- `endpoint` shall follow `<id>/<version>/<module>/<request>` pattern. E.g. `safe-api/v1.29/nfs/create-dir`.
+- Allowed `module`s are:
 ```
-"handshake"
-"nfs"
+"handshake",
+"nfs",
 "dns"
 ```
 - In all cases after this point, `<version>` for the `endpoint` field is a variable and is written as `v1.0` just as an example.
@@ -43,10 +44,15 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 ```
 
 ## handshake
+- Requests
+```
+"handshake"
+```
+
 - RSA-Key-Exchange, app to Launcher
 ```javascript
 {
-    "endpoint": "safe-api/v1.0/handshake/rsa-key-exchange",
+    "endpoint": "safe-api/v1.0/handshake/authenticate-app",
     "data": {
         "launcher_string": String, // This shall be the one supplied by Launcher
         "nonce": [ uint8 ... ], // sodiumoxide::crypto::box_::Nonce,
@@ -66,12 +72,14 @@ Associated response
 ## nfs
 - Requests
 ```
-"create-dir"
-"delete-dir"
-"get-dir"
-"create-file"
-"delete-file"
-"get-file"
+"create-dir",
+"delete-dir",
+"get-dir",
+"modify-dir",
+"create-file",
+"delete-file",
+"get-file",
+"modify-file"
 ```
 
 - Create directory
@@ -96,7 +104,7 @@ Associated response
 }
 ```
 
-- Delete Directory
+- Delete directory
 ```javascript
 {
     "endpoint": "safe-api/v1.0/nfs/delete-dir",
@@ -112,7 +120,7 @@ Associated response
 }
 ```
 
-- Get Directory
+- Get directory
 ```javascript
 {
     "endpoint": "safe-api/v1.0/nfs/get-dir",
@@ -136,15 +144,20 @@ Associated response
     "data": {
         "name": String,
         "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-        "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+        "creation_time_nsec": Integer, // Number of nano-sec offset from creation_time_sec.
+        "modification_time_sec": Integer, // Number of sec after beginning of epoch.
+        "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
         "is_private": Boolean,
         "is_versioned": Boolean,
         "user_metadata": [ uint8 ... ],
-        "sub-directories": [
+        "sub_directories": [
             {
                 "name": String,
                 "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-                "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+                "creation_time_nsec": Integer, // Number of nano-sec offset from creation_time_sec.
+                "modification_time_sec": Integer, // Number of sec after beginning of epoch.
+                "modification_time_nsec": Integer, // Number of nano-sec offset from
+                                                   // modification_time_sec.
                 "is_private": Boolean,
                 "is_versioned": Boolean,
                 "user_metadata": [ uint8 ... ]
@@ -156,11 +169,39 @@ Associated response
                 "name": String,
                 "size": Integer,
                 "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-                "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+                "creation_time_nsec": Integer, // Number of nano-sec offset from creation_time_sec.
+                "modification_time_sec": Integer, // Number of sec after beginning of epoch.
+                "modification_time_nsec": Integer, // Number of nano-sec offset from
+                                                   // modification_time_sec.
                 "user_metadata": [ uint8 ... ]
             },
             ...
         ]
+    }
+}
+```
+
+- Modify directory
+```javascript
+{
+    "endpoint": "safe-api/v1.0/nfs/modify-dir",
+    "data": {
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+        "path": String // Path root will be interpreted according
+                       // the parameter above. The last token in
+                       // the path will be interpreted as the name
+                       // of directory to be read.
+                       // e.g. "/path/to/an/existing_directory"
+        "new_values": {
+            // All fields are optional. The ones which are present will be updated with the new
+            // value against them.
+            "name": String,
+            "modification_time_sec": Integer, // Number of sec after beginning of epoch.
+            "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
+            "is_private": Boolean,
+            "is_versioned": Boolean,
+            "user_metadata": [ uint8 ... ]
+        }
     }
 }
 ```
@@ -222,6 +263,7 @@ Associated response
     }
 }
 ```
+
 Associated response
 ```javascript
 {
@@ -232,16 +274,43 @@ Associated response
             "name": String,
             "size": Integer,
             "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-            "creation_time_nsec": Integer, // Number of nano-sec, offset from creation_time_sec.
+            "creation_time_nsec": Integer, // Number of nano-sec offset from creation_time_sec.
+            "modification_time_sec": Integer, // Number of sec after beginning of epoch.
+            "modification_time_nsec": Integer, // Number of nano-sec offset from
+                                               // modification_time_sec.
             "user_metadata": [ uint8 ... ]
         }
     }
 }
 ```
+
+- Modify file
+```javascript
+{
+    "endpoint": "safe-api/v1.0/nfs/modify-file",
+    "data": {
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+        "path": String // Path root will be interpreted according
+                       // the parameter above. The last token in
+                       // the path will be interpreted as the name
+                       // of file to be read.
+                       // e.g. "/path/to/an/existing_file.ext"
+        "new_values": {
+            // All fields are optional. The ones which are present will be updated with the new
+            // value against them.
+            "name": String,
+            "modification_time_sec": Integer, // Number of sec after beginning of epoch.
+            "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
+            "user_metadata": [ uint8 ... ]
+        }
+    }
+}
+```
+
 ## dns
 - Requests
 ```
-"register-dns"
+"register-dns",
 "add-service"
 ```
 
