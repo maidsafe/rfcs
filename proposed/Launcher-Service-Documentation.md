@@ -129,7 +129,7 @@ Associated response
     }
 }
 ```
-Associated response
+    - Associated response
 ```javascript
 {
     "id": [ uint8 ... ], // SHA512(JSON-request-string)
