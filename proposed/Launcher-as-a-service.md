@@ -34,7 +34,7 @@ Launcher
 
 ## User's Login Session Packet (for reference)
 This is only to provide a context to the references to it below. This might change in future without affecting this RFC (i.e. only a small portion of this is actually relevant for this RFC).
-```
+```rust
 Account {
     an_maid,
     maid,
@@ -119,7 +119,7 @@ All parameters are UTF-8 strings.
 
 **step 4:** App generates a random asymmetric encryption keypair - `<App-Asymm-Keys>`. Then it connects to Launcher on the given endpoint asking for Launcher to give it an `<App-Specific-Symm-Key>`, its root directory-key and SAFEDrive directory-key, which Launcher had reserved as `XYZ-Root-Dir`
 - The payload format for this request shall be a JSON encoded structure of the following:
-```
+```javascript
 {
     "rsa_key_exchange_request": {
         "launcher_string"      : String,        // This shall be the one supplied by Launcher
@@ -134,7 +134,7 @@ All parameters are UTF-8 strings.
 
 **step 6:** Launcher gives the app what it requested concluding the RSA key exchange procedure.
 - The payload format for this response shall be a JSON encoded structure of the following:
-```
+```javascript
 {
     "rsa_key_exchange_response": {
         "cipher_text": [ uint8 ... ] // encrypted symmetric keys
@@ -148,7 +148,7 @@ All parameters are UTF-8 strings.
 
 - Every service provided by Launcher will be documented in Launcher service document (a separate RFC). The communication between Launcher and an app shall be in JSON subsequently encrypted by `<App-Specific-Symm-Key>`.
 - The services provided by Launcher and their format are prone to change, hence every new document will have a version information. An app may do a version negotiation anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher may default to the latest version. The version negotiation will happen via documented JSON format - e.g. of probable format:
-```
+```javascript
 {
     "version": x.y // where x.y could be 2.10 etc
 }
@@ -189,7 +189,7 @@ NfsActions {
 }
 ```
 - Errors will be given back. This is again an e.g. and not a specification:
-```
+```javascript
 // Error Response from Launcher to app:
 {
     "error_code": 15,
@@ -270,7 +270,7 @@ safe_nfs  safe_client
 
 ### ffi
 This module is intended to interface with code written in other languages especially for Launcher-UI. FFI for self-authentication must be provided as this will provide the client-engine necessary to do anything useful in the SAFE Network:
-```
+```rust
 /// Create an unregistered client. This or any one of the other companion functions to get a
 /// client must be called before initiating any operation allowed by this crate.
 #[no_mangle]
@@ -356,7 +356,7 @@ A TCP listener would try and bind to `127.0.9.9:30000`. If unsuccessfull keep in
 pub fn get_launcher_endpoint() -> std::net::SocketAddr;
 ```
 Each incoming TCP connection request will spawn a new thread and pass the socket details to a new instance of `AppSession` below. An `AppSession` instance uniquely represents a single Launcher-App session. Cleanup codes should preferably be _lazy_.
-```
+```rust
 pub enum Permission {
     None,
     ReadOnly,

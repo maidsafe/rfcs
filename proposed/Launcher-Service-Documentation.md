@@ -14,7 +14,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ## Globals
 - RSA-Key-Exchange, app to Launcher
-```
+```javascript
 {
     "rsa_key_exchange_request": {
         "launcher_string": UTF-8 String,        // This shall be the one supplied by Launcher
@@ -25,7 +25,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 }
 ```
 - RSA-Key-Exchange, Launcher to app
-```
+```javascript
 {
     "rsa_key_exchange_response": {
         "cipher_text": [ uint8 ... ] // encrypted symmetric keys
@@ -33,13 +33,13 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 }
 ```
 - Version Negotiation
-```
+```javascript
 {
     "version": x.y // where x.y could be 2.10 etc
 }
 ```
 - Errors
-```
+```javascript
 {
     "error": {
         "error_code": Integer, // This shall be whatever Into trait provides in various modules
@@ -60,12 +60,14 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ```
 "create-dir"
 "delete-dir"
+"get-dir"
 "create-file"
 "delete-file"
+"get-file"
 ```
 
 - Create Directory
-```
+```javascript
 {
     "module": "NFS"
     "action": "create-dir"
@@ -88,7 +90,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ```
 
 - Delete Directory
-```
+```javascript
 {
     "module": "NFS"
     "action": "delete-dir"
@@ -104,8 +106,25 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 }
 ```
 
-- Create File
+- Get Directory
+```javascript
+{
+    "module": "NFS"
+    "action": "get-dir"
+    "parameters": {
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
+                              // e.g. false
+        "path": String, // Path root will be interpreted according
+                        // the parameter above. The last token in
+                        // the path will be interpreted as the name
+                        // of directory to be read.
+                        // e.g. "/path/to/an/existing_directory"
+    }
+}
 ```
+
+- Create File
+```javascript
 {
     "module": "NFS"
     "action": "create-file"
@@ -124,7 +143,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ```
 
 - Delete File
-```
+```javascript
 {
     "module": "NFS"
     "action": "delete-file"
@@ -140,6 +159,28 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 }
 ```
 
+- Get File
+```javascript
+{
+    "module": "NFS"
+    "action": "get-file"
+    "parameters": {
+        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise
+                              // e.g. false
+        "path": String, // Path root will be interpreted according
+                        // the parameter above. The last token in
+                        // the path will be interpreted as the name
+                        // of file to be read.
+                        // e.g. "/path/to/an/existing_file.ext"
+        "offset": Integer, // Offset in bytes to start reading from. Will be an error if out
+                           // of bounds.
+        "length": Integer, // Number of bytes to read starting from the given offset above. If
+                           // offset + length >= file-size then complete file will be read starting
+                           // from the offset. If negative, then complete file will be read
+                           // starting from the offset.
+    }
+}
+```
 ### DNS
 - Actions
 ```
@@ -148,7 +189,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ```
 
 - Register DNS
-```
+```javascript
 {
     "module": "DNS"
     "action": "register-dns"
@@ -167,7 +208,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ```
 
 - Add service
-```
+```javascript
 {
     "module": "DNS"
     "action": "add-service"
