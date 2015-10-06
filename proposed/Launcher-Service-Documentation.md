@@ -301,6 +301,12 @@ Associated response
             "name": String,
             "modification_time_sec": Integer, // Number of sec after beginning of epoch.
             "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
+            "content": {
+                // The following fields are mandatory should `content` field be present.
+                "offset": Integer, // Offset in bytes to start writing from. Will be an error if out
+                                   // of bounds. E.g. 0
+                "bytes": [ uint8 ... ]
+            },
             "user_metadata": [ uint8 ... ]
         }
     }
