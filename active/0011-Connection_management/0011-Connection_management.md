@@ -2,8 +2,8 @@
 - Type: Enhancement
 - Related Components: routing, crust
 - Start Date: 23-09-2015
-- RFC PR: (leave this empty)
-- Issue Number: (leave this empty)
+- RFC PR: #48
+- Issue Number: Active - #52
 
 # Summary
 
