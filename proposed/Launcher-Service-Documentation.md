@@ -59,7 +59,7 @@ Associated response
 ```javascript
 {
     "id": [ uint8 ... ], // SHA512(JSON-request-string)
-    "data": "cipher_text": [ uint8 ... ] // encrypted symmetric keys
+    "data": [ uint8 ... ] // encrypted symmetric keys
 }
 ```
 
