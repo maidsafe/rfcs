@@ -46,7 +46,7 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 ## handshake
 - Requests
 ```
-"handshake"
+"authenticate-app"
 ```
 
 - RSA-Key-Exchange, app to Launcher
