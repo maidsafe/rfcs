@@ -76,7 +76,7 @@ Account {
 **step 1:** Launcher creates (if it’s the first time it saw this app):
 1. Unique random 64 byte ID for this app - App-ID (because names of different binaries can be same if they are in different locations on the same machine - thus we need a unique identifier for the binary across all machines)
 2. Unique Directory Id (a 64 byte ID associated with a directory) and an associated unique Root [Directory Listing](https://github.com/maidsafe/safe_nfs/blob/master/src/directory_listing/mod.rs) `<APP-ROOT-DIR>` for this app - `XYZ-Root-Dir`. For directory name conflicts append numbers so that they can exist on a file system - e.g. `XYZ-1-Root-Dir`. This shall be created inside `<USER’S-PRIVATE-ROOT-DIRECTORY-ID>/`.
-- `<APP-ROOT-DIR>` shall be always **unversioned** and **private** (i.e. encrypted with app-specific crypto keys). Any requirement for a versioned or public directory from the app can be managed by the app itself by creating further subdirectories.
+- `<APP-ROOT-DIR>` shall be always **unversioned** and **private** (i.e. encrypted with MAID keys). Any requirement for a versioned or public directory from the app can be managed by the app itself by creating further subdirectories.
 - Append this information in `<LAUNCHER-CONFIG-FILE>` = `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile` (This is what the DNS crate currently does too inside `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/DnsReservedDirectory/DnsConfigurationFile`.) - format shall be CBOR (concise-binary-object-representation).
 ```
 [
@@ -121,7 +121,7 @@ Account {
 All parameters are UTF-8 strings.
 
 **step 4:** App generates a random asymmetric encryption keypair - `<App-Asymm-Keys>`. Then it connects to Launcher on the given endpoint asking for Launcher to give it an `<App-Specific-Symm-Key>`, its root directory-key and SAFEDrive directory-key, which Launcher had reserved as `XYZ-Root-Dir`
-- The payload format for this request shall be a JSON encoded structure of the following:
+- The payload format for this request shall be a JSON encoded structure as in [accompanying document](Launcher-Service-Documentation.md). E.g.
 ```javascript
 {
     "rsa_key_exchange_request": {
@@ -136,7 +136,7 @@ All parameters are UTF-8 strings.
 **step 5:** Launcher verifies the `launcher_string` field above and generates a strong random symmetric encryption key `<App-Specific-Symm-Key>`. This is encrypted using app's `public_encrytion_key` and `nonce` above.
 
 **step 6:** Launcher gives the app what it requested concluding the RSA key exchange procedure.
-- The payload format for this response shall be a JSON encoded structure of the following:
+- The payload format for this response shall be a JSON encoded structure as in [accompanying document](Launcher-Service-Documentation.md). E.g.
 ```javascript
 {
     "rsa_key_exchange_response": {
@@ -150,7 +150,7 @@ All parameters are UTF-8 strings.
 ## Reads and Mutations by the App
 
 - Every service provided by Launcher will be documented in Launcher service document (a separate RFC). The communication between Launcher and an app shall be in JSON subsequently encrypted by `<App-Specific-Symm-Key>`.
-- The services provided by Launcher and their format are prone to change, hence every new document will have a version information. An app may do a version negotiation anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher may default to the latest version. The version negotiation will happen via documented JSON format - e.g. of probable format:
+- The services provided by Launcher and their format are prone to change, hence every new document will have a version information. An app may do a version negotiation anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher may default to the latest version. The version negotiation may happen via documented JSON format - e.g. of probable format:
 ```javascript
 {
     "version": x.y // where x.y could be 2.10 etc
