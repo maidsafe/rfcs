@@ -108,10 +108,6 @@ enum ExpectedConnection {
     InternalResponse::Connect(ConnectResponse, SignedToken)
 }
 
-pub struct ExpectedConnections {
-    lru_cache: LruCache<crust::Connection, ExpectedConnection>
-}
-
 ::crust::Event::OnConnect(::crust::Connection)
 ::crust::Event::OnAccept(::crust::Connection)
 ::crust::Event::BootstrapFinished
@@ -223,6 +219,36 @@ fn on_confirmation(&mut self, confirmation, connection) {
 ```
 
 NOTE: this is unfinished and the implementation for a bootstrap connection, is not integrated in the above pseudo-code.
+
+### Routing Core
+
+```rust
+struct RoutingCore {
+    ...,
+    UnknownConnections: ExpirationMap<::crust::Connection, Option<::direct_messages::Hello>>
+    ExpectedConnections: ExpirationMap<::ExpectedConnection, Option<::crust::Connection>>
+}
+```
+
+### utilities
+
+```rust
+/// ExpirationMap holds the Key and Value with a timestamp but pushes
+/// out the expired keys and values as a vector
+struct ::utilities::ExpirationMap<K, V> where K: something {
+
+}
+
+impl ExpirationMap {
+    pub fn with_expiry_duration(::time::Duration) {...}
+
+    pub fn insert()
+    pub fn contains_key()
+    /// clean out expired state
+    pub fn check_expirations() -> Vec<(K,V)>
+    ...
+}
+```
 
 ## Updates to Existing Code
 
