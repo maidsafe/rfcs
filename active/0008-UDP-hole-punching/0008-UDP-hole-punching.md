@@ -70,7 +70,7 @@ And the result of such call shall be an event `OnUdpSocketMapped` holding a stru
         public_addresses: BTreeSet<SocketAddr>, // of node A
     }
 
-Once upper layers receive such event, they can send/route `MappedUdpSocket::public_address`
+Once upper layers receive such event, they can send/route `MappedUdpSocket::public_addresses`
 to node `B`. Once `B` does the same, and upper layers receive `B`’s public endpoint, upper
 layers are ready for the actual hole punching.
 
@@ -82,7 +82,7 @@ The act of hole punching shall be initiated by a function with the following sig
                             result_token: u32,
                             udp_socket : UdpSocket,
                             secret: Option<[u8; 4]>,
-                            peer_addr : mut SocketAddr /* of node B */)
+                            peer_addrs : mut BTreeSet<SocketAddr> /* of node B */)
 
 This call will initiate reading on the `udp_socket` and will also
 start periodically sending small datagrams to the `peer_addr`.
@@ -349,7 +349,7 @@ pub fn Service::udp_punch_hole(&self,
                                                           secret,
                                                           peer_addr);
         event_sender.send(Event::OnHolePunched(HolePunchResult::new(result_token,
-                                                                    udp_socke,
+                                                                    udp_socket,
                                                                     peer_addr)));
       }
     });
