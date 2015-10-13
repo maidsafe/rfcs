@@ -57,6 +57,10 @@ The objective of this two-way connection cycle is to ensure that any node can co
 
 With the asynchronous behaviour outlined above for two named nodes, a node can connect as a client when it has not yet obtained a name from the network, or has no desire to obtain a network name.  Bootstrapping is essential when starting up, as the node does not yet have connections to the network.  It hence has no knowledge of the nodes that exist on the network or their IP locations on the internet.  To overcome this start-up problem, the node will rely on the decentralised mechanisms provided by crust.
 
+So when the bootstrapping is processed by the networking layer, there is no relevant contribution from the routing network.  The second diagram removes the functions that do not apply to bootstrapping, but adds the paths that are specific for bootstrapping.
+
+As there is no exchange of routing messages in this bootstrapping process in the `match()` function, there will not be a `ConnectRequest` or a `ConnectResponse`.  So when the client identified itself as a client in the `Hello` message, node B can safely treat as such.  Likewise, node A will want to accept a bootstrap connection to a node, in this case node B, to initiate routing communications with the network.
+
 ![Asynchronous flowchart for Connection Management for bootstrapping](Connection%20Management%20for%20Bootstrapping.png)
 
 ## Integration of Address Relocation into connection management
@@ -102,10 +106,6 @@ pub struct crust::Connection {
 enum ExpectedConnection {
     InternalRequest::Connect(ConnectRequest),
     InternalResponse::Connect(ConnectResponse, SignedToken)
-}
-
-pub struct ExpectedConnections {
-    lru_cache: LruCache<crust::Connection, ExpectedConnection>
 }
 
 ::crust::Event::OnConnect(::crust::Connection)
@@ -219,6 +219,36 @@ fn on_confirmation(&mut self, confirmation, connection) {
 ```
 
 NOTE: this is unfinished and the implementation for a bootstrap connection, is not integrated in the above pseudo-code.
+
+### Routing Core
+
+```rust
+struct RoutingCore {
+    ...,
+    UnknownConnections: ExpirationMap<::crust::Connection, Option<::direct_messages::Hello>>
+    ExpectedConnections: ExpirationMap<::ExpectedConnection, Option<::crust::Connection>>
+}
+```
+
+### utilities
+
+```rust
+/// ExpirationMap holds the Key and Value with a timestamp but pushes
+/// out the expired keys and values as a vector
+struct ::utilities::ExpirationMap<K, V> where K: something {
+
+}
+
+impl ExpirationMap {
+    pub fn with_expiry_duration(::time::Duration) {...}
+
+    pub fn insert()
+    pub fn contains_key()
+    /// clean out expired state
+    pub fn check_expirations() -> Vec<(K,V)>
+    ...
+}
+```
 
 ## Updates to Existing Code
 
