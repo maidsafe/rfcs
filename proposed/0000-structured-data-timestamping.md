@@ -54,7 +54,7 @@ During the validation consensus a manager has only to check that its own date is
 It is stored in 2 new fields. The i64 type represents the sec part of a struct Timespec
 generated from an UTC time (a number of seconds since the beginning of the epoch).
 
-```rustc
+```rust
     min_date: i64,
     max_date: i64,
 ```
@@ -63,7 +63,7 @@ generated from an UTC time (a number of seconds since the beginning of the epoch
 
 The values insure that the behavior of classic SD's remains unchanged with no date validation:
 
-```rustc
+```rust
             min_date : 0i64,
             max_date : i64::max_value(),
 ```
@@ -73,7 +73,7 @@ The values insure that the behavior of classic SD's remains unchanged with no da
 A new constructor (StructuredData::with_dates) with 2 supplementary arguments
 specifies a range of dates for the timestamping:
 
-```rustc
+```rust
     /// Constructor with min/max dates.
     /// StructuredData::new cannot simply be called and then dates added because dates must be part of signed data.
     pub fn with_dates(type_tag: u64,
@@ -106,14 +106,28 @@ specifies a range of dates for the timestamping:
     }
 ```
 
+## Inclusion of the new fields in the replace function
+
+This is done in replace_with_other function.
+The date fields must be replaced when an SD is updated.
+
+```rust
+        self.min_date = other.min_date;
+        self.max_date = other.max_date;
+```
+
 ## Validation function
 
 It checks that current date is within the specified range.
 
-```rustc
+```rust
     /// Validate date. An error is generated when current date is not in the range [min_date .. max_date]
     pub fn validate_date(&self) -> Result<(), ::error::RoutingError> {
         use time;
+        // Don't compute utc time for standard SD (with default values for dates)
+        if self.min_date <= 0 && self.max_date == i64::max_value() {
+            return Ok(())
+        }
         let now_utc = time::now_utc().to_timespec().sec;
         if now_utc < self.min_date || now_utc > self.max_date {
             Err(::error::RoutingError::OutOfRangeDate)
@@ -129,7 +143,7 @@ It checks that current date is within the specified range.
 This is done in data_to_sign function.
 The aim is to prove that date fields haven't been tampered with (like the rest of the SD).
 
-```rustc
+```rust
         try!(enc.encode(self.min_date.to_string().as_bytes()));
         try!(enc.encode(self.max_date.to_string().as_bytes()));
 ```
@@ -138,7 +152,7 @@ The aim is to prove that date fields haven't been tampered with (like the rest o
 
 Clients can get the timestamp of a SD by calling these functions.
 
-```rustc
+```rust
     /// Get the min date
     pub fn get_min_date(&self) -> i64 {
         self.min_date
@@ -156,18 +170,18 @@ OutOfRangeDate is returned by the validation function when current UTC time is n
 The code is defined at 3 places:
 
 RoutingError enumeration:
-```rustc
+```rust
     /// Current date is ouside specified range [min_date .. max_date] of structured data
     OutOfRangeDate,
 ```
 
 Implementation of std::error::Error for RoutingError:
-```rustc
+```rust
             RoutingError::OutOfRangeDate => "Current date is outside specified range",
 ```
 
 Implementation of std::fmt::Display for RoutingError:
-```rustc
+```rust
             RoutingError::OutOfRangeDate =>
                 ::std::fmt::Display::fmt("Current date is outside specified range", formatter),
 ```
