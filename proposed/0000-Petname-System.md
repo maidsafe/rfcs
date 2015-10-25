@@ -257,4 +257,8 @@ Drive: a symlink to some network location visible on the Drive will presumably b
 
 [11] If a Persona publicly owns a Share, can they have the same Petname? This would implement the `www.`, `blog.`, `xray.` in the Nickname space, which is currently avoided by the proposed system.
 
+[12] Should Nicknames be a SD type? If there is free lookup linking to Nicknames, what happens when the Nickname is changed? For sure the Petname that the user is familiar with should *not* change.
+
+[13] Should an archive folder be used to store old Nicknames? They may be free-linked to individual user's Petnames, and need to be retained. This can be controlled by a version number.
+
 [12] What attacks are inherent to this system?
