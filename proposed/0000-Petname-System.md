@@ -33,8 +33,13 @@ This Petname System should be applicable to both Personas and Shares.
 
 * Address Book: List of user-assigned Petnames
 
-* Human-memorable: This means that a human being has a chance of remembering
-the name.
+* Key Book: List of publicly available Nicknames.
+
+* Archive: List of previous versions of publicly available Nicknames.
+
+* Service: Link in Nickname that indicate specific directories for individual use cases.
+
+* Human-memorable: This means that a human being has a chance of remembering the name.
 
 * Securely Unique: This is means that the Key cannot be forged or mimicked.
 
@@ -72,7 +77,7 @@ Zooko's Triangle argues that if a system is to be decentralized, one single name
 
 Nicknames must always be specified as Nicknames - and made brutally obvious to the user that they *are*, in fact, Nicknames. They are to be changed immediately and globally once a user assigns a Petname to them. They are then to be, by default, stored forever as the Petname that the user assigns. Petnames must always be used if previously assigned.
 
-There should be a reserved character to denotate that this *is* a Nickname (see: Unresolved Questions [3]). If two nicknames are rendered in the same display, there should be a way to distinguish this as well.  One way to distinguish this is to add a trailing identifier which are the first X number of hexadecimal bytes of that Key (see: Unresolved Questions [4]). So a persona with the Nickname "Bart" with the Key “518A...” would be "Bart@518A..." if we set the reserved character to be an arroba. (see: Unresolved Questions [5]). If, however, there is no Nickname attached to the provided Key, the name would be represented with only the reserved character and the identifier.
+There should be a reserved character to denotate that a displayed name *is* a Nickname (see: Unresolved Questions [3]). If two nicknames are rendered in the same display, there should be a way to distinguish this as well.  One way to achieve this is to add a trailing identifier which are the first X number of hexadecimal bytes of that Key follwed by the reserved character before the Nickname (see: Unresolved Questions [4]). So a persona with the Nickname "Bart" with the Key “518A...” would be "518A@Bart..." if the reserved character is set to be an arroba. (see: Unresolved Questions [5]).
 
 ## Absolute/Unique Navigation
 
@@ -101,7 +106,9 @@ The Address Book will be implemented as a directory in the Drive (see: Unresolve
 
 The Address Book will contain any Structured Data that is a Petname. Multiple Petnames can fit into one piece of Structured Data, so even though a user need not create a new Structured Data type each time a Petname is denotated, it must either be put into an existing Petname Structured Data type or create a new one. (see: Unresolved Questions [7])
 
-There will also exist a way of symlinking to an entry in the Key Book for free in that same Petname directory (see: Unresolved Questions [8]). That symlink will indicate that the Nickname of that Key will also be treated by that user as their Petname. That would ensure that a user could casually browse the same as they would casually demo an APP on the SAFE Network – without having to pay for a PUT fee if used in a specific way. At the same time, this would incentivize entities (companies or individuals) to come up with novel Nicknames in hopes that it would be unique in the user's Address Book. If a user can denotate a Petname for free, it stands to reason that they would do so every time it was possible.
+There will also exist a way of symlinking to an entry in the Key Book for free in that same Petname directory (see: Unresolved Questions [8]). That symlink will indicate that the Nickname of that Key will also be treated by that user as their Petname. The symlink can be either to the entry in full, or only a particular service of that entry.
+
+That would ensure that a user could casually browse the same as they would casually demo an APP on the SAFE Network – without having to pay for a PUT fee if used in a specific way. At the same time, this would incentivize entities (companies or individuals) to come up with novel Nicknames in hopes that it would be unique in the user's Address Book. If a user can denotate a Petname for free, it stands to reason that they would do so every time it was possible.
 
 This symlink will refer to a specific version of the Key Book entry in order to assure that the reference, once assigned remains static and does not change even though the entry in the Key Book may.
 
@@ -125,6 +132,20 @@ The Archive is not to be used to look up any Nickname requests, and is only used
 
 It is unknown at this time if the Key Book entry will be required to specifically link to these Archive entries.
 
+## Services
+
+Services are a way to differentiate different data that would be applicable to different applications that run on the network. These can be html files, public encryption keys, or persona identification.
+
+Services will be specified with a reserved character after the Nickname. (see: Unresolved Questions [3]) For instance, if the reserved character was a hash (#) then the html site of a Nickname "MyBlog" would be "MyBlog#html".
+
+The name alone serves as either the name of the Persona, or an anonymous pseudonym (not linked to an account) that the owner chose. The name alone without specifying any service will point to the "default" service of that namespace. If the name is the name of a Persona, the public keys of that Persona are the default. If the name is an anonymous pseudonym, the default service will be whatever the owner chooses as their default service.
+
+This default service must also have a unique service name in addition to being the default. For instance, in the case of a persona, the default service would both be "default" as well as "persona". If the name is an anonymous pseudonym, the default service would bothe be "default" as well as whatever the owner specified as the default, for instance "html" for a html formatted page. (see Footnote: [1])
+
+This data ("default" and all other services) will belong in a hashmap of key-value pairs. The key being the name of the service, and the vaule including the public key for the location of that service. Specificly the vaule is a tuple of four parameters (NameType, u64, bool, undefined) = (NameType, tag, if private/encrypted, undefined) as directories are identied by a tuple of four identities.
+
+Initially this hashmap may contain "persona", "html", and "mail". Others to be added by APP developers to enhanse users' experience with new applications and functions via this mechanism.
+
 ## Code
 
 This seems to affect `safe_client` and potentially `safe_vault`. This will implement many ideas of `safe_dns` while modifying its functionality. This will not affect any low-level crates such as `routing` or `crust` as those act directly on public Keys alone. It is unknown at this time if this could affect `safe_nfs`, `drive`, or `self_authentication` for the generation of Nicknames.
@@ -146,11 +167,13 @@ This problem that can be mitigated into any SAFE Browser with a similar function
 
 ## 3. Cost
 
-A user needs to pay for the Structured Data in their Address Book. 
+A user needs to pay for the Structured Data in their Address Book.
 
 To make any new denotation, they would add a distinct Petname to their Address Book. However, if there already exists a Structured Data object with free space, a new Petname can be appended to that at no cost. Also, if a user were to symlink to a Nickname to use as the Petname, there will also be no cost.
 
 On the flip side, to register a Nickname, whether it be for a Persona or a Share, the user would pay to the network a fee to create a Structured Data chunk and store it in a publicly available Share that can be accessed by anyone. That data chunk would contain both the Nickname and the Key of that data.
+
+However, whenever changing a Nickname entry, a cost is incurred to create an Archive entry for the previous version. This cost both discourages the changing of Nicknames to ensure a sense of continuity of the network, as well as to facilitate static Petname \<-\> Nickname symlinking.
 
 
 # Alternatives
@@ -256,12 +279,13 @@ The Petname System has been used throughout the entire history of humanity, almo
 
 [2] If a user tries to add a Nickname to their Address Book, but there already exists a Nickname the same or similar, what is the resolution process?
 
-[3] What should the reserved Nickname differentiation character be?
+[3] What should the reserved character be for Nickname differentiation and for Service indication?
 
 * # - Hash
 * % - Percentage Sign
 * + - Plus Sign
 * @ - Arroba
+* Other?
 
 [4] Should this *always* be displayed or just in the event that there are duplicate Nicknames being displayed? How might the system intelligently, but noninvasively recognize that there are duplicate Nicknames being displayed?
 
@@ -271,8 +295,14 @@ The Petname System has been used throughout the entire history of humanity, almo
 
 [7] With the Petname Database spanning across multiple SD Blobs, how will the lookup be implemented?
 
+One way to do this is to create a simple JSON formatted list of Petnames that will mimick the structure that a Nickname entry in the Key Book follows. This way multiple Petnames can be stored without having to assign an individual Structured Data type to each one.
+
 [8] How can the symlink be made free for the user?
 
 Drive: a symlink to some network location visible on the Drive will presumably be stored in some other StructuredData object, a parent directory for example, the addition of the symlink in that case will be free since the cost is incurred when the parent directory is first PUT onto the network.
 
 [9] What attacks are inherent to this system?
+
+# Footnotes
+
+[1] Since `html` encoding is to be considered insecure, it replaces the ubiquitous `www` service in order to highlight it's shortcomings. This is done for no other reason than to draw awareness to the distinction of the service rendered.
