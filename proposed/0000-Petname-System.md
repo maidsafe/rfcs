@@ -142,7 +142,7 @@ The name alone serves as either the name of the Persona, or an anonymous pseudon
 
 This default service must also have a unique service name in addition to being the default. For instance, in the case of a persona, the default service would both be "default" as well as "persona". If the name is an anonymous pseudonym, the default service would bothe be "default" as well as whatever the owner specified as the default, for instance "html" for a html formatted page. (see Footnote: [1])
 
-This data ("default" and all other services) will belong in a hashmap of key-value pairs. The key being the name of the service, and the vaule including the public key for the location of that service. Specificly the vaule is a tuple of four parameters (NameType, u64, bool, undefined) = (NameType, tag, if private/encrypted, undefined) as directories are identied by a tuple of four identities.
+This data ("default" and all other services) will belong in a hashmap of key-value pairs. The key being the name of the service, and the vaule including the public key for the location of that service. Specificly the vaule is a tuple of four parameters (NameType, u64, bool, bool) = (NameType, tag, if private/encrypted, if versioned) as directories are identied by a tuple of four identities.
 
 Initially this hashmap may contain "persona", "html", and "mail". Others to be added by APP developers to enhanse users' experience with new applications and functions via this mechanism.
 
