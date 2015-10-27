@@ -21,7 +21,7 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 
 # Detailed design
 
-- The final payload for the underlying stream (e.g. TCP) shall be as follows: a 4 byte, little-endian encoded, unsigned integer holding the size of the actual JSON/encrypted-JSON payload to follow. So if JSON/encrypted-JSON data is denoted as `{P}`, where `{P}` is a sequence of bytes, then the final payload on the wire should be `{S}{P}` where `{S}` is the size of `{P}` in bytes in the format mentioned. All associated responses (errors or otherwise) shall contain `SHA512` of `{P}` in the `id` field, described in detail later.
+- The final payload for the underlying stream (e.g. TCP) shall be as follows: an 8 byte, little-endian encoded, unsigned integer holding the size of the actual JSON/encrypted-JSON payload to follow. So if JSON/encrypted-JSON data is denoted as `{P}`, where `{P}` is a sequence of bytes, then the final payload on the wire should be `{S}{P}` where `{S}` is the size of `{P}` in bytes in the format mentioned. All associated responses (errors or otherwise) shall contain `SHA512` of `{P}` in the `id` field, described in detail later.
 - `endpoint` shall follow `<id>/<version>/<module>/<request>` pattern. E.g. `safe-api/v1.29/nfs/create-dir`.
 - Allowed `module`s are:
 ```
@@ -57,7 +57,7 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 "authenticate-app"
 ```
 
-- RSA-Key-Exchange, app to Launcher
+- ECDH-Key-Exchange, app to Launcher: This uses [Curve25519](https://en.wikipedia.org/wiki/Curve25519) (from libsodium) for symmetric key exchange 
 ```javascript
 {
     "endpoint": "safe-api/v1.0/handshake/authenticate-app",
