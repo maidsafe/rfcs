@@ -54,7 +54,18 @@ This section will introduce the following variables:
 Total primary chunks count     == TP
 Total sacrificial chunks count == TS
 
-These values are amortised across the network and across groups close to each other. 
+These values are amortised across the network and across groups close to each other. The farming 
+rate is therefore defined as a simple algorithm:
+
+`FR = (TP / (TP -TS))`
+
+This will allow the network to increase farming when sacrifical data is decreasing and will satisfy 
+a balancing algorithm which can be measured during network tests. 
+
+It should be noted that as the network grows farming rate decreases, as it should. This will push 
+the design of the archive nodes to ensure the number of chunks active in the network is not excessive.
+Archive nodes will be a further RFC and should allow farming rates to have a natural minimum.
+ 
 ##Establishing StoreCost
 
 This is an upgrade to RFC [0005](https://github.com/dirvine/rfcs/blob/safecoin_implementation/agreed/0005-balance_network_resources.md) the initial StoreCost
@@ -70,15 +81,40 @@ Vaults are aware of GROUP_SIZE
 
 The calculation therefore becomes a simple one (for version 1.0)
 
-StoreCost = FR / (GROUP_SIZE / NC)
+`StoreCost = FR / (GROUP_SIZE / NC)`
 
-Therefore a safecoin will purchase 
+Therefore a safecoin will purchase an amount of storage equivalent to the amount of data stored (and
+active) and the current number of vaults and users on the network. 
 
-##
+##Farm request calculation
 
+The farming request calculation is also a simple affair, but must mitigate against specific attacks
+on the network. These include, but are not limited to:
+
+1. Continual Get against known data on a vault
+2. Attempted targeting of farm rewards
+
+The farming attempt will include Data Manager addresses (to differentiate a farm request from the 
+data name itself). It will also include the chunk name and the name of the ManagedNode (PMID node)
+
+This process is outlined as:
+
+1. Get request for Chunk X is received.
+2. The DataManagers will request the chunk from the ManagedNodes holding this chunk.
+3. The ManagedNodes will send the chunk with their wallet address included. 
+4. Teh DataMangers will then select take the address of each DataManager in the QUORUM.
+5. This is then hashed with the chunk name and PmidHolder name.
+6. If this `result` % Farming rate (modulu divides) with a zero value as the answer then 
+   This data is sent to the group who are closest to `result`
+   This request is a POST message as a safecoin request
+   IF there is a safecoin available of the name `result` then
+   The safecoin is created and the onwer set to the wallet address provided in the `result` packet
+   The safecoin close group then send a receipt message to the wallet address to inform the user 
+   of a new minted safecoin allocated to them. 
 
 # Drawbacks
- 
+
+These will be added during the review process and will include any concerns form the community forum 
 
 
 # Alternatives
