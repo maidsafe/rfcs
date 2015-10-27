@@ -125,6 +125,8 @@ amount of data to store. It was rather inflexible and involved a tremendous amou
 It was an alternative. It should be noted the original designs did include a digital
 currency which would have suited this purpose perfectly as safecoin now will.
 
+There is an alternative approach outlined [here](https://forum.safenetwork.io/t/safecoin-divisibility/4806/68) which introduces an alternatice coin for artists and app developers. This RFC does not limit this proposal and leaves the way open for such an implementation. 
+
 # Unresolved questions
 
 The Application developer rewards are seen as a good start to pay creators of applications on the 
@@ -135,3 +137,21 @@ Some have identified an app may
 
 #Implementation overview
 
+##Client Put
+
+ClientManager
+
+```
+if Put && key.is_in_range() { // we are client manager
+    if ! key.in_account_list {
+        Error::NoAccount;
+    }
+    let cost = vault.farming_rate / (GROUP_SIZE / account.list.len())
+    if cost > account_balance {
+        Error::NotEnoughBalance;
+    } else {
+    account_balance = account_balance - cost;
+    }
+    routing.Put(put_data, data.name()); // send actual network put to datamangers responsible for the chunk name
+}
+```
