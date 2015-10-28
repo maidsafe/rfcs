@@ -143,19 +143,25 @@ Some have identified an app may
 
 ```rust
 fn farming_rate() -> i64 {
-    let cost = if total_primary_chunks > total_sacrificial_chunks {
+    let difference = if total_primary_chunks > total_sacrificial_chunks && total_primary_chunks > 0 {
         total_primary_chunks - total_sacrificial_chunks
     } else {
         1
     };
 
-    let result = total_primary_chunks / cost
-    // return result or i64::MAX if we've overflowed
-    if result < cost { i64::MAX } else { result }
+    let result = total_primary_chunks /  difference 
+    if result < 0 { i64::MAX } else if result == 0 { 1 } else { result }
 }
 ```
 
 ## Client Put (StoreCost)
+
+```rust
+fn store_cost() -> u64 {
+farming_rate() / (GROUP_SIZE / if account.len() ==0 { 1 } else { account.len())
+}
+```
+
 
 ClientManager
 
@@ -164,11 +170,10 @@ if Put && key.is_in_range() { // we are client manager
     if !key.in_account_list {
         Error::NoAccount;
     }
-    let cost = vault.farming_rate / (GROUP_SIZE / account.list.len())
-    if cost > account_balance {
+    if store_cost() > account_balance {
         Error::NotEnoughBalance;
     } else {
-        account_balance -= cost;
+        account_balance -= store_cost();
     }
     // send actual network put to DataManagers responsible for the chunk name
     routing.Put(put_data, data.name());
@@ -178,9 +183,9 @@ if Put && key.is_in_range() { // we are client manager
 ## Client account creation, addition
 
 ```rust
-fn new_account(name) {
+fn new_account_inital_safecoin(name) {
     for (0..50) {
-        account_balance.name += 1 / (farming_rate() /(GROUP_SIZE / if account.len() ==0 { 1 } else { account.len() }
+        account_balance.name += 1 / store_cost()
     }
 }
 ```
