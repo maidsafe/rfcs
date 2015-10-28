@@ -146,7 +146,7 @@ fn farming_rate() -> i64 {
     let difference = if total_primary_chunks > total_sacrificial_chunks && total_primary_chunks > 0 {
         total_primary_chunks - total_sacrificial_chunks
     } else {
-        1
+        i64::MAX
     };
 
     let result = total_primary_chunks /  difference 
