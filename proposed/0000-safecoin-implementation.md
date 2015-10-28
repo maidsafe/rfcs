@@ -141,7 +141,16 @@ Some have identified an app may
 
 #Implementation overview
 
-##Client Put
+##Farming rate method
+
+```
+fn farming_rate() -> i64 {
+  let result = total_primary_chunks / (if total_primary_chunks >= total_sacrifical_chunks { total_primary_chunks - total_sacrifical_chunks } else { 1 }
+  if result < (if total_primary_chunks >= total_sacrifical_chunks { total_primary_chunks - total_sacrifical_chunks } else { 1 } { i64::MAX } else { result }
+
+}
+```
+##Client Put (StoreCost)
 
 ClientManager
 
@@ -162,5 +171,9 @@ if Put && key.is_in_range() { // we are client manager
 ##Client account creation, addition
 
 ```
-
+fi new_account(name) {
+  for (0..50) {
+    account_balance.name += 1 / (farming_rate() /(GROUP_SIZE/ if account.len() ==0 { 1 } else { account.len() }
+  }
+}
 ```
