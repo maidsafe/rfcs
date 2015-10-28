@@ -112,6 +112,10 @@ This process is outlined as:
    The safecoin close group then send a receipt message to the wallet address to inform the user 
    of a new minted safecoin allocated to them. 
 
+##Bootstrap with clients
+
+Although there has been hostility form the community with regard to `something for nothing` approach, there is a necessity for a bootstrap mechnism. As no safecoin can be farmed untill data is uploaded there is a cyclic dependency that reuqires resolution. To overcome this limitation this RFC will propose that every new account creatred also is charged up with 50 safecoin per account. This may be temporary and only used in test-safecoin, but is is likely essential to allow this for the time being. It may be a mechanism to kickstart the network as well.
+
 # Drawbacks
 
 These will be added during the review process and will include any concerns form the community forum 
@@ -154,4 +158,9 @@ if Put && key.is_in_range() { // we are client manager
     }
     routing.Put(put_data, data.name()); // send actual network put to datamangers responsible for the chunk name
 }
+```
+##Client account creation, addition
+
+```
+
 ```
