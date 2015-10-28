@@ -11,9 +11,17 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 - `String` means UTF-8 encoded string unless specifically noted to be otherwise.
 - Unless specifically mentioned, all JSON key-value pairs shall be considered mandatory.
+- any mention of `[ uint8 ... ]` shall be interpreted as follows: binary data (array of unsigned 8 byte integers) encoded as `Base64` and packaged into a UTF-8 string. Correspondingly `[]` would be an empty such string.
+- Configuration for Base64 encoding shall be as follows
+  - Standard Character Set
+  - Line Feed as new-line
+  - Padding (in case the length is not divisible by 4) set to true (will use `=`)
+  - No line length specified
+- All mention of `Integer` correspond to 64 bit integers.
 
 # Detailed design
 
+- The final payload for the underlying stream (e.g. TCP) shall be as follows: an 8 byte, little-endian encoded, unsigned integer holding the size of the actual JSON/encrypted-JSON payload to follow. So if JSON/encrypted-JSON data is denoted as `{P}`, where `{P}` is a sequence of bytes, then the final payload on the wire should be `{S}{P}` where `{S}` is the size of `{P}` in bytes in the format mentioned. All associated responses (errors or otherwise) shall contain `SHA512` of `{P}` in the `id` field, described in detail later.
 - `endpoint` shall follow `<id>/<version>/<module>/<request>` pattern. E.g. `safe-api/v1.29/nfs/create-dir`.
 - Allowed `module`s are:
 ```
@@ -25,7 +33,7 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 - Associated errors will always have the format
 ```javascript
 {
-    "id": [ uint8 ... ], // SHA512(JSON-request-string)
+    "id": [ uint8 ... ], // SHA512({P})
     "error": {
         "code": Integer, // This shall be derived from Into traits for all errors in Client modules
         "description": String
@@ -49,14 +57,14 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 "authenticate-app"
 ```
 
-- RSA-Key-Exchange, app to Launcher
+- ECDH-Key-Exchange, app to Launcher: This uses [Curve25519](https://en.wikipedia.org/wiki/Curve25519) (from libsodium) for symmetric key exchange 
 ```javascript
 {
     "endpoint": "safe-api/v1.0/handshake/authenticate-app",
     "data": {
         "launcher_string": String, // This shall be the one supplied by Launcher
-        "nonce": [ uint8 ... ], // sodiumoxide::crypto::box_::Nonce,
-        "public_encryption_key": [ uint8 ... ]  // sodiumoxide::crypto::box_::PublicKey from
+        "asymm_nonce": [ uint8 ... ], // sodiumoxide::crypto::box_::Nonce,
+        "asymm_pub_key": [ uint8 ... ]  // sodiumoxide::crypto::box_::PublicKey from
                                                 // <App-Asymm-Keys>
     }
 }
@@ -64,10 +72,14 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 Associated response
 ```javascript
 {
-    "id": [ uint8 ... ], // SHA512(JSON-request-string)
-    "data": [ uint8 ... ] // encrypted symmetric keys
+    "id": [],
+    "data": {
+        "encrypted_symm_key": [ uint8 ... ], // Symmetric-Key encrypted with peer's nonce and public-asymmetric-key and authenticated with Launcher's private-symmetric-key.
+	"launcher_public_key": [ uint8 ... ], // Public-key of Launcher, the private counterpart of which was used to authenticate the above.
+    }
 }
 ```
+- No communication hence forth shall be in plain-text. All JSON's must be encrypted using the symmetric-key and iv provided by Launcher.
 
 ## nfs
 - Requests
@@ -87,13 +99,13 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/nfs/create-dir",
     "data": {
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
-        "path": String, // Path root will be interpreted according
-                        // the parameter above. The last token in
-                        // the path will be interpreted as the name
-                        // of directory to be created.
-                        // e.g. "/path/to/a/new_directory"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
+        "dir_path": String, // Path root will be interpreted according
+                            // the parameter above. The last token in
+                            // the path will be interpreted as the name
+                            // of directory to be created.
+                            // e.g. "/path/to/a/new_directory"
         "is_private": Boolean, // true if the created directory must be encrypted, false if
                                // publicly viewable.
                                // e.g. true
@@ -109,13 +121,13 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/nfs/delete-dir",
     "data": {
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
-        "path": String // Path root will be interpreted according
-                       // the parameter above. The last token in
-                       // the path will be interpreted as the name
-                       // of directory to be deleted.
-                       // e.g. "/path/to/an/existing_directory"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
+        "dir_path": String // Path root will be interpreted according
+                           // the parameter above. The last token in
+                           // the path will be interpreted as the name
+                           // of directory to be deleted.
+                           // e.g. "/path/to/an/existing_directory"
     }
 }
 ```
@@ -127,29 +139,31 @@ Associated response
     "data": {
         "timeout_ms": Integer, // Time out a GET request after specified number of miliseconds.
                                // Negative values mean that request will never time out.
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
-        "path": String // Path root will be interpreted according
-                       // the parameter above. The last token in
-                       // the path will be interpreted as the name
-                       // of directory to be read.
-                       // e.g. "/path/to/an/existing_directory"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
+        "dir_path": String // Path root will be interpreted according
+                           // the parameter above. The last token in
+                           // the path will be interpreted as the name
+                           // of directory to be read.
+                           // e.g. "/path/to/an/existing_directory"
     }
 }
 ```
 Associated response
 ```javascript
 {
-    "id": [ uint8 ... ], // SHA512(JSON-request-string)
+    "id": [ uint8 ... ], // SHA512({P})
     "data": {
-        "name": String,
-        "creation_time_sec": Integer, // Number of sec after beginning of epoch.
-        "creation_time_nsec": Integer, // Number of nano-sec offset from creation_time_sec.
-        "modification_time_sec": Integer, // Number of sec after beginning of epoch.
-        "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
-        "is_private": Boolean,
-        "is_versioned": Boolean,
-        "user_metadata": [ uint8 ... ],
+	"info" {
+            "name": String,
+            "creation_time_sec": Integer, // Number of sec after beginning of epoch.
+            "creation_time_nsec": Integer, // Number of nano-sec offset from creation_time_sec.
+            "modification_time_sec": Integer, // Number of sec after beginning of epoch.
+            "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
+            "is_private": Boolean,
+            "is_versioned": Boolean,
+            "user_metadata": [ uint8 ... ],
+	}
         "sub_directories": [
             {
                 "name": String,
@@ -186,20 +200,16 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/nfs/modify-dir",
     "data": {
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-        "path": String // Path root will be interpreted according
-                       // the parameter above. The last token in
-                       // the path will be interpreted as the name
-                       // of directory to be read.
-                       // e.g. "/path/to/an/existing_directory"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+        "dir_path": String // Path root will be interpreted according
+                           // the parameter above. The last token in
+                           // the path will be interpreted as the name
+                           // of directory to be read.
+                           // e.g. "/path/to/an/existing_directory"
         "new_values": {
             // All fields are optional. The ones which are present will be updated with the new
             // value against them.
             "name": String,
-            "modification_time_sec": Integer, // Number of sec after beginning of epoch.
-            "modification_time_nsec": Integer, // Number of nano-sec offset from modification_time_sec.
-            "is_private": Boolean,
-            "is_versioned": Boolean,
             "user_metadata": [ uint8 ... ]
         }
     }
@@ -211,13 +221,13 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/nfs/create-file",
     "data": {
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
-        "path": String, // Path root will be interpreted according
-                        // the parameter above. The last token in
-                        // the path will be interpreted as the name
-                        // of file to be created.
-                        // e.g. "/path/to/a/new_file.ext"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
+        "file_path": String, // Path root will be interpreted according
+                             // the parameter above. The last token in
+                             // the path will be interpreted as the name
+                             // of file to be created.
+                             // e.g. "/path/to/a/new_file.ext"
         "user_metadata": [ uint8 ... ] // Any additional metadata.
                                        // e.g. [ 20, 30, 255, 254, 0, 119 ]
     }
@@ -229,13 +239,13 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/nfs/delete-file",
     "data": {
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
-        "path": String // Path root will be interpreted according
-                       // the parameter above. The last token in
-                       // the path will be interpreted as the name
-                       // of file to be deleted.
-                       // e.g. "/path/to/an/existing_file.ext"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
+        "file_path": String // Path root will be interpreted according
+                            // the parameter above. The last token in
+                            // the path will be interpreted as the name
+                            // of file to be deleted.
+                            // e.g. "/path/to/an/existing_file.ext"
     }
 }
 ```
@@ -245,13 +255,13 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/nfs/get-file",
     "data": {
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
-        "path": String, // Path root will be interpreted according
-                        // the parameter above. The last token in
-                        // the path will be interpreted as the name
-                        // of file to be read.
-                        // e.g. "/path/to/an/existing_file.ext"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
+        "file_path": String, // Path root will be interpreted according
+                             // the parameter above. The last token in
+                             // the path will be interpreted as the name
+                             // of file to be read.
+                             // e.g. "/path/to/an/existing_file.ext"
         "offset": Integer, // Offset in bytes to start reading from. Will be an error if out
                            // of bounds.
         "length": Integer, // Number of bytes to read starting from the given offset above. If
@@ -267,7 +277,7 @@ Associated response
 Associated response
 ```javascript
 {
-    "id": [ uint8 ... ], // SHA512(JSON-request-string)
+    "id": [ uint8 ... ], // SHA512({P})
     "data": {
         "content": [ uint8 ... ],
         "metadata": { // This field will be absent if `include_metadata` was false in the request.
@@ -289,19 +299,16 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/nfs/modify-file",
     "data": {
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-        "path": String // Path root will be interpreted according
-                       // the parameter above. The last token in
-                       // the path will be interpreted as the name
-                       // of file to be read.
-                       // e.g. "/path/to/an/existing_file.ext"
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+        "file_path": String // Path root will be interpreted according
+                            // the parameter above. The last token in
+                            // the path will be interpreted as the name
+                            // of file to be read.
+                            // e.g. "/path/to/an/existing_file.ext"
         "new_values": {
             // All fields are optional. The ones which are present will be updated with the new
             // value against them.
             "name": String,
-            "modification_time_sec": Integer, // Number of sec after beginning of epoch.
-            "modification_time_nsec": Integer, // Number of nano-sec offset from
-                                               // modification_time_sec.
             "content": {
                 // The following fields are mandatory should `content` field be present.
                 "offset": Integer, // Offset in bytes to start writing from. If negative or
@@ -329,10 +336,10 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/dns/register-dns",
     "data": {
-        "long_name": String, // e.g. "new-name.com"
+        "long_name": String, // e.g. "SomeNewDnsName"
         "service_name": String, // e.g. "www"
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
         "service_home_dir_path": String // Path root will be interpreted according
                                         // the parameter above. The last token in
                                         // the path will be interpreted as the name
@@ -347,10 +354,10 @@ Associated response
 {
     "endpoint": "safe-api/v1.0/dns/add-service",
     "parameters": {
-        "long_name": String, // e.g. "existing-name.com"
+        "long_name": String, // e.g. "SomeExistingDnsName"
         "service_name": String, // e.g. "blog"
-        "is_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                              // e.g. false
+        "is_path_shared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
+                                   // e.g. false
         "service_home_dir_path": String // Path root will be interpreted according
                                         // the parameter above. The last token in
                                         // the path will be interpreted as the name
