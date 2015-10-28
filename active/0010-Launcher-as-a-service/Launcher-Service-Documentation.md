@@ -63,8 +63,8 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
     "endpoint": "safe-api/v1.0/handshake/authenticate-app",
     "data": {
         "launcher_string": String, // This shall be the one supplied by Launcher
-        "nonce": [ uint8 ... ], // sodiumoxide::crypto::box_::Nonce,
-        "public_encryption_key": [ uint8 ... ]  // sodiumoxide::crypto::box_::PublicKey from
+        "asymm_nonce": [ uint8 ... ], // sodiumoxide::crypto::box_::Nonce,
+        "asymm_pub_key": [ uint8 ... ]  // sodiumoxide::crypto::box_::PublicKey from
                                                 // <App-Asymm-Keys>
     }
 }
