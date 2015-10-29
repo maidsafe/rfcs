@@ -49,21 +49,49 @@ be referred to as a StoreCost in this document.
 
 This section will introduce the following variables:
 
-- Farming rate                   == FR
-- Total primary chunks count     == TP
-- Total sacrificial chunks count == TS
+- Farming rate                   == FR (0 < FR <= 1)
+- Farming divisor                == FD (FD >= 1)
+- Total primary chunks count     == TP (TP >= 0)
+- Total sacrificial chunks count == TS (TS >= 0)
 
-These values are amortised across the network and across groups close to each other. The farming
-rate is therefore defined as a simple algorithm:
+These values are amortised across the network and across groups close to each other.
 
-`FR = TP / (TP - TS)`
+Each successful GET will generate a unique identifier (see below for details).  This identifier will
+be used as the dividend in a modulo operation with the FD as the corresponding divisor.  If this
+operation results in `0` then farming attempt is successful.
 
-This will allow the network to increase farming when sacrificial data is decreasing and will satisfy
-a balancing algorithm which can be measured during network tests.
+Hence the farming rate is defined as:
 
-It should be noted that as the network grows farming rate decreases, as it should. This will push
-the design of the archive nodes to ensure the number of chunks active in the network is not excessive.
-Archive nodes will be a further RFC and should allow farming rates to have a natural minimum.
+`FR = 1 / FD`
+
+In other words, if FD is 1, every attempt is successful and FR is 1.  If FD is 10, on average every
+tenth attempt is successful and FR is 0.1.
+
+Broadly speaking, we want the farming rate to drop as the number of chunks increases, but we want
+the rate to increase if we start to lose sacrificial chunks.
+
+For the first requirement, we can achieve this by having FD as the maximum of TP and TS (we'll call
+this maximum total "MT").
+
+For the second requirement, we want to reduce the FD if we have less sacrificial chunks than primary
+ones.  This means the farming divisor is defined as:
+
+```rust
+if TS < TP {
+    FD = MT - (TP - TS) + 1
+} else {
+    FD = MT + 1
+}
+```
+
+Since the farming rate decreases as the network grows, it will push the design of the archive nodes
+to ensure the number of chunks active in the network is not excessive.  Archive nodes will be a
+further RFC and should allow farming rates to have a natural minimum.
+
+This is a simplistic formula which will very likely need to be modified as more information about
+the make up of the network becomes available.  For example, more weight might need to be given in
+the case of loss of sacrificial chunks, so something like `FD = MT - 2 * (TP - TS) + 1` could be
+used (adjusted so that FD remains >= 1).
 
 ## Establishing StoreCost
 
@@ -101,9 +129,9 @@ This process is outlined as:
 1. Get request for Chunk X is received.
 2. The DataManagers will request the chunk from the ManagedNodes holding this chunk.
 3. The ManagedNodes will send the chunk with their wallet address included.
-4. The DataMangers will then take the address of each DataManager in the QUORUM.
+4. The DataManagers will then take the address of each DataManager in the QUORUM.
 5. This is hashed with the chunk name and PmidHolder name.
-6. If this `result` % farming rate (modulo divides) with a zero value as the answer then
+6. If this `result` % farming divisor (modulo divides) yields zero then
    - This data is sent to the group who are closest to `result`
    - This request is a POST message as a safecoin request
    - If there is a safecoin available of the name `result` then
@@ -142,16 +170,14 @@ Some have identified an app may
 ## Farming rate method
 
 ```rust
-fn farming_rate() -> i64 {
-    let cost = if total_primary_chunks > total_sacrificial_chunks {
+fn farming_divisor() -> u64 {
+    let bias_for_lost_sacrificial = if total_sacrificial_chunks < total_primary_chunks {
         total_primary_chunks - total_sacrificial_chunks
     } else {
-        1
+        0
     };
 
-    let result = total_primary_chunks / cost
-    // return result or i64::MAX if we've overflowed
-    if result < cost { i64::MAX } else { result }
+    ::std::cmp::max(total_primary_chunks, total_sacrificial_chunks) - bias_for_lost_sacrificial + 1
 }
 ```
 
