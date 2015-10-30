@@ -185,10 +185,12 @@ fn farming_divisor() -> u64 {
 
 ```rust
 fn store_cost() -> u64 {
-farming_rate() / (GROUP_SIZE / if account.len() ==0 { 1 } else { account.len())
+    // The number of active client accounts must be at least 1 (or storing will be free!).  This
+    // should always be the case, since at least the requesting client's account is active.
+    assert!(number_of_active_client_accounts > 0)
+    number_of_active_client_accounts / (farming_divisor() * GROUP_SIZE)
 }
 ```
-
 
 ClientManager
 
