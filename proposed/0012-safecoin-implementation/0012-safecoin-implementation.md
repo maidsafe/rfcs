@@ -2,8 +2,8 @@
 - Type: new feature
 - Related Components: safe_vault, safe_client
 - Start Date: 12-10-2015
-- RFC PR: (leave this empty)
-- Issue Number: (leave this empty)
+- RFC PR: #60
+- Issue Number: Proposed - #61
 
 # Summary
 
