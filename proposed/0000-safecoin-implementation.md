@@ -88,11 +88,6 @@ Since the farming rate decreases as the network grows, it will push the design o
 to ensure the number of chunks active in the network is not excessive.  Archive nodes will be a
 further RFC and should allow farming rates to have a natural minimum.
 
-This is a simplistic formula which will very likely need to be modified as more information about
-the make up of the network becomes available.  For example, more weight might need to be given in
-the case of loss of sacrificial chunks, so something like `FD = MT - 2 * (TP - TS) + 1` could be
-used (adjusted so that FD remains >= 1).
-
 ## Establishing StoreCost
 
 This is an upgrade to RFC [0005](https://github.com/dirvine/rfcs/blob/safecoin_implementation/agreed/0005-balance_network_resources.md) the initial StoreCost
