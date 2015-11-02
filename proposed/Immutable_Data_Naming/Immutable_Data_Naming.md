@@ -64,7 +64,7 @@ None identified, other than increased complexity of Vault and Client codebase.
 
 # Alternatives
 
-No other in-house alternatives have been documented as yet.
+1. The SAFE network itself, is able to be free of carrying out any naming calculation and handling based on types, as long as client be aware of such and fire requests bearing the different type-dependent name.  This will have the least impact to the current code base, however the client app must need to be aware of that and carry out its duty. It also leaves an option (probably good) when the client app decides only one of the type will be enough.
 
 
 # Unresolved Questions
