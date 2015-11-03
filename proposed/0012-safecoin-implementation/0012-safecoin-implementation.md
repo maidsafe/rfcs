@@ -68,21 +68,32 @@ In other words, if FD is 1, every attempt is successful and FR is 1.  If FD is 1
 tenth attempt is successful and FR is 0.1.
 
 Broadly speaking, we want the farming rate to drop as the number of chunks increases, but we want
-the rate to increase if we start to lose sacrificial chunks.
+the rate to increase as we lose sacrificial chunks.  We also want to ensure that farming stops if
+the sacrificial count is greater than or equal to the primary count.
 
-For the first requirement, we can achieve this by having FD as the maximum of TP and TS (we'll call
-this maximum total "MT").
-
-For the second requirement, we want to reduce the FD if we have less sacrificial chunks than primary
-ones.  This means the farming divisor is defined as:
+This means the farming divisor is defined as:
 
 ```rust
-if TS < TP {
-    FD = MT - (TP - TS) + 1
+if TP > TS {
+    FD = TP / (TP - TS)
 } else {
-    FD = MT + 1
+    FD = maximum possible value
 }
 ```
+
+yielding
+
+```rust
+if TP > TS {
+    FR = 1 - (TS / TP)
+} else {
+    FR = approximately 0
+}
+```
+
+As with many aspects of the network, in the early days we expect the network and the distribution of
+chunks to be fairly unbalanced, but over time this farming rate should tend towards a consistent
+figure across the whole network.
 
 Since the farming rate decreases as the network grows, it will push the design of the archive nodes
 to ensure the number of chunks active in the network is not excessive.  Archive nodes will be a
@@ -166,13 +177,11 @@ Some have identified an app may
 
 ```rust
 fn farming_divisor() -> u64 {
-    let bias_for_lost_sacrificial = if total_sacrificial_chunks < total_primary_chunks {
-        total_primary_chunks - total_sacrificial_chunks
+    if total_primary_chunks > total_sacrificial_chunks {
+        total_primary_chunks / (total_primary_chunks - total_sacrificial_chunks)
     } else {
-        0
-    };
-
-    ::std::cmp::max(total_primary_chunks, total_sacrificial_chunks) - bias_for_lost_sacrificial + 1
+        u64::MAX
+    }
 }
 ```
 
