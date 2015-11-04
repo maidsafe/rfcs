@@ -29,7 +29,7 @@ The different immutable data type copy bearing different name, which will be han
 
 ## Overview
 
-The name of a immutalbe data copy will be based on it's type and in different hash order :
+The name of an immutalbe data copy will be based on it's type and in different hash order :
 
 Normal : normal_name = hash(im.content), handled by DM(normal_name), 4 copies on the pmid_nodes picked up by that group (one copy on each node)
 
@@ -37,7 +37,9 @@ Backup : backup_name = hash(normal_name), handled by DM(backup_name), 4 copies o
 
 Sacrificial : sacrificial_name = hash(backup_name), handled by DM(sacrificial_name), 4 copies on the pmid_nodes picked up by that group (one copy on each node)
 
-The MaidManager of the client issuing the put request will charge only 4 copies of the data, as the backup and sacrificial copies are allowed to be removed from the SAFE network according to the network status.
+MaidManagers will charge the client issuing the put request with 4 copies of the data, as the backup and sacrificial copies are allowed to be removed from the SAFE network according to the network status.
+
+The portal DMs (DataManagers that being the closest group to narmal_name), fowards the put/get requests to the second/third order DMs (i.e. DataManagers closing to backup_name and sacrificial_name). This reduces the exposure of network data types to client side to minimum.
 
 ## Implementation Details
 
@@ -60,11 +62,11 @@ The MaidManager of the client issuing the put request will charge only 4 copies 
 
 # Drawbacks
 
-None identified, other than increased complexity of Vault and Client codebase.
+None identified, other than increased complexity of Vault, Routing and Client codebase.
 
 # Alternatives
 
-1. The SAFE network itself, is able to be free of carrying out any naming calculation and handling based on types, as long as client be aware of such and fire requests bearing the different type-dependent name.  This will have the least impact to the current code base, however the client app must need to be aware of that and carry out its duty. It also leaves an option (probably good) when the client app decides only one of the type will be enough.
+1. The SAFE network itself is able to be free of carrying out any naming calculation and handling based on types, as long as client be aware of such and fire requests bearing the different type-dependent name.  This will have the least impact to the current code base, however the client app must need to be aware of that and carry out its duty. It also leaves an option (probably good) when the client app decides only one of the type will be enough.
 
 
 # Unresolved Questions
