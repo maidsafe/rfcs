@@ -57,7 +57,7 @@ This is an accompanying RFC to the parent `Launcher-as-a-service` RFC and define
 "authenticate-app"
 ```
 
-- ECDH-Key-Exchange, app to Launcher: This uses [Curve25519](https://en.wikipedia.org/wiki/Curve25519) (from libsodium) for symmetric key exchange 
+- ECDH-Key-Exchange, app to Launcher: This uses [Curve25519](https://en.wikipedia.org/wiki/Curve25519) (from libsodium) for symmetric key exchange
 ```javascript
 {
     "endpoint": "safe-api/v1.0/handshake/authenticate-app",
@@ -325,7 +325,6 @@ Associated response
 ```
 "register-dns",
 "add-service"
-"get-records"
 ```
 
 - Register DNS
@@ -360,22 +359,6 @@ Associated response
                                         // the path will be interpreted as the name
                                         // of the home directory for the service.
                                         // e.g. "/path/to/an/existing_directory_blog"
-    }
-}
-```
-
-- Get all DNS records for a user
-```
-{
-    "endpoint": "safe-api/v1.0/dns/get-records",
-}
-```
-Associated response
-```
-{
-    "id": [ uint8 ... ], // SHA512({P})
-    "data": {
-        "long_names": [ Strings ... ]
     }
 }
 ```
