@@ -1,4 +1,4 @@
--Feature Name: Launcher communication with unregistered client
+- Feature Name: Launcher communication with unregistered client
 - Type: New Feature
 - Related components: [safe_launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 03-November-2015
@@ -24,7 +24,7 @@ There are plenty of use cases for unregistered clients (those that don't have a 
 There shall be a discovery mechanism in place to detect a Launcher binary running on a machine. For this Launcher shall broadcast a special packet containing a UTF-8 encoded string which will be `--launcher:tcp:<ip>:<port>`. The broadcast shall be done every **5 seconds** on port **59999**. Any application can then connect to Launcher on the announced endpoint. Once the connection is made, it will give Launcher the a special endpoint string that is metioned below. Launcher on receiving this string shall not do further Handshake. It will listen to JSON requests and carry out the tasks as usual, returning either data or error via JSON. The communication will be in plain text instead of cipher text, i.e. these JSONs will be unencrypted. On first such encounter of such a request, Launcher shall request an unregistered client engine from [safe_core](https://github.com/maidsafe/safe_core) and use that for the present as well as for all such future connections. The JSONs are described below.
 
 Handshake for anonymous access:
-```
+```javascript
 {
     "endpoint": "safe-api/v1.0/handshake/anonymous-access",
 }
@@ -39,7 +39,7 @@ dns
 ```
 
 - Get all services for a DNS record
-```
+```javascript
 {
     "endpoint": "safe-api/v1.0/dns/get-services",
     "data": {
@@ -49,7 +49,7 @@ dns
 }
 ```
 Associated response
-```
+```javascript
 {
     "id": [ uint8 ... ], // SHA512({P})
     "data": {
@@ -59,7 +59,7 @@ Associated response
 ```
 
 - Get file size for a file in DNS service's home directory tree
-```
+```javascript
 {
     "endpoint": "safe-api/v1.0/dns/get-service-file-size",
     "data": {
@@ -76,7 +76,7 @@ Associated response
 }
 ```
 Associated response
-```
+```javascript
 {
     "id": [ uint8 ... ], // SHA512({P})
     "data": {
@@ -95,7 +95,7 @@ Associated response
 ```
 
 - Get file contents for a file in DNS service's home directory tree
-```
+```javascript
 {
     "endpoint": "safe-api/v1.0/dns/get-service-file",
     "data": {
@@ -117,7 +117,7 @@ Associated response
 ```
 
 Associated response
-```
+```javascript
 {
     "id": [ uint8 ... ], // SHA512({P})
     "data": {
@@ -144,13 +144,13 @@ Another way would be to add applications like browsers like any other app to Lau
 
 - [authenticate_app.rs](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/ipc_session/authenticate_app.rs) will need to be changed to handle mulitple forms of handshake. If the endpoint is anonymous-access, it will not go through the process of handshake any further and just inform `IpcSession` that the handshake is over.
 - [AppAuthenticationEvent](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/ipc_session/events.rs) will have to be changed to:
-```
+```rust
 pub type AppAuthenticationEvent = Result<Option<event_data::AuthData>, ::errors::LauncherError>;
 ```
 so that when `Result` evaluates to `Ok(None)`, it is to be understood that an unregistered access to the Network is desired.
 - `IpcSession` will have to work in conjunction with `IpcServer` authenticate this session. This will require modification to [IpcServer](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/events.rs) and [IpcSession](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/ipc_session/events.rs) events. Also IpcServer should allow observation of such sessions (construction and tearing down).
 - [SecureCommunication](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/ipc_session/secure_communication.rs) will have to know if it has to perform encryption and decryption or not. For this, a simple modification of definition to:
-```
+```rust
 pub struct SecureCommunication {
     observer         : ::launcher::ipc_server::ipc_session::EventSenderToSession<::launcher
                                                                                  ::ipc_server
