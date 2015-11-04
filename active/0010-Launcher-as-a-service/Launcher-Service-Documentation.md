@@ -309,14 +309,10 @@ Associated response
             // All fields are optional. The ones which are present will be updated with the new
             // value against them.
             "name": String,
-            "content": {
-                // The following fields are mandatory should `content` field be present.
-                "offset": Integer, // Offset in bytes to start writing from. If negative or
-                                   // greater than the size of the file, the given bytes will
-                                   // be appended. Otherwise the file would be truncated from
-                                   // (offset, EOF] and then the given bytes be appended.
-                                   // E.g. 0 (overwrites the entire file)
-                "bytes": [ uint8 ... ]
+            "content": {                
+                "offset": Integer, // Optional field. Offset in bytes to start writing from.
+                                   // If the offset key is not present, then the entire file is overwritten.                                   
+                "bytes": [ uint8 ... ] // Mandatory field. Contents of the file
             },
             "user_metadata": [ uint8 ... ]
         }
