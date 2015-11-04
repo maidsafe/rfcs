@@ -2,6 +2,8 @@
 - Type: New Feature
 - Related components: [safe_launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 03-November-2015
+- RFC PR: #66
+- Issue number: Proposed - #67
 
 # Summary
 
