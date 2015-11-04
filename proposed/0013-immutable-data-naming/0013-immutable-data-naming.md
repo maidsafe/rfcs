@@ -2,8 +2,8 @@
 - Type: New Feature
 - Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client), [routing](https://github.com/maidsafe/routing)
 - Start Date: 02-11-2015
-- RFC PR: 
-- Issue number: Proposed - #
+- RFC PR: #59
+- Issue number: Proposed - #65
 
 # Summary
 
