@@ -106,7 +106,7 @@ Associated response
                              // the path will be interpreted as the name
                              // of file to be read.
                              // e.g. "/path/to/an/existing_file.ext"
-        "offser": Integer, // Offset in bytes to start reading from.
+        "offset": Integer, // Offset in bytes to start reading from.
         "length": Integer, // Number of bytes to read starting from the given offset above.
                            // If negative, then complete file will be read starting from the
                            // offset.
@@ -138,7 +138,7 @@ Associated response
 
 # Alternative
 
-Another way would be to add applications like browsers like any other app to Launcher and start them via Launcher. During adding of an app, Launcher would additionally prompt the user to specify if this app should be given the previlidge to access the Network on his/her behalf or just access the Network anonymously (which will ofcourse limit the permitted operations to only reads). This would have an advantage of not complicating the design by adding UDP discovery mechanism and while also providing a uniform and a consistent interface to the user.
+Another way would be to add applications like browsers like any other app to Launcher and start them via Launcher. During adding of an app, Launcher would additionally prompt the user to specify if this app should be given the previlege to access the Network on his/her behalf or just access the Network anonymously (which will ofcourse limit the permitted operations to only reads). This would have an advantage of not complicating the design by adding UDP discovery mechanism and while also providing a uniform and a consistent interface to the user.
 
 # Implementation hints
 
