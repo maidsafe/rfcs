@@ -17,7 +17,7 @@ Launcher will need to cater to the requests made by unregistered clients to acce
 
 ## Why?
 
-There are plenty of use cases for unregistered clients (those that don't have a valid SAFE Account with `MaidManagers`) to access the SAFE Network. One such example is the browser category. The browsers do not need to create an account or access the SAFE Network nor they require a registered client engine (one that performs operations on a valid account) because all they care about is the fetching and display of data. This is in line with our philosophy that anyone can fetch data from the SAFE Network - it will be of no use if it is encrypted and client fetching it does not have the decryption keys, but that is another matter. Without Launcher, each such application will have to interface with low level libraries like [safe_core](https://github.com/maidsafe/safe_core) and or [safe_nfs](https://github.com/maidsafe/safe_nfs). Further every instance of an engine from [safe_core](https://github.com/maidsafe/safe_core) will create a new routing object. All this is unnecessary overhead. Launcher will funnel requests from all unregistered applications through a single instance of an unregistered client engine obtained from [safe_core](https://github.com/maidsafe/safe_core).
+There are plenty of use cases for unregistered clients (those that don't have a valid SAFE Account with `MaidManagers`) to access the SAFE Network. One such example is the browser category. The browsers do not need to create an account to access the SAFE Network nor do they require a registered client engine (one that performs operations on a valid account) because all they care about is the fetching and display of data. This is in line with our philosophy that anyone can fetch data from the SAFE Network - it will be of no use if it is encrypted and client fetching it does not have the decryption keys, but that is another matter. Without Launcher, each such application will have to interface with low level libraries like [safe_core](https://github.com/maidsafe/safe_core) and/or [safe_nfs](https://github.com/maidsafe/safe_nfs). Further every instance of an engine from [safe_core](https://github.com/maidsafe/safe_core) will create a new routing object. All this is unnecessary overhead. Launcher will funnel requests from all unregistered applications through a single instance of an unregistered client engine obtained from [safe_core](https://github.com/maidsafe/safe_core).
 
 # Detailed design
 
@@ -30,7 +30,7 @@ Handshake for anonymous access:
 }
 ```
 
-dns
+## dns
 - Addtional requests to those mentioned [here for dns](https://github.com/maidsafe/rfcs/blob/master/active/0010-Launcher-as-a-service/Launcher-Service-Documentation.md)
 ```
 "get-services"
@@ -163,4 +163,4 @@ pub struct SecureCommunication {
 }
 ```
 and branching on if `Option` is `None` or otherwise should do it.
-- UDP broadcast will be done by `IpcServer` once it has obtained the successfully spawned an [acceptor](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/mod.rs#L321).
+- UDP broadcast will be done by `IpcServer` once it has obtained the successfully spawned [acceptor](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/mod.rs#L321).
