@@ -138,7 +138,11 @@ Associated response
 
 # Alternative
 
-Another way would be to add applications like browsers like any other app to Launcher and start them via Launcher. During adding of an app, Launcher would additionally prompt the user to specify if this app should be given the previlege to access the Network on his/her behalf or just access the Network anonymously (which will ofcourse limit the permitted operations to only reads). This would have an advantage of not complicating the design by adding UDP discovery mechanism and while also providing a uniform and a consistent interface to the user.
+1. Another way would be to add applications like browsers like any other app to Launcher and start them via Launcher. During adding of an app, Launcher would additionally prompt the user to specify if this app should be given the previlege to access the Network on his/her behalf or just access the Network anonymously (which will ofcourse limit the permitted operations to only reads). This would have an advantage of not complicating the design by adding UDP discovery mechanism and while also providing a uniform and a consistent interface to the user.
+
+2. An alternative to the discovery mechanism where Launcher is multicasting/broadcasting to the apps, we can have the reverse. Launcher would bind to port **59999** and apps would send UDP packets to it asking for the TCP address. This can have an advantage because we are unlikely to thousands of clients connecting to Launcher. So once an app gets a UDP reply from Launcher it will stop sending requests to port **59999**. Statistically we would soon have no UDP messages as all apps would have connected to Launcher. So there would not be unnecessary UDP packets being continually sent by Launcher. Another advantage is that only Launcher is going to be bound to the listening UDP port so there much lesser chance of port contention.
+
+3. Third alternative is to just assign a fix TCP endpoint to Launcher process. If Launcher is unable to attach an acceptor to this endpoint it will not start. So we have no discovery process. All apps know where to find Launcher.
 
 # Implementation hints
 
