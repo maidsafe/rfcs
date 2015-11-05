@@ -17,7 +17,7 @@ Launcher will need to cater to the requests made by unregistered clients to acce
 
 ## Why?
 
-There are plenty of use cases for unregistered clients (those that don't have a valid SAFE Account with `MaidManagers`) to access the SAFE Network. One such example is the browser category. The browsers do not need to create an account or access the SAFE Network nor they require a registered client engine (one that performs operations on a valid account) because all they care about is the fetching and display of data. This is in line with our philosophy that anyone can fetch data from the SAFE Network - it will be of no use if it is encrypted and client fetching it does not have the decryption keys, but that is another matter. Without Launcher, each such application will have to interface with low level libraries like [safe_core](https://github.com/maidsafe/safe_core) and or [safe_nfs](https://github.com/maidsafe/safe_nfs). Further every instance of an engine from [safe_core](https://github.com/maidsafe/safe_core) will create a new routing object. All this is unnecessary overhead. Launcher will funnel requests from all unregistered applications through a single instance of an unregistered client engine obtained from [safe_core](https://github.com/maidsafe/safe_core).
+There are plenty of use cases for unregistered clients (those that don't have a valid SAFE Account with `MaidManagers`) to access the SAFE Network. One such example is the browser category. The browsers do not need to create an account to access the SAFE Network nor do they require a registered client engine (one that performs operations on a valid account) because all they care about is the fetching and display of data. This is in line with our philosophy that anyone can fetch data from the SAFE Network - it will be of no use if it is encrypted and client fetching it does not have the decryption keys, but that is another matter. Without Launcher, each such application will have to interface with low level libraries like [safe_core](https://github.com/maidsafe/safe_core) and/or [safe_nfs](https://github.com/maidsafe/safe_nfs). Further every instance of an engine from [safe_core](https://github.com/maidsafe/safe_core) will create a new routing object. All this is unnecessary overhead. Launcher will funnel requests from all unregistered applications through a single instance of an unregistered client engine obtained from [safe_core](https://github.com/maidsafe/safe_core).
 
 # Detailed design
 
@@ -30,7 +30,7 @@ Handshake for anonymous access:
 }
 ```
 
-dns
+## dns
 - Addtional requests to those mentioned [here for dns](https://github.com/maidsafe/rfcs/blob/master/active/0010-Launcher-as-a-service/Launcher-Service-Documentation.md)
 ```
 "get-services"
@@ -106,7 +106,7 @@ Associated response
                              // the path will be interpreted as the name
                              // of file to be read.
                              // e.g. "/path/to/an/existing_file.ext"
-        "offser": Integer, // Offset in bytes to start reading from.
+        "offset": Integer, // Offset in bytes to start reading from.
         "length": Integer, // Number of bytes to read starting from the given offset above.
                            // If negative, then complete file will be read starting from the
                            // offset.
@@ -138,7 +138,7 @@ Associated response
 
 # Alternative
 
-Another way would be to add applications like browsers like any other app to Launcher and start them via Launcher. During adding of an app, Launcher would additionally prompt the user to specify if this app should be given the previlidge to access the Network on his/her behalf or just access the Network anonymously (which will ofcourse limit the permitted operations to only reads). This would have an advantage of not complicating the design by adding UDP discovery mechanism and while also providing a uniform and a consistent interface to the user.
+Another way would be to add applications like browsers like any other app to Launcher and start them via Launcher. During adding of an app, Launcher would additionally prompt the user to specify if this app should be given the previlege to access the Network on his/her behalf or just access the Network anonymously (which will ofcourse limit the permitted operations to only reads). This would have an advantage of not complicating the design by adding UDP discovery mechanism and while also providing a uniform and a consistent interface to the user.
 
 # Implementation hints
 
@@ -163,4 +163,4 @@ pub struct SecureCommunication {
 }
 ```
 and branching on if `Option` is `None` or otherwise should do it.
-- UDP broadcast will be done by `IpcServer` once it has obtained the successfully spawned an [acceptor](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/mod.rs#L321).
+- UDP broadcast will be done by `IpcServer` once it has obtained the successfully spawned [acceptor](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/mod.rs#L321).
