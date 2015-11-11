@@ -145,9 +145,51 @@ This process is outlined as:
      - The safecoin close group then send a receipt message to the wallet address to inform the user
        of a new minted safecoin allocated to them.
 
+## Safecoin Management
+
+Each safecoin is represented as a piece of data held by the group closest to it's ID. Safecoin data structure is defined as:
+'''rust
+ID: 64 bytes
+OWNER: 64 bytes
+'''
+The ID of a safecoin is 64Bytes long, with the most meaningful 32 bits being sequenced index starts from 0 to 4294967295, and the left over part to be fullfiled with all zeros or other pre-defined pattern (to allow coin division).
+The OWNER of a safecoin is the wallet address provided by the pmid_node as mentioned above.
+
+The Safecoin Management group can only approve a farming request when no such targeted safecoin data has been created before.
+
+When being asked to transfer the owevership, the request transcript must provide a valid signature that can be verified by the stored OWNER, which is actually a public-key. And the the owner will be updated to the new owner.
+
+When being asked to burn a coin, the request can only be from the current owner. The piece of data will then be removed.
+
+## Account Management
+
+An Account Management group is a group of nodes closest to a user's wallet address. It is resposible for that user's safecoin relation activities: rewarding, transfering or discarding.
+A user's safecoin account is defined as :
+'''rust
+OWNER: 64 bytes
+COINS: Vec<SAFECOIN_ID>
+'''
+
+1. rewarding : when received notification a safecoin has been sucessfully farmed, record the ID of that coin into the account
+2. transfer out : remove certain number of coins from the account record, and notify the receiver's account group and the chosen safecoins' management groups of the ownership transferring.
+3. transfer in : when being notified by the sender's account group and the safecoin management group, the correspondent safecoin's ID will be inserted into the record.
+4. discarding : This is a special case that no receiver has been specified. the safecoin will be removed from the account and the chosen safecoins' management groups will be notified with a burning request.
+
 ## Bootstrap with clients
 
 Although there has been hostility from the community with regard to "something for nothing" approach, there is a necessity for a bootstrap mechanism. As no safecoin can be farmed until data is uploaded there is a cyclic dependency that requires a resolution. To overcome this limitation this RFC will propose that every new account created is initialised with 50 safecoins. This may be temporary and only used in test-safecoin, but it is likely essential to allow this for the time being. It may be a mechanism to kickstart the network as well.
+
+As such safecoin data needs to be presented at the moment when to be claimed as a start-up credit for a account, client's bootstrap coins are actually from a pre-injected pool : coins indexed from 0 to 67108864 are special pool that they can be claimed when free, but not allowed to be transferred, and can only be burned.
+When a new account has been created, it can take the coins having the same head-bits with that account's hash order :
+'''rust
+    let mut name = hash(account.wallet_address);
+    for _ in 0..50 {
+        take_coin(take_most_meaningful_bits(name, 26));
+        name = hash(name);
+    }
+'''
+If a targeted coin has been taken already, then that account will not be allowed to have full 50 coins, as it indicates there are already too many users and bootstrap fund is no longer required.
+If a claiming request from a user target a coin outside its 50th hash, it shall be rejected.
 
 # Drawbacks
 
