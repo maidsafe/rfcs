@@ -159,7 +159,7 @@ The Safecoin Management group can only approve a farming request when no such ta
 
 When being asked to transfer the owevership, the request transcript must provide a valid signature that can be verified by the stored OWNER, which is actually a public-key. And the the owner will be updated to the new owner.
 
-When being asked to burn a coin, the request can only be from the current owner. The piece of data will then be removed.
+When being asked to burn a coin, the request must be signed by the current owner and forwarded through that owner's Client Manager group (which will increase allowed storage space at the same time). The piece of safecoin data will then be removed.
 
 ## Account Management
 
@@ -177,19 +177,8 @@ COINS: Vec<SAFECOIN_ID>
 
 ## Bootstrap with clients
 
-Although there has been hostility from the community with regard to "something for nothing" approach, there is a necessity for a bootstrap mechanism. As no safecoin can be farmed until data is uploaded there is a cyclic dependency that requires a resolution. To overcome this limitation this RFC will propose that every new account created is initialised with 50 safecoins. This may be temporary and only used in test-safecoin, but it is likely essential to allow this for the time being. It may be a mechanism to kickstart the network as well.
+Although there has been hostility from the community with regard to "something for nothing" approach, there is a necessity for a bootstrap mechanism. As no safecoin can be farmed until data is uploaded there is a cyclic dependency that requires a resolution. To overcome this limitation this RFC will propose that a user account is composed of two parts: safecoin_account and storage_account, every new account created is initialised with safecoin_account holding 0 coins but storage_account holding 50 safecoin equivalent storage allowance. This may be temporary and only used in test-safecoin, but it is likely essential to allow this for the time being. It may be a mechanism to kickstart the network as well.
 
-As such safecoin data needs to be presented at the moment when to be claimed as a start-up credit for a account, client's bootstrap coins are actually from a pre-injected pool : coins indexed from 0 to 67108864 are special pool that they can be claimed when free, but not allowed to be transferred, and can only be burned.
-When a new account has been created, it can take the coins having the same head-bits with that account's hash order :
-'''rust
-    let mut name = hash(account.wallet_address);
-    for _ in 0..50 {
-        take_coin(take_most_meaningful_bits(name, 26));
-        name = hash(name);
-    }
-'''
-If a targeted coin has been taken already, then that account will not be allowed to have full 50 coins, as it indicates there are already too many users and bootstrap fund is no longer required.
-If a claiming request from a user target a coin outside its 50th hash, it shall be rejected.
 
 # Drawbacks
 
@@ -241,26 +230,51 @@ fn store_cost() -> u64 {
 ClientManager
 
 ```rust
-if Put && key.is_in_range() { // we are client manager
+if key.is_in_range() { // we are client manager
     if !key.in_account_list {
-        Error::NoAccount;
+        return Error::NoAccount;
     }
-    if store_cost() > account_balance {
-        Error::NotEnoughBalance;
-    } else {
-        account_balance -= store_cost();
-    }
-    // send actual network put to DataManagers responsible for the chunk name
-    routing.Put(put_data, data.name());
+    match operation {
+        Put => {
+            if store_cost() > storage_balance {
+                Error::NotEnoughBalance;
+            } else {
+                storage_balance -= store_cost();
+            }
+            // send actual network put to DataManagers responsible for the chunk name
+            routing.Put(put_data, data.name());
+        }
+        Reward, TransferIn => {
+            safecoin_account.add(new_coin);
+        }
+        Convert, TransferOut => {
+            let removed_coins = safecoin_account.remove(quantity);
+            if receiver.is_some() {
+                // Notify the receiver
+                routing.Post(removed_coins, receiver);
+            } else {
+                // This is a convert operation
+                for (0..quantity) {
+                    storage_balance += 1 / store_cost();
+                }
+            }
+            for coin in removed_coins {
+                // Notify each coin's management group
+                routing.Post(compose_transfer_msg(coin, receiver), coin.id);
+            }
+        }
+    }    
 }
 ```
 
 ## Client account creation, addition
 
 ```rust
-fn new_account_inital_safecoin(name) {
+fn new_account(name) {
+    let mut tuple = (name, storage_balance, safecoin_account);
     for (0..50) {
-        account_balance.name += 1 / store_cost()
+        tuple.storage_balance += 1 / store_cost();
     }
+    account_list.push(record);
 }
 ```
