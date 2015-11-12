@@ -145,9 +145,40 @@ This process is outlined as:
      - The safecoin close group then send a receipt message to the wallet address to inform the user
        of a new minted safecoin allocated to them.
 
+## Safecoin Management
+
+Each safecoin is represented as a piece of data held by the group closest to it's ID. Safecoin data structure is defined as:
+'''rust
+ID: 64 bytes
+OWNER: 64 bytes
+'''
+The ID of a safecoin is 64Bytes long, with the most meaningful 32 bits being sequenced index starts from 0 to 4294967295, and the left over part to be fullfiled with all zeros or other pre-defined pattern (to allow coin division).
+The OWNER of a safecoin is the wallet address provided by the pmid_node as mentioned above.
+
+The Safecoin Management group can only approve a farming request when no such targeted safecoin data has been created before.
+
+When being asked to transfer the owevership, the request transcript must provide a valid signature that can be verified by the stored OWNER, which is actually a public-key. And the the owner will be updated to the new owner.
+
+When being asked to burn a coin, the request must be signed by the current owner and forwarded through that owner's Client Manager group (which will increase allowed storage space at the same time). The piece of safecoin data will then be removed.
+
+## Account Management
+
+An Account Management group is a group of nodes closest to a user's wallet address. It is resposible for that user's safecoin relation activities: rewarding, transfering or discarding.
+A user's safecoin account is defined as :
+'''rust
+OWNER: 64 bytes
+COINS: Vec<SAFECOIN_ID>
+'''
+
+1. rewarding : when received notification a safecoin has been sucessfully farmed, record the ID of that coin into the account
+2. transfer out : remove certain number of coins from the account record, and notify the receiver's account group and the chosen safecoins' management groups of the ownership transferring.
+3. transfer in : when being notified by the sender's account group and the safecoin management group, the correspondent safecoin's ID will be inserted into the record.
+4. discarding : This is a special case that no receiver has been specified. the safecoin will be removed from the account and the chosen safecoins' management groups will be notified with a burning request.
+
 ## Bootstrap with clients
 
-Although there has been hostility from the community with regard to "something for nothing" approach, there is a necessity for a bootstrap mechanism. As no safecoin can be farmed until data is uploaded there is a cyclic dependency that requires a resolution. To overcome this limitation this RFC will propose that every new account created is initialised with 50 safecoins. This may be temporary and only used in test-safecoin, but it is likely essential to allow this for the time being. It may be a mechanism to kickstart the network as well.
+Although there has been hostility from the community with regard to "something for nothing" approach, there is a necessity for a bootstrap mechanism. As no safecoin can be farmed until data is uploaded there is a cyclic dependency that requires a resolution. To overcome this limitation this RFC will propose that a user account is composed of two parts: safecoin_account and storage_account, every new account created is initialised with safecoin_account holding 0 coins but storage_account holding 50 safecoin equivalent storage allowance. This may be temporary and only used in test-safecoin, but it is likely essential to allow this for the time being. It may be a mechanism to kickstart the network as well.
+
 
 # Drawbacks
 
@@ -199,26 +230,51 @@ fn store_cost() -> u64 {
 ClientManager
 
 ```rust
-if Put && key.is_in_range() { // we are client manager
+if key.is_in_range() { // we are client manager
     if !key.in_account_list {
-        Error::NoAccount;
+        return Error::NoAccount;
     }
-    if store_cost() > account_balance {
-        Error::NotEnoughBalance;
-    } else {
-        account_balance -= store_cost();
-    }
-    // send actual network put to DataManagers responsible for the chunk name
-    routing.Put(put_data, data.name());
+    match operation {
+        Put => {
+            if store_cost() > storage_balance {
+                Error::NotEnoughBalance;
+            } else {
+                storage_balance -= store_cost();
+            }
+            // send actual network put to DataManagers responsible for the chunk name
+            routing.Put(put_data, data.name());
+        }
+        Reward, TransferIn => {
+            safecoin_account.add(new_coin);
+        }
+        Convert, TransferOut => {
+            let removed_coins = safecoin_account.remove(quantity);
+            if receiver.is_some() {
+                // Notify the receiver
+                routing.Post(removed_coins, receiver);
+            } else {
+                // This is a convert operation
+                for (0..quantity) {
+                    storage_balance += 1 / store_cost();
+                }
+            }
+            for coin in removed_coins {
+                // Notify each coin's management group
+                routing.Post(compose_transfer_msg(coin, receiver), coin.id);
+            }
+        }
+    }    
 }
 ```
 
 ## Client account creation, addition
 
 ```rust
-fn new_account_inital_safecoin(name) {
+fn new_account(name) {
+    let mut tuple = (name, storage_balance, safecoin_account);
     for (0..50) {
-        account_balance.name += 1 / store_cost()
+        tuple.storage_balance += 1 / store_cost();
     }
+    account_list.push(record);
 }
 ```
