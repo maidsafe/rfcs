@@ -82,6 +82,8 @@ None identified, other than increased complexity of Vault and Launcher.
 
 1. It is possible to use command line interaction or passing the listed configurations as program parameters. However, this may cause some issue to the user experience, especially when vault executable needs to be restarted.
 
+1. Regarding the max_space, it is also being proposed by David that a percentage of free space shall be used as a measurement. The recent update in rust file system may enable such calculation to be supported across platforms. Considering there might be multiple vaults running on same machine, a constant check of free space during each store might be necessary.
+
 
 # Unresolved Questions
 
