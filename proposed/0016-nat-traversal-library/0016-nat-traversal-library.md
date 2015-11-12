@@ -66,15 +66,15 @@ pub enum HolePunchServerAddr {
 /// Used to map a udp socket.
 struct UdpSocketMapper<'a> {
     socket: UdpSocket,
-    hole_punch_servers: &'a MappingContext,
+    mapping_context: &'a MappingContext,
 }
 
 impl<'a> UdpSocketMapper<'a> {
-    /// Create a `UdpSocketMapper` which maps `socket` using `hole_punch_servers`.
-    /// `hole_punch_servers` can be `&[]` if we only want to use UPnP. The
+    /// Create a `UdpSocketMapper` which maps `socket` using `mapping_context`.  The
     /// `UdpSocketMapperController` can be dropped to asynchronously cancel the `map` and
     /// `map_timeout` methods.
-    fn new(socket: UdpSocket, hole_punch_servers: &'a MappingContext) -> (UdpSocketMapper<'a>, UdpSocketMapperController);
+    fn new(socket: UdpSocket, mapping_context: &'a MappingContext)
+        -> (UdpSocketMapper<'a>, UdpSocketMapperController);
 
     /// the mapping. Returns `None` if the operation was canceled by dropping the
     /// `UdpSocketMapperController`.
