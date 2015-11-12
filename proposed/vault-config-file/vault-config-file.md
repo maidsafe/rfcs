@@ -27,6 +27,8 @@ To resolved the above issues, a separate config file for vault is proposed to al
 
 1. In case of restart, the configuration keeps the same
 
+1. In case of the re-installation of Vault executable, the config file shall not be changed.
+
 
 ## Expected Outcome
 
@@ -38,17 +40,21 @@ A separated config file co-existing with the vault exectuable. This will only be
 
 The config file shall contains following items:
 	1. wallet_address : the associated address that shall get rewarded for the service provided, in a format of hex code
-	1. max_space_pmid_node : the max disk space allocated for pmid_node, measured in Byte
-	1. max_space_sd : the max disk space allocated for structured_data manager, measured in Byte
+	1. max_space : the max disk space allocated for this vault node, measured in MBytes
+
+It needs to be mentioned that there is an internal distribution ratio between pmid_node (for immutable_data) and sd_manager (for structured_data). This RFC is proposing such ratio to be 3:1. i.e. if 100MB has been set for a vault, 75MB will be used by pmid_node and 25MB will be used by sd_manager.
 
 A sample config file may looks like (1GB for pmid_node and 100MB for sd_manager):
 ```rust
 {
 	wallet_address : 245df3245df3245df3245df300000000000000001cc0dd1cc0dd1cc0dd1cc0dd
-	max_space_pmid_node : 1073741824
-	max_space_sd : 104857600
+	max_space : 100
 }
 ```
+
+Following rules shall also be applied:
+1. A wallet address must be presented to start up a vault
+1. A default vault of 1000MB for the max storage space will be used if it is not set.
 
 ## Implementation Details
 
