@@ -400,6 +400,10 @@ One way to do this is to create a simple JSON formatted list of Petnames that wi
 
 Drive: a symlink to some network location visible on the Drive will presumably be stored in some other StructuredData object, a parent directory for example, the addition of the symlink in that case will be free since the cost is incurred when the parent directory is first PUT onto the network.
 
+From David Irvine [here](https://forum.safenetwork.io/t/abusive-scenario-about-de-duplication/4787/11?u=smacz):
+
+>Better to think like this, For any data you store from outside SAFE then you pay. Any data you store/copy from within SAFE is free.
+
 [9] How will this be derived? Keep in mind that the datamap is ever growing and expanding. And the name is subject to change.
 
 [10] What attacks are inherent to this system?
