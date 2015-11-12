@@ -66,7 +66,7 @@ pub enum HolePunchServerAddr {
 /// Used to map a udp socket.
 struct UdpSocketMapper<'a> {
     socket: UdpSocket,
-    hole_punch_servers: &'a [HolePunchServerAddr],
+    hole_punch_servers: &'a MappingContext,
 }
 
 impl<'a> UdpSocketMapper<'a> {
@@ -74,7 +74,7 @@ impl<'a> UdpSocketMapper<'a> {
     /// `hole_punch_servers` can be `&[]` if we only want to use UPnP. The
     /// `UdpSocketMapperController` can be dropped to asynchronously cancel the `map` and
     /// `map_timeout` methods.
-    fn new(socket: UdpSocket, hole_punch_servers: &[HolePunchServerAddr]) -> (UdpSocketMapper<'a>, UdpSocketMapperController);
+    fn new(socket: UdpSocket, hole_punch_servers: &'a MappingContext) -> (UdpSocketMapper<'a>, UdpSocketMapperController);
 
     /// the mapping. Returns `None` if the operation was canceled by dropping the
     /// `UdpSocketMapperController`.
@@ -108,13 +108,14 @@ impl<'a, 'b> UdpHolePuncher<'a, 'b> {
 }
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
-struct SimpleUdpHolePunchServer {
+struct SimpleUdpHolePunchServer<'a> {
+    mapping_context: &'a MappingContext,
 }
 
-impl SimpleUdpHolePunchServer {
+impl<'a> SimpleUdpHolePunchServer<'a> {
     /// Create a new server. This will spawn a background thread which will serve requests until
     /// the server is dropped.
-    fn new() -> SimpleUdpHolePunchServer;
+    fn new(mapping_context: &'a MappingContext) -> SimpleUdpHolePunchServer<'a>;
 
     /// Obtain the addresses that this server can be contacted on. The `Addresses` object can be
     /// used to get the addresses. The `AddressesController` object can dropped to abort the
@@ -134,6 +135,23 @@ impl Addresses {
 
 /// Drop this object to cancel the corresponding `Addresses::get` call.
 struct AddressesController;
+
+/// Maintains a list of connections to Internet Gateway Devices (if there are any) as well as a set
+/// of addresses of hole punching servers.
+struct MappingContext {
+    gateway: Vec<Result<igd::Gateway, igd::SearchError>>,
+    servers: RwLock<Vec<HolePunchServerAddr>>,
+}
+
+impl MappingContext {
+    /// Create a new mapping context.
+    fn new() -> MappingContext
+
+    /// Inform the context about external hole punching servers.
+    fn add_servers<S>(&self, servers: S)
+        where S: IntoIterator<Item=HolePunchServerAddr>
+}
+
 ```
 
 # Drawbacks
