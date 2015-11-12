@@ -53,8 +53,10 @@ A sample config file may looks like (1GB for pmid_node and 100MB for sd_manager)
 ```
 
 Following rules shall also be applied:
-1. A wallet address must be presented to start up a vault
-1. A default vault of 1000MB for the max storage space will be used if it is not set.
+
+    1. A wallet address must be presented to start up a vault
+
+    2. A default vault of 1000MB for the max storage space will be used if it is not set.
 
 ## Implementation Details
 
