@@ -144,7 +144,7 @@ We now have a fully-featured API for accepting incoming connections. The
 following example shows how this API can be used to listen on a single endpoint
 for a specified duration before timing out.
 
-```
+```rust
 fn accept_timeout(listen: ListenEndpoint, timeout: Duration) -> Option<Stream> {
     let mut acceptor = Acceptor::new();
     let (acc_reactor, acc_controller) = acceptor.start();
@@ -358,7 +358,8 @@ impl<'c, 'a> Iterator for AcceptingEndpoints<'c, 'a> {
 impl<'c, 'a> AcceptingEndpoint<'c, a> {
     fn listen_endpoint(&self) -> &ListenEndpoint;
     fn known_endpoints(&self) -> Endpoints;
-    fn mapped_endpoints<'m>(&'m self, mapping_context: &MappingContext) -> (MappedEndpoints<'m, 'c, 'a>, MappedEndpointsController<'m, 'c, 'a>),
+    fn mapped_endpoints<'m>(&'m self, mapping_context: &MappingContext)
+        -> (MappedEndpoints<'m, 'c, 'a>, MappedEndpointsController<'m, 'c, 'a>),
 }
 
 impl Iterator for Endpoints {
@@ -419,7 +420,8 @@ struct RendezvousInfo {
 }
 
 impl Connector {
-    fn new(addr: Endpoint, mapping_context: Option<&nat_traversal::MappingContext>) -> (Connector, ConnectorController)
+    fn new(addr: Endpoint, mapping_context: Option<&nat_traversal::MappingContext>)
+        -> (Connector, ConnectorController)
     fn rendezvous_info(&self) -> Option<RendezvousInfo>
 }
 
@@ -428,7 +430,8 @@ impl Drop for ConnectorController {
 }
 
 impl<'a> AcceptorController<'a> {
-    fn rendezvous_acceptor<'c>(&'c self, info: RendezvousInfo) -> (RendezvousAcceptor<'c, 'a>, RendezvousAcceptorController<'c, 'a>)
+    fn rendezvous_acceptor<'c>(&'c self, info: RendezvousInfo)
+        -> (RendezvousAcceptor<'c, 'a>, RendezvousAcceptorController<'c, 'a>)
 }
 
 impl<'c, 'a> RendezvousAcceptor<'c, 'a> {
@@ -502,7 +505,8 @@ impl<'a> AcceptorReactor<'a> {
 impl<'a> AcceptorController<'a> {
     fn add_listener(&self, addr: ListenEndpoint);
     fn remove_listener(&self, addr: ListenEndpoint);
-    fn rendezvous_acceptor<'c>(&'c self, info: RendezvousInfo) -> (RendezvousAcceptor<'c, 'a>, RendezvousAcceptorController<'c, 'a>)
+    fn rendezvous_acceptor<'c>(&'c self, info: RendezvousInfo)
+        -> (RendezvousAcceptor<'c, 'a>, RendezvousAcceptorController<'c, 'a>)
 }
 
 impl<'a> Drop for AcceptorController<'a> {
@@ -513,7 +517,8 @@ type Connector;
 type ConnectorController;
 
 impl Connector {
-    fn new<A: ToEndpoint>(addr: A, mapping_context: Option<&nat_traversal::MappingContext>) -> (Connector, ConnectorController)
+    fn new<A: ToEndpoint>(addr: A, mapping_context: Option<&nat_traversal::MappingContext>)
+        -> (Connector, ConnectorController)
     fn rendezvous_info(&self) -> Option<RendezvousInfo>
     fn connect(self) -> Option<Stream>;
 }
@@ -536,7 +541,8 @@ impl ReaderSet {
 
 impl<'r, T> ReaderSetReactor<'r, T> {
     fn read(self, buf: &mut [u8]) -> Option<(ReaderSetReactor<'r, T>, usize)>
-    fn read_timeout(self, buf: &mut [u8], timeout: Duration) -> Option<(ReaderSetReactor<'r, T>, Option<usize>)>
+    fn read_timeout(self, buf: &mut [u8], timeout: Duration)
+        -> Option<(ReaderSetReactor<'r, T>, Option<usize>)>
     fn next_reader<F, R>(self, F: callback) -> R
         where F: for<'e> FnOnce(ReadyReadStream<'e, 'r, T>) -> Option<(ReaderSetReactor<'r, T>, R)>
 }
@@ -564,7 +570,8 @@ impl WriterSet {
 
 impl<'r, T> WriterSetReactor<'r, T> {
     fn write(self, buf: &mut [u8]) -> Option<(WriterSetReactor<'r, T>, usize)>
-    fn write_timeout(self, buf: &[u8], timeout: Duration) -> Option<(WriterSetReactor<'r, T>, Option<usize>)>
+    fn write_timeout(self, buf: &[u8], timeout: Duration)
+        -> Option<(WriterSetReactor<'r, T>, Option<usize>)>
     fn next_writer<F, R>(self, F: callback) -> R
         where F: for<'e> FnOnce(ReadyWriteStream<'e, 'r, T>) -> Option<(WriterSetReactor<'r, T>, R)>
 }
