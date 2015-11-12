@@ -556,6 +556,15 @@ impl Read for ReadyReadStream {
     // non-blocking impl
 }
 
+impl<'r, T> ReaderSetController<'r, T> {
+    fn add_reader(&self, reader: ReadStream, token: T);
+    fn remove_reader(&self, which: &T) -> Vec<(ReadStream, T)>
+}
+
+impl<'r, T> Drop for ReaderSetController<'r, T> {
+    // unblock the corresponding `read()` call
+}
+
 type WriteStream;
 type WriterSet;
 type ReadyWriteStream;
@@ -569,7 +578,7 @@ impl WriterSet {
 }
 
 impl<'r, T> WriterSetReactor<'r, T> {
-    fn write(self, buf: &mut [u8]) -> Option<(WriterSetReactor<'r, T>, usize)>
+    fn write(self, buf: &[u8]) -> Option<(WriterSetReactor<'r, T>, usize)>
     fn write_timeout(self, buf: &[u8], timeout: Duration)
         -> Option<(WriterSetReactor<'r, T>, Option<usize>)>
     fn next_writer<F, R>(self, F: callback) -> R
@@ -585,6 +594,14 @@ impl Write for ReadyWriteStream {
     // non-blocking impl
 }
 
+impl<'r, T> WriterSetController<'r, T> {
+    fn add_writer(&self, reader: WriterStream, token: T);
+    fn remove_writer(&self, which: &T) -> Vec<(WriteStream, T)>
+}
+
+impl<'r, T> Drop for WriterSetController<'r, T> {
+    // unblock the corresponding `write()` call
+}
 impl From<Stream> for ReadStream { ... }
 impl From<Stream> for WriteStream { ... }
 
