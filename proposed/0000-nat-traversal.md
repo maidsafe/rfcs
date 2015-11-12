@@ -7,14 +7,14 @@
 
 # Summary
 
-Create a seperate library for NAT traversal techniques.
+Create a separate library for NAT traversal techniques.
 
 # Motivation
 
 The MaidSAFE network needs to be able to operate through NATs. Currently NAT
 traversal is implemented in Crust, however these techniques may be useful
-elsewhere and to other Rust developers. We can acheive better seperation of
-concerns by implementing a generic NAT-traversal library as a seperate crate.
+elsewhere and to other Rust developers. We can achieve better separation of
+concerns by implementing a generic NAT-traversal library as a separate crate.
 
 # Detailed design
 
@@ -31,7 +31,7 @@ port mapping techniques be employed whenever the library attempts to map a
 socket rather than one or the other technique depending on the situation.
 
 A draft of the public-facing API of the library is proposed below. Most
-error/result types are ommitted from the proposal both for clarity and because
+error/result types are omitted from the proposal both for clarity and because
 it's not always obvious where these types are necessary until it comes to
 implementing it. As this is a blocking-based API this should not be an issue -
 errors will simply be returned where they occur.
