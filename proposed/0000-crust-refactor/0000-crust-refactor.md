@@ -82,6 +82,8 @@ monitor and filter it's own events.
 
 # Detailed design
 
+## Design goals
+
 Everything considered, what sort of design goals should crust strive for? In my view, some
 sensible goals are to be:
 
@@ -135,4 +137,191 @@ sensible goals are to be:
   or impossible to write broken code. For example, on destruction of a crust
   `Service` the user should be able to statically guarantee that all resources
   associated with the service have been cleaned up.
+
+## Components
+
+The unix philosophy is that programs (or libraries as it may be) should do one
+thing and do it well but crust currently performs several distinct tasks. Some
+of these tasks are
+
+* Local peer discovery
+* Nat traversal
+* Transport abstraction
+* Connection management
+
+This RFC proposes that local peer discovery, NAT traversal and transport
+abstraction be factored out into three separate libraries with Crust taking the
+role of a connection management library that utilises the other three. The
+proposed APIs of these libraries are introduced in four separate documents
+
+* [beacon](beacon-library.md)
+* [nat_traversal](nat-library.md)
+* [transport](transport-library.md)
+* [crust](crust-library.md)
+
+## API style
+
+I will now try to justify the design patterns used in these libraries.
+
+The first thing to notice is how blocking operations are performed. In the rust
+standard library, to perform a tcp connection one can write:
+
+```rust
+let stream = try!(TcpStream::connect(addr));
+```
+
+This is good, it creates a connection and returns it (or an error) to the place
+in code where it's needed. However it has a problem, if the `connect` call
+blocks for a long period of time there is no way to cancel it. This is
+important as the part of the application making the connection may want to
+cancel the connection attempt after some time period, or if another event
+happens first, or if the application is shutting down, or any number of other
+reasons. To enable this we can instead make the connection happen in two
+stages. First we create a pair of objects, one of which is used to perform the
+blocking call, the other of which is used to cancel the blocking call.
+
+```rust
+let (connect_go, connect_kill) = Stream::connect(addr);
+```
+
+We forward `connect_kill` to the part of the program that will be in charge of
+cancelling the call and then perform the call.
+
+```rust
+sender.send(connect_kill)
+let stream = connect_go.go();
+```
+
+Alternatively, `connect_go` could be sent to another thread to perform the
+connection, the important part is that the `go` and `kill` are in two seperate
+places of control. To cancel the operation we simply drop `connect_kill`.
+
+As this is a common pattern throughout the libraries, there's a trait for it.
+
+```rust
+trait Go {
+    type Output;
+
+    fn go(self) -> Option<Self::Output> { .. }
+    fn go_timeout(self, timeout: Duration) -> Option<Self::Output> { .. }
+    fn go_deadline(self, deadline: SteadyTime) -> Option<Self::Output> { .. }
+    fn go_opt_timeout(self, opt_timeout: Option<Duration>) -> Option<Self::Output> { .. }
+    fn go_opt_deadline(self, opt_deadline: Option<SteadyTime>) -> Option<Self::Output>
+}
+```
+
+Wherever types named `*Go` and `*Kill` occur in the libraries, this is the
+pattern that's being used. Additionally, it's sometimes necessary to control a
+blocking operation while it is taking place. In these cases, a `*Go` and
+`*Controller` type are used where the controller is used to control the object
+performing the operation. As with `*Kill`, dropping `*Controller` unblocks the
+operation. For an example of this see the `Beacon::recv` method.
+
+For operations that can be performed repeatedly the `*Go` type will return
+itself upon success. For example, the `Output` of `ReadGo` is `(ReadGo, usize)`
+
+To see how functions that use this blocking style can be used and composed
+consider an example where a user wants to write a method which
+
+ (0) Connects to an endpoint.
+ (1) Writes "ping" to the stream.
+ (2) Reads data from the stream.
+ (3) Prints the result.
+
+First, let's consider a simple example where we want to do these things in
+sequence and timeout the whole operation after 1 second;
+
+```rust
+pub fn ping(endpoint: Endpoint) {
+    let deadline = SteadyTime::now() + Duration::from_secs(1);
+
+    let (connect_go, _k) = Stream::connect(endpoint);
+    let stream = connect_go.go_deadline(deadline);
+
+    let (write_go, _k) = stream.write(b"ping");
+    let _ = write_go.go_deadline(deadline);
+
+    let mut data = [0u8; 256];
+    let (read_go, _k) = stream.read(&mut data[..]);
+    let n = read_go.go_deadline(deadline);
+
+    println!("data == {:?}", data);
+}
+```
+
+Simple, right? For a richer example, consider how we implement this procedure
+in a function which itself follows to go/kill style. This implementation allows
+the ping operation to be killed gracefully if, say, the peer never responds.
+
+```rust
+pub fn ping(endpoint: Endpoint) -> (PingGo, PingKill) {
+    let (connect_tx, connect_rx) = channel();
+    let (write_tx, write_rx) = channel();
+    let (read_tx, read_rx) = channel();
+    let go = PingGo {
+        endpoint: endpoint,
+        connect_kill: connect_tx,
+        write_kill: write_tx,
+        read_kill: read_tx,
+    };
+    let kill = PingKill {
+        _connect_kill: connect_rx,
+        _write_kill: write_rx,
+        _read_kill: read_rx,
+    };
+    (go, kill)
+}
+
+struct PingGo {
+    endpoint: Endpoint,
+    connect_kill: Sender<ConnectKill>,
+    write_kill: Sender<WriteKill>,
+    read_kill: Sender<ReadKill>,
+}
+
+struct PingKill {
+    _connect_kill: Receiver<ConnectKill>,
+    _write_kill: Receiver<WriteKill>,
+    _read_kill: Receiver<ReadKill>,
+}
+
+impl Go for PingGo {
+    type Output = ();
+
+    fn go_opt_deadline(self, deadline: Option<SteadyTime>) {
+        let stream = try_opt!(match Stream::connect(self.endpoint) {
+            (go, kill) => self.connect_kill.send(kill).and_then(go.go_opt_deadline(deadline)) {
+        });
+
+        let _ = try_opt!(match stream.write(b"ping") {
+            (go, kill) => self.write_kill.send(kill).and_then(go.go_opt_deadline(deadline)) {
+        });
+
+        let mut data = [0u8; 256];
+        let n = try_opt!(match stream.read(&mut data[..]) {
+            (go, kill) => self.read_kill.send(kill).and_then(go.go_opt_deadline(deadline)) {
+        });
+
+        println!("data: {:?}", data[..n]);
+        Some(())
+    }
+}
+```
+
+## Mio
+
+The APIs described in the other documents are intended to be efficiently
+implementable and usable. For example, reading from a socket repeatedly should
+not require us to spawn threads or repeatedly allocate data.
+
+TODO: show how a mock-up implementation of `ReaderSet` works
+
+# Drawbacks
+
+
+# Alternatives
+
+
+# Unresolved Questions
+
 
