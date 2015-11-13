@@ -155,7 +155,7 @@ role of a connection management library that utilises the other three. The
 proposed APIs of these libraries are introduced in four separate documents
 
 * [beacon](beacon-library.md)
-* [nat_traversal](nat-library.md)
+* [nat_traversal](nat-traversal-library.md)
 * [transport](transport-library.md)
 * [crust](crust-library.md)
 
