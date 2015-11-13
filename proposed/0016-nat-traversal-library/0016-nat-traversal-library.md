@@ -39,6 +39,7 @@ errors will simply be returned where they occur.
 ```rust
 /// A socket address obtained through some mapping technique.
 pub struct MappedSocketAddr {
+
     /// The mapped address
     pub addr: SocketAddrV4,
 
@@ -46,15 +47,6 @@ pub struct MappedSocketAddr {
     /// address. `nat_restricted` will not be set if this is a fully mapped address such as the
     /// external address of a full-cone NAT or one obtained through UPnP.
     pub nat_restricted: bool,
-}
-
-/// The result of mapping a UDP socket.
-pub struct MapUdpSocketResult {
-    /// The result of attempting UPnP mapping.
-    pub upnp_result: Result<(), ...>,
-
-    /// A vector of all addresses we were able to obtain for this socket.
-    pub endpoints: Vec<MappedSocketAddr>,
 }
 
 /// The address of a server that can be used to obtain an external address.
@@ -76,35 +68,41 @@ impl<'a> UdpSocketMapper<'a> {
     fn new(socket: UdpSocket, mapping_context: &'a MappingContext)
         -> (UdpSocketMapper<'a>, UdpSocketMapperController);
 
+    /// Create a `UdpSocketMapper` which maps a fresh `UdpSocket` using `mapping_context`. The
+    /// `UdpSocketMapperController` can be dropped to asynchronously cancel the `map` and
+    /// `map_timeout` methods.
+    fn new_socket(mapping_context: &'a MappingContext) -> (UdpSocketMapper<'a>, UdpSocketMapperController);
+
     /// the mapping. Returns `None` if the operation was canceled by dropping the
     /// `UdpSocketMapperController`.
-    fn map(self) -> Option<(UdpSocket, MapUdpSocketResult)>
+    fn map(self) -> Option<(UdpSocket, UdpRendezvousInfo)>
     
     /// Perform the mapping. Returns `None` if the operation was canceled by dropping the
     /// `UdpSocketMapperController` or if the timeout was reached.
-    fn map_timeout(self, timeout: Duration) -> Option<(UdpSocket, MapUdpSocketResult)>
+    fn map_timeout(self, timeout: Duration) -> Option<(UdpSocket, UdpRendezvousInfo)>
 }
 
 /// Drop this object to unblock the corresponding `UdpSocketMapper` `map` or `map_timeout` method.
 struct UdpSocketMapperController { ... }
 
-/// The result of attempting udp hole punching.
-struct UdpHolePunchResult {
-    result: io::Result<SocketAddrV4>
+struct UdpRendezvousInfo {
+    /// A vector of all the mapped addresses that the peer can try connecting to.
+    endpoints: Vec<MappedSocketAddr>,
+    /// Used to identify the peer.
+    secret: [u8; 4],
 }
 
 /// Used to punch a hole through a NAT.
-struct UdpHolePuncher<'a, 'b> {
-    socket: UdpSocket
-    target: &'a [SocketAddrV4],
-    secret: &'b [u8],
+struct UdpHolePuncher {
+    socket: UdpSocket,
+    peer_info: UdpRendezvousInfo,
 }
 
-impl<'a, 'b> UdpHolePuncher<'a, 'b> {
-    fn new(socket: UdpSocket, target: &'a [SocketAddrV4], secret: &'b [u8])
-        -> (UdpHolePuncher<'a, 'b>, UdpHolePuncherController)
-    fn punch_hole(self) -> Option<(UdpSocket, UdpHolePunchResult)>
-    fn punch_hole_timeout(self) -> Option<(UdpSocket, UdpHolePunchResult)>
+impl UdpHolePuncher {
+    fn new(socket: UdpSocket, their_info: UdpRendezvousInfo)
+        -> (UdpHolePuncher, UdpHolePuncherController)
+    fn punch_hole(self) -> Option<(UdpSocket, SocketAddr)>
+    fn punch_hole_timeout(self) -> Option<(UdpSocket, SocketAddr)>
 }
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
