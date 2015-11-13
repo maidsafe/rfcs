@@ -564,19 +564,5 @@ Needs to be implemented.
 
 # Unresolved questions
 
-* How easy will it be to use these `*Controller` APIs the way they're intended?
-  In practice, the user can always just ignore the controller and perform the
-  blocking call directly eg.
-
-  ```rust
-  let (conn, _c) = Connector::new(addr, None);
-  let stream = conn.connect();
-  ```
-
-  However this defeats the point. The intention is that the user can always be
-  in position to - for example - cancel any pending operations if they receive
-  a signal to shutdown. What lengths will they have to go to keep themselves in
-  this position as their becomes more complicated?
-
-* Should we have a `Stream` type? Or just `ReadStream` and `WriteStream` types?
-
+* None (for now, there were some here but I feel I now have satisfactory
+  answers for them)
