@@ -1,9 +1,9 @@
-- Feature Name: ImmutableData naming base on type
+- Feature Name: Vault Config File
 - Type: New Feature
 - Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 10-11-2015
-- RFC PR:
-- Issue number: Proposed -
+- RFC PR: #70
+- Issue number: Proposed - #74
 
 # Summary
 
