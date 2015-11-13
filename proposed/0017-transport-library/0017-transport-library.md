@@ -340,7 +340,7 @@ full towards the end of this RFC).
 ## Nat traversal
 
 So far we have ignored the problem of network address translation. One of the
-goals of this library is to provide a way to create streams through NATs.
+goals of this library is to allow the user to create streams through NATs.
 
 First we need a way to accept connections from behind a NAT. This means both
 being aware of what addresses can be used to connect to us and trying to create
@@ -357,23 +357,27 @@ impl<'c, 'a> Iterator for AcceptingEndpoints<'c, 'a> {
 
 impl<'c, 'a> AcceptingEndpoint<'c, a> {
     fn listen_endpoint(&self) -> &ListenEndpoint;
-    fn known_endpoints(&self) -> Endpoints;
+    fn known_endpoints(&self) -> KnownEndpoints;
     fn mapped_endpoints<'m>(&'m self, mapping_context: &MappingContext)
         -> (MappedEndpoints<'m, 'c, 'a>, MappedEndpointsController<'m, 'c, 'a>),
 }
 
-impl Iterator for Endpoints {
-    type Item = Endpoint;
+struct MappedEndpoint {
+    pub endpoint: Endpoint,
+    pub nat_restricted: bool,
+}
+
+impl Iterator for KnownEndpoints {
+    type Item = MappedEndpoint;
 }
 
 impl MappedEndpoints<'m, 'c, 'a> {
-    fn next_endpoint(self) -> Option<(MappedEndpoints<'m, 'c, 'a>, Endpoint)>
+    fn next_endpoint(self) -> Option<(MappedEndpoints<'m, 'c, 'a>, MappedEndpoint)>
 }
 
 impl<'m, 'c, 'a> Drop for MappedEndpointsController<'m, 'c, 'a> {
     // unblock any `next_endpoint` call
 }
-
 ```
 
 Here, `accepting_endpoints` returns an iterator that we can use to iterate over
@@ -392,72 +396,14 @@ endpoint. This endpoint will, at best, allow us to receive data only from peers
 that we have already messaged through it. Connecting to such an endpoint
 requires that the remote peer is aware of our attempt to connect to it so that
 it can manually accept the connection using a rendezvous connection procedure.
+The `MappedEndpoint::nat_restricted` flag indicates which of these situations
+the endpoint is in. These endpoints can then be gossiped to other peers that
+may want to connect to us.
 
-Whether an endpoint is NATted or not is relevant both when we map an endpoint
-and when we attempt to connect to an endpoint. As such it should be part of the
-`Endpoint` type. An `Endpoint` type that allows us to consider TCP, UtP and
-NAT-restricted UtP endpoints thus looks like:
-
-```rust
-enum Endpoint {
-    Tcp(SocketAddr),
-    Utp(SocketAddr),
-    NatRestrictedUtp(SocketAddrV4),
-}
-```
-
-Making a connection from A to B where B is a NATted endpoint is a three stage
-process. First, A initiates the connection and in doing so generates
-rendezvous info that B can use to accept the connection. This info is then
-routed to B out-of-band by the user. B then uses this info to accept the
-connection. The APIs for this process are shown below:
-
-```rust
-struct RendezvousInfo {
-    target_endpoint: Endpoint,
-    mapped_endpoints: Vec<Endpoint>,
-    secret: [u8; 4],
-}
-
-impl Connector {
-    fn new(addr: Endpoint, mapping_context: Option<&nat_traversal::MappingContext>)
-        -> (Connector, ConnectorController)
-    fn rendezvous_info(&self) -> Option<RendezvousInfo>
-}
-
-impl Drop for ConnectorController {
-    // unblock rendezvous_info and connect calls
-}
-
-impl<'a> AcceptorController<'a> {
-    fn rendezvous_acceptor<'c>(&'c self, info: RendezvousInfo)
-        -> (RendezvousAcceptor<'c, 'a>, RendezvousAcceptorController<'c, 'a>)
-}
-
-impl<'c, 'a> RendezvousAcceptor<'c, 'a> {
-    fn accept(self) -> (RendezvousInfo, Option<Stream>)
-}
-
-impl<'c, 'a> Drop for RendezvousAcceptorController<'c, 'a> {
-    // unblock the accept call
-}
-```
-
-First off, we add an extra parameter to the `Connector::new` function. If the
-`Connector` sees that it needs to perform a rendezvous connect then it may need
-to use igd and external hole punching servers in order to perform the
-connection. After the `Connector` obtains a mapped socket it puts any
-information needed to accept the connection into a `RendezvousInfo` which the
-user can obtain through the `rendezvous_info` method. The `RendezvousInfo`
-struct contains the endpoint that A is trying to connect to, a list of all the
-mapped endpoints of the socket A is using to perform the connection, and a
-secret needed to accept the connection. If any of A's mapped endpoints for this
-connection are NATed it starts the hole punching procedure, otherwise it simply
-waits for B to connect to it. While this is happening, the user routes the
-rendezvous info to the target node. The target node accepts the connection
-through the appropriate `Acceptor` using the `rendezvous_acceptor` method. This
-method checks whether it can connect directly to the initiator's endpoint. If
-so it does so, otherwise it starts the hole-punching procedure.
+Making a `Stream` between A and B where both endpoints are restricted by a NAT
+requires the user to first create a hole-punched udp socket and peer address
+using the `nat_traversal` library. This socket can then be upgraded to a
+`Stream` as such: `Stream::from(UtpStream::from_udp_socket(socket, peer_addr))`.
 
 ## Full API
 
@@ -466,6 +412,9 @@ still omitted for clarity.
 
 ```rust
 type Stream;
+
+impl From<TcpStream> for Stream;
+impl From<UtpStream> for Stream;
 
 type Endpoint;
 
@@ -505,8 +454,6 @@ impl<'a> AcceptorReactor<'a> {
 impl<'a> AcceptorController<'a> {
     fn add_listener(&self, addr: ListenEndpoint);
     fn remove_listener(&self, addr: ListenEndpoint);
-    fn rendezvous_acceptor<'c>(&'c self, info: RendezvousInfo)
-        -> (RendezvousAcceptor<'c, 'a>, RendezvousAcceptorController<'c, 'a>)
 }
 
 impl<'a> Drop for AcceptorController<'a> {
@@ -517,9 +464,7 @@ type Connector;
 type ConnectorController;
 
 impl Connector {
-    fn new<A: ToEndpoint>(addr: A, mapping_context: Option<&nat_traversal::MappingContext>)
-        -> (Connector, ConnectorController)
-    fn rendezvous_info(&self) -> Option<RendezvousInfo>
+    fn new<A: ToEndpoint>(addr: A) -> (Connector, ConnectorController)
     fn connect(self) -> Option<Stream>;
 }
 
@@ -602,22 +547,10 @@ impl<'r, T> WriterSetController<'r, T> {
 impl<'r, T> Drop for WriterSetController<'r, T> {
     // unblock the corresponding `write()` call
 }
+
 impl From<Stream> for ReadStream { ... }
 impl From<Stream> for WriteStream { ... }
 
-struct RendezvousInfo {
-    target_endpoint: Endpoint,
-    mapped_endpoints: Vec<Endpoint>,
-    secret: [u8; 4],
-}
-
-impl<'c, 'a> RendezvousAcceptor<'c, 'a> {
-    fn accept(self) -> (RendezvousInfo, Option<Stream>)
-}
-
-impl<'c, 'a> Drop for RendezvousAcceptorController<'c, 'a> {
-    // unblock the accept call
-}
 ```
 
 # Drawbacks
