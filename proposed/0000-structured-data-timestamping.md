@@ -227,7 +227,28 @@ This one is really simple with only 64 new lines of code (not counting test func
 
 The date validation can be done in the maid managers or the sd managers or both,
 I would say it should be done at the same place(s) where the signatures of SD content are verified
-(except churn or later events) but I didn't find where this is currently done.
+(except churn or later events).
+
+If done in sd managers the following pieces of code are to be added in safe_vault/src/sd_manager/mod.rs:
+
+- In function handle_put:
+
+```rust
+        // Validate min/max dates
+        if structured_data.validate_date().is_err() {
+            warn!("Invalid min/max dates for PUT at StructuredDataManager");
+            return ::utils::HANDLED;
+        }
+```
+- In function handle_post:
+
+```rust
+        // Validate min/max dates
+        if new_data.validate_date().is_err() {
+            warn!("Invalid min/max dates for POST at StructuredDataManager");
+            return ::utils::HANDLED;
+        }
+```
 
 ## Can it work if date variability among the nodes is too important?
 
