@@ -308,20 +308,194 @@ impl Go for PingGo {
 }
 ```
 
-## Mio
+## Mio usage
 
 The APIs described in the other documents are intended to be efficiently
 implementable and usable. For example, reading from a socket repeatedly should
 not require us to spawn threads or repeatedly allocate data.
 
-TODO: show how a mock-up implementation of `ReaderSet` works
+This can be acheived by building the `Acceptor`, `ReaderSet` and `WriterSet`
+types around a `mio::Poll`. A `mio::Poll` can have many file descriptors
+registered with it and then be used to block until one of them becomes active.
+
+An example implementation of `Acceptor` is shown below:
+
+```rust
+pub struct Acceptor {
+    inner: Mutex<AcceptorInner>,
+    inner_freshened: Condvar,
+    notify_write: Mutex<mio::unix::PipeWriter>,
+}
+
+struct AcceptorInner {
+    poll: mio::Poll,
+    listeners: Vec<TcpListener>,
+    notify_read: mio::unix::PipeReader,
+    fresh: bool,
+    in_accept: bool,
+    wake_buffer: u64,
+}
+
+impl Acceptor {
+    pub fn new() -> Result<Acceptor, AcceptorNewError> {
+        let (r, w) = try!(mio::unix::pipe().map_err(|e| AcceptorNewError::CreatePipe {cause: e}));
+        let mut poll = try!(mio::Poll::new().map_err(|e| AcceptorNewError::CreatePoll {cause: e}));
+        try!(poll.register(&r, ::TOKEN_NOTIFY, mio::EventSet::readable(), mio::PollOpt::level())
+                 .map_err(|e| AcceptorNewError::RegisterNotify {cause: e}));
+        Ok(Acceptor {
+            inner: Mutex::new(AcceptorInner {
+                poll: poll,
+                listeners: Vec::new(),
+                notify_read: r,
+                fresh: false,
+                in_accept: false,
+                wake_buffer: 0,
+            }),
+            inner_freshened: Condvar::new(),
+            notify_write: Mutex::new(w),
+        })
+    }
+
+    pub fn accept<'a>(&'a mut self) -> (AcceptGo<'a>, AcceptorController) {
+        let go = AcceptGo {
+            acceptor: self,
+        };
+        let controller = AcceptorController {
+            acceptor: self,
+        };
+        (go, controller)
+    }
+}
+```
+
+The `Acceptor` maintains a vector of `TcpListener`s, each of which is
+registered with the `poll`. Additionally, there is a pipe (`notify_read`,
+`notify_write`) which is registered for readability with `poll`. When
+`AcceptGo` tries to accept on the socket set it aquires the `inner` `Mutex` and
+blocks on `poll`. When `AcceptorController` wants to destroy or reconfigure the
+`Acceptor` it notifies `AcceptGo` via the pipe, causing it to either return
+`None` or temporarily release the `Mutex` so that `inner` can be mutated. This
+is implemented below:
+
+```rust
+pub struct AcceptGo<'a> {
+    acceptor: &'a Acceptor,
+}
+
+impl<'a> Go for AcceptGo<'a> {
+    type Output = (AcceptGo<'a>, Result<Stream, AcceptError>);
+
+    fn go_timeout(self, timeout: Duration) -> Option<(AcceptGo<'a>, Result<Stream, AcceptError>)> {
+        let timeout_ms = timeout.num_milliseconds();
+        let timeout_ms = match timeout_ms < 0 {
+            true    => 0,
+            false   => timeout_ms as usize,
+        };
+        loop {
+            let mut inner = self.acceptor.inner.lock().unwrap();
+            let n = match inner.poll.poll(timeout_ms) {
+                Ok(n) => n,
+                Err(e) => return Some((self, Err(AcceptError::Poll {cause: e}))),
+            };
+            for i in 0..n {
+                match inner.poll.event(i).token {
+                    ::TOKEN_NOTIFY => {
+                        let mut c = [0u8];
+                        read_exact(&mut inner.notify_read, &mut c[..]).unwrap();
+                        match c[0] {
+                            ::NOTIFY_WAKE => {
+                                if inner.wake_buffer > 0 {
+                                    inner.wake_buffer -= 1;
+                                }
+                                else {
+                                    inner.fresh = false;
+                                    while !inner.fresh {
+                                        inner.in_accept = true;
+                                        inner = self.acceptor.inner_freshened.wait(inner).unwrap();
+                                        inner.in_accept = false;
+                                    }
+                                }
+                            },
+                            ::NOTIFY_SHUTDOWN => return None,
+                            x => panic!("Unexpected byte in notify pipe: {}", x),
+                        }
+                    },
+                    t => {
+                        match inner.listeners[t.0].accept() {
+                            Ok(None)         => (),
+                            Ok(Some(stream)) => return Some((self, Ok(Stream::Tcp(stream)))),
+                            Err(e)           => return Some((self, Err(AcceptError::Accept {cause: e}))),
+                        }
+                    },
+                }
+            }
+        }
+    }
+
+    fn go_opt_timeout(self, opt_timeout: Option<Duration>) -> Option<(AcceptGo<'a>, Result<Stream, AcceptError>)> {
+        self.go_timeout(opt_timeout.unwrap_or(Duration::max_value()))
+    }
+
+    fn go_opt_deadline(self, opt_deadline: Option<SteadyTime>) -> Option<(AcceptGo<'a>, Result<Stream, AcceptError>)> {
+        self.go_timeout(opt_deadline.map(|d| d - SteadyTime::now()).unwrap_or(Duration::max_value()))
+    }
+}
+
+pub struct AcceptorController<'a> {
+    acceptor: &'a Acceptor,
+}
+
+impl<'a> AcceptorController<'a> {
+    pub fn add_listener<A: ToListenEndpoint>(&self, addr: A) -> Result<(), AddListenerError<A::Err>> {
+        let addr = try!(addr.to_listen_endpoint()
+                             .map_err(|e| AddListenerError::ParseAddr {cause: e}));
+        match addr {
+            ListenEndpoint::Tcp(sa) => {
+                let listener = try!(TcpListener::bind(&sa)
+                                                .map_err(|e| AddListenerError::Bind {cause: e}));
+                {
+                    let mut notify_write = self.acceptor.notify_write.lock().unwrap();
+                    try!(notify_write.write_all(&[::NOTIFY_WAKE])
+                                     .map_err(|e| AddListenerError::Notify {cause: e}));
+                }
+                {
+                    let mut inner = self.acceptor.inner.lock().unwrap();
+                    let token = mio::Token(inner.listeners.len());
+                    try!(inner.poll.register(&listener, token, mio::EventSet::readable(), mio::PollOpt::level())
+                                   .map_err(|e| AddListenerError::Register {cause: e}));
+                    inner.listeners.push(listener);
+                    if inner.in_accept && !inner.fresh {
+                        inner.fresh = true;
+                        self.acceptor.inner_freshened.notify_one();
+                    }
+                    else {
+                        inner.wake_buffer += 1;
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+impl<'a> Drop for AcceptorController<'a> {
+    fn drop(&mut self) {
+        let mut notify_write = self.acceptor.notify_write.lock().unwrap();
+        // not much we could do about this
+        let _ = notify_write.write(&[::NOTIFY_SHUTDOWN]);
+    }
+}
+```
 
 # Drawbacks
 
+Needs to be implemented.
 
 # Alternatives
 
+We could instead build a transport abstraction layer around mioco or rotor.
 
 # Unresolved Questions
 
+None.
 
