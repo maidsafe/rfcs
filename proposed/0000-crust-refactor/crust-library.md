@@ -16,7 +16,83 @@ See the main Crust RFC for an explanation.
 
 # Detailed design
 
-TODO: explain this design
+The user starts their crust session by creating a `Service` object.
+
+```rust
+impl Service {
+    /// Create a new service from the default configuration file.
+    pub fn new() -> Service;
+    /// Create a new service from the given config file.
+    pub fn new_from_config(cfg: Config) -> Service;
+}
+```
+
+Crust performs many separate functions, as such `Service` is a transparent
+object, that can be disassembled into components to be used independently.
+
+```rust
+struct Service {
+    /// Used to accept incoming connections.
+    pub acceptor: ServiceAcceptGo,
+    /// Used to control the state of the beacon.
+    pub beacon_state: ServiceBeaconState,
+    /// Used to receive endpoints broadcasted by peers on the local network.
+    pub beacon_receiver: ServiceNextBeaconEndpointGo,
+    /// Used to control the service.
+    pub controller: ServiceController,
+}
+```
+
+The user moves `acceptor` to where they want to wait for incoming connections
+and `beacon_receiver` to where they want to wait for incoming beacon messages.
+
+`controller` is used to perform almost all the other functionality of crust. it
+implements `Sync` and it's methods borrow `self` immutably allowing it to be
+borrowed and used throughout the rest of the program. `controller` can be used to
+ * Add/remove/list listening endpoints on the service's internal `Acceptor`.
+ * Tell the service about external hole-punching servers.
+ * Get the local hole-punching server's addresses.
+ * Perform connections and rendezvous connections.
+ * Read the cache of recorded endpoints.
+
+```rust
+/// Drop this type to shutdown the service.
+impl ServiceController {
+    /// Accepting
+    pub fn add_listener(&self, addr: ListenEndpoint);
+    pub fn remove_listener(&self, addr: ListenEndpoint);
+    pub fn accepting_endpoints<'c>(&'c self) -> AcceptingEndpoints<'c>
+
+    /// Hole punching
+    pub fn mapping_context(&self) -> &MappingContext;
+    pub fn add_hole_puncher_server(&self, server: HolePunchServerAddr);
+    pub fn hole_punch_addresses(&self) -> (HolePunchAddressesGo, HolePunchAddressesKill);
+
+    /// Get a mapped udp socket using the `Service's internal `MappingContext`
+    pub fn mapped_udp_socket<'c>(&'c self)
+        -> (MappedUdpSocketGo<'c>, MappedUdpSocketKill<'c>)
+    /// Connect a `MappedUdpSocket`.
+    pub fn utp_rendezvous_connect<'c>(&'c self, mapped_socket: MappedUdpSocket, their_info: UdpRendezvousInfo)
+        -> (UtpRendezvousConnectGo<'c>, UtpRendezvousConnectKill<'c>)
+
+    /// Connecting
+    pub fn connect<'c>(&'c self, endpoint: Endpoint)
+        -> (ConnectGo<'c>, ConnectKill<'c>)
+    
+    /// Cacheing/Bootstrapping
+    pub fn cache_endpoint(&self, endpoint: Endpoint)
+    pub fn iter_endpoint_cache<'c>(&'c self) -> EndpointCacheIterator<'c>
+}
+```
+
+The service's beacon state (enabled or disabled) is controlled via a separate
+object. This is just to take advantage of the fact that - being a simple
+boolean - it's state can be represented at the type level. The user can enforce
+compile-time guarantees about the state of the beacon during particular parts
+of their code, or they can just stick the `ServiceBeaconState` in a `Mutex` and
+use it the same way they use the `ServiceController`.
+
+The full API (sans error handling) is given below.
 
 ```rust
 impl Service {
@@ -86,6 +162,7 @@ impl ServiceController {
     /// Hole punching
     pub fn mapping_context(&self) -> &MappingContext;
     pub fn add_hole_puncher_server(&self, server: HolePunchServerAddr);
+    pub fn hole_punch_addresses(&self) -> (HolePunchAddressesGo, HolePunchAddressesKill);
 
     /// Get a mapped udp socket using the `Service's internal `MappingContext`
     pub fn mapped_udp_socket<'c>(&'c self)
@@ -126,6 +203,10 @@ impl<'e, 'c> Go for MappedEndpointsGo<'e, 'c> {
     type Output = (MappedEndpointsGo<'e, 'c>, MappedEndpoint);
 }
 
+impl Go for HolePunchAddressesGo {
+    type Output = Vec<HolePunchServerAddr>
+}
+
 impl<'c> Go for MappedUdpSocketGo<'c> {
     type Output = (MappedUdpSocket<'c>, UdpRendezvousInfo);
 }
@@ -156,12 +237,13 @@ impl<'c> CachedEndpoint<'c> {
 
 # Drawbacks
 
-Why should we *not* do this?
+This is a major overhaul of the current crust API and will take time to implement.
 
 # Alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+Not do this.
 
 # Unresolved questions
 
-What parts of the design are still to be done?
+None.
+
