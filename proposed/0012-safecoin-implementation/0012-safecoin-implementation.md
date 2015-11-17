@@ -278,3 +278,42 @@ fn new_account(name) {
     account_list.push(record);
 }
 ```
+
+## Safecoin Manager
+```rust
+if coin.is_in_range() { // we are the manager of that coin
+    match operation {
+        Farm => {
+            if coin_list.has(coin) {
+                return Error::NotFree;
+            }
+            coin_list.push(generate_coin(coin, requester));
+            // send notification to the requester
+            routing.Post(coin, requester);
+        }
+        Transfer => {
+            if !coin_list.has(coin) {
+                return Error::NoSuchCoin;
+            }
+            if coin_list.get(coin).owner != requester {
+                return Error::InvalidRequest;
+            }
+            coin_list.update(coin, requester, receiver);
+            // send notification to both the requester and receiver
+            routing.PostResponse(coin, requester);
+            routing.Post(coin, receiver);
+        }
+        Burn => {
+            if !coin_list.has(coin) {
+                return Error::NoSuchCoin;
+            }
+            if coin_list.get(coin).owner != requester {
+                return Error::InvalidRequest;
+            }
+            coin_list.remove(coin);
+            // send notification to the requester
+            routing.PostResponse(coin, requester);
+        }
+    }    
+}
+```
