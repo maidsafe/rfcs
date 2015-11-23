@@ -261,4 +261,18 @@ then the data associated with the DataMap is returned
 # Drawbacks
 If a big file/data has to be saved from the application (Say 5gb). Then
 writing the entire content of the data through the API at one go would choke up the resources.
-As a workaround the `update raw data` API can be invoked in smaller chunks, but this approach will increase the number of `GET` calls to the network.  
+As a workaround the `update raw data` API can be invoked in smaller chunks, but this approach will increase the number of `GET` calls to the network.
+
+# Alternatives
+To overcome the drawback, we can probably derive motivation from the REST based cloud APIs such as AWS.
+The way they handle large file uploads is bit different.
+
+1. API is invoked to indicate a beginning of an upload along with the actual content size that would be uploaded. This will return an temporary token or a request id.
+2. Then the actual upload of the content starts in smaller chunks, this request will refer to the temporary token obtained from step1.
+3. The upload is continued till the file is completely uploaded.
+
+A similar approach can be adopted as an enhancement later, without disturbing the existing API.   
+
+# Unresolved questions
+
+None
