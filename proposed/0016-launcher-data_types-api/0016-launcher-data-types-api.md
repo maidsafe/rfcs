@@ -147,12 +147,14 @@ i.e within the permissible range 10,001 to 2^64
 
 ## Immutable data
 
-### Save immutable data
+Raw Data in the network is stored as Immutable data after the SefEncryption process.
+
+### Save Raw data
 
 #### Request
 ```javascript
 {
-  endpoint: 'safe-api/v1.0/data_types/save_immutable_data',
+  endpoint: 'safe-api/v1.0/data_types/save_raw_data',
   data: {
     content: String // base64 String
   }
@@ -182,12 +184,14 @@ i.e within the permissible range 10,001 to 2^64
 }
 ```
 
-### Update immutable data
+### Update raw data
+
+Update an already existing raw data in the network by pasing the DataMap corresponding to it.
 
 #### Request
 ```javascript
 {
-  endpoint: 'safe-api/v1.0/data_types/update_immutable_data',
+  endpoint: 'safe-api/v1.0/data_types/update_raw_data',
   data: {
     datamap: String, // base64 String - Serialised DataMap
     content: String // base64 String
@@ -219,12 +223,12 @@ i.e within the permissible range 10,001 to 2^64
 }
 ```
 
-### Get immutable data
+### Get raw data
 
 #### Request
 ```javascript
 {
-  endpoint: 'safe-api/v1.0/data_types/get_immutable_data',
+  endpoint: 'safe-api/v1.0/data_types/get_raw_data',
   data: {
     content: String // base64 String - Serialised DataMap
   }
@@ -257,4 +261,4 @@ then the data associated with the DataMap is returned
 # Drawbacks
 If a big file/data has to be saved from the application (Say 5gb). Then
 writing the entire content of the data through the API at one go would choke up the resources.
-As a workaround the update API can be invoked in smaller chunks, but this approach will increase the number of `GET` calls to the network.  
+As a workaround the `update raw data` API can be invoked in smaller chunks, but this approach will increase the number of `GET` calls to the network.  
