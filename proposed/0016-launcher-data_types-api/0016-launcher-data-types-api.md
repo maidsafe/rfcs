@@ -191,7 +191,7 @@ i.e within the permissible range 10,001 to 2^64
   data: {
     datamap: String, // base64 String - Serialised DataMap
     content: String // base64 String
-    offset: U64 // Optional field - Offset from where it is supposed to be written. If not specified then the data is appended to the last
+    offset: U64 // Optional field - Offset from where the data is to be written. If not specified then the data is appended to the last
   }
 }
 ```
