@@ -40,7 +40,7 @@ i.e within the permissible range 10,001 to 2^64
 {
   endpoint: 'safe-api/v1.0/data_types/create_structured_data',
   data: {
-    id: String,
+    id: String, // Id of the structured Data
     tag_type: u64,
     content: String, // data to be saved
     is_private: Boolean // If private the data would be encrypted
@@ -54,7 +54,7 @@ i.e within the permissible range 10,001 to 2^64
 ###### On Success
 ```javascript
 {
-  id: String,
+  id: String, // base64 String
   error: null
 }
 ```
@@ -62,7 +62,7 @@ i.e within the permissible range 10,001 to 2^64
 ###### On Error
 ```javascript
 {
-  id: String,
+  id: String, // base64 String
   error: {
     code: -200,
     description: 'Some Error'
@@ -76,7 +76,7 @@ i.e within the permissible range 10,001 to 2^64
 {
   endpoint: 'safe-api/v1.0/data_types/get_structured_data',
   data: {
-    id: String,
+    id: String, // base64 String
     tag_type: u64,
     is_private: Boolean
   }
@@ -85,19 +85,21 @@ i.e within the permissible range 10,001 to 2^64
 
 ##### Response
 
-
 ###### On Success
 ```javascript
 {
-  id: String,
-  data: String
+  id: String, // base64 String
+  data: {
+    version: u64, // version number of the Structured Data
+    content: String // base64 String
+  }  
 }
 ```
 
 ###### On Error
 ```javascript
 {
-  id: String,
+  id: String,// base64 String
   error: {
     code: -200,
     description: 'Some Error'
@@ -113,7 +115,7 @@ i.e within the permissible range 10,001 to 2^64
     id: String, // base64 String
     tag_type: u64,
     version: u64, // previous version number
-    content: String, //base64 String - New Content associated to the Structured Data
+    content: String, // base64 String - New Content associated to the Structured Data
     is_private: Boolean // If private the data would be encrypted and saved in the network
   }
 }
@@ -127,7 +129,7 @@ i.e within the permissible range 10,001 to 2^64
 ###### On Success
 ```javascript
 {
- id: String,
+ id: String, // base64 String
  error: null
 }
 ```
@@ -135,7 +137,7 @@ i.e within the permissible range 10,001 to 2^64
 ###### On Error
 ```javascript
 {
- id: String,
+ id: String, // base64 String
  error: {
    code: -200,
    description: 'Some Error'
@@ -189,7 +191,7 @@ i.e within the permissible range 10,001 to 2^64
   data: {
     datamap: String, // base64 String - Serialised DataMap
     content: String // base64 String
-    offset: U64 // Offset from where it is supposed to be written. By default the data would be appended to the end
+    offset: U64 // Optional field - Offset from where it is supposed to be written. If not specified then the data is appended to the last
   }
 }
 ```
@@ -230,8 +232,8 @@ i.e within the permissible range 10,001 to 2^64
 ```
 
 ##### Response
- Returns error with code and description. If the request is processed successfully
- then the data associated with the DataMap is returned
+Returns error with code and description. If the request is processed successfully
+then the data associated with the DataMap is returned
 
 ###### On Success
 ```javascript
@@ -253,10 +255,6 @@ i.e within the permissible range 10,001 to 2^64
 ```
 
 # Drawbacks
-If there is a big file/data has to be saved from the application (Say 5gb). Then
-the entire content of the data cannot be written through the API at one go because
-this would choke up the resources. As a workaround the user can invoke the update api in smaller chunks, but this approach will increase the number of `GET` calls to the network.  
-
-# Unresolved questions
-
-How to transfer ownership of the StructuredData?
+If a big file/data has to be saved from the application (Say 5gb). Then
+writing the entire content of the data through the API at one go would choke up the resources.
+As a workaround the update API can be invoked in smaller chunks, but this approach will increase the number of `GET` calls to the network.  
