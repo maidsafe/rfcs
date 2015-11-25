@@ -33,11 +33,11 @@ object, that can be disassembled into components to be used independently.
 ```rust
 struct Service {
     /// Used to accept incoming connections.
-    pub acceptor: ServiceAcceptGo,
+    pub acceptor: ServiceListener,
     /// Used to control the state of the beacon.
     pub beacon_state: ServiceBeaconState,
     /// Used to receive endpoints broadcasted by peers on the local network.
-    pub beacon_receiver: ServiceNextBeaconEndpointGo,
+    pub beacon_receiver: ServiceBeaconReceiver,
     /// Used to control the service.
     pub controller: ServiceController,
 }
@@ -66,19 +66,22 @@ impl ServiceController {
     /// Hole punching
     pub fn mapping_context(&self) -> &MappingContext;
     pub fn add_hole_puncher_server(&self, server: HolePunchServerAddr);
-    pub fn hole_punch_addresses(&self) -> (HolePunchAddressesGo, HolePunchAddressesKill);
+    pub fn hole_punch_addresses(&self, bop_handle: &BopHandle)
+        -> BopResult<Vec<HolePunchServerAddr>>
 
     /// Get a mapped udp socket using the `Service's internal `MappingContext`
-    pub fn mapped_udp_socket<'c>(&'c self)
-        -> (MappedUdpSocketGo<'c>, MappedUdpSocketKill<'c>)
+    pub fn mapped_udp_socket<'c>(&'c self, bop_handle: &BopHandle)
+        -> BopResult<MappedUdpSocket>;
     /// Connect a `MappedUdpSocket`.
-    pub fn utp_rendezvous_connect<'c>(&'c self, mapped_socket: MappedUdpSocket, their_info: UdpRendezvousInfo)
-        -> (UtpRendezvousConnectGo<'c>, UtpRendezvousConnectKill<'c>)
+    pub fn utp_rendezvous_connect(&self, bop_handle: &BopHandle,
+                                         mapped_socket: MappedUdpSocket,
+                                         their_info: UdpRendezvousInfo)
+        -> BopResult<Stream>
 
     /// Connecting
-    pub fn connect<'c>(&'c self, endpoint: Endpoint)
-        -> (ConnectGo<'c>, ConnectKill<'c>)
-    
+    pub fn connect(&self, bop_handle: &BopHandle, endpoint: Endpoint)
+        -> BopResult<Stream>
+
     /// Cacheing/Bootstrapping
     pub fn cache_endpoint(&self, endpoint: Endpoint)
     pub fn iter_endpoint_cache<'c>(&'c self) -> EndpointCacheIterator<'c>
@@ -106,17 +109,22 @@ impl Service {
 /// it to be disassembled into components which can be used independently.
 struct Service {
     /// Used to accept incoming connections.
-    pub acceptor: ServiceAcceptGo,
+    pub acceptor: ServiceListener,
     /// Used to control the state of the beacon.
     pub beacon_state: ServiceBeaconState,
     /// Used to receive endpoints broadcasted by peers on the local network.
-    pub beacon_receiver: ServiceNextBeaconEndpointGo,
+    pub beacon_receiver: ServiceBeaconReceiver,
     /// Used to control the service.
     pub controller: ServiceController,
 }
 
-impl Go for ServiceAcceptGo {
-    type Output = (ServiceAcceptGo, Stream);
+impl ServiceListener {
+    pub fn accept(&mut self, bop_handle: &BopHandle) -> BopResult<Stream>;
+    pub fn incoming(&mut self, bop_handle: &BopHandle) -> Incoming;
+}
+
+impl Iterator for Incoming {
+    type Item = Stream;
 }
 
 impl ServiceBeaconState {
@@ -148,8 +156,13 @@ impl ServiceBeaconStateDisabled {
 impl From<ServiceBeaconStateEnabled> for ServiceBeaconState;
 impl From<ServiceBeaconStateDisabled> for ServiceBeaconState;
 
-impl Go for ServiceNextBeaconEndpointGo {
-    type Output = (ServiceNextBeaconEndpointGo, Endpoint)
+impl ServiceBeaconReceiver {
+    pub fn next(&mut self, bop_handle: &BopHandle) -> BopResult<Endpoint>;
+    pub fn endpoints(&mut self, bop_handle: &BopHandle) -> BeaconEndpoints;
+}
+
+impl Iterator for BeaconEndpoints {
+    type Item = Endpoint;
 }
 
 /// Drop this type to shutdown the service.
@@ -162,19 +175,22 @@ impl ServiceController {
     /// Hole punching
     pub fn mapping_context(&self) -> &MappingContext;
     pub fn add_hole_puncher_server(&self, server: HolePunchServerAddr);
-    pub fn hole_punch_addresses(&self) -> (HolePunchAddressesGo, HolePunchAddressesKill);
+    pub fn hole_punch_addresses(&self, bop_handle: &BopHandle)
+        -> BopResult<Vec<HolePunchServerAddr>>
 
     /// Get a mapped udp socket using the `Service's internal `MappingContext`
-    pub fn mapped_udp_socket<'c>(&'c self)
-        -> (MappedUdpSocketGo<'c>, MappedUdpSocketKill<'c>)
+    pub fn mapped_udp_socket(&self, bop_handle: &BopHandle)
+        -> BopResult<MappedUdpSocket>;
     /// Connect a `MappedUdpSocket`.
-    pub fn utp_rendezvous_connect<'c>(&'c self, mapped_socket: MappedUdpSocket, their_info: UdpRendezvousInfo)
-        -> (UtpRendezvousConnectGo<'c>, UtpRendezvousConnectKill<'c>)
+    pub fn utp_rendezvous_connect(&self, bop_handle: &BopHandle,
+                                         mapped_socket: MappedUdpSocket,
+                                         their_info: UdpRendezvousInfo)
+        -> BopResult<Stream>
 
     /// Connecting
-    pub fn connect<'c>(&'c self, endpoint: Endpoint)
-        -> (ConnectGo<'c>, ConnectKill<'c>)
-    
+    pub fn connect(&self, bop_handle: &BopHandle, endpoint: Endpoint)
+        -> BopResult<Stream>
+
     /// Cacheing/Bootstrapping
     pub fn cache_endpoint(&self, endpoint: Endpoint)
     pub fn iter_endpoint_cache<'c>(&'c self) -> EndpointCacheIterator<'c>
@@ -185,9 +201,10 @@ impl<'c> Iterator for AcceptingEndpoints<'c> {
 }
 
 impl<'c> AcceptingEndpoint<'c> {
-    fn listen_endpoint(&self) -> &ListenEndpoint;
+    fn local_endpoint(&self) -> &ListenEndpoint;
     fn known_endpoints<'e>(&'e self) -> KnownEndpoints<'e, 'c>;
-    fn mapped_endpoints<'e>(&'e self) -> (MappedEndpointsGo<'e, 'c>, MappedEndpointsKill<'e, 'c>),
+    fn mapped_endpoints<'e>(&'e self, bop_handle: &BopHandle)
+        -> MappedEndpoints<'e, 'c>,
 }
 
 struct MappedEndpoint {
@@ -199,24 +216,8 @@ impl<'e, 'c> Iterator for KnownEndpoints<'e, 'c> {
     type Item = MappedEndpoint;
 }
 
-impl<'e, 'c> Go for MappedEndpointsGo<'e, 'c> {
-    type Output = (MappedEndpointsGo<'e, 'c>, MappedEndpoint);
-}
-
-impl Go for HolePunchAddressesGo {
-    type Output = Vec<HolePunchServerAddr>
-}
-
-impl<'c> Go for MappedUdpSocketGo<'c> {
-    type Output = (MappedUdpSocket<'c>, UdpRendezvousInfo);
-}
-
-impl<'c> Go for UtpRendezvousConnectGo<'c> {
-    type Output = Stream;
-}
-
-impl<'c> Go for ConnectGo<'c> {
-    type Ouput = Stream;
+impl<'e, 'c> Iterator for MappedEndpoints<'e, 'c> {
+    type Item = MappedEndpoint;
 }
 
 impl<'c> EndpointCacheIterator<'c> {
@@ -231,7 +232,7 @@ impl<'c> CachedEndpoint<'c> {
     pub fn endpoint(&self) -> Endpoint;
 
     /// Calls `service.connect(self.endpoint())` then calls `self.remove()` if the connect fails.
-    pub fn connect(self) -> (ConnectGo<'c>, ConnectKill<'c>)
+    pub fn connect(self, bop_handle: &BopHandle) -> BopResult<Stream>
 }
 ```
 

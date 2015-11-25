@@ -52,15 +52,11 @@ struct MappingContext {
 
 impl MappingContext {
     /// Create a new mapping context.
-    fn new() -> (MappingContextGo, MappingContextKill)
+    fn new(bop_handle: &BopHandle) -> BopResult<MappingContext>
 
     /// Inform the context about external hole punching servers.
     fn add_servers<S>(&self, servers: S)
         where S: IntoIterator<Item=HolePunchServerAddr>
-}
-
-impl Go for MappingContextGo {
-    type Output = MappingContext;
 }
 
 /// A socket address obtained through some mapping technique.
@@ -95,14 +91,12 @@ impl UdpRendezvousInfo {
 
 impl MappedUdpSocket {
     /// Map an existing `UdpSocket`.
-    pub fn map<'a>(socket: UdpSocket, mc: &'a MappingContext) -> (MappedUdpSocketGo<'a>, MappedUdpSocketKill)
+    pub fn map(bop_handle: &BopHandle, socket: UdpSocket, mc: &MappingContext)
+        -> BopResult<MappedUdpSocket>
 
     /// Create a new `MappedUdpSocket`
-    pub fn new<'a>(mc: &'a MappingContext) -> (MappedUdpSocketGo<'a>, MappedUdpSocketKill)
-}
-
-impl<'a> Go for MappedUdpSocketGo<'a> {
-    type Output = MappedSocket;
+    pub fn new(bop_handle: &BopHandle, mc: &MappingContext)
+        -> BopResult<MappedUdpSocket>
 }
 
 /// A udp socket that has been hole punched.
@@ -113,12 +107,8 @@ struct PunchedUdpSocket {
 
 impl PunchedUdpSocket {
     /// Punch a udp socket using a mapped socket and the peer's rendezvous info.
-    pub fn punch_hole(socket: UdpSocket, their_rendezvous_info: UdpRendezvousInfo)
-        -> (PunchHoleGo, PunchHoleKill)
-}
-
-impl Go for PunchedUdpSocketGo {
-    type Output = PunchedUdpSocket;
+    pub fn punch_hole(&bop_handle: &BopHandle, socket: UdpSocket, their_rendezvous_info: UdpRendezvousInfo)
+        -> BopResult<PunchedUdpSocket>
 }
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
@@ -129,13 +119,11 @@ struct SimpleUdpHolePunchServer<'a> {
 impl<'a> SimpleUdpHolePunchServer<'a> {
     /// Create a new server. This will spawn a background thread which will serve requests until
     /// the server is dropped.
-    pub fn new(mapping_context: &'a MappingContext) -> SimpleUdpHolePunchServer<'a>;
+    pub fn new(mapping_context: &'a MappingContext)
+        -> SimpleUdpHolePunchServer<'a>;
 
-    pub fn addresses(&self) -> (AddressesGo, AddressesKill)
-}
-
-impl Go for AddressesGo {
-    type Output = Vec<MappedSocketAddr>
+    pub fn addresses(&self, bop_handle: &BopHandle)
+        -> BopResult<Vec<MappedSocketAddr>>
 }
 ```
 

@@ -68,179 +68,157 @@ trait ToListenEndpoint {
 impl ToListenEndpoint for ListenEndpoint { ... }
 impl ToListenEndpoint for &str { ... }
 
+type StreamListener
+type ListenerSet;
+type ListenerSetController;
+
+/// Listen on an endpoint for incoming connections.
+impl StreamListener {
+    pub fn bind<A: ToListenEndPoint>(addr: A) -> StreamListener;
+    pub fn accept(&mut self, bop_handle: &BopHandle) -> BopResult<Stream>;
+}
+
 /// Listens on multiple listening endpoints and accepts connections from any of them.
-impl Acceptor {
-    /// Create a new `Acceptor`
-    pub fn new() -> Acceptor;
+impl ListenerSet {
+    // Create a new `ListenerSet` and a controller for it.
+    pub fn new() -> (ListenerSet, ListenerSetController);
 
-    /// Create an `Acceptor` which listens on `addr`.
-    pub fn from_endpoint<A: ToListenEndpoint>(addr: A) -> Acceptor;
-    pub fn add_listener<A: ToListenEndpoint>(&mut self, addr: A) -> bool;
-    pub fn remove_listener<A: ToListenEndpoint>(&mut self, addr: A) -> bool;
-    pub fn accept<'a>(&'a mut self) -> (AcceptGo<'a>, AcceptorController);
+    // Accept an incoming connection.
+    pub fn accept(&mut self, bop_handle: &BopHandle) -> BopResult<Stream>;
 }
 
-impl<'a> Go for AcceptGo<'a> {
-    type Output = (AcceptGo<'a>, Stream);
+impl ListenSetController {
+    pub fn add_listener<A: ToListenEndpoint>(&self, addr: A);
+    pub fn remove_listener<A: ToListenEndpoint>(&self, addr: A);
+
+    /// Iterate over the endpoints that the `ListenSet` is listening on.
+    pub fn listening_endpoints<'c>(&'c self) -> ListeningEndpoints<'c>
 }
 
-impl<'a> AcceptorController<'a> {
-    pub fn add_listener<A: ToListenEndpoint>(&self, addr: A) -> bool;
-    pub fn remove_listener<A: ToListenEndpoint>(&self, addr: A) -> bool;
-
-    /// Iterate over the endpoints that this `Acceptor` is listening on.
-    pub fn accepting_endpoints<'c>(&'c self) -> AcceptingEndpoints<'c, 'a>
+impl<'c> Iterator for ListeningEndpoints<'c> {
+    type Item = ListeningEndpoint<'c>;
 }
 
-impl<'c, 'a> Iterator for AcceptingEndpoints<'c, 'a> {
-    type Item = AcceptingEndpoint<'c, 'a>;
-}
-
-/// An endpoint that this `Acceptor` is listening on.
-impl<'c, 'a> AcceptingEndpoint<'c, 'a> {
+/// An endpoint that the `ListenerSet` is listening on.
+impl<'c> ListeningEndpoint<'c> {
     /// The local listening address.
-    fn listen_endpoint(&self) -> &ListenEndpoint;
+    fn local_endpoint(&self) -> &ListenEndpoint;
 
     /// Iterates over the known external endpoints of this address which other peers may be able to
     /// connect to.
     fn known_endpoints<'e>(&'e self) -> KnownEndpoints<'e>;
 
     /// Create external mappings for this endpoint and iterate over them.
-    fn mapped_endpoints<'e>(&'e self, mapping_context: &MappingContext)
-        -> (MappedEndpointsGo<'e, 'c, 'a>, MappedEndpointsKill<'e, 'c, 'a>),
+    fn mapped_endpoints<'e>(&'e self, bop_handle: &BopHandle, mapping_context: &MappingContext)
+        -> MappedEndpoints<'e, 'c>
 }
- 
+
+impl<'e, 'c> Iterator for KnownEndpoints<'e, 'c> {
+    type Item = MappedEndpoint;
+}
+
+impl<'e, 'c> Iterator for MappedEndpoints<'e, 'c> {
+    type Item = MappedEndpoint;
+}
+
 /// The result if mapping an `ListenEndpoint`.
 struct MappedEndpoint {
     pub endpoint: Endpoint,
     pub nat_restricted: bool,
 }
 
-impl<'e, 'c, 'a> Iterator for KnownEndpoints<'e, 'c, 'a> {
-    type Item = MappedEndpoint;
-}
-
-impl<'e, 'c, 'a> Go for MappedEndpointsGo<'e, 'c, 'a> {
-    type Output = (MappedEndpointsGo<'e, 'c, 'a>, MappedEndpoint);
-}
-
+/// A connection to a peer.
 impl Stream {
-    pub fn connect<A: ToEndpoint>(addr: A) ->
-        (ConnectGo, ConnectKill)
-    pub fn read<'r>(&'r mut self, buf: &mut [u8]) -> (ReadGo<'r>, ReadKill<'r>)
-    pub fn write<'w>(&'w mut self, buf: &[u8]) -> (WriteGo<'w>, WriteKill<'w>)
-    pub fn split(self) -> (ReadStream, WriteStream);
-}
+    pub fn connect<A: ToEndpoint>(bop_handle: &BopHandle, addr: A)
+        -> BopResult<Stream>;
+    pub fn read(&mut self, bop_handle: &BopHandle, buf: &mut [u8])
+        -> BopResult<usize>;
+    pub fn write(&mut self, bop_handle: &BopHandle, buf: &[u8])
+        -> BopResult<usize>;
 
-impl Go for ConnectGo {
-    type Output = Stream;
+    /// Split the `Stream` into reading and writing halves which can be used
+    /// independently.
+    pub fn split(self) -> (ReadStream, WriteStream);
 }
 
 impl From<Stream> for ReadStream { ... }
 impl From<Stream> for WriteStream { ... }
 
 impl ReadStream {
-    pub fn read<'r>(&'r mut self, buf: &mut [u8]) -> (ReadGo<'r>, ReadKill<'r>)
-}
-
-impl<'r, T> Go for ReadGo<'r, T> {
-    type Output = (ReadGo<'r, T>, usize);
+    pub fn read(&mut self, bop_handle: &BopHandle, buf: &mut [u8])
+        -> BopResult<usize>;
 }
 
 /// Read from multiple `ReadStream`s simultaneously
 impl<T> ReaderSet<T> {
-    pub fn new() -> ReaderSet;
-    pub fn from_reader(reader: ReadStream) -> ReaderSet<()>;
+    pub fn new() -> (ReaderSet, ReaderSetController);
+    pub fn read(&mut self, bop_handle: &BopHandle, buf: &mut [u8])
+        -> BopResult<usize>;
 
-    /// `ReadStream`s can be registered with a token to identify them.
-    pub fn add_reader(&mut self, reader: ReadStream, token: T);
-    pub fn remove_reader(&mut self, which: &T) -> Vec<(ReadStream, T)>;
-    pub fn read<'r>(&'r mut self, buf: &mut [u8]) -> (ReadGo<'r>, ReaderSetController<'r, T>)
-
-    /// `ReadInspectGo` will block until a `ReadStream` has data ready to be read and then
-    /// synchronously calls `callback` and return's it's result.
-    pub fn read_inspect<'r, F, R>(&'r mut self, callback: F)
-            -> (ReadInspectGo<'r, T, F, R>, ReaderSetController<'r, T>)
-        where F: for<'e> FnMut(ReadyReadStream<'e, 'r, T>) -> R
-}
-
-impl<'r, T, F, R> Go for ReadInspectGo<'r, T, F, R> {
-    type Output = (ReadInspectGo<'r, T, F, R>, R);
+    /// Block until a `ReadStream` has data ready to be read and then
+    /// synchronously calls `callback` and returns it's result.
+    pub fn read_inspect<F, R>(&mut self, bop_handle: &BopHandle, callback: F)
+            -> R
+        where F: for<'e> FnMut(ReadyReadStream<'e, T>) -> R
 }
 
 /// Created by `ReaderSet::read_inspect`, this represents a `ReadStream` in the set which has data
 /// ready to be read. This type can be read without blocking.
-impl<'e, 'r, T> ReadyReadStream<'e, 'r, T> {
+impl<'e, T> ReadyReadStream<'e, T> {
     /// The token the `ReadStream` was registered in the set with.
     pub fn token(&self) -> &T
     /// Remove the `ReadStream` from the `ReaderSet`.
     pub fn remove(self) -> (ReadStream, T)
 }
 
-impl Read for ReadyReadStream {
+impl std::io::Read for ReadyReadStream {
     // non-blocking impl
 }
 
 /// Controls the `ReaderSet` it was created with. Can be dropped to cancel any blocked reads.
-impl<'r, T> ReaderSetController<'r, T> {
+impl<T> ReaderSetController<T> {
+    /// `ReadStream`s can be registered with a token to identify them.
     pub fn add_reader(&self, reader: ReadStream, token: T);
     pub fn remove_reader(&self, which: &T) -> Vec<(ReadStream, T)>
-
-    /// Downcast to a `ReadKill`.
-    pub fn to_kill(self) -> ReadKill<'r>
 }
 
 impl WriteStream {
-    pub fn write<'w>(&'w mut self, buf: &[u8]) -> (WriteGo<'w>, WriteKill<'w>)
-}
-
-impl<'w, T> Go for WriteGo<'w, T> {
-    type Output = (WriteGo<'w, T>, usize);
+    pub fn write(&mut self, bop_handle: &BopHandle, buf: &[u8])
+        -> BopResult<usize>;
 }
 
 /// Write to multiple `WriteStream`s simultaneously.
-impl<T> WriteSet<T> {
-    pub fn new() -> WriteSet;
-    pub fn from_writer(writer: WriteStream) -> WriterSet<()>;
+impl<T> WriterSet<T> {
+    pub fn new() -> (WriterSet, WriterSetController)
+    pub fn write(&mut self, bop_handle: &BopHandle, buf: &[u8])
+        -> BopResult<usize>;
 
-    /// `WriteStream`s can be registered with a token to identify them.
-    pub fn add_writer(&mut self, writer: WriterStream, token: T);
-    pub fn remove_writer(&mut self, which: &T) -> Vec<(WriteStream, T)>;
-    pub fn write<'w>(&'w mut self, buf: &[u8]) -> (WriteGo<'w>, WriterSetController<'w, T>)
-
-    /// `WriteInspectGo` will block until a `WriteStream` is ready to be written and then
-    /// synchronously calls `callback` and return's it's result.
-    pub fn write_inspect<'w, F, R>(&'w mut self, callback: F)
-            -> (WriteInspectGo<'w, T, F, R>, WriterSetController<'w, T>)
-        where F: for<'e> FnMut(ReadyWriteStream<'e, 'w, T>) -> R
-}
-
-impl<'w, T, F, R> Go for WriteInspectGo<'w, T, F, R> {
-    type Output = (WriteInspectGo<'w, T, F, R>, R);
+    /// Block until a `WriteStream` is ready to be written and then
+    /// synchronously calls `callback` and returns it's result.
+    pub fn write_inspect<F, R>(&mut self, bop_handle: &BopHandle, callback: F)
+            -> R
+        where F: for<'e> FnMut(ReadyWriteStream<'e, T>) -> R
 }
 
 /// Created by `WriterSet::write_inspect`, this represents a `WriteStream` in the set which is
 /// ready to be writen. This type can be written to without blocking.
-impl<'e, 'w, T> ReadyWriteStream<'e, 'w, T> {
+impl<'e, T> ReadyWriteStream<'e, T> {
     /// The token the `WriteStream` was registered in the set with.
     pub fn token(&self) -> &T
     /// Remove the `WriteStream` from the `WriterSet`.
     pub fn remove(self) -> (WriteStream, T)
 }
 
-impl Write for ReadyWriteStream {
+impl std::io::Write for ReadyWriteStream {
     // non-blocking impl
 }
 
 /// Controls the `WriterSet` it was created with. Can be dropped to cancel any blocked writes.
-impl<'w, T> WriterSetController<'w, T> {
+impl<T> WriterSetController<T> {
+    /// `WriteStream`s can be registered with a token to identify them.
     pub fn add_writer(&self, writer: WriteStream, token: T);
     pub fn remove_writer(&self, which: &T) -> Vec<(WriteStream, T)>
-
-    /// Downcast to a `WriteKill`.
-    pub fn to_kill(self) -> WriteKill<'w>
 }
-rust
 ```
 
 # Drawbacks
@@ -254,5 +232,5 @@ Needs to be implemented.
 
 # Unresolved questions
 
-* None (for now, there were some here but I feel I now have satisfactory
-  answers for them)
+None
+

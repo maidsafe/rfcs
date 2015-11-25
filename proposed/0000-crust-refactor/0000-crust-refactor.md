@@ -161,150 +161,34 @@ proposed APIs of these libraries are introduced in four separate documents
 
 ## API style
 
-I will now try to justify the design patterns used in these libraries.
+As mentioned, the APIs described in the above documents are blocking based. One
+thing to note is that all blocking calls can be cancelled asynchronously. All
+functions that can block take an extra argument of type `&BopHandle` (where bop
+is short for blocking-operation). A `BopHandle` is created in conjunction with
+a `BopKiller` using `fn BopHandle::new() -> (BopHandle, BopKiller)`. Once the
+`BopKiller` is dropped, all functions borrowing the corresponding `BopHandle`
+will return immediately. This design makes it easy to implement functions that
+perform lots of blocking operations but which can be torn down on demand.
 
-The first thing to notice is how blocking operations are performed. In the rust
-standard library, to perform a tcp connection one can write:
-
-```rust
-let stream = try!(TcpStream::connect(addr));
-```
-
-This is good, it creates a connection and returns it (or an error) to the place
-in code where it's needed. However it has a problem, if the `connect` call
-blocks for a long period of time there is no way to cancel it. This is
-important as the part of the application making the connection may want to
-cancel the connection attempt after some time period, or if another event
-happens first, or if the application is shutting down, or any number of other
-reasons. To enable this we can instead make the connection happen in two
-stages. First we create a pair of objects, one of which is used to perform the
-blocking call, the other of which is used to cancel the blocking call.
+An example usage of the transport library using this design is shown below. The
+`ping_pong_timeout` function accepts a connections, reads a string from the
+stream and, if the string is "ping", replys with "pong". The whole operation
+times out after one second.
 
 ```rust
-let (connect_go, connect_kill) = Stream::connect(addr);
-```
-
-We forward `connect_kill` to the part of the program that will be in charge of
-cancelling the call and then perform the call.
-
-```rust
-sender.send(connect_kill)
-let stream = connect_go.go();
-```
-
-Alternatively, `connect_go` could be sent to another thread to perform the
-connection, the important part is that the `go` and `kill` are in two seperate
-places of control. To cancel the operation we simply drop `connect_kill`.
-
-As this is a common pattern throughout the libraries, there's a trait for it.
-
-```rust
-trait Go {
-    type Output;
-
-    fn go(self) -> Option<Self::Output> { .. }
-    fn go_timeout(self, timeout: Duration) -> Option<Self::Output> { .. }
-    fn go_deadline(self, deadline: SteadyTime) -> Option<Self::Output> { .. }
-    fn go_opt_timeout(self, opt_timeout: Option<Duration>) -> Option<Self::Output> { .. }
-    fn go_opt_deadline(self, opt_deadline: Option<SteadyTime>) -> Option<Self::Output>
-}
-```
-
-Wherever types named `*Go` and `*Kill` occur in the libraries, this is the
-pattern that's being used. Additionally, it's sometimes necessary to control a
-blocking operation while it is taking place. In these cases, a `*Go` and
-`*Controller` type are used where the controller is used to control the object
-performing the operation. As with `*Kill`, dropping `*Controller` unblocks the
-operation. For an example of this see the `Beacon::recv` method.
-
-For operations that can be performed repeatedly the `*Go` type will return
-itself upon success. For example, the `Output` of `ReadGo` is `(ReadGo, usize)`
-
-To see how functions that use this blocking style can be used and composed
-consider an example where a user wants to write a method which
-
- (0) Connects to an endpoint.
- (1) Writes "ping" to the stream.
- (2) Reads data from the stream.
- (3) Prints the result.
-
-First, let's consider a simple example where we want to do these things in
-sequence and timeout the whole operation after 1 second;
-
-```rust
-pub fn ping(endpoint: Endpoint) {
-    let deadline = SteadyTime::now() + Duration::from_secs(1);
-
-    let (connect_go, _k) = Stream::connect(endpoint);
-    let stream = connect_go.go_deadline(deadline);
-
-    let (write_go, _k) = stream.write(b"ping");
-    let _ = write_go.go_deadline(deadline);
-
-    let mut data = [0u8; 256];
-    let (read_go, _k) = stream.read(&mut data[..]);
-    let n = read_go.go_deadline(deadline);
-
-    println!("data == {:?}", data);
-}
-```
-
-Simple, right? For a richer example, consider how we implement this procedure
-in a function which itself follows to go/kill style. This implementation allows
-the ping operation to be killed gracefully if, say, the peer never responds.
-
-```rust
-pub fn ping(endpoint: Endpoint) -> (PingGo, PingKill) {
-    let (connect_tx, connect_rx) = channel();
-    let (write_tx, write_rx) = channel();
-    let (read_tx, read_rx) = channel();
-    let go = PingGo {
-        endpoint: endpoint,
-        connect_kill: connect_tx,
-        write_kill: write_tx,
-        read_kill: read_tx,
-    };
-    let kill = PingKill {
-        _connect_kill: connect_rx,
-        _write_kill: write_rx,
-        _read_kill: read_rx,
-    };
-    (go, kill)
-}
-
-struct PingGo {
-    endpoint: Endpoint,
-    connect_kill: Sender<ConnectKill>,
-    write_kill: Sender<WriteKill>,
-    read_kill: Sender<ReadKill>,
-}
-
-struct PingKill {
-    _connect_kill: Receiver<ConnectKill>,
-    _write_kill: Receiver<WriteKill>,
-    _read_kill: Receiver<ReadKill>,
-}
-
-impl Go for PingGo {
-    type Output = ();
-
-    fn go_opt_deadline(self, deadline: Option<SteadyTime>) {
-        let stream = try_opt!(match Stream::connect(self.endpoint) {
-            (go, kill) => self.connect_kill.send(kill).and_then(go.go_opt_deadline(deadline)) {
-        });
-
-        let _ = try_opt!(match stream.write(b"ping") {
-            (go, kill) => self.write_kill.send(kill).and_then(go.go_opt_deadline(deadline)) {
-        });
-
-        let mut data = [0u8; 256];
-        let n = try_opt!(match stream.read(&mut data[..]) {
-            (go, kill) => self.read_kill.send(kill).and_then(go.go_opt_deadline(deadline)) {
-        });
-
-        println!("data: {:?}", data[..n]);
-        Some(())
-    }
+fn ping_pong_timeout() {
+    let (bop, kill) = BopHandle::new();
+    thread::spawn(move || -> BopResult<()> {
+        let stream_listener = StreamListener::bind("tcp:0.0.0.0:45666");
+        let stream = try!(stream_listener.accept(&bop));
+        let mut buf = [0u8; 4];
+        let n = try!(stream.read(&bop, &mut buf[..]));
+        if buf[..n] == "ping" {
+            try!(stream.write(&bop, "pong"));
+        }
+    });
+    thread::sleep(Duration::from_seconds(1));
+    drop(kill)
 }
 ```
 
@@ -314,36 +198,44 @@ The APIs described in the other documents are intended to be efficiently
 implementable and usable. For example, reading from a socket repeatedly should
 not require us to spawn threads or repeatedly allocate data.
 
-This can be acheived by building the `Acceptor`, `ReaderSet` and `WriterSet`
+This can be acheived by building the various IO
 types around a `mio::Poll`. A `mio::Poll` can have many file descriptors
 registered with it and then be used to block until one of them becomes active.
 
-An example implementation of `Acceptor` is shown below:
+An example implementation of `ListenerSet` is shown below:
 
 ```rust
-pub struct Acceptor {
-    inner: Mutex<AcceptorInner>,
-    inner_freshened: Condvar,
+pub struct ListenerSet {
+    inner: Arc<ListenerSetInner>,
+}
+
+struct ListenerSetInner {
+    data: Mutex<ListenerSetData>,
+    data_freshened: Condvar,
     notify_write: Mutex<mio::unix::PipeWriter>,
 }
 
-struct AcceptorInner {
+struct ListenerSetData {
     poll: mio::Poll,
-    listeners: Vec<TcpListener>,
+    listeners: Vec<StreamListenerLower>,
     notify_read: mio::unix::PipeReader,
     fresh: bool,
     in_accept: bool,
-    wake_buffer: u64,
+    wake_buffer: usize,
 }
 
-impl Acceptor {
-    pub fn new() -> Result<Acceptor, AcceptorNewError> {
-        let (r, w) = try!(mio::unix::pipe().map_err(|e| AcceptorNewError::CreatePipe {cause: e}));
-        let mut poll = try!(mio::Poll::new().map_err(|e| AcceptorNewError::CreatePoll {cause: e}));
-        try!(poll.register(&r, ::TOKEN_NOTIFY, mio::EventSet::readable(), mio::PollOpt::level())
-                 .map_err(|e| AcceptorNewError::RegisterNotify {cause: e}));
-        Ok(Acceptor {
-            inner: Mutex::new(AcceptorInner {
+pub struct ListenerSetController {
+    inner: Weak<ListenerSetInner>,
+}
+
+impl ListenerSet {
+    pub fn new() -> Result<(ListenerSet, ListenerSetController), ListenerSetNewError> {
+        let (r, w) = try!(mio::unix::pipe()
+                                    .map_err(|e| ListenerSetNewError::CreatePipe {cause: e}));
+        let poll = try!(mio::Poll::new()
+                                  .map_err(|e| ListenerSetNewError::CreatePoll {cause: e}));
+        let inner = Arc::new(ListenerSetInner {
+            data: Mutex::new(ListenerSetData {
                 poll: poll,
                 listeners: Vec::new(),
                 notify_read: r,
@@ -351,138 +243,108 @@ impl Acceptor {
                 in_accept: false,
                 wake_buffer: 0,
             }),
-            inner_freshened: Condvar::new(),
+            data_freshened: Condvar::new(),
             notify_write: Mutex::new(w),
-        })
-    }
-
-    pub fn accept<'a>(&'a mut self) -> (AcceptGo<'a>, AcceptorController) {
-        let go = AcceptGo {
-            acceptor: self,
+        });
+        let weak = Arc::downgrade(&inner);
+        let listen_set = ListenerSet {
+            inner: inner,
         };
-        let controller = AcceptorController {
-            acceptor: self,
+        let listen_set_controller = ListenerSetController {
+            inner: weak,
         };
-        (go, controller)
+        Ok((listen_set, listen_set_controller))
     }
 }
 ```
 
-The `Acceptor` maintains a vector of `TcpListener`s, each of which is
+The `ListenerSet` maintains a vector of `StreamListener`s, each of which is
 registered with the `poll`. Additionally, there is a pipe (`notify_read`,
-`notify_write`) which is registered for readability with `poll`. When
-`AcceptGo` tries to accept on the socket set it aquires the `inner` `Mutex` and
-blocks on `poll`. When `AcceptorController` wants to destroy or reconfigure the
-`Acceptor` it notifies `AcceptGo` via the pipe, causing it to either return
-`None` or temporarily release the `Mutex` so that `inner` can be mutated. This
-is implemented below:
+`notify_write`) which is registered for readability with `poll`. When the
+`ListenerSet` tries to accept on the socket set it aquires the `data` `Mutex`
+and blocks on `poll`. When `ListenerSetController` wants to destroy or
+reconfigure the `ListenerSet` it notifies it via the pipe, causing it to either
+return `None` or temporarily release the `Mutex` so that `data` can be mutated.
+This is implemented below:
 
 ```rust
-pub struct AcceptGo<'a> {
-    acceptor: &'a Acceptor,
-}
-
-impl<'a> Go for AcceptGo<'a> {
-    type Output = (AcceptGo<'a>, Result<Stream, AcceptError>);
-
-    fn go_timeout(self, timeout: Duration) -> Option<(AcceptGo<'a>, Result<Stream, AcceptError>)> {
-        let timeout_ms = timeout.num_milliseconds();
-        let timeout_ms = match timeout_ms < 0 {
-            true    => 0,
-            false   => timeout_ms as usize,
-        };
+impl ListenerSet {
+    pub fn accept(&mut self, bk: &BopKiller) -> BopResult<Result<Stream, ListenerSetAcceptError>> {
+        let mut data = self.inner.data.lock().unwrap();
         loop {
-            let mut inner = self.acceptor.inner.lock().unwrap();
-            let n = match inner.poll.poll(timeout_ms) {
-                Ok(n) => n,
-                Err(e) => return Some((self, Err(AcceptError::Poll {cause: e}))),
+            let token = {
+                let mut poll = match BopPoll::wrap(&mut data.poll, bk) {
+                    Ok(poll) => poll,
+                    Err(e)   => return Ok(Err(ListenerSetAcceptError::RegisterBop {cause: e})),
+                };
+                match poll.poll(::std::usize::MAX) {
+                    Ok(0)  => continue,
+                    Ok(_)  => poll.event(0).token,
+                    Err(e) => return Ok(Err(ListenerSetAcceptError::Poll {cause: e})),
+                }
             };
-            for i in 0..n {
-                match inner.poll.event(i).token {
-                    ::TOKEN_NOTIFY => {
-                        let mut c = [0u8];
-                        read_exact(&mut inner.notify_read, &mut c[..]).unwrap();
-                        match c[0] {
-                            ::NOTIFY_WAKE => {
-                                if inner.wake_buffer > 0 {
-                                    inner.wake_buffer -= 1;
-                                }
-                                else {
-                                    inner.fresh = false;
-                                    while !inner.fresh {
-                                        inner.in_accept = true;
-                                        inner = self.acceptor.inner_freshened.wait(inner).unwrap();
-                                        inner.in_accept = false;
-                                    }
-                                }
-                            },
-                            ::NOTIFY_SHUTDOWN => return None,
-                            x => panic!("Unexpected byte in notify pipe: {}", x),
-                        }
-                    },
-                    t => {
-                        match inner.listeners[t.0].accept() {
-                            Ok(None)         => (),
-                            Ok(Some(stream)) => return Some((self, Ok(Stream::Tcp(stream)))),
-                            Err(e)           => return Some((self, Err(AcceptError::Accept {cause: e}))),
-                        }
-                    },
-                }
-            }
-        }
-    }
-
-    fn go_opt_timeout(self, opt_timeout: Option<Duration>) -> Option<(AcceptGo<'a>, Result<Stream, AcceptError>)> {
-        self.go_timeout(opt_timeout.unwrap_or(Duration::max_value()))
-    }
-
-    fn go_opt_deadline(self, opt_deadline: Option<SteadyTime>) -> Option<(AcceptGo<'a>, Result<Stream, AcceptError>)> {
-        self.go_timeout(opt_deadline.map(|d| d - SteadyTime::now()).unwrap_or(Duration::max_value()))
-    }
-}
-
-pub struct AcceptorController<'a> {
-    acceptor: &'a Acceptor,
-}
-
-impl<'a> AcceptorController<'a> {
-    pub fn add_listener<A: ToListenEndpoint>(&self, addr: A) -> Result<(), AddListenerError<A::Err>> {
-        let addr = try!(addr.to_listen_endpoint()
-                             .map_err(|e| AddListenerError::ParseAddr {cause: e}));
-        match addr {
-            ListenEndpoint::Tcp(sa) => {
-                let listener = try!(TcpListener::bind(&sa)
-                                                .map_err(|e| AddListenerError::Bind {cause: e}));
-                {
-                    let mut notify_write = self.acceptor.notify_write.lock().unwrap();
-                    try!(notify_write.write_all(&[::NOTIFY_WAKE])
-                                     .map_err(|e| AddListenerError::Notify {cause: e}));
-                }
-                {
-                    let mut inner = self.acceptor.inner.lock().unwrap();
-                    let token = mio::Token(inner.listeners.len());
-                    try!(inner.poll.register(&listener, token, mio::EventSet::readable(), mio::PollOpt::level())
-                                   .map_err(|e| AddListenerError::Register {cause: e}));
-                    inner.listeners.push(listener);
-                    if inner.in_accept && !inner.fresh {
-                        inner.fresh = true;
-                        self.acceptor.inner_freshened.notify_one();
+            match token {
+                ::TOKEN_KILL => return Err(BopCancelled),
+                ::TOKEN_CONTROL => {
+                    let mut c = [0u8];
+                    read_exact(&mut data.notify_read, &mut c[..]).unwrap();
+                    if data.wake_buffer > 0 {
+                        data.wake_buffer -= 1;
                     }
                     else {
-                        inner.wake_buffer += 1;
+                        data.fresh = false;
+                        while !data.fresh {
+                            data.in_accept = true;
+                            data = self.inner.data_freshened.wait(data).unwrap();
+                            data.in_accept = false;
+                        }
                     }
-                }
+                },
+                t => {
+                    match data.listeners[t.0].accept() {
+                        Ok(Some(stream)) => return Ok(Ok(stream)),
+                        Ok(None) => continue,
+                        Err(e) => return Ok(Err(ListenerSetAcceptError::Accept {cause: e})),
+                    }
+                },
             }
-        }
-        Ok(())
+        };
     }
 }
 
-impl<'a> Drop for AcceptorController<'a> {
-    fn drop(&mut self) {
-        let mut notify_write = self.acceptor.notify_write.lock().unwrap();
-        // not much we could do about this
-        let _ = notify_write.write(&[::NOTIFY_SHUTDOWN]);
+impl ListenerSetController {
+    pub fn add_endpoint<A: ToListenEndpoint>(&self, addr: A) -> Result<(), AddEndpointError<A::Err>> {
+        let addr = try!(addr.to_listen_endpoint()
+                            .map_err(|e| AddEndpointError::ParseAddr {cause: e}));
+        let lower = try!(StreamListenerLower::bind(addr)
+                                             .map_err(|e| AddEndpointError::Bind {cause: e}));
+        self.add_listener_lower(lower)
+            .map_err(|e| AddEndpointError::Add {cause: e})
+    }
+
+    pub fn add_listener_lower(&self, lower: StreamListenerLower) -> Result<(), AddLowerError> {
+        let inner = match self.inner.upgrade() {
+            Some(inner) => inner,
+            None => return Ok(()),
+        };
+        {
+            let mut notify_write = inner.notify_write.lock().unwrap();
+            try!(notify_write.write_all(&[0])
+                             .map_err(|e| AddLowerError::Notify {cause: e}));
+        }
+        let mut data = inner.data.lock().unwrap();
+        let token = mio::Token(data.listeners.len());
+        try!(data.poll.register(&lower, token, mio::EventSet::readable(), mio::PollOpt::level())
+                      .map_err(|e| AddLowerError::Register {cause: e}));
+        data.listeners.push(lower);
+        if data.in_accept && !data.fresh {
+            data.fresh = true;
+            inner.data_freshened.notify_one();
+        }
+        else {
+            data.wake_buffer += 1;
+        }
+        Ok(())
     }
 }
 ```
