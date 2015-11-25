@@ -16,19 +16,19 @@ To intercept the scheme and serve the content from the browser add-on, the dns_a
 fetching the home directory of the service should be exposed. Along with this if the
 other essential APIs like `get_all_registered_names`, `get_all_services`, `delete_service`, etc. are exposed, it
 would allow variety of applications to be built on the network.
-For example, SAFENetwork Service management application could be something which can help users to manage their
+For example, SAFENetwork Service management application could be something which can help users to manage the
 services exposed under their public name.
 
 # Detailed design
 
-The APIs are just an extension from the already existing dns API exposed from the safe_launcher.
+The APIs are just an extension from the already existing [dns API](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/parser/dns/mod.rs) exposed from the safe_launcher.
 
 ### Get Service Home Directory
 
 #### Implementation
 The request would make use of the [get_home_service_directory](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/mod.rs#L150)
-function from safe_dns crate and get the DirectoryKey. Using the directory key the actual directory content is retrieved using the safe_nfs crate and
-returned as part of the response.
+function from safe_dns crate and get the DirectoryKey. Using the directory key the actual directory content is retrieved using the safe_nfs crate.
+The fetched directory is returned as part of the response.
 
 #### Request
 ```javascript
@@ -281,7 +281,7 @@ This is a direct API call to the [delete_dns](https://github.com/maidsafe/safe_d
 }
 ```
 
-### Delete a Service for Public Name
+### Delete a Service for a Public Name
 API would delete a service for a public name associated to the User Account.
 
 #### Implementation
