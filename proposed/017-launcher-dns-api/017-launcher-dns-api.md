@@ -1,6 +1,6 @@
 - Feature Name: safe_dns API from safe_launcher
 - Type: Enhancement
-- Related components safe_launcher, safe_dns, safe_nfs
+- Related components safe_launcher
 - Start Date: 24-11-2015
 - RFC PR:
 - Issue number:
@@ -319,7 +319,6 @@ This is a direct API call to the [remove_service](https://github.com/maidsafe/sa
   }
 }
 ```
-
 
 # Drawbacks
 
