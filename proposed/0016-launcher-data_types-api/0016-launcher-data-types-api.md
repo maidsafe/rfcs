@@ -275,4 +275,4 @@ A similar approach can be adopted as an enhancement later, without disturbing th
 
 # Unresolved questions
 
-None
+Can the ownership of the Structured data be transfered? 
