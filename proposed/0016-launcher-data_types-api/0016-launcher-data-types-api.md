@@ -41,7 +41,7 @@ i.e within the permissible range 10,001 to 2^64
   endpoint: 'safe-api/v1.0/data_types/create_structured_data',
   data: {
     id: String, // Id of the structured Data
-    tag_type: u64,
+    tag_type: Integer,
     content: String, // data to be saved
     is_private: Boolean // If private the data would be encrypted
   }
@@ -77,7 +77,7 @@ i.e within the permissible range 10,001 to 2^64
   endpoint: 'safe-api/v1.0/data_types/get_structured_data',
   data: {
     id: String, // base64 String
-    tag_type: u64,
+    tag_type: Integer,
     is_private: Boolean
   }
 }
@@ -90,9 +90,10 @@ i.e within the permissible range 10,001 to 2^64
 {
   id: String, // base64 String
   data: {
-    version: u64, // version number of the Structured Data
+    version: Integer, // version number of the Structured Data
+    owners: [ String ], // List of base64 String representing the public signing key of the Owners
     content: String // base64 String
-  }  
+  }
 }
 ```
 
@@ -113,9 +114,12 @@ i.e within the permissible range 10,001 to 2^64
   endpoint: 'safe-api/v1.0/data_types/update_structured_data',
   data: {
     id: String, // base64 String
-    tag_type: u64,
-    version: u64, // previous version number
+    tag_type: Integer,
+    version: Integer, // Incremented version number    
     content: String, // base64 String - New Content associated to the Structured Data
+    owners: [ String ], // List of base64 String representing the public signing key of the Owners
+    previous_owners: [ String ], // Optional field - List of base64 String representing the public signing key of the previous owners.
+                                 // This is used while transferring the ownership of the Structured data
     is_private: Boolean // If private the data would be encrypted and saved in the network
   }
 }
@@ -147,7 +151,7 @@ i.e within the permissible range 10,001 to 2^64
 
 ## Immutable data
 
-Raw Data in the network is stored as Immutable data after the SefEncryption process.
+Raw Data in the network is stored as Immutable data after the SelfEncryption process.
 
 ### Save Raw data
 
@@ -195,7 +199,7 @@ Update an already existing raw data in the network by pasing the DataMap corresp
   data: {
     datamap: String, // base64 String - Serialised DataMap
     content: String // base64 String
-    offset: U64 // Optional field - Offset from where the data is to be written. If not specified then the data is appended to the last
+    offset: Integer // Optional field - Offset from where the data is to be written. If not specified then the data is appended to the last
   }
 }
 ```
@@ -275,4 +279,4 @@ A similar approach can be adopted as an enhancement later, without disturbing th
 
 # Unresolved questions
 
-Can the ownership of the Structured data be transfered? 
+None
