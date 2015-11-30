@@ -2,8 +2,8 @@
 - Type: Enhancement
 - Related components safe_launcher
 - Start Date: 24-11-2015
-- RFC PR:
-- Issue number:
+- RFC PR: #76
+- Issue number: Proposed - #78
 
 # Summary
 
