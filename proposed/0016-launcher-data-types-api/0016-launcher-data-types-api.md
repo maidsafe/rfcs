@@ -2,8 +2,8 @@
 - Type: new feature
 - Related components: safe_launcher
 - Start Date: 20-11-2015
-- RFC PR:
-- Issue number:
+- RFC PR: #75
+- Issue number: Proposed - #77
 
 # Summary
 
