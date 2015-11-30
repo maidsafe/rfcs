@@ -32,7 +32,7 @@ under the end point `safe-api/v1.0/data_types/`.
 ## Structured data API
 
 #### Create Structured data
-Structure Data can be created only within the permitted range as specified in the [reserved-names RFC](https://github.com/maidsafe/rfcs/blob/master/implemented/0003-reserved_names/0003-reserved_names.md#detailed-design),
+Structure Data with a custom `type_tag` can be created only within the permitted range as specified in the [reserved-names RFC](https://github.com/maidsafe/rfcs/blob/master/implemented/0003-reserved_names/0003-reserved_names.md#detailed-design),
 i.e within the permissible range 10,001 to 2^64
 
 ##### Request
@@ -41,7 +41,7 @@ i.e within the permissible range 10,001 to 2^64
   endpoint: 'safe-api/v1.0/data_types/create_structured_data',
   data: {
     id: String, // Id of the structured Data
-    tag_type: Integer,
+    type_tag: Integer,
     content: String, // data to be saved
     is_private: Boolean // If private the data would be encrypted
   }
@@ -77,7 +77,7 @@ i.e within the permissible range 10,001 to 2^64
   endpoint: 'safe-api/v1.0/data_types/get_structured_data',
   data: {
     id: String, // base64 String
-    tag_type: Integer,
+    type_tag: Integer,
     is_private: Boolean
   }
 }
@@ -114,7 +114,7 @@ i.e within the permissible range 10,001 to 2^64
   endpoint: 'safe-api/v1.0/data_types/update_structured_data',
   data: {
     id: String, // base64 String
-    tag_type: Integer,
+    type_tag: Integer,
     version: Integer, // Incremented version number    
     content: String, // base64 String - New Content associated to the Structured Data
     owners: [ String ], // List of base64 String representing the public signing key of the Owners
