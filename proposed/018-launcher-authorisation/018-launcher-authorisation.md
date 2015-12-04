@@ -66,6 +66,7 @@ requesting for authorisation along with the list of permission requested for. Th
 would be able to `Allow` or `Deny` the request.
 5. The launcher would reply to the request, based on the user's decision. If the user
 denies, then the error response is sent. Else the connection parameters are sent.
+
 ###### On permission granted
 ```javascript
 {
