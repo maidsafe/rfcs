@@ -92,8 +92,8 @@ The service's beacon state (enabled or disabled) is controlled via a separate
 object. This is just to take advantage of the fact that - being a simple
 boolean - it's state can be represented at the type level. The user can enforce
 compile-time guarantees about the state of the beacon during particular parts
-of their code, or they can just stick the `ServiceBeaconState` in a `Mutex` and
-use it the same way they use the `ServiceController`.
+of their code using the `ServiceBeaconState<Enabled>` and
+`ServiceBeaconState<Disabled>`.
 
 The full API (sans error handling) is given below.
 
@@ -127,34 +127,40 @@ impl Iterator for Incoming {
     type Item = Stream;
 }
 
-impl ServiceBeaconState {
+enum Dynamic {}
+enum Enabled {}
+enum Disabled {}
+
+struct ServiceBeaconState<State = Dynamic> { .. }
+
+impl<State> ServiceBeaconState<State> {
     /// Test whether the beacon is enabled.
     fn is_enabled(&self) -> bool,
+    /// Enable to beacon.
+    fn enable(self) -> ServiceBeaconState<Enabled>,
+    /// Disable to beacon.
+    fn disable(self) -> ServiceBeaconState<Disabled>,
+}
+
+impl ServiceBeaconState<Dynamic> {
     /// Set the period between transmissions.
     fn set_period(&mut self, period: Duration)
-    /// Enable to beacon.
-    fn enable(self) -> ServiceBeaconStateEnabled,
-    /// Disable to beacon.
-    fn disable(self) -> ServiceBeaconStateDisabled,
+    /// Set whether the beacon is enabled.
+    fn set_enabled(&mut self, enabled: bool)
 }
 
 /// This is because some code may want a static guarantee that the beacon is held in a particular
 /// state. Usually, enforcing this sort of thing at the type-level would require typestate or
 /// dependent types. But as the state is only a boolean we can acheive this in rust by treating the
 /// states as two different types.
-impl ServiceBeaconStateEnabled {
+impl ServiceBeaconState<Enabled> {
     fn set_period(&mut self, period: Duration);
-    fn disable(self) -> ServiceBeaconStateDisabled;
-}
-
-impl ServiceBeaconStateDisabled {
-    fn enable(self) -> ServiceBeaconStateEnabled;
 }
 
 /// If the user wishes to erase which state the beacon is in they can easily cast these types back
-/// to a `ServiceBeaconState`
-impl From<ServiceBeaconStateEnabled> for ServiceBeaconState;
-impl From<ServiceBeaconStateDisabled> for ServiceBeaconState;
+/// to a `ServiceBeaconState<Dynamic>`
+impl From<ServiceBeaconState<Enabled>> for ServiceBeaconState<Dynamic>
+impl From<ServiceBeaconState<Disabled>> for ServiceBeaconState<Dynamic>
 
 impl ServiceBeaconReceiver {
     pub fn next(&mut self, bop_handle: &BopHandle) -> BopResult<Endpoint>;
