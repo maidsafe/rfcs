@@ -20,8 +20,6 @@ a separate library.
 The bulk of this work is already implemented. However this RFC proposes a few
 changes to the existing implementation:
  * The API should be made more general (ie. not Crust-specific)
- * The API should use the interruptible-blocking-call style design of the other
-   crust-refactor RFCs.
  * The implementation should allow multiple beacons in multiple processes to
    listen on the same port using. This will allow more than two crust instances
    on the one machine to discover each other.
@@ -41,7 +39,7 @@ impl Beacon {
     /// block until we receive a message from another beacon. This method will return any data that
     /// is received on the port where the first `id_bytes` of the packet does not equal that of the
     /// data we're sending.
-    fn next_message(&mut self, bop_handle: &BopHandle, buf: &mut Vec<u8>)
+    fn next_message(&mut self, buf: &mut Vec<u8>)
             -> Option<()>
 }
 

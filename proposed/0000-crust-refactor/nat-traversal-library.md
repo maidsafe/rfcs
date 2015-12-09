@@ -52,7 +52,7 @@ struct MappingContext {
 
 impl MappingContext {
     /// Create a new mapping context.
-    fn new(bop_handle: &BopHandle) -> BopResult<MappingContext>
+    fn new() -> MappingContext
 
     /// Inform the context about external hole punching servers.
     fn add_servers<S>(&self, servers: S)
@@ -91,12 +91,12 @@ impl UdpRendezvousInfo {
 
 impl MappedUdpSocket {
     /// Map an existing `UdpSocket`.
-    pub fn map(bop_handle: &BopHandle, socket: UdpSocket, mc: &MappingContext)
-        -> BopResult<MappedUdpSocket>
+    pub fn map(socket: UdpSocket, mc: &MappingContext)
+        -> MappedUdpSocket
 
     /// Create a new `MappedUdpSocket`
-    pub fn new(bop_handle: &BopHandle, mc: &MappingContext)
-        -> BopResult<MappedUdpSocket>
+    pub fn new(mc: &MappingContext)
+        -> MappedUdpSocket
 }
 
 /// A udp socket that has been hole punched.
@@ -107,8 +107,8 @@ struct PunchedUdpSocket {
 
 impl PunchedUdpSocket {
     /// Punch a udp socket using a mapped socket and the peer's rendezvous info.
-    pub fn punch_hole(&bop_handle: &BopHandle, socket: UdpSocket, their_rendezvous_info: UdpRendezvousInfo)
-        -> BopResult<PunchedUdpSocket>
+    pub fn punch_hole(socket: UdpSocket, their_rendezvous_info: UdpRendezvousInfo)
+        -> PunchedUdpSocket
 }
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
@@ -122,8 +122,8 @@ impl<'a> SimpleUdpHolePunchServer<'a> {
     pub fn new(mapping_context: &'a MappingContext)
         -> SimpleUdpHolePunchServer<'a>;
 
-    pub fn addresses(&self, bop_handle: &BopHandle)
-        -> BopResult<Vec<MappedSocketAddr>>
+    pub fn addresses(&self)
+        -> Vec<MappedSocketAddr>
 }
 ```
 

@@ -66,21 +66,20 @@ impl ServiceController {
     /// Hole punching
     pub fn mapping_context(&self) -> &MappingContext;
     pub fn add_hole_puncher_server(&self, server: HolePunchServerAddr);
-    pub fn hole_punch_addresses(&self, bop_handle: &BopHandle)
-        -> BopResult<Vec<HolePunchServerAddr>>
+    pub fn hole_punch_addresses(&self)
+        -> Vec<HolePunchServerAddr>
 
     /// Get a mapped udp socket using the `Service's internal `MappingContext`
-    pub fn mapped_udp_socket<'c>(&'c self, bop_handle: &BopHandle)
-        -> BopResult<MappedUdpSocket>;
+    pub fn mapped_udp_socket<'c>(&'c self)
+        -> MappedUdpSocket;
     /// Connect a `MappedUdpSocket`.
-    pub fn utp_rendezvous_connect(&self, bop_handle: &BopHandle,
-                                         mapped_socket: MappedUdpSocket,
+    pub fn utp_rendezvous_connect(&self, mapped_socket: MappedUdpSocket,
                                          their_info: UdpRendezvousInfo)
-        -> BopResult<Stream>
+        -> Stream
 
     /// Connecting
-    pub fn connect(&self, bop_handle: &BopHandle, endpoint: Endpoint)
-        -> BopResult<Stream>
+    pub fn connect(&self, endpoint: Endpoint)
+        -> Stream
 
     /// Cacheing/Bootstrapping
     pub fn cache_endpoint(&self, endpoint: Endpoint)
@@ -119,8 +118,8 @@ struct Service {
 }
 
 impl ServiceListener {
-    pub fn accept(&mut self, bop_handle: &BopHandle) -> BopResult<Stream>;
-    pub fn incoming(&mut self, bop_handle: &BopHandle) -> Incoming;
+    pub fn accept(&mut self) -> Stream;
+    pub fn incoming(&mut self) -> Incoming;
 }
 
 impl Iterator for Incoming {
@@ -163,8 +162,8 @@ impl From<ServiceBeaconState<Enabled>> for ServiceBeaconState<Dynamic>
 impl From<ServiceBeaconState<Disabled>> for ServiceBeaconState<Dynamic>
 
 impl ServiceBeaconReceiver {
-    pub fn next(&mut self, bop_handle: &BopHandle) -> BopResult<Endpoint>;
-    pub fn endpoints(&mut self, bop_handle: &BopHandle) -> BeaconEndpoints;
+    pub fn next(&mut self) -> Endpoint;
+    pub fn endpoints(&mut self) -> BeaconEndpoints;
 }
 
 impl Iterator for BeaconEndpoints {
@@ -181,21 +180,20 @@ impl ServiceController {
     /// Hole punching
     pub fn mapping_context(&self) -> &MappingContext;
     pub fn add_hole_puncher_server(&self, server: HolePunchServerAddr);
-    pub fn hole_punch_addresses(&self, bop_handle: &BopHandle)
-        -> BopResult<Vec<HolePunchServerAddr>>
+    pub fn hole_punch_addresses(&self)
+        -> Vec<HolePunchServerAddr>
 
     /// Get a mapped udp socket using the `Service's internal `MappingContext`
-    pub fn mapped_udp_socket(&self, bop_handle: &BopHandle)
-        -> BopResult<MappedUdpSocket>;
+    pub fn mapped_udp_socket(&self)
+        -> MappedUdpSocket;
     /// Connect a `MappedUdpSocket`.
-    pub fn utp_rendezvous_connect(&self, bop_handle: &BopHandle,
-                                         mapped_socket: MappedUdpSocket,
+    pub fn utp_rendezvous_connect(&self, mapped_socket: MappedUdpSocket,
                                          their_info: UdpRendezvousInfo)
-        -> BopResult<Stream>
+        -> Stream
 
     /// Connecting
-    pub fn connect(&self, bop_handle: &BopHandle, endpoint: Endpoint)
-        -> BopResult<Stream>
+    pub fn connect(&self, endpoint: Endpoint)
+        -> Stream
 
     /// Cacheing/Bootstrapping
     pub fn cache_endpoint(&self, endpoint: Endpoint)
@@ -209,7 +207,7 @@ impl<'c> Iterator for AcceptingEndpoints<'c> {
 impl<'c> AcceptingEndpoint<'c> {
     fn local_endpoint(&self) -> &ListenEndpoint;
     fn known_endpoints<'e>(&'e self) -> KnownEndpoints<'e, 'c>;
-    fn mapped_endpoints<'e>(&'e self, bop_handle: &BopHandle)
+    fn mapped_endpoints<'e>(&'e self)
         -> MappedEndpoints<'e, 'c>,
 }
 
@@ -238,7 +236,7 @@ impl<'c> CachedEndpoint<'c> {
     pub fn endpoint(&self) -> Endpoint;
 
     /// Calls `service.connect(self.endpoint())` then calls `self.remove()` if the connect fails.
-    pub fn connect(self, bop_handle: &BopHandle) -> BopResult<Stream>
+    pub fn connect(self) -> Stream
 }
 ```
 
