@@ -49,7 +49,7 @@ and `beacon_receiver` to where they want to wait for incoming beacon messages.
 `controller` is used to perform almost all the other functionality of crust. it
 implements `Sync` and it's methods borrow `self` immutably allowing it to be
 borrowed and used throughout the rest of the program. `controller` can be used to
- * Add/remove/list listening endpoints on the service's internal `Acceptor`.
+ * Add/remove/list endpoints on the service's internal set of listening endpoints.
  * Tell the service about external hole-punching servers.
  * Get the local hole-punching server's addresses.
  * Perform connections and rendezvous connections.
@@ -58,12 +58,18 @@ borrowed and used throughout the rest of the program. `controller` can be used t
 ```rust
 /// Drop this type to shutdown the service.
 impl ServiceController {
-    /// Accepting
+    /// Accepting.
+    /// Crust maintains a set of endpoints that it listens for connections on.
+    /// These functions can be used to add/remove/inspect this set.
     pub fn add_listener(&self, addr: ListenEndpoint);
     pub fn remove_listener(&self, addr: ListenEndpoint);
     pub fn accepting_endpoints<'c>(&'c self) -> AcceptingEndpoints<'c>
 
     /// Hole punching
+    /// Crust maintains a list of external hole-punching servers that it can
+    /// use to perform rendezvous connections. It also acts as a hole-punching
+    /// server for other peers.
+    /// Some of these types are described in the nat-traversal doc.
     pub fn mapping_context(&self) -> &MappingContext;
     pub fn add_hole_puncher_server(&self, server: HolePunchServerAddr);
     pub fn hole_punch_addresses(&self)
@@ -82,6 +88,9 @@ impl ServiceController {
         -> Stream
 
     /// Cacheing/Bootstrapping
+    /// Crust records the endpoint of every peer it successfully connects to or
+    /// accepts a connection from so that the user can use them if they lose
+    /// connection to the network.
     pub fn cache_endpoint(&self, endpoint: Endpoint)
     pub fn iter_endpoint_cache<'c>(&'c self) -> EndpointCacheIterator<'c>
 }
@@ -126,6 +135,8 @@ impl Iterator for Incoming {
     type Item = Stream;
 }
 
+/// States that a service beacon can be in. Used to enforce state at
+/// compile-time.
 enum Dynamic {}
 enum Enabled {}
 enum Disabled {}
@@ -162,7 +173,9 @@ impl From<ServiceBeaconState<Enabled>> for ServiceBeaconState<Dynamic>
 impl From<ServiceBeaconState<Disabled>> for ServiceBeaconState<Dynamic>
 
 impl ServiceBeaconReceiver {
+    /// Block until we receive an `Endpoint` from a local peer.
     pub fn next(&mut self) -> Endpoint;
+    /// Iterate over endpoints as we receive them.
     pub fn endpoints(&mut self) -> BeaconEndpoints;
 }
 
@@ -196,7 +209,16 @@ impl ServiceController {
         -> Stream
 
     /// Cacheing/Bootstrapping
+    /// Add an endpoint to the cache.
     pub fn cache_endpoint(&self, endpoint: Endpoint)
+    /// Iterate over the endpoints in the cache.
+    /// # Example
+    /// ```rust
+    /// // Attempt to connect to all endpoints in the cache.
+    /// for cached_endpoint in controller.iter_endpoint_cache() {
+    ///     let stream = try!(cached_endpoint.connect());
+    /// }
+    /// ```
     pub fn iter_endpoint_cache<'c>(&'c self) -> EndpointCacheIterator<'c>
 }
 
@@ -204,9 +226,17 @@ impl<'c> Iterator for AcceptingEndpoints<'c> {
     type Item = AcceptingEndpoint<'c>;
 }
 
+/// Represents an endpoint that Crust is currently listening on. An endpoint
+/// consists of the local endpoint address and the external addresses
+/// connectable by other peers.
 impl<'c> AcceptingEndpoint<'c> {
+    /// Returns immediately with the local address of this endpoint.
     fn local_endpoint(&self) -> &ListenEndpoint;
+    /// Return an iterator over the known mapped addresses of this endpoint.
+    /// Does not perform any port-mapping.
     fn known_endpoints<'e>(&'e self) -> KnownEndpoints<'e, 'c>;
+    /// Maps this endpoint and returns an iterator that can be used to get
+    /// the mapped addresses.
     fn mapped_endpoints<'e>(&'e self)
         -> MappedEndpoints<'e, 'c>,
 }
@@ -224,10 +254,12 @@ impl<'e, 'c> Iterator for MappedEndpoints<'e, 'c> {
     type Item = MappedEndpoint;
 }
 
+/// Iterate over Crust's cached endpoints.
 impl<'c> EndpointCacheIterator<'c> {
     type Item = CachedEndpoint<'c>;
 }
 
+/// An endpoint in Crust's cache.
 impl<'c> CachedEndpoint<'c> {
     /// Remove this endpoint from the cache.
     pub fn remove(self);

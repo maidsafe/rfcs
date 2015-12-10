@@ -159,10 +159,22 @@ proposed APIs of these libraries are introduced in four separate documents
 * [transport](transport-library.md)
 * [crust](crust-library.md)
 
-## mioco
+## Libraries
 
 This RFC proposes that we make of use of [mioco](https://github.com/dpc/mioco)
-as the basis of the transport library
+as the basis of the transport library. Mioco will allow us to write code that
+has the control-flow of blocking-based code combined with the efficiency of
+green threads. Preliminary benchmarks show that a simple mioco-based echo
+server running on an i7 is able to respond to about 50,000 requests per second
+on windows and 16,000 per second on Linux (although it's likely this Linux
+figure could be improved). Having blocking-style code will also greatly
+simplify our error-handling story as errors can simply be returned where they
+are generated.
+
+To help with resource leakage and allow greater efficiency this RFC also
+recommends the use of scoped threads from the crossbeam library. These will
+allow us to statically guarantee that threads are not leaked and allows threads
+to share borrowed data with the their child threads.
 
 # Drawbacks
 
