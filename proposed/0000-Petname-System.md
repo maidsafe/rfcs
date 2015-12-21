@@ -75,9 +75,9 @@ Zooko's Triangle argues that if a system is to be decentralized, one single name
 
 ## Nickname Denotation
 
-Nicknames must always be specified as Nicknames - and made brutally obvious to the user that they *are*, in fact, Nicknames. They are to be changed immediately and globally once a user assigns a Petname to them. They are then to be, by default, stored forever as the Petname that the user assigns. Petnames must always be used if previously assigned.
+Nicknames must always be specified as Nicknames - and made brutally obvious to the user that they *are*, in fact, Nicknames. They are to be changed immediately and globally (from the user's point of view) once a user assigns a Petname to them. They are then to be, by default, stored forever as the Petname that the user assigns. Petnames must always be used if previously assigned.
 
-There should be a reserved character to denotate that a displayed name *is* a Nickname (see: Unresolved Questions [3]). If two nicknames are rendered in the same display, there should be a way to distinguish this as well.  One way to achieve this is to add a trailing identifier which are the first X number of hexadecimal bytes of that Key follwed by the reserved character before the Nickname (see: Unresolved Questions [4]). So a persona with the Nickname "Bart" with the Key “518A...” would be "518A@Bart..." if the reserved character is set to be an arroba. (see: Unresolved Questions [5]).
+This is the burden that App developers are to shoulder with their UI. The Return Value (see below) of this functionality will provide the developer a way to gather whether the returned name is either a Petname or a Nickname. It is then up to them to present the users with an easy-to-understand way of differentiating the two.
 
 ## Absolute/Unique Navigation
 
@@ -141,7 +141,10 @@ It is unknown at this time if the Key Book entry will be required to specificall
 ## Service Map
 
 > What's in a name? That which we call a rose
+
 > By any other name would smell as sweet;
+
+> *-- William Shakespear - Romeo & Juliet*
 
 The actual content of the Nickname or the Petname will be a datamap that points to a `home` directory for a Persona or Share. This directory houses datamaps and/or directories containing any and all content that is linked to that Persona. This will also include the messaging encryption keys and bio (if included).
 
@@ -210,6 +213,15 @@ A rough outline is as follows:
 5. Version is incremented whenever a change is made to the data
 6. Previous owner's keys is self-explanatory
 7. Signature - a signature of the mutable fields above
+
+### Return Value
+
+The return value of any given function should be a tuple of `(string, bool)`. This corresponds to the name and whether that name is a Petname or a Nickname. This allows App devs to handle the aspect of differentiating Petnames from Nicknames in their UI accordingly.
+
+>The effort spent in fixing a fundamentally flawed model of the "Internet as Television" is wasted in futility and compounds the problems by simply creating new crimes like "Cybersquatting". Instead, this effort can directed to removing the artificial scarcity engendered by this flawed view of the Internet and the Web. The phone books and other directory services are far more effective at handling names and the computers obviate the need to every type or even see the URLs.
+*-- [Bob Frankston](http://www.frankston.com/public/?name=dnssafehaven)*
+
+This does imply though, that this kind of system would deviate from the existing paradigm. The existing paradigm being that the specific location is returned given the name. In this case, the name is returned given a specific location.
 
 ### Naming Crate
 
@@ -378,18 +390,6 @@ The Petname System has been used throughout the entire history of humanity, almo
 
 [2] If a user tries to add a Nickname to their Address Book, but there already exists a Petname that is the same or similar, what is the resolution process?
 
-[3] What should the reserved character be for denotating Nicknames?
-
-* # - Hash
-* % - Percentage Sign
-* + - Plus Sign
-* @ - Arroba
-* Other?
-
-[4] Should this *always* be displayed or just in the event that there are duplicate Nicknames being displayed? How might the system intelligently, but noninvasively recognize that there are duplicate Nicknames being displayed?
-
-[5] What number of bytes of the Key should be appended onto the Nickname separated by the reserved character when displayed as Nicknames?
-
 [6] At what level will the symlink occur? (Datamap, NFS, Drive) 
 
 [7] With the Petname Database spanning across multiple SD Blobs, how will the lookup be implemented?
@@ -400,9 +400,8 @@ One way to do this is to create a simple JSON formatted list of Petnames that wi
 
 Drive: a symlink to some network location visible on the Drive will presumably be stored in some other StructuredData object, a parent directory for example, the addition of the symlink in that case will be free since the cost is incurred when the parent directory is first PUT onto the network.
 
-From David Irvine [here](https://forum.safenetwork.io/t/abusive-scenario-about-de-duplication/4787/11?u=smacz):
-
 >Better to think like this, For any data you store from outside SAFE then you pay. Any data you store/copy from within SAFE is free.
+> *-- [@dirvine](https://forum.safenetwork.io/t/abusive-scenario-about-de-duplication/4787/11?u=smacz)*
 
 [9] How will this be derived? Keep in mind that the datamap is ever growing and expanding. And the name is subject to change.
 
