@@ -378,9 +378,8 @@ Lastly, since this is not HTML encoded, the link is the Referral - Key + Nicknam
 
 ## Physical World
 
-From [Mark Stiegler's outline](http://www.skyhunter.com/marcs/petnames/IntroPetNames.html):
-
 > Humans have been using parts of petname systems since before the invention of the written word. Human faces were used as keys. These keys resisted forgery far better than most things that pass for security today on computers (except in episodes of Mission Impossible, and the occasional Shakespearian comedy like 12th Night). The referral, "Joe, this is my son Billy, he's great with a club," transferred a key/alleged-name pair. The recipient of this referral typically accepts the alleged name as a petname, though in some cases the recipient may instead choose other petnames, such as, "Bob's big dumb dufus of a son", which is a strictly private petname.
+> *-- [Mark Stiegler](http://www.skyhunter.com/marcs/petnames/IntroPetNames.html)*
 
 The Petname System has been used throughout the entire history of humanity, almost transparently! This gives me great hope that if a digital system were to completely fulfill the requirements of creating an implementation of the Petname System, it would be an unmitigated success. It would truly grant secure access for everyone.
 
