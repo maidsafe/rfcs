@@ -46,8 +46,6 @@ This Petname System should be applicable to both Personas and Shares.
 * Denotate: To specify/signify as a specific type.
     * *He denotated “NSA-friend 1” as his Petname for the Nickname “Google”.*
 
-* Arroba: The 'at sign' ("@")
-
 
 # Motivation
 
