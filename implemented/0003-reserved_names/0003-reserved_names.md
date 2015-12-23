@@ -35,7 +35,7 @@ reduce any confusion or name collisions (although the latter is extremely improb
 
 8-10,000     --      Reserved
 
-10,001-2^64  --      Available
+10,001-(2^64 - 1)  --      Available
 
 The numbers 0-10,000 will be hard coded into vaults for the use of the core network only and will not be likely
 available to application developers to overwrite their structure.
