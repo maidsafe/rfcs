@@ -90,8 +90,8 @@ status: 200 Ok
 {
     "info" {
             "name": String,
-            "creationTime": Integer, // milli seconds            
-            "modificationTime": Integer, // milli seconds            
+            "creationTime": Integer, // milliseconds            
+            "modificationTime": Integer, // milliseconds            
             "isPrivate": Boolean,
             "isVersioned": Boolean,
             "metadata": base64 String,
@@ -99,8 +99,8 @@ status: 200 Ok
     "subDirectories": [
         {
             "name": String,
-            "creationTime": Integer, // milli seconds            
-            "modificationTime": Integer, // milli seconds
+            "creationTime": Integer, // milliseconds            
+            "modificationTime": Integer, // milliseconds
             "isPrivate": Boolean,
             "isVersioned": Boolean,
             "metadata": base64 String
@@ -111,8 +111,8 @@ status: 200 Ok
         {
             "name": String,
             "size": Integer,                
-            "creationTime": Integer, // milli seconds            
-            "modificationTime": Integer, // milli seconds
+            "creationTime": Integer, // milliseconds            
+            "modificationTime": Integer, // milliseconds
             "metadata": base64 String
         },
         ...

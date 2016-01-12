@@ -4,7 +4,7 @@
 - Start Date: 11-01-2016
 
 # Summary
-This is an accompanying RFC to the parent launcher-as-local-server RFC and defines APIs for RESTFull interface.
+This is an accompanying RFC to the parent launcher-as-local-rest-server RFC and defines APIs for RESTFull interface.
 This RFC must be read and is useful only in conjunction with the parent RFC.
 
 # Conventions
@@ -20,12 +20,11 @@ Base64 and packaged into a UTF-8 string. Correspondingly [] would be an empty su
     - Line Feed as new-line
     - Padding (in case the length is not divisible by 4) set to true (will use =)
     - No line length specified
-- All mention of Integer correspond to 64 bit integers.
 - SERVER_PORT refers to the port to which the server binds
 
 # Detailed API Design
 
-The APIs can be directly invoked at localhost:SERVER_PORT or web application are expected to direct the API requests to
+The APIs can be directly invoked from localhost:SERVER_PORT. Web application are expected to direct the API requests to
 `api.safenet`
 
 **For authorised requests, the query string and also the HTTP body payload must be encrypted using the Symmetric key
@@ -83,7 +82,7 @@ status: 200 OK
 {
     "token": "header.payload.signed", //JWT token
     "encryptionKey": "base64", // Encrypted Symmetric key
-    "publicKey": "base64", // public key used for encryption of the SymmetricKey,
+    "publicKey": "base64", // public key used for encryption of the Symmetric Key,
     "permissions": [ // list of permissions approved
         "SAFE_DRIVE_ACCESS"
     ]
@@ -108,7 +107,6 @@ DELETE
 
 ##### Request header
 ```
-content-type: application/json
 Authorization: Bearer {TOKEN}
 ```
 
@@ -116,6 +114,5 @@ Authorization: Bearer {TOKEN}
 
 ##### Response headers
 ```
-content-type: application/json
 status: 200 OK
 ```
