@@ -10,7 +10,7 @@ This RFC must be read and is useful only in conjunction with the parent RFC.
 # Conventions
 
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and
-"OPTIONAL" in this document are to be interpreted as described in RFC 2119.
+"OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 - String means UTF-8 encoded string unless specifically noted to be otherwise.
 - Unless specifically mentioned, all JSON key-value pairs shall be considered mandatory.
 any mention of [ uint8 ... ] shall be interpreted as follows: binary data (array of unsigned 8 byte integers) encoded as
