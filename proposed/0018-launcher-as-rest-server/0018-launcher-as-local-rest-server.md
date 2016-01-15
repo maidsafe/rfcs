@@ -147,7 +147,9 @@ key is also stored.
 10. An asymmetric key pair is generated for the Symmetric key exchange.
 11. The symmetric key(from step 7) is encrypted using the application nonce, application public key and the private key
 generated in step 10. The application nonce and application public key is received as a part of the authorisation request.
-12. The response is constructed and sent back to the application.
+12. Launcher checks for special directory named SAFEDrive inside <USER’S-PRIVATE-ROOT-DIRECTORY-ID>/SAFEDrive - if not
+present Launcher will create it. This is the directory that the user will usually see it mounted as root.
+13. The response is constructed and sent back to the application.
 
   ###### Response
 
