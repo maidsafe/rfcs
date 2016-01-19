@@ -91,13 +91,15 @@ status: 200 OK
 
 ### Revoke Token
 
-Revoke token is invoked to revoke the authorised token.  
+Revoke token is invoked to revoke the authorised token.
 
 #### Request
 
+The url path must be encrypted with the Symmetric Key
+
 ##### End point
 ```
-/v1/auth/revoke?token={JWT_TOKEN}
+/v1/auth/revoke
 ```
 
 ##### Method

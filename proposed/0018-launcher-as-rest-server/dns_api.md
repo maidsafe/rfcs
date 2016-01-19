@@ -1,5 +1,25 @@
 ## DNS
 
+### General Parameter Specification
+
+Common parameters used,
+- isPathShared denotes whether the path of the directory is shared from SAFE Drive or from the application
+  root directory. Optional parameter. Default value will be `false`.
+
+### Unregistered Client Access
+Get Service Directory and get File APIs are exposed for Unregistered client access.
+
+### Authorised Request
+- The Authorisation token must be passed in the request header.
+- Authorised requests should encrypt the entire url path, using the symmetric encryption key.
+- The body of the http request should also be encrypted using the symmetric key.
+
+For example,
+```
+GET http:\\api.safenet\{encrypted_path_along_with_the_query_params}
+```
+
+
 ### Register DNS
 
 #### Request
@@ -25,8 +45,7 @@ Authorization: Bearer {TOKEN}
 {
     "longName": String, // e.g. "SomeNewDnsName"
     "serviceName": String, // e.g. "www"
-    "isPathShared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                               // e.g. false
+    "isPathShared": Boolean, // Optional
     "serviceHomeDirPath": String // Path root will be interpreted according
                                     // the parameter above. The last token in
                                     // the path will be interpreted as the name
@@ -67,8 +86,7 @@ Authorization: Bearer {TOKEN}
 {
     "longName": String, // e.g. "SomeNewDnsName"
     "serviceName": String, // e.g. "www"
-    "isPathShared": Boolean, // true if root is to be considered `SAFEDrive`, false otherwise.
-                             // e.g. false
+    "isPathShared": Boolean, // Optional
     "serviceHomeDirPath": String // Path root will be interpreted according
                                  // the parameter above. The last token in
                                  // the path will be interpreted as the name
@@ -92,7 +110,7 @@ This API can be called without authorisation token for getting public unencrypte
 
 ##### Endpoint
 ```
-/v1/dns/directory?serviceName=name_of_service&longName=domain_name
+/v1/dns/{serviceName}/{longName}
 ```
 
 ##### Method
@@ -150,10 +168,11 @@ status: 200 Ok
 ### Get File (Unregistered Client Access)
 
 #### Request
+filePath must be url encoded
 
 ##### End point
 ```
-/v1/dns/file?serviceName=name_of_service&longName=long_name&path=filePath
+/v1/dns/{serviceName}/{longName}/{filePath}
 ```
 
 ##### Optional parameters
@@ -195,7 +214,7 @@ List the public names for the user
 
 ##### End point
 ```
-/v1/dns/longNames
+/v1/dns/longName
 ```
 
 ##### Method
@@ -232,7 +251,7 @@ List the services available for a long name
 
 ##### End point
 ```
-/v1/dns/services?longName=long_name
+/v1/dns/service/{longName}
 ```
 
 ##### Method
@@ -267,7 +286,7 @@ status: 200 Ok
 
 ##### End point
 ```
-/v1/dns?longName=long_name_to_delete
+/v1/dns/longName/{longName}
 ```
 
 ##### Method
@@ -295,7 +314,7 @@ status: 202 Accepted
 
 ##### End point
 ```
-/v1/dns?longName=long_name&service=service_to_delete
+/v1/dns/service/{serviceName}/{longName}
 ```
 
 ##### Method

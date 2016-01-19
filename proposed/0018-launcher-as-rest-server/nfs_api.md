@@ -4,24 +4,35 @@
 
 Common parameters used,
 
-- isVersioned is used to denote whether the Directory is to to be versioned or not.
+- isVersioned is used to denote whether the Directory is to to be versioned or not.  
 - isPrivate is used to indicate whether the Directory is private and encrypted.
   If not, then the Directory is exposed as public and unencrypted.
 - dirPath corresponds to the root path. The last token in the path will be interpreted as the name of
-          directory to be used for the operation. e.g. "/path/to/a/new_directory"
+  directory to be used for the operation. e.g. "/path/to/a/new_directory".  
 - isPathShared denotes whether the path of the directory is shared from SAFE Drive or from the application
-  root directory.
+  root directory. Optional parameter. Default value will be `false`.
 - metadata - refers to the user metadata that can be saved along with the Directory or File
+- filePath corresponds to the path to the file. The last token in the path will be interpreted as the name of
+  file to be used for the operation. e.g. "/path/to/a/directory/my_file.txt".  
 
+### Unregistered Client Access
 Get Directory and File APIs are exposed for Unregistered client access.
-For all other requests the query string and the response body must be encrypted with the symmetric key and nonce
-obtained after authorisation.
+
+### Authorised Request
+- The Authorisation token must be passed in the request header.
+- Authorised requests should encrypt the entire url path, using the symmetric encryption key.
+- The body of the http request should also be encrypted using the symmetric key.
+
+For example,
+```
+GET http:\\api.safenet\{encrypted_path_along_with_the_query_params}
+```
 
 ### Directory
 
 #### Create Directory
 
-Creates a directory in the network  
+Creates a directory in the network
 
 #### Request
 
@@ -44,11 +55,11 @@ Authorization: Bearer {TOKEN}
 ##### Request Body
 
 ```
-{
-    "isPathShared": Boolean,
+{    
     "dirPath": String,
-    "isPrivate": Boolean,
-    "isVersioned": Boolean,
+    "isPathShared": Boolean, // Optional. Default value - false    
+    "isPrivate": Boolean, // Optional. Default value - true
+    "isVersioned": Boolean, // Optional. Default value - false
     "metadata": base64 String // Optional field. Any additional metadata. to be passed as base64 string
 }
 ```
@@ -62,9 +73,13 @@ status: 202 Accepted
 
 #### Get Directory
 
+##### Request
+
+dirPath must be url-encoded.
+
 ##### End point
 ```
-/v1/nfs/directory?isPathShared=boolean&dirPath=path_of_directory
+/v1/nfs/directory/{dirPath}/{isPathShared}
 ```
 
 ##### Method
@@ -125,8 +140,9 @@ status: 200 Ok
 #### Request
 
 ##### End point
+dirPath must be url encoded
 ```
-/v1/nfs/directory?isPathShared=true&dirPath=dir_path_to_delete
+/v1/nfs/directory/{dirPath}/{isPathShared}
 ```
 
 ##### Method
@@ -155,7 +171,7 @@ at least one key value pair.
 
 ##### End point
 ```
-/v1/nfs/directory?isPathShared=boolean&dirPath=path_of_directory
+/v1/nfs/directory/{dirPath}/{isPathShared}
 ```
 
 ##### Method
@@ -210,9 +226,9 @@ Authorization: Bearer {TOKEN}
 
 ```
 {
-    "isPathShared": Boolean,
-    "filePath": String, // e.g. "/path/to/a/new_file.ext"
-    "metadata": base64 string
+    "filePath": String,
+    "isPathShared": Boolean, // Optional
+    "metadata": base64 string // Optional
 }
 ```
 
@@ -226,10 +242,11 @@ status: 202 Accepted
 #### Read File
 
 ##### Request
+filePath must be url encoded
 
 ###### End point
 ```
-/v1/nfs/file?isPathShared=boolean&filePath=path_to_file
+/v1/nfs/file/{filePath}/{isPathShared}
 ```
 
 ##### Optional parameters
@@ -253,8 +270,8 @@ Authorization: Bearer {TOKEN}
 
 ###### Response headers
 ```
-content-type: application/json
-content-size: 3000
+Content-Type: application/json
+Content-Length: 3000
 file-name: file_name
 file-created-time: 1452447851949 // time in milliseconds
 file-modified-time: 1452447851949 // time in milliseconds
@@ -273,7 +290,7 @@ File content as bytes. encrypted only for authorised requests
 
 ###### End point
 ```
-/v1/nfs/file/metadata?isPathShared=boolean&filePath=path_of_file
+/v1/nfs/file/metadata/{filePath}/{isPathShared}
 ```
 
 ###### Method
@@ -308,7 +325,7 @@ status: 202 Accepted
 
 ###### End point
 ```
-/v1/nfs/file?isPathShared=boolean&filePath=path_of_file
+/v1/nfs/file/{filePath}/{isPathShared}
 ```
 
 ###### Optional parameter
@@ -344,7 +361,7 @@ status: 202 Accepted
 
 ###### End point
 ```
-/v1/nfs/file?isPathShared=boolean&filePath=path_of_file
+/v1/nfs/file/{filePath}/{isPathShared}
 ```
 
 ###### Method
