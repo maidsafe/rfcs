@@ -303,7 +303,6 @@ Authorization: Bearer {TOKEN}
 
 ##### Response Header
 ```
-Content-Type: application/json
 status: 202 Accepted
 ```
 
@@ -331,6 +330,5 @@ Authorization: Bearer {TOKEN}
 
 ##### Response Header
 ```
-Content-Type: application/json
 status: 202 Accepted
 ```

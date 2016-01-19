@@ -371,7 +371,6 @@ DELETE
 
 ###### Request header
 ```
-content-type: application/json
 Authorization: Bearer {TOKEN}
 ```
 
