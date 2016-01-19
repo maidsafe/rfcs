@@ -36,23 +36,23 @@ Creates a directory in the network
 
 #### Request
 
-##### End point
+###### End point
 ```
 /v1/nfs/directory
 ```
 
-##### Method
+###### Method
 ```
 POST
 ```
 
-##### Request header
+###### Request header
 ```
 content-type: application/json
 Authorization: Bearer {TOKEN}
 ```
 
-##### Request Body
+###### Request Body
 
 ```
 {    
@@ -66,7 +66,7 @@ Authorization: Bearer {TOKEN}
 
 #### Response on Success
 
-##### Response headers
+###### Response headers
 ```
 status: 202 Accepted
 ```
@@ -77,30 +77,30 @@ status: 202 Accepted
 
 dirPath must be url-encoded.
 
-##### End point
+###### End point
 ```
 /v1/nfs/directory/{dirPath}/{isPathShared}
 ```
 
-##### Method
+###### Method
 ```
 GET
 ```
 
-##### Request header
+###### Request header
 ```
 Authorization: Bearer {TOKEN} // Optional
 ```
 
-#### Response on Success
+##### Response on Success
 
-##### Response headers
+###### Response headers
 ```
 content-type: application/json
 status: 200 Ok
 ```
 
-##### Response body
+###### Response body
 ```
 {
     "info" {
@@ -137,27 +137,27 @@ status: 200 Ok
 
 #### Delete Directory
 
-#### Request
-
-##### End point
+##### Request
 dirPath must be url encoded
+
+###### End point
 ```
 /v1/nfs/directory/{dirPath}/{isPathShared}
 ```
 
-##### Method
+###### Method
 ```
 DELETE
 ```
 
-##### Request header
+###### Request header
 ```
 Authorization: Bearer {TOKEN}
 ```
 
-#### Response on Success
+##### Response on Success
 
-##### Response headers
+###### Response headers
 ```
 status: 202 Accepted
 ```
@@ -169,23 +169,23 @@ at least one key value pair.
 
 #### Request
 
-##### End point
+###### End point
 ```
 /v1/nfs/directory/{dirPath}/{isPathShared}
 ```
 
-##### Method
+###### Method
 ```
 PUT
 ```
 
-##### Request header
+###### Request header
 ```
 content-type: application/json
 Authorization: Bearer {TOKEN}
 ```
 
-##### Request Body
+###### Request Body
 ```
 {
     "name": String,
@@ -193,9 +193,9 @@ Authorization: Bearer {TOKEN}
 }
 ```
 
-#### Response on Success
+##### Response on Success
 
-##### Response headers
+###### Response headers
 ```
 status: 202 Accepted
 ```
@@ -249,7 +249,7 @@ filePath must be url encoded
 /v1/nfs/file/{filePath}/{isPathShared}
 ```
 
-##### Optional parameters
+###### Optional parameters
 ```
 offset - Default value is 0. This indicates the starting position from where to read the file
 length - Reads the entire content from the offset by default. If length is mentioned it will read only the

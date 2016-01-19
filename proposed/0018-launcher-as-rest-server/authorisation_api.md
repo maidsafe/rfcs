@@ -27,8 +27,15 @@ Base64 and packaged into a UTF-8 string. Correspondingly [] would be an empty su
 The APIs can be directly invoked from localhost:SERVER_PORT. Web application are expected to direct the API requests to
 `api.safenet`
 
-**For authorised requests, the query string and also the HTTP body payload must be encrypted using the Symmetric key
-obtained after authorisation**
+### Authorised Request
+- The Authorisation token must be passed in the request header.
+- Authorised requests should encrypt the entire url path, using the symmetric encryption key.
+- The body of the http request should also be encrypted using the symmetric key.
+
+For example,
+```
+GET http:\\api.safenet\{encrypted_path_along_with_the_query_params}
+```
 
 ## Authorisation API
 
