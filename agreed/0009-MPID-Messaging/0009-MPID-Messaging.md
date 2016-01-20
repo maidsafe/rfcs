@@ -1,6 +1,6 @@
 - Feature Name: MPID Messaging System
 - Type: New Feature
-- Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client), [routing](https://github.com/maidsafe/routing)
+- Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client), [mpid_messaging](https://github.com/maidsafe/mpid_messaging)
 - Start Date: 22-09-2015
 - RFC PR: #43
 - Issue number: Agreed - #50
@@ -93,7 +93,7 @@ This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_publ
 
 ## Messaging Format Among Nodes
 
-Messages between Clients and MpidManagers will utilise [`::routing::structured_data::PlainData`][5], for example:
+Messages between Clients and MpidManagers will utilise [`::routing::plain_data::PlainData`][5], for example:
 ```rust
 let pd = PlainData {
     name: mpid_message_name(mpid_message),
