@@ -63,7 +63,7 @@ pub struct MpidHeader {
 }
 ```
 
-The `sender` field is hopefully self-explanatory.  The `guid` allows the message to be message to be uniquely identified, both by receivers and by the manager Vaults which need to hold the messages in a map-like structure.
+The `sender` field is hopefully self-explanatory.  The `guid` allows the message to be uniquely identified, both by receivers and by the manager Vaults which need to hold the messages in a map-like structure.
 
 The `metadata` field allows passing arbitrary user/app data.  It must not exceed `MAX_HEADER_METADATA_SIZE` bytes.
 
@@ -93,16 +93,11 @@ This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_publ
 
 ## Messaging Format Among Nodes
 
-Messages between Clients and MpidManagers will utilise [`::routing::structured_data::StructuredData`][5], for example:
+Messages between Clients and MpidManagers will utilise [`::routing::structured_data::PlainData`][5], for example:
 ```rust
-let sd = StructuredData {
-    type_tag: MPID_MESSAGE,
-    identifier: mpid_message_name(mpid_message),
-    data: ::utils::encode(mpid_message),
-    previous_owner_keys: vec![],
-    version: 0,
-    current_owner_keys: vec![sender_public_key],
-    previous_owner_signatures: vec![]
+let pd = PlainData {
+    name: mpid_message_name(mpid_message),
+    data: serialise(MpidMessageWrapper::PutMessage(mpid_message)),
 }
 ```
 
@@ -131,29 +126,29 @@ Such a separate routing object (or the registering procedure) is not required if
 
 ## Planned Work
 
-1. Vault
-    1. outbox
-    1. inbox
-    1. sending message flow
-    1. retrieving message flow
-    1. deleting message flow
-    1. churn handling and refreshing for account_transfer (Inbox and Outbox)
-    1. MPID Client registering (when GetAllHeader request received)
+1. MPID-Messaging
+    1. Definition of `MpidMessage`.
+    1. Definition of `MpidHeader`.
+    1. Definition of constants.
+    1. Structure of PlainData::value for messaging.
 
-1. Routing
-    1. `Authority::MpidManager`
-    1. definition of `MPID_MESSAGE_TAG` and `MPID_HEADER_TAG`
-    1. definition of `MpidMessage` and `MpidHeader`
-    1. support Delete (for StructuredData only)
-    1. support push to client
+1. Vault
+    1. Definition of `Outbox`.
+    1. Definition of `Inbox`.
+    1. Sending message flow.
+    1. Retrieving message flow.
+    1. Deleting message flow.
+    1. Churn handling and refreshing for account_transfer (Inbox and Outbox).
+    1. MPID Client registering (when GetAllHeader request received).
+    1. `Authority::MpidManager`.
 
 1. Client
-    1. Put `MpidMessage`
-    1. Get all `MpidHeader`s (pull)
-    1. accept all/single `MpidHeader` (push)
-    1. Get `MpidMessage`.  This shall also include the work of removing corresponding `MpidHeader`s
-    1. Delete `MpidMessage`
-    1. Delete `MpidHeader`
+    1. Put `MpidMessage`.
+    1. Get all `MpidHeader`s (pull).
+    1. Accept all/single `MpidHeader` (push).
+    1. Get `MpidMessage`.  This shall also include the work of removing corresponding `MpidHeader`s.
+    1. Delete `MpidMessage`.
+    1. Delete `MpidHeader`.
 
 
 # Drawbacks
@@ -192,25 +187,20 @@ None.
 
 ### Further Implementation Details
 
-All MPID-related messages will be in the form of a Put, Post or Delete of a `StructuredData`.
+All MPID-related messages will be in the form of a Put, Post or Delete of `PlainData`.
 
-Such `StructuredData` will be:
+Such `PlainData` will be:
 
 ```rust
 
-StructuredData {
-    type_tag: MPID_MESSAGE,
-    identifier: mpid_message_name(mpid_message),  // or mpid_header_name(mpid_header)
-    data: XXX,
-    previous_owner_keys: vec![],
-    version: 0,
-    current_owner_keys: vec![sender_public_key],
-    previous_owner_signatures: vec![],
+PlainData {
+    name: mpid_message_name(mpid_message),
+    value: serialise::(MpidMessageWrapper),
 }
 
 ```
 
-The various different types for `StructuredData::data` can be enumerated as:
+The various different types for `PlainData::value` can be enumerated as:
 
 ```rust
 #[allow(variant_size_differences)]
@@ -418,26 +408,23 @@ impl MpidManager {
     // sending message:
     //     1, messaging: put request from sender A to its MpidManagers(A)
     //     2, notifying: from MpidManagers(A) to MpidManagers(B)
-    pub fn handle_put(from, to, sd, token) {
-        if messaging {  // sd.data holds MpidMessage
+    pub fn handle_put(from, to, pd, token) {
+        if messaging {  // pd.value holds MpidMessage
             // insert received mpid_message into the outbox_storage
             if outbox_storage.insert(from, mpid_message) {
-                let forward_sd = StructuredData {
-                    type_tag: MPID_MESSAGE,
-                    identifier: mpid_message_name(mpid_message),
-                    data: ::utils::encode(mpid_message.mpid_header),
-                    previous_owner_keys: vec![],
-                    version: 0,
-                    current_owner_keys: vec![my_mpid.public_key],
-                    previous_owner_signatures: vec![]
+                let forward_pd = PlainData {
+                    name: mpid_message_name(mpid_message),
+                    value: serialise(MpidMessageWrapper::PutHeader(
+                            mpid_message.mpid_header, 
+                            ::mpid_manager::Authority(mpid_message.mpid_header.sender_name())),
                 }
-                routing.put_request(::mpid_manager::Authority(mpid_message.recipient), forward_sd);
+                routing.put_request(::mpid_manager::Authority(mpid_message.recipient), forward_pd);
             } else {
                 // outbox full or other failure
                 reply failure to the sender (Client);
             }
         }
-        if notifying {  // sd.data holds MpidHeader
+        if notifying {  // pd.value holds MpidHeader
             // insert received mpid_header into the inbox_storage
             if inbox_storage.insert(to, mpid_header) {
                 let recipient_account = inbox_storage.find_account(to);
@@ -536,14 +523,9 @@ impl MpidManager {
     fn get_message(header: (sender_name: ::routing::NameType,
                             sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
                             mpid_header: MpidHeader)) {
-        let request_sd = StructuredData {
-            type_tag: MPID_MESSAGE,
-            identifier: header.sender_name,
-            data: ::utils::encode(MpidMessgeWrapper::GetMessage(mpid_header_name(mpid_header))),
-            previous_owner_keys: vec![],
-            version: 0,
-            current_owner_keys: vec![header.sender_public_key],
-            previous_owner_signatures: vec![]
+        let request_sd = PlainData {
+            name: mpid_header.sender_name,
+            value: seialise(MpidMessgeWrapper::GetMessage(mpid_header_name(mpid_header))),
         }
         routing.post_request(::mpid_manager::Authority(header.sender_name), request_sd);
     }
@@ -559,32 +541,22 @@ Pseudo-code for MpidClient:
 pub fn send_mpid_message(my_mpid: Mpid, recipient: ::routing::Authority::Client,
                          metadata: Vec<u8>, body: Vec<u8>) {
     let mpid_message = MpidMessage::new(my_mpid, recipient, metadata: Vec<u8>, body);
-    let sd = StructuredData {
-        type_tag: MPID_MESSAGE,
-        identifier: mpid_message_name(mpid_message),
-        data: ::utils::encode(mpid_message),
-        previous_owner_keys: vec![],
-        version: 0,
-        current_owner_keys: vec![my_mpid.public_key],
-        previous_owner_signatures: vec![]
+    let sd = PlainData {
+        name: mpid_message_name(mpid_message),
+        data: serialise(MpidMessageWrapper::PutMessage(mpid_message)),
     }
     client_routing.put_request(::mpid_manager::Authority(my_mpid.name),
-                               ::routing::data::Data::StructuredData(sd));
+                               ::routing::data::Data::PlainData(pd));
 }
 
 /// Client register to be online
 pub fn register_online(my_mpid: Mpid) {
-    let sd = StructuredData {
-        type_tag: MPID_MESSAGE,
-        identifier: my_mpid.name,
-        data: ::utils::encode(MpidMessageWrapper::Online),,
-        previous_owner_keys: vec![],
-        version: 0,
-        current_owner_keys: vec![my_mpid.public_key],
-        previous_owner_signatures: vec![]
+    let pd = PlainData {
+        name: my_mpid.name,
+        value: serialise(MpidMessageWrapper::Online),
     }
     client_routing.post_request(::mpid_manager::Authority(my_mpid.name),
-                                ::routing::data::Data::StructuredData(sd));
+                                ::routing::data::Data::PlainData(pd));
 }
 
 /// Client get all headers:
@@ -642,5 +614,5 @@ pub fn mpid_message_name(mpid_message: &MpidMessage) -> ::routing::NameType {
 [2]: #mpidmessage
 [3]: #outbox
 [4]: #inbox
-[5]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/structured_data.rs#L22-L34
+[5]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/plain_data.rs
 [6]: https://github.com/maidsafe/routing/blob/7c59efe27148ea062c3bfdabbf3a5c108afc159c/src/data.rs#L24-L33
