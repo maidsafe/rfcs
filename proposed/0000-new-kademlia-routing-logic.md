@@ -160,7 +160,18 @@ even distribution of addresses, this should rarely be substantially more than
 
 ## Node removal
 
-TBD
+Since we keep connections open to each routing table entry, every contact of a
+leaving node learns about the removal. (Should we change that, a periodic check
+needs to be introduced.)
+
+If a node loses a connection in a bucket that is not full, no action needs to
+be taken: Because of the invariant, the remaining nodes in that bucket are *all*
+there are in the network with the given bucket index.
+
+If the bucket was full before, the entry probably needs to be replaced. To do
+that, the node sends another `GetPublicIdWithEndpoints` request to the bucket
+address of the modified bucket, as if it had just joined, to obtain the contact
+information of the *new* close group of its `i`-th bucket and refill it.
 
 
 # Drawbacks
