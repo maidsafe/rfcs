@@ -64,7 +64,7 @@ this will make the following guarantees in common scenarios:
 1. The number of nodes in the network with `node.is_close(target) == true` is
    exactly `GROUP_SIZE` for each target address.
 2. Each node in a given address' close group is connected to each other node in
-   that group.
+   that group. In particular, every node is connected to its own close group.
 3. Each message reaches every member of the destination's close group after at
    most 512 hops.
 4. The number of total hop messages created for each message is at most
@@ -89,8 +89,7 @@ In every node, every bucket is maximally filled, and every node knows its close
 group. That means:
 
 Whenever a bucket has less than `BUCKET_SIZE` entries, it contains *all nodes in
-the network* that have the corresponding bucket distance. And the closest
-`GROUP_SIZE - 1` nodes are always in a node's routing table.
+the network* that have the corresponding bucket distance.
 
 
 ## Changes to the routing logic
