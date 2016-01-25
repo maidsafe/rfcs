@@ -123,7 +123,39 @@ imply the required guarantees.
 
 ## Node insertion
 
-TBD
+After adding its close group to the routing table, a new node knows that only
+the buckets up to the first one that currently has an entry can potentially have
+entries. (Nodes in later buckets would belong to the close group!) For each such
+bucket `i` that is not full (i. e. has `GROUP_SIZE` entries) yet, the node sends
+a `GetPublicIdWithEndpoints` request to the group authority of its `i`-th bucket
+address.
+
+The members of that group verify that they belong to one of the sender's bucket
+addresses and the sender is therefore allowed to see their endpoints. They each
+individually send their endpoints to the new node. The node replies with its own
+endpoints and establishes the connections.
+
+At that point, the invariant holds true for the new node's routing table. But it
+might still fail at another node `n` with bucket index `i`, whose `i`-th bucket
+is not full.
+
+This can only happen if there were less than `GROUP_SIZE` nodes `m` in the
+network before that had `bi(n, m) == i`, which is equivalent to them being in
+a bucket `> i` in the new node's table.
+
+Thus the further action only needs to be taken if the new node has a full bucket
+`i` such that there are fewer than `GROUP_SIZE` nodes with bucket index greater
+than `i`. The new additions to the nodes' `i`-th bucket know that this is the
+case: Their `i`-th bucket, to which they just added the new node, has not been
+full before!
+
+So whenever a node `n` adds a new node to a bucket `i` that was not full, `n`
+needs to make sure that *all* nodes `m` in the network with `bi(m, n) > i` are
+notified. To do that, it sends a `Churn` message to *all* entries from its
+`i + 1`-th bucket onwards. Since all nodes that receive the event do the same,
+this will reach every node with `bi(m, n) > i`. (In a balanced network with an
+even distribution of addresses, this should rarely be substantially more than
+`GROUP_SIZE` nodes.)
 
 
 ## Node removal
@@ -251,7 +283,7 @@ that there are no nodes with that bucket distance in the network and therefore
 
 ### Property 4
 
-This follows immediately from Property 2, since only `PARALLELISM` different
+This follows immediately from Property 3, since only `PARALLELISM` different
 messages are created by the sender.
 
 
