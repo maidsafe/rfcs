@@ -60,11 +60,13 @@ this will make the following guarantees in common scenarios:
 
 1. The number of nodes in the network with `node.is_close(target) == true` is
    exactly `GROUP_SIZE` for each target address.
-2. Each message reaches every member of the destination's close group after at
+2. Each node in a given address' close group is connected to each other node in
+   that group.
+3. Each message reaches every member of the destination's close group after at
    most 512 hops.
-3. The number of total hop messages created for each message is at most
+4. The number of total hop messages created for each message is at most
    `PARALLELISM * 512`.
-4. For each node there are at most 512 * `GROUP_SIZE` other nodes in the network
+5. For each node there are at most 512 * `GROUP_SIZE` other nodes in the network
    for which it can obtain the IP address, at any point in time.
 
 **TODO**: We should add more guarantees here, e. g.: If `PARALLELISM - 1` nodes
@@ -97,9 +99,12 @@ In kademlia_routing_table:
 * The `add_node` and `want_to_add` methods are modified so that we always
   add/want a node if its bucket does not yet have `BUCKET_SIZE` entries.
 * The `target_nodes` function is modified (and used in routing accordingly) so
-  that only the source node of a message sends `PARALLELISM` copies of it. Apart
-  from that, each node relays every copy of the message that it receives, and up
-  to `PARALLELISM` copies.
+  that only the source node of a message sends `PARALLELISM` copies of it.
+* Apart from that, each node relays every copy of the message that it receives,
+  and up to `PARALLELISM` copies.
+* As an exception to the previous point: Any message sent to a group that the
+  current node belongs to is relayed to the `GROUP_SIZE - 1` nodes closest to
+  the target.
 * The `is_close` method returns whether there are fewer than `GROUP_SIZE` nodes
   in the routing table which are closer to the target than `self`.
 
@@ -153,23 +158,25 @@ guaranteed.
 
 Let `bd(x, y)` be the bucket distance between two addresses `x` and `y`, `x ^ y`
 the XOR distance, and `bi(x, y) = 512 - bd(x, y)` the bucket index.
+Equivalently, the `bi(x, y)`-th bit is the first (most significant) one where
+`x` and `y` disagree.
 
 
 ### Lemma 1
 
 `y` is XOR-closer to `x` than `z` if and only if `y` agrees with `x` in the most
-significant place where `y` disagrees with `z`. That is, the following are
+significant bit where `y` disagrees with `z`. That is, the following are
 equivalent:
 
 * `x ^ y < x ^ z`
-* `x` and `y` agree in the `bi(y, z)`-th digit.
-* `x` and `z` disagree in the `bi(y, z)`-th digit.
+* `x` and `y` agree in the `bi(y, z)`-th bit.
+* `x` and `z` disagree in the `bi(y, z)`-th bit.
 
 **Proof:**
-`x ^ y < x ^ z` means that in the most significant digit where `x ^ y` and
+`x ^ y < x ^ z` means that in the most significant bit where `x ^ y` and
 `x ^ z` disagree, `x ^ y` has a 0. But `x ^ y` and `x ^ z` disagree in the same
-places as `y` and `z`, i. e. they first disagree in the `bi(y, z)`-th digit.
-Since `x ^ y` is 0 in that place, that means that `x` and `y` agree there.
+bits as `y` and `z`, i. e. they first disagree in the `bi(y, z)`-th bit.
+Since `x ^ y` has a 0 there, that means that `x` and `y` agree there.
 Similarly, since `x ^ z` is 1 in that place, `x` and `z` disagree there.
 
 
@@ -178,6 +185,7 @@ Similarly, since `x ^ z` is 1 in that place, `x` and `z` disagree there.
 If `n` is in the close group to `d`, it has every node `m` in its routing table
 which is *even closer* to `d`.
 
+**Proof:**
 By Lemma 1, `m` is closer to `d` if and only if `d` and `n` agree in the
 `bi(m, n)`-th digit, i. e. if `m` would belong in a bucket `i` of `n` such that
 `d ^ n` has a `0` in the `i`-th position. In other words, the nodes closer to
@@ -196,50 +204,58 @@ returns `true`.
 For the converse, assume there are `GROUP_SIZE` nodes that are closer to the
 target `t` than our node's address `n`. That such a node `c` is closer to `t`
 means `t ^ c < t ^ n`, which by Lemma 1 is equivalent to `c` belonging in the
-`i`-th bucket of `n` for some `i` where `n` and `t` disagree. Since by the
-invariant each such bucket contains either *all* nodes with that bucket distance
-or `GROUP_SIZE` such nodes, the routing table then has at least `GROUP_SIZE`
-such entries `c`.
+`i`-th bucket of `n` for some `i` such that `n` and `t` disagree in the `i`-th
+bit. Since by the invariant each such bucket contains either *all* nodes with
+that bucket distance or `GROUP_SIZE` such nodes, the routing table then has at
+least `GROUP_SIZE` such entries `c`.
 
 
 ### Property 2
 
-Let the current node `n` not be closest to the destination `d`.
-
-Let `xn` be the number that has a 0 in exactly those places where `n` has an
-empty bucket. We prove that the number of leading zeros of `(n ^ d) & xn`
-increases in every step.
-
-Since we send on the message to the closest node to `d` in our routing table, we
-need to show that `(m ^ d) & xm` has strictly more leading zeros than
-`(n ^ d) & xn` for that node `m`.
-
-`m` minimizes `bi(m, n)` with the constraint that in `bi(m, n)`, `n` and `d`
-differ. (A node with a smaller such index would be closer to `d`.) Thus all
-buckets with a smaller index `i` such that `n` and `d` differ in the
-`i`-th place are empty, which means that `xn` has a 0 in the `i`-th place.
-Since `m` and `n` agree up to `bi(m, n)`, `xn` and `xm` also do.
-
-Hence `bi(m, n)` is exactly the number of leading zeros in `(n ^ d) & xn`. Since
-`m` agrees with `n` exactly up to the most significant bit where `(n ^ d) & xn`
-has a 1, `(m ^ d) & xm` has at least one more leading zero.
-
-This proves that after at most 511 hops, the message arrives at the node `n`
-which is closest to `d`.
-
-Finally, if the message is addressed at a group, `n` will pass it on to its
-`GROUP_SIZE - 1` connections that are closest to `d`. So it remains to prove
-that these constitute in fact the close group of `d`. But this is true since by
-Lemma 2, every member of `d`'s close group does indeed have a connection to `n`.
+Let `n` and `m` be in the close group of `d`. Witout loss of generality assume
+that `n` is closer to `d`. Then by Lemma 2, `m` has `n` in its routing table.
+Therefore, the two are connected.
 
 
 ### Property 3
+
+Thanks to property 2, we only have to show that the message reaches the node
+closest to the destination `d`, as from there it will directly be sent to all
+the other close nodes.
+
+For that, we show that every node `n` that is not closest to `d` increases the
+number of *good* leading bits in the next hop:
+
+A bit `i` is *good* for `n` if either `n ^ x` is 0 in that bit, or `n`'s `i`-th
+bucket is empty.
+
+Let the current node `n` not be closest to the destination `d`, and assume that
+the first `i` bits are good. The message is sent to the entry `m` in `n`'s
+routing table which is closest to `d`, so we need to prove that `m` has at least
+`i + 1` good leading bits.
+
+Since `m` minimizes the distance to `d` among the table entries, it must be in
+the first nonempty bucket `k` of `n` such that `n` and `d` disagree in the
+`k`-th bit. Thus `k`-th is the first bit that is not good for `n`, that is,
+`k = i + 1`. Since `m` and `d` agree there, it is, however, good for `m`.
+
+If we can show that the first `i` bits are also still good for `m`, then it
+follows that `m` has in fact at least `i + 1` good leading bits:
+
+But `m` and `n` agree in the first `i` bits. So wherever `n ^ x` has a 0,
+`m ^ x` also does. Also, the nodes with bucket distance `j` for every `j <= i`
+are the same, so whenever `n`'s `j`-th bucket is empty, the invariant implies
+that there are no nodes with that bucket distance in the network and therefore
+`m`'s `j`-th bucket must also be empty.
+
+
+### Property 4
 
 This follows immediately from Property 2, since only `PARALLELISM` different
 messages are created by the sender.
 
 
-### Property 4
+### Property 5
 
 There are `512` bucket addresses, and each of them has only `GROUP_SIZE` close
 nodes.
