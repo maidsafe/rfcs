@@ -286,7 +286,7 @@ routing table which is closest to `d`, so we need to prove that `m` has at least
 
 Since `m` minimizes the distance to `d` among the table entries, it must be in
 the first nonempty bucket `k` of `n` such that `n` and `d` disagree in the
-`k`-th bit. Thus `k`-th is the first bit that is not good for `n`, that is,
+`k`-th bit. Thus the `k`-th is the first bit that is not good for `n`, that is,
 `k = i + 1`. Since `m` and `d` agree there, it is, however, good for `m`.
 
 If we can show that the first `i` bits are also still good for `m`, then it
