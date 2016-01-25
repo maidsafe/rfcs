@@ -58,6 +58,9 @@ Instead of detailing how and where the above points fail, this is a proposal to
 make some changes to the routing logic, together with a rigorous argument why
 this will make the following guarantees in common scenarios:
 
+
+## Guaranteed properties
+
 1. The number of nodes in the network with `node.is_close(target) == true` is
    exactly `GROUP_SIZE` for each target address.
 2. Each node in a given address' close group is connected to each other node in
