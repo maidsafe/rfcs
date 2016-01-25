@@ -98,6 +98,7 @@ In kademlia_routing_table:
   and `BUCKET_SIZE >= PARALLELISM`. (Possibly remove `BUCKET_SIZE`.)
 * The `add_node` and `want_to_add` methods are modified so that we always
   add/want a node if its bucket does not yet have `BUCKET_SIZE` entries.
+* Don't automatically drop nodes from the routing table when adding new ones.
 * The `target_nodes` function is modified (and used in routing accordingly) so
   that only the source node of a message sends `PARALLELISM` copies of it.
 * Apart from that, each node relays every copy of the message that it receives,
@@ -184,7 +185,22 @@ the routing table size.
 
 # Alternatives
 
-TBD
+If the routing table size turns out to be too large in practice, we could let
+connections time out: Entries we haven't communicated with within some period of
+time are disconnected, without being removed from the routing table. The
+connection is reestablished periodically to check whether the node is still
+there, as well as whenever we need to route messages via them. This should allow
+us to keep only `PARALLELISM` connections open per bucket most of the time.
+
+We could also experiment with smaller values for `GROUP_SIZE` and `PARALLELISM`,
+but we need to make sure that that doesn't compromise security.
+
+Finally, if it turns out to be a problem that we never drop nodes (it shouldn't,
+because we are only allowed to add nodes that are close to one of our bucket
+addresses anyway), nodes could periodically send `IDontWantToTalkToYouAnymore`
+messages to every entry in an overflowing bucket except the `BUCKET_SIZE`
+closest ones to the bucket address. The other node then drops the connection if
+it also doesn't need it anymore.
 
 
 # Unresolved questions
