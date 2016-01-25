@@ -122,7 +122,7 @@ In routing:
   invariant is satisfied. (See below for details.)
 
 See the appendix below for proofs that the invariant and these changes will
-imply the required guarantees.
+guarantee the desired properties.
 
 
 ## Node insertion
@@ -144,14 +144,9 @@ might still fail at another node `n` with bucket index `i`, whose `i`-th bucket
 is not full.
 
 This can only happen if there were less than `GROUP_SIZE` nodes `m` in the
-network before that had `bi(n, m) == i`, which is equivalent to them being in
-a bucket `> i` in the new node's table.
-
-Thus the further action only needs to be taken if the new node has a full bucket
-`i` such that there are fewer than `GROUP_SIZE` nodes with bucket index greater
-than `i`. The new additions to the nodes' `i`-th bucket know that this is the
-case: Their `i`-th bucket, to which they just added the new node, has not been
-full before!
+network before that had `bi(n, m) == i`. If such nodes exist, then some of them
+have just connected to the new node and they know that their `i`-th bucket was
+not full before.
 
 So whenever a node `n` adds a new node to a bucket `i` that was not full, `n`
 needs to make sure that *all* nodes `m` in the network with `bi(m, n) > i` are
@@ -204,13 +199,6 @@ addresses anyway), nodes could periodically send `IDontWantToTalkToYouAnymore`
 messages to every entry in an overflowing bucket except the `BUCKET_SIZE`
 closest ones to the bucket address. The other node then drops the connection if
 it also doesn't need it anymore.
-
-
-# Unresolved questions
-
-Although it can be proved that the closest node to the destination is reached by
-a message, there is no proof yet that *every* member of the close group will be
-reached.
 
 
 # Appendix: Proofs
