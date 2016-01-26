@@ -180,6 +180,48 @@ one open connection and two threads. It would therefore be desirable to reduce
 the routing table size.
 
 
+# Unresolved questions
+
+The idea behind group authorities (close groups) as well as parallelism (sending
+the message along more than one path) is to provide security and redundancy.
+However, the former measure can easily bypassed if the latter is undermined:
+A single node could invent a whole close group and claim that it is relaying
+messages from them. The recipient usually doesn't know the sender: They neither
+know their public keys, nor do they know the network layout around the sender,
+so they don't know whether the sender actually *is* close to the source address,
+nor whether the sender is a legitimate node at all.
+
+One idea to prevent this kind of attack would rely on the parallel paths of a
+message never intersecting:
+
+* Every hop node signs the public key of the previous node: They have them in
+their routing table and know that it's a legitimate node, in the sense that it
+was added to the network via the bootstrap procedure. All these keys and
+signatures are passed along with the message until it reaches its destination.
+* Every copy of a message except the first one is *bounced back* to the previous
+hop node, and that tries to route it via another contact. That way the
+`PARALLELISM` copies of the message will have taken four completely different
+routes to the target.
+
+The target node then has `PARALLELISM` uninterrupted chains of signatures: I
+know A and A signed B and B signed C and C sent the message. Then for the
+message to be faked, *each* of these paths would have to contain one of the
+attacker's nodes.
+
+By making `PARALLELISM` big enough this might make attacks infeasible. (We'll
+need to calculate the chances here.)
+
+Maybe there are ways to change the routing algorithm so that the paths of the
+copies usually stay disjoint by themselves, so that too many bounces can be
+avoided? A few wild ideas:
+
+* A copy could be numbered from the beginning, and copy `n` could always be
+routed via the `n`-th closest node to the target, instead of the closest one.
+* Nodes could have one of `GROUP_SIZE` colors. A close group consists of the
+closest nodes to the target in each of these colors. Every message is routed via
+a path that stays exclusively in one color, until it reaches the destination.
+
+
 # Alternatives
 
 If the routing table size turns out to be too large in practice, we could let
