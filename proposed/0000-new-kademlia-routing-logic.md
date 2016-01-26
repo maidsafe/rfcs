@@ -204,12 +204,17 @@ hop node, and that tries to route it via another contact. That way the
 routes to the target.
 
 The target node then has `PARALLELISM` uninterrupted chains of signatures: I
-know A and A signed B and B signed C and C sent the message. Then for the
+know A and A signed B and B signed C and C sent the message. For the
 message to be faked, *each* of these paths would have to contain one of the
 attacker's nodes.
 
-By making `PARALLELISM` big enough this might make attacks infeasible. (We'll
-need to calculate the chances here.)
+By making `PARALLELISM` big enough this might make attacks infeasible. (If the
+attacker controls a percentage `a` of a network with `2`<sup>`n`</sup> nodes,
+the chance to intercept any given path of length `n` is about
+`1 - (1 - a)`<sup>`n`</sup>, and the chance to intercept *all* `p = PARALLELISM`
+paths is about `(1 - (1 - a)`<sup>`n`</sup>`)`<sup>`p`</sup>. E. g. in a
+network with a million nodes (`n = 20`) and `p = 8`, an attacker who controls
+`a = 5%` of the nodes would still have a chance of success of about `3%`.)
 
 Maybe there are ways to change the routing algorithm so that the paths of the
 copies usually stay disjoint by themselves, so that too many bounces can be
@@ -217,9 +222,16 @@ avoided? A few wild ideas:
 
 * A copy could be numbered from the beginning, and copy `n` could always be
 routed via the `n`-th closest node to the target, instead of the closest one.
-* Nodes could have one of `GROUP_SIZE` colors. A close group consists of the
-closest nodes to the target in each of these colors. Every message is routed via
-a path that stays exclusively in one color, until it reaches the destination.
+This might make it likely, but not impossible, that the paths never collide.
+(We will need to count bounces in tests to verify that, probably also using
+a highly imbalanced network to simulate one path in a very large network.)
+* Nodes could have one of `GROUP_SIZE` colours. A close group consists of one
+node in each colour: the single closest node to the target with that colour.
+Every message copy is routed via a path that stays exclusively in one colour,
+until it reaches the destination, making it *impossible* for the copies to
+collide. This would change the routing algorithm considerably: Instead of one
+table with bucket size `GROUP_SIZE`, each node would have to keep `GROUP_SIZE`
+tables - one for each colour - with bucket size 1.
 
 
 # Alternatives
