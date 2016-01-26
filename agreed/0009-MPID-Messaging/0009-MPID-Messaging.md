@@ -56,7 +56,7 @@ pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 
 ```rust
 pub struct MpidHeader {
-    sender_name: ::NameType,
+    sender_name: XorName,
     guid: [u8; 16],
     metadata: Vec<u8>,
     signature: ::sodiumoxide::crypto::sign::Signature,
@@ -71,8 +71,8 @@ The `metadata` field allows passing arbitrary user/app data.  It must not exceed
 
 ```rust
 pub struct MpidMessage {
-    header: ::MpidHeader,
-    recipient: ::NameType,
+    header: MpidHeader,
+    recipient: XorName,
     body: Vec<u8>,
     recipient_and_body_signature: ::sodiumoxide::crypto::sign::Signature,
 }
@@ -89,7 +89,7 @@ This can be implemented as a `Vec<MpidMessage>`.
 
 Again this will be one per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
-This can be implemented as a `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, mpid_header: MpidHeader)>` or having the headers from the same sender grouped: `Vec<(sender_name: ::routing::NameType, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<mpid_header: MpidHeader>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
+This can be implemented as a `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, mpid_header: MpidHeader)>` or having the headers from the same sender grouped: `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<mpid_header: MpidHeader>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
 
 ## Messaging Format Among Nodes
 
@@ -234,8 +234,8 @@ Requests composed by Client:
 | Put     | Client(A) creating a new message                                    | `Wrapper::MpidMessage`                 | Managers(A)                     |
 | Post    | Client(A) checking existence of list of sent messages in own outbox | `Wrapper::OutboxHas(Vec<Header.name>)` | Managers(A)                     |
 | Post    | Client(A) getting list of all messages still in own outbox          | `Wrapper::GetOutboxHeaders`            | Managers(A)                     |
-| Delete  | Client(A) or (B) deleting from own outbox or inbox respectively     | `NameType`                             | Managers(A) or (B) respectively |
-| Delete  | Client(B) deleting a "read" message from sender's outbox            | `NameType`                             | Managers(A)                     |
+| Delete  | Client(A) or (B) deleting from own outbox or inbox respectively     | `XorName`                              | Managers(A) or (B) respectively |
+| Delete  | Client(B) deleting a "read" message from sender's outbox            | `XorName`                              | Managers(A)                     |
 | Post    | Client announcing to Managers it's connected to network             | `Wrapper::Online`                      | Managers                        |
 
 Requests composed by Client:
@@ -263,14 +263,14 @@ const GUID_SIZE: usize = 16;
 /// MpidHeader
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, RustcDecodable, RustcEncodable)]
 pub struct MpidHeader {
-    sender_name: ::NameType,
+    sender_name: XorName,
     guid: [u8; GUID_SIZE],
     metadata: Vec<u8>,
     signature: ::sodiumoxide::crypto::sign::Signature,
 }
 
 impl MpidHeader {
-    pub fn new(sender_name: ::NameType,
+    pub fn new(sender_name: XorName,
                metadata: Vec<u8>,
                secret_key: &::sodiumoxide::crypto::sign::SecretKey)
                -> Result<MpidHeader, ::error::RoutingError> {
@@ -290,7 +290,7 @@ impl MpidHeader {
         })
     }
 
-    pub fn sender_name(&self) -> &::NameType {
+    pub fn sender_name(&self) -> &XorName {
         &self.sender_name
     }
 
@@ -311,7 +311,7 @@ impl MpidHeader {
         ::sodiumoxide::crypto::sign::verify_detached(&self.signature, &encoded, public_key)
     }
 
-    fn encode(sender_name: &::NameType, guid: &[u8; GUID_SIZE], metadata: &Vec<u8>) -> Vec<u8> {
+    fn encode(sender_name: &XorName, guid: &[u8; GUID_SIZE], metadata: &Vec<u8>) -> Vec<u8> {
         ::utils::encode(&(sender_name, guid, metadata)).unwrap_or(vec![])
     }
 }
@@ -327,15 +327,15 @@ pub const MAX_BODY_SIZE: usize = ::structured_data::MAX_STRUCTURED_DATA_SIZE_IN_
 /// MpidMessage
 #[derive(Eq, PartialEq, PartialOrd, Ord, Clone, RustcDecodable, RustcEncodable)]
 pub struct MpidMessage {
-    header: ::MpidHeader,
-    recipient: ::NameType,
+    header: MpidHeader,
+    recipient: XorName,
     body: Vec<u8>,
     recipient_and_body_signature: ::sodiumoxide::crypto::sign::Signature,
 }
 
 impl MpidMessage {
-    pub fn new(header: ::MpidHeader,
-               recipient: ::NameType,
+    pub fn new(header: MpidHeader,
+               recipient: XorName,
                body: Vec<u8>,
                secret_key: &::sodiumoxide::crypto::sign::SecretKey)
                -> Result<MpidMessage, ::error::RoutingError> {
@@ -353,11 +353,11 @@ impl MpidMessage {
         })
     }
 
-    pub fn header(&self) -> &::MpidHeader {
+    pub fn header(&self) -> &MpidHeader {
         &self.header
     }
 
-    pub fn recipient(&self) -> &::NameType {
+    pub fn recipient(&self) -> &XorName {
         &self.recipient
     }
 
@@ -371,7 +371,7 @@ impl MpidMessage {
                                                      public_key) && self.header.verify(public_key)
     }
 
-    fn encode(recipient: &::NameType, body: &Vec<u8>) -> Vec<u8> {
+    fn encode(recipient: &XorName, body: &Vec<u8>) -> Vec<u8> {
         ::utils::encode(&(recipient, body)).unwrap_or(vec![])
     }
 }
@@ -381,14 +381,14 @@ Account types held by MpidManagers
 
 ```rust
 struct OutboxAccount {
-    pub sender: ::routing::NameType,
+    pub sender: XorName,
     pub mpid_messages: Vec<MpidMessage>,
     pub total_size: u64,
 }
 struct InboxAccount {
-    pub recipient_name: ::routing::NameType,
+    pub recipient_name: XorName,
     pub recipient_clients: Vec<::routing::Authority::Client>,
-    pub headers: Vec<(sender_name: ::routing::NameType,
+    pub headers: Vec<(sender_name: XorName,
                       sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
                       mpid_header: MpidHeader)>,
     pub total_size: u64,
@@ -520,7 +520,7 @@ impl MpidManager {
         }
     }
 
-    fn get_message(header: (sender_name: ::routing::NameType,
+    fn get_message(header: (sender_name: XorName,
                             sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
                             mpid_header: MpidHeader)) {
         let request_sd = PlainData {
@@ -599,10 +599,10 @@ fn on_post_failure() {
 General functions
 
 ```rust
-pub fn mpid_header_name(mpid_header: &MpidHeader) -> ::routing::NameType {
+pub fn mpid_header_name(mpid_header: &MpidHeader) -> XorName {
     ::crypto::hash::sha512::hash(::utils::encode(mpid_header))
 }
-pub fn mpid_message_name(mpid_message: &MpidMessage) -> ::routing::NameType {
+pub fn mpid_message_name(mpid_message: &MpidMessage) -> XorName {
     mpid_header_name(mpid_message.mpid_header)
 }
 ```
