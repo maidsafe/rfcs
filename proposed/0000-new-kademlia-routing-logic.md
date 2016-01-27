@@ -119,6 +119,8 @@ In routing:
   your routing table).
 * Whenever a node joins or leaves, all routing tables are updated so that the
   invariant is satisfied. (See below for details.)
+* Raise churn events if the lost or new node belongs to *any* close group that
+  we are a member of, not just *our* close group. (See below.)
 
 See the appendix below for proofs that the invariant and these changes will
 guarantee the desired properties.
@@ -170,6 +172,27 @@ If the bucket was full before, the entry probably needs to be replaced. To do
 that, the node sends another `GetPublicIdWithEndpoints` request to the bucket
 address of the modified bucket, as if it had just joined, to obtain the contact
 information of the *new* close group of its `i`-th bucket and refill it.
+
+
+## Churn
+
+If a node is joining or leaving, the upper layers are informed about it so that
+they can adapt to the change in the network, e. g. restore the desired
+replication number of data chunks. The nodes that need to act on this are those
+which are in any close group together with the new/lost node.
+
+If the new/lost node `n` is/was in any non-full bucket, this is the case:
+We and the lost node are then both close to that bucket address.
+
+If the bucket `i` is full, then we are not close to any address that disagrees
+with us in the `i`-th place, so the question is whether `n` is close to any
+other address we are close to. If we have `GROUP_SIZE - 1` or more contacts with
+higher indices, this is not the case: These would all be closer than `n`.
+Otherwise it *is* the case: Ourselves and `n` are in the close group of `n`'s
+`i`-th bucket address.
+
+So a `Churn` event needs to be raised if `n` is in a non-full bucket or we have
+less than `GROUP_SIZE - 1` contacts with a bucket index greater than `n`'s.
 
 
 # Drawbacks
