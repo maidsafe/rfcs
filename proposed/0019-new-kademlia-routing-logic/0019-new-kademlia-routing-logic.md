@@ -98,6 +98,10 @@ In kademlia_routing_table:
 
 * The constants are changed and a test asserts that `BUCKET_SIZE == GROUP_SIZE`
   and `BUCKET_SIZE >= PARALLELISM`. (Possibly remove `BUCKET_SIZE`.)
+* I am allowed to connect to you (and learn about your IP address) if and only
+  if you are in the close group of one of my *bucket address*es: an address that
+  differs from mine in exactly one bit, (independent of whether you want me in
+  your routing table). A new `allow_connection` method will check that.
 * The `add_node` and `want_to_add` methods are modified so that we always
   add/want a node if its bucket does not yet have `BUCKET_SIZE` entries.
 * Don't automatically drop nodes from the routing table when adding new ones.
@@ -113,10 +117,6 @@ In kademlia_routing_table:
 
 In routing:
 
-* I am allowed to connect to you (and learn about your IP address) if and only
-  if you are in the close group of one of my *bucket address*es: an address that
-  differs from mine in exactly one bit, (independent of whether you want me in
-  your routing table).
 * Whenever a node joins or leaves, all routing tables are updated so that the
   invariant is satisfied. (See below for details.)
 * Raise churn events if the lost or new node belongs to *any* close group that
@@ -337,7 +337,7 @@ least `GROUP_SIZE` such entries `c`.
 
 ### Property 2
 
-Let `n` and `m` be in the close group of `d`. Witout loss of generality assume
+Let `n` and `m` be in the close group of `d`. Without loss of generality assume
 that `n` is closer to `d`. Then by Lemma 2, `m` has `n` in its routing table.
 Therefore, the two are connected.
 
