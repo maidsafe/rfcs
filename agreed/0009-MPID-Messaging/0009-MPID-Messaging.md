@@ -407,12 +407,6 @@ struct MailBox {
 Pseudo-code for MpidManager:
 
 ```rust
-pub struct MpidManager {
-    outbox_storage: Vec<OutboxAccount>,
-    inbox_storage: Vec<InboxAccount>,
-    routing: Routing,
-}
-
 impl MpidManager {
     // sending message:
     //     1, messaging: put request from sender A to its MpidManagers(A)
