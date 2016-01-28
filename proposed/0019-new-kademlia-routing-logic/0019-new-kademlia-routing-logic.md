@@ -132,13 +132,12 @@ After adding its close group to the routing table, a new node knows that only
 the buckets up to the first one that currently has an entry can potentially have
 entries. (Nodes in later buckets would belong to the close group!) For each such
 bucket `i` that is not full (i. e. has `GROUP_SIZE` entries) yet, the node sends
-a `GetPublicIdWithEndpoints` request to the group authority of its `i`-th bucket
-address.
+a `GetCloseGroup` request to the `NaeManager` of its `i`-th bucket address.
 
-The members of that group verify that they belong to one of the sender's bucket
-addresses and the sender is therefore allowed to see their endpoints. They send
-all of the groups' endpoints to the new node. The node replies with its own
-endpoints and establishes the connections.
+The group verifies that it is one the sender's bucket addresses and the sender
+is therefore allowed to connect to its members. It responds with the groups'
+public IDs to the new node. The node then exchanges its endpoints with each of
+the members and establishes the connections.
 
 At that point, the invariant holds true for the new node's routing table. But it
 might still fail at another node `n` with bucket index `i`, whose `i`-th bucket
