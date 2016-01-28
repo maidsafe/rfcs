@@ -376,21 +376,31 @@ impl MpidMessage {
 }
 ```
 
-Account types held by MpidManagers
+Structs in MpidManager to holding the account and messages:
 
 ```rust
-struct OutboxAccount {
-    pub sender: XorName,
-    pub mpid_messages: Vec<MpidMessage>,
-    pub total_size: u64,
+pub struct MpidManager {
+    // key: account owner's mpid_name; value: account
+    accounts: HashMap<XorName, Account>,
+    chunk_store_inbox: ChunkStore,
+    chunk_store_outbox: ChunkStore,
 }
-struct InboxAccount {
-    pub recipient_name: XorName,
-    pub recipient_clients: Vec<::routing::Authority::Client>,
-    pub headers: Vec<(sender_name: XorName,
-                      sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
-                      mpid_header: MpidHeader)>,
-    pub total_size: u64,
+
+#[derive(RustcEncodable, RustcDecodable, PartialEq, Eq, Debug, Clone)]
+struct Account {
+    // account owners' registerred client proxies
+    clients: Vec<::routing::Authority::Client>,
+    inbox: MailBox,
+    outbox: MailBox,
+}
+
+#[derive(RustcEncodable, RustcDecodable, PartialEq, Eq, Debug, Clone)]
+struct MailBox {
+    allowance: u64,
+    used_space: u64,
+    space_available: u64,
+    // key: msg or header's name; value: sender's public key
+    mail_box: HashMap<XorName, PublicKey>,
 }
 ```
 
