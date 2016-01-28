@@ -337,7 +337,7 @@ least `GROUP_SIZE` such entries `c`.
 
 ### Property 2
 
-Let `n` and `m` be in the close group of `d`. Witout loss of generality assume
+Let `n` and `m` be in the close group of `d`. Without loss of generality assume
 that `n` is closer to `d`. Then by Lemma 2, `m` has `n` in its routing table.
 Therefore, the two are connected.
 
