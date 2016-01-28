@@ -136,8 +136,8 @@ a `GetPublicIdWithEndpoints` request to the group authority of its `i`-th bucket
 address.
 
 The members of that group verify that they belong to one of the sender's bucket
-addresses and the sender is therefore allowed to see their endpoints. They each
-individually send their endpoints to the new node. The node replies with its own
+addresses and the sender is therefore allowed to see their endpoints. They send
+all of the groups' endpoints to the new node. The node replies with its own
 endpoints and establishes the connections.
 
 At that point, the invariant holds true for the new node's routing table. But it
