@@ -46,8 +46,7 @@ Broadly speaking, the `MpidHeader` contains metadata and the `MpidMessage` conta
 ```rust
 pub const MPID_MESSAGE: u64 = 51000;
 pub const MAX_HEADER_METADATA_SIZE: usize = 128;  // bytes
-pub const MAX_BODY_SIZE: usize =
-    ::routing::structured_data::MAX_STRUCTURED_DATA_SIZE_IN_BYTES - 512 - MAX_HEADER_METADATA_SIZE;
+pub const MAX_BODY_SIZE: usize = 102400 - 512 - MAX_HEADER_METADATA_SIZE;
 pub const MAX_INBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 ```
@@ -238,7 +237,7 @@ Requests composed by Client:
 | Delete  | Client(B) deleting a "read" message from sender's outbox            | `XorName`                              | Managers(A)                     |
 | Post    | Client announcing to Managers it's connected to network             | `Wrapper::Online`                      | Managers                        |
 
-Requests composed by Client:
+Requests composed by MpidManager:
 
 | Request      | Usage Scenario                                             | Content                                                 | From Authority | Destination Authority |
 |:-------------|:-----------------------------------------------------------|:--------------------------------------------------------|:---------------|:----------------------|
@@ -321,7 +320,7 @@ MPID Message:
 
 ```rust
 /// Maximum allowed size for `MpidMessage::body`.
-pub const MAX_BODY_SIZE: usize = ::structured_data::MAX_STRUCTURED_DATA_SIZE_IN_BYTES - 512 -
+pub const MAX_BODY_SIZE: usize = 102400 - 512 -
                                  ::mpid_header::MAX_HEADER_METADATA_SIZE;
 
 /// MpidMessage
@@ -377,33 +376,37 @@ impl MpidMessage {
 }
 ```
 
-Account types held by MpidManagers
+Structs in MpidManager to holding the account and messages:
 
 ```rust
-struct OutboxAccount {
-    pub sender: XorName,
-    pub mpid_messages: Vec<MpidMessage>,
-    pub total_size: u64,
+pub struct MpidManager {
+    // key: account owner's mpid_name; value: account
+    accounts: HashMap<XorName, Account>,
+    chunk_store_inbox: ChunkStore,
+    chunk_store_outbox: ChunkStore,
 }
-struct InboxAccount {
-    pub recipient_name: XorName,
-    pub recipient_clients: Vec<::routing::Authority::Client>,
-    pub headers: Vec<(sender_name: XorName,
-                      sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
-                      mpid_header: MpidHeader)>,
-    pub total_size: u64,
+
+#[derive(RustcEncodable, RustcDecodable, PartialEq, Eq, Debug, Clone)]
+struct Account {
+    // account owners' registerred client proxies
+    clients: Vec<::routing::Authority::Client>,
+    inbox: MailBox,
+    outbox: MailBox,
+}
+
+#[derive(RustcEncodable, RustcDecodable, PartialEq, Eq, Debug, Clone)]
+struct MailBox {
+    allowance: u64,
+    used_space: u64,
+    space_available: u64,
+    // key: msg or header's name; value: sender's public key
+    mail_box: HashMap<XorName, PublicKey>,
 }
 ```
 
 Pseudo-code for MpidManager:
 
 ```rust
-pub struct MpidManager {
-    outbox_storage: Vec<OutboxAccount>,
-    inbox_storage: Vec<InboxAccount>,
-    routing: Routing,
-}
-
 impl MpidManager {
     // sending message:
     //     1, messaging: put request from sender A to its MpidManagers(A)
@@ -523,11 +526,11 @@ impl MpidManager {
     fn get_message(header: (sender_name: XorName,
                             sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
                             mpid_header: MpidHeader)) {
-        let request_sd = PlainData {
+        let request_pd = PlainData {
             name: mpid_header.sender_name,
             value: seialise(MpidMessgeWrapper::GetMessage(mpid_header_name(mpid_header))),
         }
-        routing.post_request(::mpid_manager::Authority(header.sender_name), request_sd);
+        routing.post_request(::mpid_manager::Authority(header.sender_name), request_pd);
     }
 
 }
