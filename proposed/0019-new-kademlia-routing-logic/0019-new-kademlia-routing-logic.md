@@ -101,7 +101,7 @@ In kademlia_routing_table:
 * I am allowed to connect to you (and learn about your IP address) if and only
   if you are in the close group of one of my *bucket address*es: an address that
   differs from mine in exactly one bit, (independent of whether you want me in
-  your routing table). A new `allow_being_added_to` method will check that.
+  your routing table). A new `allow_connection` method will check that.
 * The `add_node` and `want_to_add` methods are modified so that we always
   add/want a node if its bucket does not yet have `BUCKET_SIZE` entries.
 * Don't automatically drop nodes from the routing table when adding new ones.
