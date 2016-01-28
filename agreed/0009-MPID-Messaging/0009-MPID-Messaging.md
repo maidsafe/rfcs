@@ -46,8 +46,7 @@ Broadly speaking, the `MpidHeader` contains metadata and the `MpidMessage` conta
 ```rust
 pub const MPID_MESSAGE: u64 = 51000;
 pub const MAX_HEADER_METADATA_SIZE: usize = 128;  // bytes
-pub const MAX_BODY_SIZE: usize =
-    ::routing::structured_data::MAX_STRUCTURED_DATA_SIZE_IN_BYTES - 512 - MAX_HEADER_METADATA_SIZE;
+pub const MAX_BODY_SIZE: usize = 102400 - 512 - MAX_HEADER_METADATA_SIZE;
 pub const MAX_INBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
 ```
@@ -238,7 +237,7 @@ Requests composed by Client:
 | Delete  | Client(B) deleting a "read" message from sender's outbox            | `XorName`                              | Managers(A)                     |
 | Post    | Client announcing to Managers it's connected to network             | `Wrapper::Online`                      | Managers                        |
 
-Requests composed by Client:
+Requests composed by MpidManager:
 
 | Request      | Usage Scenario                                             | Content                                                 | From Authority | Destination Authority |
 |:-------------|:-----------------------------------------------------------|:--------------------------------------------------------|:---------------|:----------------------|
@@ -321,7 +320,7 @@ MPID Message:
 
 ```rust
 /// Maximum allowed size for `MpidMessage::body`.
-pub const MAX_BODY_SIZE: usize = ::structured_data::MAX_STRUCTURED_DATA_SIZE_IN_BYTES - 512 -
+pub const MAX_BODY_SIZE: usize = 102400 - 512 -
                                  ::mpid_header::MAX_HEADER_METADATA_SIZE;
 
 /// MpidMessage
@@ -523,11 +522,11 @@ impl MpidManager {
     fn get_message(header: (sender_name: XorName,
                             sender_public_key: ::sodiumoxide::crypto::sign::PublicKey,
                             mpid_header: MpidHeader)) {
-        let request_sd = PlainData {
+        let request_pd = PlainData {
             name: mpid_header.sender_name,
             value: seialise(MpidMessgeWrapper::GetMessage(mpid_header_name(mpid_header))),
         }
-        routing.post_request(::mpid_manager::Authority(header.sender_name), request_sd);
+        routing.post_request(::mpid_manager::Authority(header.sender_name), request_pd);
     }
 
 }
