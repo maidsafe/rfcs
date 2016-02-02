@@ -128,7 +128,8 @@ struct MappedTcpSocket {
     /// A bound, but neither listening or connected tcp socket. The socket is bound to be reuseable
     /// (ie. SO_REUSEADDR is set as is SO_REUSEPORT on unix).
     pub socket: net2::TcpBuilder,
-    /// The known endpoints of this socket.
+    /// The known endpoints of this socket. This includes all known endpoints of the socket
+    /// including local addresses.
     pub endpoints: Vec<MappedSocketAddr>,
 }
 
