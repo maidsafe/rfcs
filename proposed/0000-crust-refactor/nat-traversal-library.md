@@ -21,10 +21,9 @@ concerns by implementing a generic NAT-traversal library as a separate crate.
 The actual techniques used in this library are described in [RFC-008 UDP Hole Punching](https://github.com/maidsafe/rfcs/tree/master/active/0008-UDP-hole-punching).
 
 This RFC proposes that the existing implementation be factored out into a
-separate library. A new API is suggested which provides cancellable blocking
-calls and is intended to be forward-compatible with future versions of this
-library which may implement standard NAT traversal techniques such as STUN and
-ICE.
+separate library. A new API is suggested which is intended to be
+forward-compatible with future versions of this library which may implement
+standard NAT traversal techniques such as STUN and ICE.
 
 Additionally, this RFC proposes that both UPnP and then external-server-based
 port mapping techniques be employed whenever the library attempts to map a
@@ -39,20 +38,24 @@ errors will simply be returned where they occur.
 ```rust
 /// The address of a server that can be used to obtain an external address.
 pub enum HolePunchServerAddr {
-    /// A server which speaks the simple hole punching protocol.
+    /// A server which speaks the simple hole punching protocol (ie. our MaidSafe protocol). This
+    /// should probably be deprecated and replaced with a proper STUN implementation.
     Simple(SocketAddrV4),
+    /// An Internet Gateway Device that can be used for UPnP port mapping.
+    IgdGateway(igd::Gateway)
 }
 
-/// Maintains a list of connections to Internet Gateway Devices (if there are any) as well as a set
-/// of addresses of hole punching servers.
+/// You need to create a `MappingContext` before doing any socket mapping. This `MappingContext`
+/// should ideally be kept throughout the lifetime of the program. Internally it caches a
+/// addresses of UPnP servers and hole punching servers.
 struct MappingContext {
-    gateway: Vec<Result<igd::Gateway, igd::SearchError>>,
     servers: RwLock<Vec<HolePunchServerAddr>>,
 }
 
 impl MappingContext {
-    /// Create a new mapping context.
-    fn new() -> MappingContext
+    /// Create a new mapping context. This will block breifly while it searches the network for
+    /// UPnP servers.
+    fn new() -> MappingContext,
 
     /// Inform the context about external hole punching servers.
     fn add_servers<S>(&self, servers: S)
@@ -61,7 +64,11 @@ impl MappingContext {
 
 /// A socket address obtained through some mapping technique.
 pub struct MappedSocketAddr {
-    /// The mapped address
+    /// The mapped address. Mapped addresses include all the addresses that a peer
+    /// may be able to connect to the socket on. This includes the socket's local address for the
+    /// sake of peers that are on the same local network. A Vec of MappedSocketAddr may also
+    /// include several different addresses obtained from external servers in the case that
+    /// we are behind more that one NAT.
     pub addr: SocketAddrV4,
 
     /// Indicated that hole punching needs to be used for an external client to connect to this
@@ -72,25 +79,30 @@ pub struct MappedSocketAddr {
 
 /// A bound udp socket for which we know our external endpoints.
 struct MappedUdpSocket {
+    /// The socket.
     pub socket: UdpSocket,
+    /// The known endpoints of this socket. This includes all known endpoints of the socket
+    /// including local addresses.
     pub endpoints: Vec<MappedSocketAddr>
 }
 
-/// Info needed by both parties when performing a udp rendezvous connection.
-struct UdpRendezvousInfo {
+/// Info needed by both parties when performing a rendezvous connection.
+struct RendezvousInfo {
     /// A vector of all the mapped addresses that the peer can try connecting to.
     endpoints: Vec<MappedSocketAddr>,
     /// Used to identify the peer.
     secret: [u8; 4],
 }
 
-impl UdpRendezvousInfo {
+impl RendezvousInfo {
     /// Create rendezvous info for being sent to the remote peer.
-    pub fn from_endpoints(endpoints: Vec<MappedSocketAddr>);
+    pub fn from_endpoints(endpoints: Vec<MappedSocketAddr>) -> RendezvousInfo;
 }
 
 impl MappedUdpSocket {
-    /// Map an existing `UdpSocket`.
+    /// Map an existing `UdpSocket`. The mapped addresses include all the addresses that a peer
+    /// may be able to connect to the socket on. This includes the socket's local address for the
+    /// sake of peers that are on the same local network. It may also include 
     pub fn map(socket: UdpSocket, mc: &MappingContext)
         -> MappedUdpSocket
 
@@ -107,9 +119,34 @@ struct PunchedUdpSocket {
 
 impl PunchedUdpSocket {
     /// Punch a udp socket using a mapped socket and the peer's rendezvous info.
-    pub fn punch_hole(socket: UdpSocket, their_rendezvous_info: UdpRendezvousInfo)
+    pub fn punch_hole(socket: UdpSocket, their_rendezvous_info: RendezvousInfo)
         -> PunchedUdpSocket
 }
+
+/// A tcp socket for which we know our external endpoints.
+struct MappedTcpSocket {
+    /// A bound, but neither listening or connected tcp socket. The socket is bound to be reuseable
+    /// (ie. SO_REUSEADDR is set as is SO_REUSEPORT on unix).
+    pub socket: net2::TcpBuilder,
+    /// The known endpoints of this socket. This includes all known endpoints of the socket
+    /// including local addresses.
+    pub endpoints: Vec<MappedSocketAddr>,
+}
+
+impl MappedTcpSocket {
+    /// Map an existing tcp socket. The socket must not bound or connected. This function will set
+    /// the options to make the socket address reuseable before binding it.
+    pub fn map(socket: net2::TcpBuilder, mc: &MappingContext)
+        -> MappedTcpSocket;
+
+    /// Create a new `MappedTcpSocket`
+    pub fn new(mc: &MappingContext)
+        -> MappedTcpSocket;
+}
+
+/// Perform a tcp rendezvous connect. `socket` should have been obtained from a `MappedTcpSocket`.
+pub fn tcp_punch_hole(socket: net2::TcpBuilder, their_rendezvous_info: RendezvousInfo)
+    -> TcpStream;
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
 struct SimpleUdpHolePunchServer<'a> {
@@ -145,9 +182,9 @@ let mapped_socket = MappedUdpSocket::new(&mc);
 // endpoints for the socket.
 let MappedUdpSocket { socket, endpoints } = mapped_socket;
 
-// Now they create a `UdpRendezvousInfo` packet that they can share with the
+// Now they create a `RendezvousInfo` packet that they can share with the
 // peer they want to rendezvous connect with.
-let our_rendezvous_info = UdpRendezvousInfo::from_endpoints(endpoints);
+let our_rendezvous_info = RendezvousInfo::from_endpoints(endpoints);
 
 // Now, the peers share rendezvous info out-of-band somehow.
 let their_rendezvous_info = ???
