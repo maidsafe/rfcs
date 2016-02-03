@@ -7,11 +7,11 @@
 
 # Summary
 
-The `MpidMessageWrapper` enum used as the serialised `PlainData::value` for MPID-messaging Put/Post requests/responses should for the sake of consistency include Delete requests. 
+The `MpidMessageWrapper` enum used as the serialised `PlainData::value` for MPID-messaging `Put/Post` requests/responses should for the sake of consistency include `Delete` requests. 
 
 # Motivation
 
-The MPID-Messaging mechanism as it stands uses the `PlainData` type to issue requests and responses between peers. On receipt of any message a vault parses the outer message before passing it to the relevant persona. Currently Put and Post for a `PlainData` type are passed to the `MpidManager` to process by further parsing the `PlainData::value` and acting in accordance with resultant type. For consistency it is proposed to add to the `MpidMessageWrapper` values that can be parsed by the `MpidManager` on receipt of Delete requests arriving as `PlainData`.
+The MPID-Messaging mechanism as it stands uses the `PlainData` type to issue requests and responses between peers. On receipt of any message a vault parses the outer message before passing it to the relevant persona. Currently `Put` and `Post` for a `PlainData` type are passed to the `MpidManager` to process by further parsing the `PlainData::value` and acting in accordance with resultant type. For consistency it is proposed to add to the `MpidMessageWrapper` values that can be parsed by the `MpidManager` on receipt of `Delete` requests arriving as `PlainData`.
 
 # Detailed design
 
@@ -49,6 +49,7 @@ pub enum MpidMessageWrapper {
 
 The effect of this on the `MpidManager` would be the inclusion of the following function,
 
+```
 pub fn handle_delete(&mut self, routing_node: &RoutingNode, request: &RequestMessage) -> Result<(), InternalError> {
     match Parse request content 
         MpidMessageWrapper::DeleteMessage(name) => {
@@ -59,10 +60,11 @@ pub fn handle_delete(&mut self, routing_node: &RoutingNode, request: &RequestMes
        	}
     }
 }
+```
 
 # Drawbacks
 
-Since no Authority is defined for `MpidManager`'s, `PlainData` messages used for Mpid-Messaging arrive at a vault from `Client` to `ClientManager` preventing the use of `PlainData` in other scenarios.
+Since no `Authority` is defined for `MpidManager`'s, `PlainData` messages used for Mpid-Messaging arrive at a vault from `Client` to `ClientManager` preventing the use of `PlainData` in other scenarios.
 
 # Alternatives
 
