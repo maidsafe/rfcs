@@ -194,31 +194,27 @@ The following code demonstrates how one could use this API to perform a udp rend
 // First, one needs a `MappingContext` to do the port mapping with.
 let mut mc = MappingContext::new();
 
-// Optionally, the can inform the context about any external port-mapping
+// Optionally, they can inform the context about any external port-mapping
 // servers they know about.
 mc.add_servers([some_well_known_server]);
 
 // Now they create a mapped udp socket to use for the connection.
 let mapped_socket = MappedUdpSocket::new(&mc);
 
-// A mapped udp socket consists of a socket and a list of known external
-// endpoints for the socket.
-let MappedUdpSocket { socket, endpoints } = mapped_socket;
-
-// Now they create a `RendezvousInfo` packet that they can share with the
-// peer they want to rendezvous connect with.
-let our_rendezvous_info = RendezvousInfo::from_endpoints(endpoints);
+// Next, if they determine they need to do hole-punching, they use the mapped socket to generate a
+// `RendezvousInfo`.
+let (prepunched_socket, our_rendezvous_info) = PrepunchedUdpSocket::prepare(mapped_socket);
 
 // Now, the peers share rendezvous info out-of-band somehow.
 let their_rendezvous_info = ???
 
 // Now they do the hole-punching.
-let punched_udp_socket = PunchedUdpSocket::punch_hole(socket, their_rendezvous_info)
+let punched_udp_socket = PunchedUdpSocket::punch_hole(prepunched_socket, their_rendezvous_info)
 
 // Extract the socket and peer address
 let PunchedUdpSocket { socket, peer_addr } = punched_udp_socket;
 
-// Congratualtions! If everthing succeeded then `socket` is a `UdpSocket` that
+// Congratualtions! If everything succeeded then `socket` is a `UdpSocket` that
 // can be used to talk to `peer_adddr` through NATs and firewalls.
 ```
 
