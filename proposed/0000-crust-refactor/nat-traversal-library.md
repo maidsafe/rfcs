@@ -86,18 +86,22 @@ struct MappedUdpSocket {
     pub endpoints: Vec<MappedSocketAddr>
 }
 
-/// Info needed by both parties when performing a rendezvous connection.
-struct RendezvousInfo {
+/// Info exchanged by both parties before performing a rendezvous connection.
+struct PubRendezvousInfo {
     /// A vector of all the mapped addresses that the peer can try connecting to.
     endpoints: Vec<MappedSocketAddr>,
     /// Used to identify the peer.
     secret: [u8; 4],
 }
 
-impl RendezvousInfo {
-    /// Create rendezvous info for being sent to the remote peer.
-    pub fn from_endpoints(endpoints: Vec<MappedSocketAddr>) -> RendezvousInfo;
+/// The local half of a `PubRendezvousInfo`.
+struct PrivRendezvousInfo {
+    secret: [u8; 4],
 }
+
+/// Create a `(PrivRendezvousInfo, PubRendezvousInfo)` pair from a list of mapped socket addresses.
+pub fn gen_rendezvous_info(endpoints: Vec<MappedSocketAddr>)
+    -> (PrivRendezvousInfo, PubRendezvousInfo)
 
 impl MappedUdpSocket {
     /// Map an existing `UdpSocket`. The mapped addresses include all the addresses that a peer
@@ -119,7 +123,9 @@ struct PunchedUdpSocket {
 
 impl PunchedUdpSocket {
     /// Punch a udp socket using a mapped socket and the peer's rendezvous info.
-    pub fn punch_hole(socket: UdpSocket, their_rendezvous_info: RendezvousInfo)
+    pub fn punch_hole(socket: UdpSocket,
+                      our_priv_rendezvous_info: PrivRendezvousInfo,
+                      their_pub_rendezvous_info: PubRendezvousInfo)
         -> PunchedUdpSocket
 }
 
@@ -145,7 +151,9 @@ impl MappedTcpSocket {
 }
 
 /// Perform a tcp rendezvous connect. `socket` should have been obtained from a `MappedTcpSocket`.
-pub fn tcp_punch_hole(socket: net2::TcpBuilder, their_rendezvous_info: RendezvousInfo)
+pub fn tcp_punch_hole(socket: net2::TcpBuilder,
+                      our_priv_rendezvous_info: PrivRendezvousInfo,
+                      their_pub_rendezvous_info: PubRendezvousInfo)
     -> TcpStream;
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
@@ -171,32 +179,32 @@ The following code demonstrates how one could use this API to perform a udp rend
 // First, one needs a `MappingContext` to do the port mapping with.
 let mut mc = MappingContext::new();
 
-// Optionally, the can inform the context about any external port-mapping
+// Optionally, they can inform the context about any external port-mapping
 // servers they know about.
 mc.add_servers([some_well_known_server]);
 
 // Now they create a mapped udp socket to use for the connection.
 let mapped_socket = MappedUdpSocket::new(&mc);
 
-// A mapped udp socket consists of a socket and a list of known external
-// endpoints for the socket.
+// A mapped socket consists of a socket and a list of endpoints.
 let MappedUdpSocket { socket, endpoints } = mapped_socket;
 
-// Now they create a `RendezvousInfo` packet that they can share with the
-// peer they want to rendezvous connect with.
-let our_rendezvous_info = RendezvousInfo::from_endpoints(endpoints);
+// Next, they create a `PrivRendezvousInfo`, `PubRendezvousInfo` pair from the socket's endpoints.
+let (our_priv_rendezous_info, our_pub_rendezvous_info) = gen_rendezvous_info(endpoints);
 
-// Now, the peers share rendezvous info out-of-band somehow.
-let their_rendezvous_info = ???
+// Now, the peers share their public rendezvous info out-of-band somehow.
+let their_pub_rendezvous_info = ???
 
 // Now they do the hole-punching.
-let punched_udp_socket = PunchedUdpSocket::punch_hole(socket, their_rendezvous_info)
+let punched_udp_socket = PunchedUdpSocket::punch_hole(socket,
+                                                      our_priv_rendezvous_info,
+                                                      their_pub_rendezvous_info)
 
 // Extract the socket and peer address
 let PunchedUdpSocket { socket, peer_addr } = punched_udp_socket;
 
-// Congratualtions! If everthing succeeded then `socket` is a `UdpSocket` that
-// can be used to talk to `peer_adddr` through NATs and firewalls.
+// Congratualtions! If everything succeeded then `socket` is a `UdpSocket` that
+// can be used to talk to `peer_addr` through NATs and firewalls.
 ```
 
 # Drawbacks
