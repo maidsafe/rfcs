@@ -87,17 +87,21 @@ struct MappedUdpSocket {
 }
 
 /// Info exchanged by both parties before performing a rendezvous connection.
-struct RendezvousInfo {
+struct PubRendezvousInfo {
     /// A vector of all the mapped addresses that the peer can try connecting to.
     endpoints: Vec<MappedSocketAddr>,
     /// Used to identify the peer.
     secret: [u8; 4],
 }
 
-/// The local half of a `RendezvousInfo`.
-struct RendezvousKey {
+/// The local half of a `PubRendezvousInfo`.
+struct PrivRendezvousInfo {
     secret: [u8; 4],
 }
+
+/// Create a `(PrivRendezvousInfo, PubRendezvousInfo)` pair from a list of mapped socket addresses.
+pub fn gen_rendezvous_info(endpoints: Vec<MappedSocketAddr>)
+    -> (PrivRendezvousInfo, PubRendezvousInfo)
 
 impl MappedUdpSocket {
     /// Map an existing `UdpSocket`. The mapped addresses include all the addresses that a peer
@@ -111,20 +115,6 @@ impl MappedUdpSocket {
         -> MappedUdpSocket
 }
 
-/// A UDP socket that has been prepared for hole punching but has not yet been punched.
-struct PrepunchedUdpSocket {
-    /// The socket.
-    pub socket: UdpSocket,
-    /// The key that pairs this socket with it's corresponding `RendezvousInfo`.
-    pub key: RendezvousKey,
-}
-
-impl PrepunchedUdpSocket {
-    /// Prepare a mapped UDP socket for hole punching. Generates a `RendezvousInfo` to be shared
-    /// with the remote peer for punching a hole to them.
-    pub fn prepare(mapped_socket: MappedUdpSocket) -> (PrepunchedUdpSocket, RendezvousInfo)
-}
-
 /// A udp socket that has been hole punched.
 struct PunchedUdpSocket {
     pub socket: UdpSocket,
@@ -133,7 +123,9 @@ struct PunchedUdpSocket {
 
 impl PunchedUdpSocket {
     /// Punch a udp socket using a mapped socket and the peer's rendezvous info.
-    pub fn punch_hole(prepunched_socket: PrepunchedUdpSocket, their_rendezvous_info: RendezvousInfo)
+    pub fn punch_hole(socket: UdpSocket,
+                      our_priv_rendezvous_info: PrivRendezvousInfo,
+                      their_pub_rendezvous_info: PubRendezvousInfo)
         -> PunchedUdpSocket
 }
 
@@ -158,17 +150,10 @@ impl MappedTcpSocket {
         -> MappedTcpSocket;
 }
 
-/// A TCP socket that has been prepared for hole punching but has not yet been punched.
-struct PrepunchedTcpSocket {
-    /// The socket. Bound, but neither listening or connected. The socket is bound to be reuseable
-    /// (ie. SO_REUSEADDR is set as is SO_REUSEPORT on unix).
-    pub socket: net2::TcpBuilder,
-    /// The key that pairs this socket with it's corresponding `RendezvousInfo`.
-    pub key: RendezvousKey,
-}
-
 /// Perform a tcp rendezvous connect. `socket` should have been obtained from a `MappedTcpSocket`.
-pub fn tcp_punch_hole(prepunched_socket: PrepunchedTcpSocket, their_rendezvous_info: RendezvousInfo)
+pub fn tcp_punch_hole(socket: net2::TcpBuilder,
+                      our_priv_rendezvous_info: PrivRendezvousInfo,
+                      their_pub_rendezvous_info: PubRendezvousInfo)
     -> TcpStream;
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
@@ -201,21 +186,25 @@ mc.add_servers([some_well_known_server]);
 // Now they create a mapped udp socket to use for the connection.
 let mapped_socket = MappedUdpSocket::new(&mc);
 
-// Next, if they determine they need to do hole-punching, they use the mapped socket to generate a
-// `RendezvousInfo`.
-let (prepunched_socket, our_rendezvous_info) = PrepunchedUdpSocket::prepare(mapped_socket);
+// A mapped socket consists of a socket and a list of endpoints.
+let MappedUdpSocket { socket, endpoints } = mapped_socket;
 
-// Now, the peers share rendezvous info out-of-band somehow.
-let their_rendezvous_info = ???
+// Next, they create a `PrivRendezvousInfo`, `PubRendezvousInfo` pair from the socket's endpoints.
+let (our_priv_rendezous_info, our_pub_rendezvous_info) = gen_rendezvous_info(endpoints);
+
+// Now, the peers share their public rendezvous info out-of-band somehow.
+let their_pub_rendezvous_info = ???
 
 // Now they do the hole-punching.
-let punched_udp_socket = PunchedUdpSocket::punch_hole(prepunched_socket, their_rendezvous_info)
+let punched_udp_socket = PunchedUdpSocket::punch_hole(socket,
+                                                      our_priv_rendezvous_info,
+                                                      their_pub_rendezvous_info)
 
 // Extract the socket and peer address
 let PunchedUdpSocket { socket, peer_addr } = punched_udp_socket;
 
 // Congratualtions! If everything succeeded then `socket` is a `UdpSocket` that
-// can be used to talk to `peer_adddr` through NATs and firewalls.
+// can be used to talk to `peer_addr` through NATs and firewalls.
 ```
 
 # Drawbacks
