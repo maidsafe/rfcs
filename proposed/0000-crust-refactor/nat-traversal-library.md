@@ -86,7 +86,7 @@ struct MappedUdpSocket {
     pub endpoints: Vec<MappedSocketAddr>
 }
 
-/// Info needed by both parties when performing a rendezvous connection.
+/// Info exchanged by both parties before performing a rendezvous connection.
 struct RendezvousInfo {
     /// A vector of all the mapped addresses that the peer can try connecting to.
     endpoints: Vec<MappedSocketAddr>,
@@ -94,9 +94,9 @@ struct RendezvousInfo {
     secret: [u8; 4],
 }
 
-impl RendezvousInfo {
-    /// Create rendezvous info for being sent to the remote peer.
-    pub fn from_endpoints(endpoints: Vec<MappedSocketAddr>) -> RendezvousInfo;
+/// The local half of a `RendezvousInfo`.
+struct RendezvousKey {
+    secret: [u8; 4],
 }
 
 impl MappedUdpSocket {
@@ -111,6 +111,20 @@ impl MappedUdpSocket {
         -> MappedUdpSocket
 }
 
+/// A UDP socket that has been prepared for hole punching but has not yet been punched.
+struct PrepunchedUdpSocket {
+    /// The socket.
+    pub socket: UdpSocket,
+    /// The key that pairs this socket with it's corresponding `RendezvousInfo`.
+    pub key: RendezvousKey,
+}
+
+impl PrepunchedUdpSocket {
+    /// Prepare a mapped UDP socket for hole punching. Generates a `RendezvousInfo` to be shared
+    /// with the remote peer for punching a hole to them.
+    pub fn prepare(mapped_socket: MappedUdpSocket) -> (PrepunchedUdpSocket, RendezvousInfo)
+}
+
 /// A udp socket that has been hole punched.
 struct PunchedUdpSocket {
     pub socket: UdpSocket,
@@ -119,7 +133,7 @@ struct PunchedUdpSocket {
 
 impl PunchedUdpSocket {
     /// Punch a udp socket using a mapped socket and the peer's rendezvous info.
-    pub fn punch_hole(socket: UdpSocket, their_rendezvous_info: RendezvousInfo)
+    pub fn punch_hole(prepunched_socket: PrepunchedUdpSocket, their_rendezvous_info: RendezvousInfo)
         -> PunchedUdpSocket
 }
 
@@ -144,8 +158,17 @@ impl MappedTcpSocket {
         -> MappedTcpSocket;
 }
 
+/// A TCP socket that has been prepared for hole punching but has not yet been punched.
+struct PrepunchedTcpSocket {
+    /// The socket. Bound, but neither listening or connected. The socket is bound to be reuseable
+    /// (ie. SO_REUSEADDR is set as is SO_REUSEPORT on unix).
+    pub socket: net2::TcpBuilder,
+    /// The key that pairs this socket with it's corresponding `RendezvousInfo`.
+    pub key: RendezvousKey,
+}
+
 /// Perform a tcp rendezvous connect. `socket` should have been obtained from a `MappedTcpSocket`.
-pub fn tcp_punch_hole(socket: net2::TcpBuilder, their_rendezvous_info: RendezvousInfo)
+pub fn tcp_punch_hole(prepunched_socket: PrepunchedTcpSocket, their_rendezvous_info: RendezvousInfo)
     -> TcpStream;
 
 /// RAII type for a hole punch server which speaks the simple hole punching protocol.
