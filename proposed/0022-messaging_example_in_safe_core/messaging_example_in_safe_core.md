@@ -7,19 +7,19 @@
 
 # Summary
 
-Expand the current example in the `safe_core` to include the feature of creating a mpid_account (for messaging) and send/receive a message to/from peer user.
+Expand the current example in `safe_core` to include the features of creating an mpid_account for messaging and send/receive a message to/from a peer user.
 
 # Motivation
 
-The current `safe_core` has an example `safe_client` showing how a user create an account and login to the vault network. With the messaging feature has now been implemented on the vault and client side, it worth to expand such example to include the messaging feature. This can served as a show case of the secured messaging works with the distributed vault network, and also to testify the current implementation on both vault and client side.
+The current `safe_core` has an example `safe_client` showing how a user can create an account and login to the Vault network. With the messaging feature now having been implemented on the Vault and Client side, we wish to expand the `safe_core` example to include this messaging feature. This can shall showcase how secured messaging works within the distributed Vault network, and also to testify the current implementation from both Vault and the Client side.
 
 # Detailed design
 
-The account creation and login part in the current `safe_client` will be kept as the same.
+The account creation and login part within the current `safe_client` will remain unchanged.
 
-Once client logged in, an option of creating mpid_account will be provided.
-User is allowed to use any name, say Alice, as a memorable account name.
-```
+Once a client logged in, an option of creating an mpid_account will be provided.
+The user is allowed to use any name, say Alice, as a memorable account name.
+```rust
 /// safe_client code for create mpid_account
 let _ = create_mpid_account(client, "Alice");
 
@@ -29,8 +29,8 @@ fn create_mpid_account(client: &Client, account_name: &String) -> Result<Respons
 }
 ```
 
-After that, a sequence of CLI interactions will ask for the user to input the receiver's memorable name, metadata and content of the message.
-```
+After that, a sequence of CLI interactions will ask the user to input the receiver's memorable name, metadata and content of the message.
+```rust
 /// safe_client code for sending an mpid message
 fn send_mpid_message(client: &Client, mpid_account: &XorName) {
     let _ = std::io::stdin().read_line(&mut receiver_name);
@@ -42,8 +42,8 @@ fn send_mpid_message(client: &Client, mpid_account: &XorName) {
 }
 ```
 
-The second safe_client can now be started up, and once client logged in, the previous used receiver's name shall be now used to create mpid_account for this client. It is then expected the previous sent message show now be received as a pushed in message to this client.
-```
+The second `safe_client` can now be started up and once Client is logged in, the previous used receiver's name shall now be used to create an mpid_account for this Client. It is then expected that the previously sent message should now be received by this client.
+```rust
 /// safe_client code for receiving an mpid message
 let response_getter = try!(create_mpid_account(client, "Bob"));
 loop {
@@ -66,9 +66,9 @@ loop {
 
 # Drawbacks
 
-1, To avoid exchanging long hex code mpid_account, the example code needs to carry out a hash function, so that human readable memorable word can be used as mpid_account name.
+1, To avoid exchanging long hex code mpid_account, the example code needs to carry out a hash function, so that it is a human readable memorable word that can be used as an mpid_account name.
 
-2, Two `safe_client` needs to be executed in sequence to demo the messaging feature.
+2, Two `safe_client`'s need to be executed in sequence to demo the messaging feature.
 
 3, The secret key from maid_account has been used as the signing secret key for the mpid messaging.
 
