@@ -7,11 +7,11 @@
 
 # Summary
 
-Expand the current example in `safe_core` to include the features of creating an mpid_account (for messaging) and send / receive a message to / from a peer user.
+Expand the current example in `safe_core` to include the features of creating an mpid_account for messaging and send/receive a message to/from a peer user.
 
 # Motivation
 
-The current `safe_core` has an example `safe_client` showing how a user can create an account and login to the Vaults network. With the messaging feature now having been implemented on the Vaults and Client side, we wish to expand the `safe_core` example to include this messaging feature. This can shall showcase how secured messaging works within the distributed Vaults network, and also to testify the current implementation from both Vaults and the Client side.
+The current `safe_core` has an example `safe_client` showing how a user can create an account and login to the Vault network. With the messaging feature now having been implemented on the Vault and Client side, we wish to expand the `safe_core` example to include this messaging feature. This can shall showcase how secured messaging works within the distributed Vault network, and also to testify the current implementation from both Vault and the Client side.
 
 # Detailed design
 
