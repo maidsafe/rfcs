@@ -21,36 +21,10 @@ and help cover edge cases difficult to set up on real network.
 
 This section details one possible implementation of the Crust Mock.
 
-## Changes to crust
-
-A new trait `ConnectionService` MUST be defined. It MUST have all the relevant methods of `crust::Service`:
-
-```rust
-pub trait ConnectionService {
-  fn start_listening_tcp(&mut self) -> io::Result<()>;
-  fn start_listening_utp(&mut self) -> io::Result<()>;
-  fn start_service_discovery(&mut self);
-  fn prepare_connection_info(&mut self, result_token: u32);
-  fn connect(&self, our_info: OurConnectionInfo, their_info: TheirConnectionInfo);
-  fn disconnect(&self, id: &PeerId) -> bool;
-  fn send(&self, id: &PeerId, data: Vec<u8>) -> io::Result<()>;
-}
-```
-
-This trait MUST be implemented by the current `crust::Service` and by the new
-`crust::mock::Service`.
-
 ## Changes to routing
 
-`routing::Core` MUST be either made generic over the `ConnectionService`, or change the type of its `crust_service` member to `Box<ConnectionService>`.
-
-A way to specify which instance of `ConnectionService` to pass into `routing::Core` MUST be devised. One possible option is to have `routing::Core::new` accept a `Fn` which returns the `ConnectionService` instance when called with `CrustEventSender`:
-
-```rust
-routing::Core::new(..., |crust_event_sender| {
-  Box::new(crust::mock::Service::new(crust_event_sender))
-})
-```
+Add a feature gate which when enabled will replace `crust::Service` with the mock
+version. There might be need to replace other types with mock version. One potential candiate is `crust::OutConnectionInfo`.
 
 ## Features of `crust::mock::Service`
 
@@ -66,7 +40,7 @@ the mock service.
 
 ## Implementation details
 
-TODO
+Refer to the `implementation-sketch.rs` file in the same directory as this document.
 
 ## Additional notes
 
@@ -104,5 +78,4 @@ This is an alternative to defining the `ConnectionService` trait with two implem
 
 # Unresolved questions
 
-`crust::OutConnectionInfo` contains a `net::UdpSocket` member which is not desirable to be in the mock version. Some way around it should be devised. Possibly making `OurConnectionInfo` and `TheirConnectionInfo` associated types of the `ConnectionService` trait, but that affects also `crust::Event` which would also have to be turned into associated type. Less intrusive change would be desirable.
-
+None so far.
