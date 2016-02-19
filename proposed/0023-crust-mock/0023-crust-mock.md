@@ -27,13 +27,13 @@ A new trait `ConnectionService` MUST be defined. It MUST have all the relevant m
 
 ```rust
 pub trait ConnectionService {
-  fn start_listening_tcp();
-  fn start_listening_utp();
-  fn start_service_discovery();
-  fn prepare_connection_info();
-  fn connect();
-  fn disconnect();
-  fn send();
+  fn start_listening_tcp(&mut self) -> io::Result<()>;
+  fn start_listening_utp(&mut self) -> io::Result<()>;
+  fn start_service_discovery(&mut self);
+  fn prepare_connection_info(&mut self, result_token: u32);
+  fn connect(&self, our_info: OurConnectionInfo, their_info: TheirConnectionInfo);
+  fn disconnect(&self, id: &PeerId) -> bool;
+  fn send(&self, id: &PeerId, data: Vec<u8>) -> io::Result<()>;
 }
 ```
 
