@@ -61,6 +61,7 @@ parameters to the constructor.
 the mock service.
 - Enable, disable, pause and resume incoming and outgoing traffic for each `mock::Service` individually (and/or for the whole mock network), to simulate various network failures.
 - Full control over the order of the simulated network operations. The whole system SHOULD be synchronous.
+- OPTIONALLY: intercept and examine messages sent over the simulated network
 - OPTIONALLY: ability to set expectations of various network events and verify that they really occurred.
 
 ## Implementation details
@@ -103,4 +104,5 @@ This is an alternative to defining the `ConnectionService` trait with two implem
 
 # Unresolved questions
 
-TODO (What parts of the design are still to be done?)
+`crust::OutConnectionInfo` contains a `net::UdpSocket` member which is not desirable to be in the mock version. Some way around it should be devised. Possibly making `OurConnectionInfo` and `TheirConnectionInfo` associated types of the `ConnectionService` trait, but that affects also `crust::Event` which would also have to be turned into associated type. Less intrusive change would be desirable.
+
