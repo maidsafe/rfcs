@@ -1,6 +1,6 @@
-- Feature Name: ImmutableData naming base on type
+- Feature Name: ImmutableData naming based on type
 - Type: New Feature
-- Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client), [routing](https://github.com/maidsafe/routing)
+- Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_core](https://github.com/maidsafe/safe_core), [routing](https://github.com/maidsafe/routing)
 - Start Date: 02-11-2015
 - RFC PR: #59
 - Issue number: Proposed - #65
@@ -13,36 +13,35 @@ This RFC outlines the system components and design for how the three immutable d
 
 ## Rationale
 
-The SAFE Network keeps multiple copies of one original data not only for the purpose of avalability but also for secure reason.  It has been defined three different types currently : Normal, Backup and Sacrificial.  They are currently having the same name (hash of the content), which means it will be the same group of DataManager to handle them.
+The SAFE Network keeps multiple copies of a single ImmutableData chunk, not only for availability but also for security reasons.  To that end, three different types of ImmutableData have been defined: Normal, Backup and Sacrificial.  These differ only in how their name is calculated; their contents are identical.
 
-Making three different types copy bearing different but determinic name will increase the difficultiy of any possible attack, as it will be three different groups, instead of just one group, need to be tackled at the same time.
+Having three different types bearing different but deterministic names will increase the difficulty of any attack, as it will be three different groups of Vault, which need to be tackled at the same time.
 
 ## Supported Use-Cases
 
-For client perspective, the use-case keeps the same : storing or fetching immutable data.  Though client may need to be aware of the existing of different types and calculations of name. 
+From the client perspective, the use-case stays the same: storing or fetching immutable data.  However, the client may need to be aware of the existence of different types and calculation of their names.
 
 ## Expected Outcome
 
-The different immutable data type copy bearing different name, which will be handled by different DataManager group.
+Replication of the different immutable data types bearing different names, which will be handled by different DataManager groups.
 
 # Detailed design
 
 ## Overview
 
-The name of an immutalbe data copy will be based on it's type and in different hash order :
+The name of a ImmutableData chunk (`im`) will be based on its type:
 
-Normal : normal_name = hash(im.content), handled by DM(normal_name), 4 copies on the pmid_nodes picked up by that group (one copy on each node)
+Normal: `normal_name` = hash(`im.content`), handled by DataManagers(`normal_name`), 2 copies on the PmidNodes picked up by that group (one copy on each node)
 
-Backup : backup_name = hash(normal_name), handled by DM(backup_name), 4 copies on the pmid_nodes picked up by that group (one copy on each node)
+Backup: `backup_name` = hash(`normal_name`), handled by DataManagers(`backup_name`), 2 copies on the PmidNodes picked up by that group (one copy on each node)
 
-Sacrificial : sacrificial_name = hash(backup_name), handled by DM(sacrificial_name), 4 copies on the pmid_nodes picked up by that group (one copy on each node)
+Sacrificial: `sacrificial_name` = hash(`backup_name`), handled by DataManagers(`sacrificial_name`), 2 copies on the PmidNodes picked up by that group (one copy on each node)
 
-MaidManagers will charge the client issuing the put request with 4 copies of the data, as the backup and sacrificial copies are allowed to be removed from the SAFE network according to the network status.
+For each type, the management of the chunk will be done by the ImmutableDataManagers closest to the chunk's name, and a copy will be stored on two PmidNodes within that close group.
 
-The portal DMs (DataManagers that being the closest group to narmal_name), fowards the put/get requests to the second/third order DMs (i.e. DataManagers closing to backup_name and sacrificial_name). This reduces the exposure of network data types to client side to minimum.
+The Normal DMs (DataManagers comprising closest group to `normal_name`), forward client Put/Get requests to the Backup and Sacrificial DMs.  This minimises client exposure to the network data types and their management.
 
 ## Implementation Details
-
 
 ## Planned Work
 
@@ -62,22 +61,17 @@ The portal DMs (DataManagers that being the closest group to narmal_name), fowar
 
 # Drawbacks
 
-None identified, other than increased complexity of Vault, Routing and Client codebase.
+None identified, other than increased complexity of Vault, Routing and Core codebase.
 
 # Alternatives
 
-1. The SAFE network itself is able to be free of carrying out any naming calculation and handling based on types, as long as client be aware of such and fire requests bearing the different type-dependent name.  This will have the least impact to the current code base, however the client app must need to be aware of that and carry out its duty. It also leaves an option (probably good) when the client app decides only one of the type will be enough.
-
+1. The SAFE network itself could be free of carrying out any naming calculations and handling based on types if the Client only was aware of these and made requests bearing the different type-dependent names.
 
 # Unresolved Questions
 
-1. It is notionable that to reduce the code coplexity, the portal DataManager group of an immutable data shall still be DM(normal_name). Then such group can forwarding the requests to pmid_nodes closest to normal_name, backup_name, sacrificial_name.
-However, due to the facts the pmid_nodes all already closest nodes to the data_manager, such forwarding mechanism may not be able to securse a highly diversity of the distribution. i.e. some pmid_nodes may holding different type copies at the same time.
+1. It is possible that to reduce the code complexity, the Normal DataManager group of an immutable data chunk shall still be DM(normal_name). Then such a group can forward the requests to pmid_nodes closest to normal_name, backup_name, and sacrificial_name. However, due to the fact the pmid_nodes are all already the closest nodes to the data_manager, such a forwarding mechanism may not be able to secure a highly diverse distribution. i.e. some pmid_nodes may hold different type copies at the same time.
 
-2. Fraser argued that the hash of the hash paradigm shall not be used, since this could yield the same group for the normal, backup and sacrificial copies (the probability of this increasing to 1 as the network size decreases).  He proposed to XOR the chunk ID ( hash(content) ) to yield each group. While this should be more efficient than repeated hashing, more importantly it should yield groups which don't intersect (except for tiny networks).
-Essentially the "normal" group will be XOR with 000...000 i.e. equivalent to the ID.
-The sacrificial group will be XOR with fff...fff, i.e. the furthest location in the address space. And the backup will be in the middle; i.e. XOR with 800...000.
-
+1. Fraser argued that the hash of the hash paradigm should not be used, since this could yield the same group for the normal, backup and sacrificial copies (the probability of this increasing to 1 as the network size decreases).  He proposed to XOR the chunk ID ( hash(content) ) to yield each group.  While this should be more efficient than repeated hashing, more importantly it should yield groups which don't intersect (except for tiny networks).  Essentially the Normal name will be chunk ID XORed with `000...000` i.e. equivalent to the ID.  The Sacrificial name will be chunk ID XORed with `fff...fff`, i.e. the furthest location in the address space.  And the Backup will be in the middle; i.e. XORed with `800...000`.
 
 # Future Work
 
