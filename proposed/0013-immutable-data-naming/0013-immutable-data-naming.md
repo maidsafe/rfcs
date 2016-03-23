@@ -52,7 +52,7 @@ PNs (PmidNodes) without enough free space to handle a Put request for any type c
 
 DMs handling a Put failure for Normal or Backup chunks should send Delete requests for Sacrificial chunks which the same PN holds to the PM group.  Once the responses have all arrived, the initial Put request should be retried.
 
-If a PN is ultimately unable to store a chunk even after removing all Sacrificial chunks, it should be marked as "bad" by the DMs and not retried as a holder for that chunk.  The Put process stops at a DM group once a copy is held on two different PNs from the close group for that chunk, or once all Vaults in the close group have been attempted and failed.
+If a PN is ultimately unable to store a chunk even after having been instructed by the DMs to delete all Sacrificial chunks, it should be marked as "bad" by the DMs and not retried as a holder for that chunk.  The Put process stops at a DM group once a copy is held on two different PNs from the close group for that chunk, or once all Vaults in the close group have been attempted and failed.
 
 ### Get
 
@@ -74,6 +74,7 @@ If a current PN ceases to be a holder for a chunk due to churn (either it has di
     1. Block attempts to Put or Get Backup or Sacrificial chunks
 
 1. DataManager
+    1. Make accounts aware of the type of chunk
     1. Put Backup and Sacrificial copies when handling a client Put
     1. Handle Puts from other DMs for Backup and Sacrificial chunks
     1. Handle failure to Get by trying to Get a different type of the same chunk
