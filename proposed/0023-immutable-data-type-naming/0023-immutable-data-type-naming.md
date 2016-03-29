@@ -19,7 +19,7 @@ By using hashing to derive the Backup and Sacrificial names, there is a chance t
 
 The proposed solution involves generating the Backup and Sacrificial names by XORing the Normal name with known values.  As the "distance" between two addresses on the SAFE network is calculated by XORing them, and since XOR is a commutative operation, the values chosen to XOR the Normal name with will effectively be the distances from the Normal name to the secondary names.
 
-Since we want the distances between the groups to maximal, we can take the "maximum address" (where this is (2^512) - 1 (i.e. `111..111`)) divided by two as the target distance between groups.  This means we can define the distance between Normal and Backup as 2^511 (i.e. `100..000`) and between Backup and Sacrificial as (2^511) - 1 (i.e. `011..111`).  For any network comprising at least three times "group size" Vaults, there should be no Vault responsible for more than a single type of chunk for any given chunk.
+Since we want the distances between the groups to maximal, we can take the "maximum address" (where this is (2^512) - 1 (i.e. `111..111`)) divided by two as the target distance between groups.  This means we can define the distance between Normal and Backup as 2^511 (i.e. `100..000`) and between Backup and Sacrificial as (2^511) - 1 (i.e. `011..111`).
 
 ## Secondary Benefits
 
@@ -106,7 +106,8 @@ None.
 
 # Alternatives
 
-Continue to use the existing implementation.
+* Rather than XORing full IDs, simply XOR the first (most significant) byte.
+* Continue to use the existing implementation.
 
 # Unresolved Questions
 
