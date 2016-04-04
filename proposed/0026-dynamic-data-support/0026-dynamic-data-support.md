@@ -15,18 +15,18 @@ Currently the SAFE Network supports static data storage and retrieval. This limi
 the application developers to build only static applications. In real world, most of
 the applications are dynamic in nature. Enabling dynamic data handling will allow
 application developers to create and manage their own data structures using the
-Structured Data and Immutable Data of the SAFE Network.
+Structured Data and Immutable Data from the SAFE Network.
 
 # Detailed design
 
-Structured data, at present can only be modified by the owner. If it has multiple owners,
+Structured data at present can only be modified by the owner. If it has multiple owners,
 then at least (n/2) + 1 owners must sign the structured data for any update or delete.
 
-This design does not scale when it comes to handling dynamic data. Because for dynamic data
-handling the Structured data should be modifiable by any of the user of the application.
+This design does not scale when it comes to handling dynamic data. For dynamic data
+handling the Structured data should be modifiable by the users of the application.
 
-Thus, proposing a new behaviour for the Structured Data with `type_tag - 8`. The Structured
-data with `type_tag 8` can be appendable by anyone. The vaults wouldn't be checking the
+Thus, proposing a new behaviour for the Structured Data with `tag_type - 8`. The Structured
+data with `tag_type 8` can be appendable by anyone. The vaults wouldn't be checking the
 ownership but instead it would allow anyone to modify the content of the structured data.
 However, the vaults would validate the ownership of the Structured data for a delete operation.
 
@@ -44,14 +44,15 @@ a dynamic application like a `Forum`.
 ### Hosting the application - Same as we do for the static websites
 - The Admin of the application creates a public name and a service for the same. Let us consider,
 that the service name is `forum` and the public name is `maidsafe`. Thus making it accessible
-from browser as `forum.maidsafe.net`
+from browser as `http://forum.maidsafe.net`
 - The application is hosted in the SAFE Network just like a website is hosted by mapping
 the public folder (Source of the application).
 
 ### Initial Configuration - Creating Root/Master Appendable Structured Data
 - After making the application public, the admin registers himself as the owner/admin of the application.
-- Assume for the initial setup the admin will create the list of `tags` like `updates, development, marketing`.
-- The application will create a root/master Structured Data with `type_tag 8`. The data with
+- Assume that the admin will have to configure the list of `tags` like `updates, development, marketing`,
+in the initial set up.
+- The application will create a root/master Structured Data with `tag_type 8`. The data with
 in the structured data can be any data structure that would be fitting for the needs of
 the application. In this use case we can consider a simple JSON object that would be stored
 in the root structured data.
@@ -67,19 +68,19 @@ contain the public key of the user.
 - Thus, when the admin configures the application and saves the metadata like tags, the root
 Structured data can be created which will make the admin as the owner of the application.
 - The root structure data plays a very important role as it is the single source from which the
-application can get the information while booting. Thus a deterministic approach must be in place
+application can get the information while loading. Thus a deterministic approach must be in place
 for identifying the root structured data.
 - The hash of service name and public name can be used as the ID for the root/master structured data.
 
 #### Summing it up
 When the admin configures the application for the first time. The application will create a root
-structured data with `type_tag as 8` and with id `SHA512(service name + public name)`.
+structured data with `tag_type as 8` and with id `SHA512(service name + public name)`.
 The data part of the structured data can be anything that would fit the needs of the application like,
 `csv, toml, json` etc. In this use case we would be using a JSON object.
 
 #### Application looking up for the master Structured data on start
 When a user reaches the end point (forum.maidsafe.safenet), the application will be able to lookup
-for the structured data with the `type_tag 8` and id `SHA512(service name + public name)`. Once the data
+for the structured data with the `tag_type 8` and id `SHA512(service name + public name)`. Once the data
 is fetched, based on the JSON object rest of the data needed by the application can be fetched.
 
 #### When a new thread is created
