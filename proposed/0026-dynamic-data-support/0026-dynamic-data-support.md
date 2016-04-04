@@ -25,12 +25,12 @@ then at least (n/2) + 1 owners must sign the structured data for any update or d
 This design does not scale when it comes to handling dynamic data. For dynamic data
 handling the Structured data should be modifiable by the users of the application.
 
-Thus, proposing a new behaviour for the Structured Data with `tag_type - 8`. The Structured
+Thus, proposing a new behaviour for the structured data with `tag_type - 8`. The Structured
 data with `tag_type 8` can be appendable by anyone. The vaults wouldn't be checking the
 ownership but instead it would allow anyone to modify the content of the structured data.
-However, the vaults would validate the ownership of the Structured data for a delete operation.
+However, the vaults would validate the ownership of the structured data for a delete operation.
 
-Combining the appendable Structured data and Immutable data, the doors for handling dynamic
+Combining the appendable structured data and immutable data, the doors for handling dynamic
 data can be opened up in the SAFE Network.
 
 Low level APIs for directly working with Structured Data and Immutable Data must be exposed
@@ -38,22 +38,22 @@ from the launcher.
 
 ## A Practical Use Case - Simple Forum application
 
-We can analyse how the appendable structured data and immutable data can be used to create
-a dynamic application like a `Forum`.
+The appendable structured data and immutable data can be used to create a dynamic
+application like a `Forum`.
 
 ### Hosting the application - Same as we do for the static websites
 - The Admin of the application creates a public name and a service for the same. Let us consider,
-that the service name is `forum` and the public name is `maidsafe`. Thus making it accessible
+that the service name is `forum` and the public name is `maidsafe`, making it accessible
 from browser as `http://forum.maidsafe.net`
 - The application is hosted in the SAFE Network just like a website is hosted by mapping
-the public folder (Source of the application).
+the public folder (Source of the application) with the service.
 
 ### Initial Configuration - Creating Root/Master Appendable Structured Data
 - After making the application public, the admin registers himself as the owner/admin of the application.
 - Assume that the admin will have to configure the list of `tags` like `updates, development, marketing`,
 in the initial set up.
 - The application will create a root/master Structured Data with `tag_type 8`. The data with
-in the structured data can be any data structure that would be fitting for the needs of
+in the structured data can be any data structure that would be fitting the needs of
 the application. In this use case we can consider a simple JSON object that would be stored
 in the root structured data.
 ```
@@ -63,7 +63,7 @@ in the root structured data.
  }
 ```
 - When the root/master structured data is created, the user who creates the Structured Data
-will eventually become the owner. At the time of creation of the SD, the owner field will
+will eventually become the owner. At the time of creation of the structured data, the owner field will
 contain the public key of the user.
 - Thus, when the admin configures the application and saves the metadata like tags, the root
 Structured data can be created which will make the admin as the owner of the application.
@@ -91,8 +91,8 @@ root/master Structured data.
 
 ##### Detailing the steps in sequence
 - User XYZ logs in to the launcher with his own credentials and goes to `forum.maidsafe.safenet`
-- Application will look up for the master/root SD by Hashing the service and long name.
-The SD when fetched from the network will have the JSON object to fetch the list of posts
+- Application will look up for the master/root structured data by Hashing the service and long name.
+The structured data when fetched from the network will have the JSON object to fetch the list of posts
 from the network and load the same.
 - When a user creates a new thread, the thread is stored as a JSON Object in the network using
 the low level APIs for creating immutable data exposed by the safe_launcher. The thread is converted to a
@@ -111,7 +111,7 @@ JSON representation and stored in the network. The DataMap received after the da
  	"title": "hello world",
  	"createdTime": "timeinUTC",
   "createdBy": "ABC", // public name of the user who created the thread
-	"tags": [],
+  "tags": [],
   "body': "Actual content of the thread goes here",
   "replies": []
 }
@@ -132,8 +132,8 @@ Here v2 represents the new DataMap.
 
 Since the root/master Structured Data is generated/looked up in a deterministic manner
 and moreover it is also appendable for anyone, makes it easier for an attacker to corrupt
-the data. A simple CLI tool can be created using safe_core and the SD can be modified or even cleared.
-DNS also uses a deterministic approach, but the SD is secure as it can be modified only by the owner.
+the data. A simple CLI tool can be created using safe_core and the structured data can be modified or even cleared.
+DNS also uses a deterministic approach, but the structured data is secure as it can be modified only by the owner.
 But in this appendable structured data, it becomes easier to corrupt the data.
 
 
@@ -143,9 +143,9 @@ None
 
 # Unresolved questions
 
-Concurrency Issue. Say two users are replying to a same thread at the same time.
+Concurrency Issue. When two users are replying to a same thread at the same time.
 Only the last updated DataMap will be reflected. This will result in the loss of the
-reply made by the first user. This can not be handled by the SD versions because in this
-case we are using only one master SD for the application and the number of concurrent
+reply made by the first user. This can not be handled by the structured data versions because in this
+case we are using only one master structured data for the application and the number of concurrent
 changes can be very high. Even for a `like` or for a reply would enforce the entire DataMap
-to be generated and also the root SD to be updated.
+to be generated and also the root structured data to be updated.
