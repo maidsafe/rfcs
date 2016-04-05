@@ -133,7 +133,7 @@ Here v2 represents the new DataMap.
 # Drawbacks
 
 Since the root/master Structured Data is generated/looked up in a deterministic manner
-and moreover it is also appendable for anyone, makes it easier for an attacker to corrupt
+and moreover it is also appendable by anyone. This makes it easier for an attacker to corrupt
 the data. A simple CLI tool can be created using safe_core and the structured data can be modified or even cleared.
 DNS also uses a deterministic approach, but the structured data is secure as it can be modified only by the owner.
 But in this appendable structured data, it becomes easier to corrupt the data.
