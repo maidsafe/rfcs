@@ -1,5 +1,5 @@
-- Feature Name: Ability to Support Dynamic Data Handling
-- Type enhancement
+- Feature Name: Appendable By All Structured Data Type
+- Type New feature
 - Related components safe_launcher, safe_ffi, safe_core, safe_vault
 - Start Date: 04-04-2016
 - RFC PR: (leave this empty)
@@ -7,7 +7,8 @@
 
 # Summary
 
-The proposal details on how dynamic data can be supported in the SAFE Network.
+The proposal details on how a new Structured Data Type which can be appended by all
+can enable dynamic data handling.
 
 # Motivation
 
