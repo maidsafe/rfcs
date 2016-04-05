@@ -1,6 +1,6 @@
 - Feature Name: Ability to Support Dynamic Data Handling
 - Type enhancement
-- Related components safe_launcher, safe_core, safe_vault
+- Related components safe_launcher, safe_ffi, safe_core, safe_vault
 - Start Date: 04-04-2016
 - RFC PR: (leave this empty)
 - Issue number: (leave this empty)
@@ -34,7 +34,9 @@ Combining the appendable structured data and immutable data, the doors for handl
 data can be opened up in the SAFE Network.
 
 Low level APIs for directly working with Structured Data and Immutable Data must be exposed
-from the launcher.
+from the launcher. The applications must request for `LOW_LEVEL_API_ACCESS` permission at
+the time of authorization for invoking the Low level APIs for structured data and
+immutable data access.
 
 ## A Practical Use Case - Simple Forum application
 
@@ -50,10 +52,10 @@ the public folder (Source of the application) with the service.
 
 ### Initial Configuration - Creating Root/Master Appendable Structured Data
 - After making the application public, the admin registers himself as the owner/admin of the application.
-- Assume that the admin will have to configure the list of `tags` like `updates, development, marketing`,
-in the initial set up.
-- The application will create a root/master Structured Data with `tag_type 8`. The data with
-in the structured data can be any data structure that would be fitting the needs of
+- Assume that the admin will have to configure the list of `tags` like `updates, development, marketing`
+during the initial set up.
+- The application will create a root/master Structured Data with `tag_type 8`. The actual data held
+by the structured data can be any data structure that would be fitting the needs of
 the application. In this use case we can consider a simple JSON object that would be stored
 in the root structured data.
 ```
@@ -62,11 +64,11 @@ in the root structured data.
  	"posts": []
  }
 ```
-- When the root/master structured data is created, the user who creates the Structured Data
+- When the root/master structured data is created, the user who creates the structured data
 will eventually become the owner. At the time of creation of the structured data, the owner field will
 contain the public key of the user.
 - Thus, when the admin configures the application and saves the metadata like tags, the root
-Structured data can be created which will make the admin as the owner of the application.
+Structured data can be created which will make admin as the owner of the application.
 - The root structure data plays a very important role as it is the single source from which the
 application can get the information while loading. Thus a deterministic approach must be in place
 for identifying the root structured data.
@@ -80,7 +82,7 @@ The data part of the structured data can be anything that would fit the needs of
 
 #### Application looking up for the master Structured data on start
 When a user reaches the end point (forum.maidsafe.safenet), the application will be able to lookup
-for the structured data with the `tag_type 8` and id `SHA512(service name + public name)`. Once the data
+for the structured data with the id `SHA512(service name + public name)`. Once the data
 is fetched, based on the JSON object rest of the data needed by the application can be fetched.
 
 #### When a new thread is created
