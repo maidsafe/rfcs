@@ -1,4 +1,4 @@
-- Feature Name: Appendable By All Structured Data Type
+- Feature Name: Append By All Structured Data Type
 - Type New feature
 - Related components safe_launcher, safe_ffi, safe_core, safe_vault
 - Start Date: 04-04-2016
@@ -27,11 +27,11 @@ This design does not scale when it comes to handling dynamic data. For dynamic d
 handling the Structured data should be modifiable by the users of the application.
 
 Thus, proposing a new behaviour for the structured data with `tag_type - 8`. The Structured
-data with `tag_type 8` can be appendable by anyone. The vaults wouldn't be checking the
+data with `tag_type 8` can be appended by anyone. The vaults wouldn't be checking the
 ownership but instead it would allow anyone to modify the content of the structured data.
 However, the vaults would validate the ownership of the structured data for a delete operation.
 
-Combining the appendable structured data and immutable data, the doors for handling dynamic
+Combining the append by anyone structured data type and immutable data, the doors for handling dynamic
 data can be opened up in the SAFE Network.
 
 Low level APIs for directly working with Structured Data and Immutable Data must be exposed
