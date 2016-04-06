@@ -112,7 +112,7 @@ Status: 200 Ok
 #### Get
 Retrieve the list of versions for the Structured Data. This will work only for the
 Versioned Structured Data, else 400 (Bad Request) will be thrown. The response
-will have data and a ref as a JSON. This value `ref` corresponds to the [version field in the structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
+will have data and a ref as a JSON. `ref` corresponds to the [version field in the structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
 To avoid confusion it would be better to call this field with a different name as the api already uses version.
 The `ref` value must be passed while updating the structured data. This value is useful for concurrency handling.
 The ref will be internally mapped to the version field in the structured data. If the version being updated is outdated
@@ -343,7 +343,8 @@ Data as base64 String
 
 # Drawbacks
 
-None
+1. Large file sizes can not be supported. Streaming API will be needed for
+supporting large file content
 
 # Alternatives
 
