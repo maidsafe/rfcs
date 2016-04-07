@@ -33,26 +33,29 @@ can be between the range 10,001 to 2^64.
 
 |tag_type |Operation|Description|
 |---------|---------|-----------|
-|9| Private| Encrypted Structured Data read and modified only be owner|
-|10| PrivateVersioned| Version enabled encrypted Structured Data read and modified only be owner|
-|11| Public |Structured Data for public read but modified only be owner|
-|12| PublicVersioned|Version enabled Structured Data for public read but modified only be owner|
+|9| Encrypted| Encrypted Structured Data read and modified only by owner|
+|10| Encrypted & Versioned| Version enabled encrypted Structured Data read and modified only by owner|
+|11| NotEncypted/Plain |Structured Data for public read but modified only by owner|
+|12| NotEncypted/Plain & Versioned|Version enabled Structured Data for public read but modified only by owner|
 
 These tag types will make use of the standard implementation of the Structured Data operations in the
 [safe_core](https://github.com/maidsafe/safe_core/tree/master/src/core/structured_data_operations).
 
-At this point, `tag_type between the range 10,001 to 2^64 and 9-11` will be permitted by the launcher.
+At this point, `tag_type between the range 10,001 to (2^64-1) and 9-11` will be permitted by the launcher.
 If any specific tag type within the reserved range has to be exposed then it can
 also be added later to the permitted range list for the `tag_type` in launcher API.
 
 The Structured Data has size restriction of 100kb. The default implementation in the safe_core
 for Structured Data will handle the scenarios even if the size is larger than the allowed size limit.
-So the devs using the standard tag types might not have to bother about the size restriction.
+So the devs using the standard tag types will not have to bother about the size restriction.
 
 But in case, if the devs decide to use more efficient approach than the default implementation,
-then they can create a tag_type in the range between 10001 and 2^64 and call the APIs. If a
+then they can create a tag_type in the Non Reserved range between (10001 and 2^64-1) and call the APIs. If a
 custom tag type is used, then the size restriction should be handled by the application. If the
-size is more than the permitted size, then a 413 (Payload too large) error will be thrown.
+size is more than the permitted size, then a 413 (Payload too large) HTTP status code will be returned.
+
+If the tag type is in the Custom Range (10001 - 2^64-1) then the data wont be encrypted and will be saved as is.
+It becomes the app devs responsibility to encrypt.
 
 ### Versioned Structured Data
 
@@ -81,9 +84,7 @@ POST
 {
   "id": base64 string // [u8;64] array of u8's of length 64 as a base64 String
   "tagType": U64 // Within the permitted range
-  "data": base64 // Data that has to be stored as a base64 string
-  "isVersioned": Boolean // optional  - defaults to false
-  "isPrivate": Boolean // optional  - defaults to false - Whether the data should be encrypted or not
+  "data": base64 // Data that has to be stored as a base64 string    
 }
 ```
 |Field| Description|
@@ -91,8 +92,6 @@ POST
 |id   | u8 array of length 64 as a base64 string|
 |tagType| Must be a permitted u64 value (9 - 11 or 10001 - 2^64)|
 |data| Data to be saved in the Structured Data as base 64 string|
-|isVersioned| Optional value - this parameter will be used only if the tagType is in the range (10001-2^64). Defaults to false|
-|isPrivate| Optional value - this parameter will be used only if the tagType is in the range (10001-2^64). Defaults to false|
 
 ##### Response
 
@@ -112,7 +111,7 @@ structured data for the specified id and tag type is not found.
 
 ###### End point
 ```
-/structuredData/{id}/{tagType}
+/structuredData/versions/{id}/{tagType}
 ```
 |Field|Description|
 |-----|-----------|
@@ -137,26 +136,23 @@ Status: 200 Ok
 
 #### Get
 Retrieves the data held by the Structured Data. When a Structured Data is retrieved,
-the header will contain a `ref` field with a value. This value, helps in resolving
-version mismatch issues. This value can be passed while updating a Structured Data,
-so that if the user tries to update an older version of the structured data a
-409 (Conflict) error can be returned. In the case of the versioned Structured Data, the
-`ref` will be a base64 string representing the version id. For the Unversioned Structured
-Data the `ref` will be u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
+the header will contain a `sd-version` field with a value.
+This `sd-version` value when passed while updating a Structured Data, if the user tries to
+update an older version of the Structured Data a 409 (Conflict) HTTP Status Code will be returned.
+In the case of the versioned Structured Data, the `sd-version` will be a base64 string representing the version id.
+For the Unversioned Structured Data the `sd-version` will be u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
 
 ##### Request
 
 ###### End point
 ```
-/structuredData/{id}/{tagType}?isVersioned=false&isPrivate=false
+/structuredData/{id}/{tagType}
 ```
 |Field| Description|
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string|
 |tagType| Must be a permitted u64 value (9 - 11 or 10001 - 2^64)|
 |data| Data to be saved in the Structured Data as base 64 string|
-|isVersioned| Optional value - this parameter will be used only if the tagType is in the range (10001-2^64). Defaults to false|
-|isPrivate| Optional value - this parameter will be used only if the tagType is in the range (10001-2^64). Defaults to false|
 
 ###### Method
 ```
@@ -167,7 +163,7 @@ GET
 ###### Header
 ```
 Status: 200 Ok
-ref: {ref-id}
+sd-version: {version-reference}
 ```
 
 ###### Body
@@ -199,7 +195,7 @@ GET
 ###### Header
 ```
 status: 200 Ok
-ref: {ref-id}
+sd-version: {version-reference}
 ```
 
 ###### Body
@@ -211,22 +207,31 @@ Data held by the Structured Data as a base64 string
 
 #### Update
 
-Structured data can be updated by passing the `Id and tagType` corresponding
+Structured data can be updated by passing the `Id, tagType and sd-version` corresponding
 to the structured data.
+
+For example, Say Two users using an application request for a structured Data with id ABC,
+type tag 9. Assume both the users get the same `sd-version as 5`, which means both have the same copy of the
+Structured Data. One user updates the Structured Data for few times and thus the `sd-version` is now at `8`.
+When the other user who still has `sd-version 5` when he tries to update, the API must be able to throw a proper
+status code describing the conflict in sd-version (409). Based on which the applications can get the latest
+Structured Data and updated the same again. If the `sd-version` is not specified in the request,
+the latest Structured Data will be updated with the data passed in the update, which might lead of loss of
+modifications which might have happened in the mean time.
 
 ##### Request
 
 ###### End point
 ```
-/structuredData/{id}/{tagType}/{ref-id}?isVersioned=false&isPrivate=false
+/structuredData/{id}/{tagType}/{sd-version}?isVersioned=false&isPrivate=false
 ```
 |Field| Description|
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string|
 |tagType| Must be a permitted u64 value (9 - 11 or 10001 - 2^64)|
-|ref-id| Optional value - if specified, the concurrency check before updating will be done. If not specified, data will be updated without any concurrency checks|
-|isVersioned| Optional value - this parameter will be used only if the tagType is in the range (10001-2^64). Defaults to false|
-|isPrivate| Optional value - this parameter will be used only if the tagType is in the range (10001-2^64). Defaults to false|
+|sd-version| Optional value - Checks whether the latest version of Structured Data is being updated, if the value is set to true.
+Else, will overwrite with the latest data|
+
 
 ###### Method
 ```
@@ -304,7 +309,7 @@ status: 200 Ok
 
 ##### Body
 ```
-[u8;64] as bas64 string
+ID [u8;64] as bas64 string
 ```
 
 #### Update
@@ -317,7 +322,7 @@ status: 200 Ok
 ```
 |Field|Description|
 |-----|-----------|
-|id| Id obtained after the create operation|
+|id| Id referring to the DataMap, obtained after the create operation|
 |offset| Optional parameter - if offset is not specified the data is appended to the end of the DataMap|
 
 ###### Method
@@ -374,6 +379,7 @@ Data as base64 String
 supporting large file content.
 2. Raw data can not be completely re-written. It can only be updated (partial update)
 or appended. Workaround will be to create a new DataMap.  
+3. Multi Signature support is not exposed in the API
 
 # Alternatives
 
