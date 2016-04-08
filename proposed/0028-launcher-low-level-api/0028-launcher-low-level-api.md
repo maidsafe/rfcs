@@ -29,7 +29,7 @@ permission at the time of authorisation with the launcher.
 
 Structured Data can be used to reference data in the network using an ID and the `tag_type`.
 The Id of the structured data is a u8 array of length 64 [u8;64] and the `tag_type` value
-can be between the range 10,001 to 2^64.
+can be between the range 10,001 to (2^64 - 1).
 
 |tag_type |Operation|Description|
 |---------|---------|-----------|
@@ -90,7 +90,7 @@ POST
 |Field| Description|
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string|
-|tagType| Must be a permitted u64 value (9 - 11 or 10001 - 2^64)|
+|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1))|
 |data| Data to be saved in the Structured Data as base 64 string|
 
 ##### Response
@@ -154,7 +154,7 @@ For the Unversioned Structured Data the `sd-version` will be u64 number which wi
 |Field| Description|
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string|
-|tagType| Must be a permitted u64 value (9 - 11 or 10001 - 2^64)|
+|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1))|
 |data| Data to be saved in the Structured Data as base 64 string|
 
 ###### Method
@@ -186,7 +186,7 @@ Data held by the Structured Data as a base64 string
 |Field| Description|
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string|
-|tagType| Must be a permitted u64 value (9 - 11 or 10001 - 2^64)|
+|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1))|
 |versionId| Version id for which the Structured Data has to be fetched|
 
 ###### Method
@@ -231,7 +231,7 @@ modifications which might have happened in the mean time.
 |Field| Description|
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string|
-|tagType| Must be a permitted u64 value (9 - 11 or 10001 - 2^64)|
+|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1))|
 |sd-version| Optional value - Checks whether the latest version of Structured Data is being updated, if the value is set to true.
 Else, will overwrite with the latest data|
 
