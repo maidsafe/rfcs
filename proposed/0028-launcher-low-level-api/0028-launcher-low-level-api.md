@@ -13,7 +13,7 @@ use Structured Data and Immutable data to create their own topologies.
 # Motivation
 
 Access to structured data and raw data will be needed for third party applications,
-which will allow them to create their own data structures and also to store raw data.
+which will allow devs to create their own data structures and also to store raw data.
 
 # Detailed design
 
@@ -137,8 +137,11 @@ Status: 200 Ok
 #### Get
 Retrieves the data held by the Structured Data. When a Structured Data is retrieved,
 the header will contain a `sd-version` field with a value.
-This `sd-version` value when passed while updating a Structured Data, if the user tries to
-update an older version of the Structured Data a 409 (Conflict) HTTP Status Code will be returned.
+
+If the user tries to update an older version of the Structured Data, based on the
+`sd-version` value passed while updating can be used to validate the version and a
+409 (Conflict) HTTP Status Code will be returned.
+
 In the case of the versioned Structured Data, the `sd-version` will be a base64 string representing the version id.
 For the Unversioned Structured Data the `sd-version` will be u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
 
