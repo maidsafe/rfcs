@@ -387,4 +387,9 @@ None
 
 # Unresolved questions
 
-None
+When Structured Data is saved in the network directly using the low level api,
+the launcher wont be able keep an account of the Structured Data saved by the user.
+Here the application will only be able to fetch the data from the network and the
+users will be able to manage the data only through application and not via launcher.
+Should launcher keep track of the Structure Data and immutable Data created by the
+user?
