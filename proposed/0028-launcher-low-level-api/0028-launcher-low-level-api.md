@@ -25,6 +25,8 @@ Structured Data to create and manage their own data structures to build applicat
 To access the low level APIs, the application must request `LOW_LEVEL_ACCESS`
 permission at the time of authorisation with the Launcher.
 
+**Only Authorised requests can access the low level APIs.**
+
 ## Structured Data
 
 Structured Data can be used to reference data in the network using an ID and the `tag_type`.
@@ -45,14 +47,14 @@ At this point, `tag_type between the range 10,001 to (2^64-1) and 9-11` will be 
 If any specific tag type within the reserved range has to be exposed then it can
 also be added later to the permitted range list for the `tag_type` in the Launcher API.
 
-The Structured Data has a size restriction of 100kb. The default implementation in the safe_core
+The Structured Data has a size restriction of 100KB. The default implementation in the safe_core
 for Structured Data will handle the scenarios even if the size is larger than the allowed size
 limit. So the devs using the standard tag types will not have to bother about the size restriction.
 
-If the devs decide to use a more efficient approach than the default implementation,
+If the devs decide to use a different approach other than the default implementation,
 then they can create a tag_type in the non reserved range between (10001 and 2^64-1) and call the APIs. If a custom tag type is used, then the size restriction should be handled by the application. If the size is more than the permitted size, then a 413 (payload too large) HTTP status code will be returned.
-
-If the tag type is within the custom range (10001 - 2^64-1) then the data wont be encrypted and will be saved as is. It becomes the app devs responsibility to encrypt.
+Moreover, if the tag type is within the custom range (10001 - 2^64-1) then the data will be saved as is.
+It becomes the app devs responsibility to encrypt, verify size, etc.
 
 ### Versioned Structured Data
 
@@ -64,6 +66,9 @@ be retrieved from the network. Unversioned Structured Data will only return the 
 
 #### Create
 
+Structured Data api will return the version ID on success for tag_types 10 & 12 (Versioned Structure Data).
+The version Id will be base64 string representing [u8;64]
+
 ##### Request
 
 ###### End point
@@ -74,6 +79,11 @@ be retrieved from the network. Unversioned Structured Data will only return the 
 ###### Method
 ```
 POST
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
 ```
 
 ###### Body
@@ -95,6 +105,12 @@ POST
 ###### Header
 ```
 Status: 200 Ok
+```
+
+###### Body
+Only for Versioned Structure Data
+```
+Version Id as base64 string
 ```
 
 #### List versions
@@ -119,6 +135,12 @@ Structured Data for the specified id and tag type is not found.
 ```
 GET
 ```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
 ##### Response
 
 ###### Header
@@ -133,14 +155,14 @@ Status: 200 Ok
 
 #### Get
 Retrieves the data held by the Structured Data. When a Structured Data is retrieved,
-the header will contain a `sd-version` field with a value.
+the header will contain a `SD-Version` field with a value.
 
 If the user tries to update an older version of the Structured Data - based upon the
-`sd-version` value passed while updating will be used to validate the version and a
+`SD-Version` value passed while updating will be used to validate the version and a
 409 (Conflict) HTTP Status Code will be returned.
 
-In the case of the versioned Structured Data, the `sd-version` will be a base64 string representing the version id.
-For the Unversioned Structured Data the `sd-version` will be a u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
+In the case of the versioned Structured Data, the `SD-Version` will be a base64 string representing the version id.
+For the Unversioned Structured Data the `SD-Version` will be a u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
 
 ##### Request
 
@@ -152,18 +174,23 @@ For the Unversioned Structured Data the `sd-version` will be a u64 number which 
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string.|
 |tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1)).|
-|data| Data to be saved in the Structured Data as a base64 string.|
 
 ###### Method
 ```
 GET
 ```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
 ##### Response
 
 ###### Header
 ```
 Status: 200 Ok
-sd-version: {version-reference}
+SD-Version: {version-reference}
 ```
 
 ###### Body
@@ -190,12 +217,18 @@ Data held by the Structured Data as a base64 string
 ```
 GET
 ```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
 ##### Response
 
 ###### Header
 ```
 status: 200 Ok
-sd-version: {version-reference}
+SD-Version: {version-reference}
 ```
 
 ###### Body
@@ -207,31 +240,36 @@ Data held by the Structured Data as a base64 string
 
 #### Update
 
-Structured Data can be updated by passing the `Id, tagType and sd-version` corresponding
+Structured Data can be updated by passing the `Id, tagType and SD-Version` corresponding
 to the Structured Data.
 
 For example, Say two users using an application request Structured Data with the ID ABC,
-type tag 9. Assuming both the users get the same `sd-version as 5`, which means both have the same copy of the Structured Data. One user updates the Structured Data a few times and the `sd-version`
+type tag 9. Assuming both the users get the same `SD-Version as 5`, which means both have the same copy of the Structured Data. One user updates the Structured Data a few times and the `SD-Version`
 is now at `8`.
-When the other user who still has `sd-version 5` - when he tries to update -the API must be able to throw a proper status code describing the conflict in sd-version (409). Based on which the applications can get the latest Structured Data and update the same again. If the `sd-version` is
+When the other user who still has `SD-Version 5` - when he tries to update -the API must be able to throw a proper status code describing the conflict in SD-Version (409). Based on which the applications can get the latest Structured Data and update the same again. If the `SD-Version` is
 not specified in the request, the latest Structured Data will be updated with the data passed in the update, which may lead to a loss of modifications which might have happened in the mean time.
 
 ##### Request
 
 ###### End point
 ```
-/structuredData/{id}/{tagType}/{sd-version}?isVersioned=false&isPrivate=false
+/structuredData/{id}/{tagType}/{SD-Version}
 ```
 |Field| Description|
 |-----|------------|
 |id   | u8 array of length 64 as a base64 string.|
 |tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1)).|
-|sd-version| Optional value - Checks whether the latest version of Structured Data is being updated, if the value is set to true, otherwise it will overwrite with the latest data.|
+|SD-Version| Optional value - Checks whether the latest version of Structured Data is being updated, if the value is set to true, otherwise it will overwrite with the latest data.|
 
 
 ###### Method
 ```
 PUT
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
 ```
 
 ###### Body
@@ -244,6 +282,12 @@ Data to be saved in the Structured Data as base64 String
 ###### Header
 ```
 Status: 200 Ok
+```
+
+###### Body
+Only for Versioned Structure Data
+```
+Version Id as base64 string
 ```
 
 #### Delete
@@ -259,6 +303,12 @@ Status: 200 Ok
 ```
 DELETE
 ```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
 ##### Response
 
 ###### Header
@@ -271,8 +321,13 @@ Status: 200 Ok
 Raw data can be saved in the network as Immutable Data through the self-encryption process.
 When raw data is written to the network, the data is self-encrypted and split into smaller
 chunks and saved as Immutable Data. The self-encryption process returns a DataMap, using which
-the actual data can be retrieved. This DataMap is saved to network as raw data and an ID of the
-Immutable Data is obtained which refers to the DataMap.
+the actual data can be retrieved.
+
+The DataMap obtained is saved to network as Immutable Data and the ID of the Immutable Data is used to
+refer to the DataMap. This will make it easier and avoid passing the serialised DataMap to and fro
+between the launcher and the application.
+
+After a create or update operation a new ID relating to the DataMap will be returned.
 
 #### Create
 
@@ -289,6 +344,11 @@ the DataMap is returned.
 ##### Method
 ```
 POST
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
 ```
 
 ##### Body
@@ -326,9 +386,9 @@ ID [u8;64] as bas64 string
 PUT
 ```
 
-###### Body
-```javascript
-Data as base64 string
+###### Headers
+```
+Authorization: Bearer <TOKEN>
 ```
 
 #### Response
@@ -336,6 +396,11 @@ Data as base64 string
 ##### Header
 ```
 status: 200 Ok
+```
+
+###### Body
+```javascript
+ID [u8;64] as bas64 string
 ```
 
 #### Get
@@ -348,13 +413,18 @@ status: 200 Ok
 ```
 |Field|Description|
 |-----|-----------|
-|id| ID obtained after the create operation.|
-|offset| Optional parameter - if offset is not specified the data is appended to the end of the DataMap.|
-|length| Optional parameter - if length is not specified the value defaults to the full length.|
+|id| ID obtained after the create/update operation.|
+|offset| Optional parameter - if offset is specified, the data is read from the specified position. Else it will be read from the start|
+|length| Optional parameter - if length is not specified, the value defaults to the full length.|
 
 ###### Method
 ```
 GET
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
 ```
 
 #### Response
