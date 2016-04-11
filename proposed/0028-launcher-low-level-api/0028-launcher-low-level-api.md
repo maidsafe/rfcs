@@ -25,7 +25,7 @@ Structured Data to create and manage their own data structures to build applicat
 To access the low level APIs, the application must request `LOW_LEVEL_ACCESS`
 permission at the time of authorisation with the Launcher.
 
-**Only Authorised requests can access the low level APIs**
+**Only Authorised requests can access the low level APIs.**
 
 ## Structured Data
 
@@ -323,9 +323,11 @@ When raw data is written to the network, the data is self-encrypted and split in
 chunks and saved as Immutable Data. The self-encryption process returns a DataMap, using which
 the actual data can be retrieved.
 
-The DataMap obtained is saved to network as Immutable Data through self-encryption and the ID of the
-Immutable Data is used to refer to the DataMap. After a create or update operation a new ID relating
-to the DataMap will be returned.
+The DataMap obtained is saved to network as Immutable Data and the ID of the Immutable Data is used to
+refer to the DataMap. This will make it easier and avoid passing the serialised DataMap to and fro
+between the launcher and the application.
+
+After a create or update operation a new ID relating to the DataMap will be returned.
 
 #### Create
 
