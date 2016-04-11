@@ -25,7 +25,7 @@ Structured Data to create and manage their own data structures to build applicat
 To access the low level APIs, the application must request `LOW_LEVEL_ACCESS`
 permission at the time of authorisation with the Launcher.
 
-** Only Authorised Requests can access the low level APIs**
+**Only Authorised requests can access the low level APIs**
 
 ## Structured Data
 
@@ -65,6 +65,9 @@ be retrieved from the network. Unversioned Structured Data will only return the 
 
 #### Create
 
+Structured Data api will return the version ID on success for tag_types 10 & 12 (Versioned Structure Data).
+The version Id will be base64 string representing [u8;64]
+
 ##### Request
 
 ###### End point
@@ -101,6 +104,12 @@ Authorization: Bearer <TOKEN>
 ###### Header
 ```
 Status: 200 Ok
+```
+
+###### Body
+Only for Versioned Structure Data
+```
+Version Id as base64 string
 ```
 
 #### List versions
@@ -274,6 +283,11 @@ Data to be saved in the Structured Data as base64 String
 Status: 200 Ok
 ```
 
+###### Body
+```
+Version Id as base64 string
+```
+
 #### Delete
 
 ##### Request
@@ -305,8 +319,10 @@ Status: 200 Ok
 Raw data can be saved in the network as Immutable Data through the self-encryption process.
 When raw data is written to the network, the data is self-encrypted and split into smaller
 chunks and saved as Immutable Data. The self-encryption process returns a DataMap, using which
-the actual data can be retrieved. This DataMap is saved to network as raw data and an ID of the
-Immutable Data is obtained which refers to the DataMap.
+the actual data can be retrieved.
+
+The DataMap obtained is saved to network as Immutable Data through self-encryption and the ID of the
+Immutable Data is used to refer to the DataMap.
 
 #### Create
 
@@ -370,16 +386,16 @@ PUT
 Authorization: Bearer <TOKEN>
 ```
 
-###### Body
-```javascript
-ID [u8;64] as bas64 string
-```
-
 #### Response
 
 ##### Header
 ```
 status: 200 Ok
+```
+
+###### Body
+```javascript
+ID [u8;64] as bas64 string
 ```
 
 #### Get
@@ -393,8 +409,8 @@ status: 200 Ok
 |Field|Description|
 |-----|-----------|
 |id| ID obtained after the create/update operation.|
-|offset| Optional parameter - if offset is specified the data is read from the specified position. Else it will be read from the start|
-|length| Optional parameter - if length is not specified the value defaults to the full length.|
+|offset| Optional parameter - if offset is specified, the data is read from the specified position. Else it will be read from the start|
+|length| Optional parameter - if length is not specified, the value defaults to the full length.|
 
 ###### Method
 ```
