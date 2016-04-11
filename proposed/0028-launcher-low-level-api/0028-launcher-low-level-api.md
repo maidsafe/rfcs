@@ -47,13 +47,14 @@ At this point, `tag_type between the range 10,001 to (2^64-1) and 9-11` will be 
 If any specific tag type within the reserved range has to be exposed then it can
 also be added later to the permitted range list for the `tag_type` in the Launcher API.
 
-The Structured Data has a size restriction of 100kb. The default implementation in the safe_core
+The Structured Data has a size restriction of 100KB. The default implementation in the safe_core
 for Structured Data will handle the scenarios even if the size is larger than the allowed size
 limit. So the devs using the standard tag types will not have to bother about the size restriction.
 
-If the devs decide to use a more efficient approach than the default implementation,
+If the devs decide to use a different approach other than the default implementation,
 then they can create a tag_type in the non reserved range between (10001 and 2^64-1) and call the APIs. If a custom tag type is used, then the size restriction should be handled by the application. If the size is more than the permitted size, then a 413 (payload too large) HTTP status code will be returned.
-Moreover, if the tag type is within the custom range (10001 - 2^64-1) then the data wont be encrypted and will be saved as is. It becomes the app devs responsibility to encrypt.
+Moreover, if the tag type is within the custom range (10001 - 2^64-1) then the data will be saved as is.
+It becomes the app devs responsibility to encrypt, verify size, etc.
 
 ### Versioned Structured Data
 
@@ -284,6 +285,7 @@ Status: 200 Ok
 ```
 
 ###### Body
+Only for Versioned Structure Data
 ```
 Version Id as base64 string
 ```
@@ -322,7 +324,8 @@ chunks and saved as Immutable Data. The self-encryption process returns a DataMa
 the actual data can be retrieved.
 
 The DataMap obtained is saved to network as Immutable Data through self-encryption and the ID of the
-Immutable Data is used to refer to the DataMap.
+Immutable Data is used to refer to the DataMap. After a create or update operation a new ID relating
+to the DataMap will be returned.
 
 #### Create
 
