@@ -91,7 +91,7 @@ Authorization: Bearer <TOKEN>
 {
   "id": base64 string // [u8;64] array of u8's of length 64 as a base64 String
   "tagType": U64 // Within the permitted range
-  "data": base64 // Data that has to be stored as a base64 string    
+  "data": base64 // Data that has to be stored as a base64 string  
 }
 ```
 |Field| Description|
@@ -191,6 +191,7 @@ Authorization: Bearer <TOKEN>
 ```
 Status: 200 Ok
 SD-Version: {version-reference}
+Owner: base64 string - representing public key of user
 ```
 
 ###### Body
@@ -229,6 +230,7 @@ Authorization: Bearer <TOKEN>
 ```
 status: 200 Ok
 SD-Version: {version-reference}
+Owner: base64 string - representing public key of user
 ```
 
 ###### Body
@@ -331,15 +333,20 @@ After a create or update operation a new ID relating to the DataMap will be retu
 
 #### Create
 
-When the raw data is written to the network, the ID of the Immutable Data chunk referring to
-the DataMap is returned.
+This DataMap is saved in the Network as an Immutable Data and the ID of the Immutable Data is returned.
+The DataMap can be encrypted using the user's key and stored, else it can stored without encryption
+making it readable for public.
 
 ##### Request
 
 ##### Endpoint
 ```
-/rawData
+/rawData/{isEncrypted}
 ```
+
+|Field|Description|
+|-----|-----------|
+|isEncrypted| The DataMap will be encrypted and saved in the network, else it would be saved without encryption. Defaults to false|
 
 ##### Method
 ```
@@ -368,16 +375,57 @@ status: 200 Ok
 ID [u8;64] as bas64 string
 ```
 
+#### Get Meta Data
+
+##### Request
+
+##### Endpoint
+```
+/rawData/{id}/{isEncrypted}
+```
+
+|Field|Description|
+|-----|-----------|
+|isEncrypted| true or false based on how the Raw Data was initially created. Defaults to false|
+|id| ID referring to the DataMap, obtained after the create operation.|
+|offset| Optional parameter - if offset is not specified the data is appended to the end of the DataMap.|
+
+##### Method
+```
+HEAD
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+#### Response
+
+##### Header
+```
+status: 200 Ok
+```
+
+##### Body
+```javascript
+{
+  length: u64 // Actual length of the raw data
+}
+```
+
 #### Update
 
 ##### Request
 
 ###### Endpoint
 ```
-/rawData/{id}?offset=0
+/rawData/{id}/{isEncrypted}?offset=0
 ```
+
 |Field|Description|
 |-----|-----------|
+|isEncrypted| true or false based on how the RawData was initially created. Defaults to false|
 |id| ID referring to the DataMap, obtained after the create operation.|
 |offset| Optional parameter - if offset is not specified the data is appended to the end of the DataMap.|
 
@@ -409,10 +457,12 @@ ID [u8;64] as bas64 string
 
 ###### Endpoint
 ```
-/rawData/{id}?offset=0&length=100
+/rawData/{id}/{isEncrypted}?offset=0&length=100
 ```
+
 |Field|Description|
 |-----|-----------|
+|isEncrypted| true or false based on how the Raw Data was initially created. Defaults to false|
 |id| ID obtained after the create/update operation.|
 |offset| Optional parameter - if offset is specified, the data is read from the specified position. Else it will be read from the start|
 |length| Optional parameter - if length is not specified, the value defaults to the full length.|
@@ -437,6 +487,116 @@ status: 200 Ok
 ##### Body
 ```
 Data as base64 String
+```
+
+### Utility APIs
+
+#### Hybrid Encryption
+
+Combined Asymmectric and Symmetric encryption. The data is encrypted using random Key and
+IV with Xsalsa-symmetric encryption. Random IV ensures that same plain text produces different
+cipher-texts for each fresh symmetric encryption even with the same key. The Key and IV are then asymmetrically
+enrypted using Public-MAID and the whole thing is then serialised into a single Vec<u8>.
+
+##### Request
+
+###### End Point
+```
+/util/encrypt
+```
+
+###### Method
+```
+POST
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+###### Body
+```
+Data as base64 String
+```
+
+##### Response
+
+###### Headers
+```
+Status: 200 Ok
+```
+
+###### Body
+```
+Encrypted data as base64 String
+```
+
+#### Hybrid Decryption
+
+Decrypt data that was encrypted using the hybrid encryption API.
+
+###### End Point
+```
+/util/decrypt
+```
+
+###### Method
+```
+POST
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+###### Body
+```
+Encrypted Data as base64 String
+```
+
+##### Response
+
+###### Headers
+```
+Status: 200 Ok
+```
+
+###### Body
+```
+Decrypted data as base64 String
+```
+
+#### Get Public Key
+
+##### Request
+
+###### End Point
+```
+/util/publicKey
+```
+
+###### Method
+```
+GET
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+##### Response
+
+###### Headers
+```
+Status: 200 Ok
+```
+
+###### Body
+```
+[u8;64] Array as base64 String
 ```
 
 # Drawbacks
