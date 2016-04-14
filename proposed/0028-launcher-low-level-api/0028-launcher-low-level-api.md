@@ -73,8 +73,13 @@ The version Id will be base64 string representing [u8;64]
 
 ###### End point
 ```
-/structuredData
+/structuredData/{id}/{tagType}
 ```
+
+|Field| Description|
+|-----|------------|
+|id   | u8 array of length 64 as a base64 string.|
+|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1)).|
 
 ###### Method
 ```
@@ -88,17 +93,8 @@ Authorization: Bearer <TOKEN>
 
 ###### Body
 ```javascript
-{
-  "id": base64 string // [u8;64] array of u8's of length 64 as a base64 String
-  "tagType": U64 // Within the permitted range
-  "data": base64 // Data that has to be stored as a base64 string  
-}
+Data that has to be stored as a base64 string  
 ```
-|Field| Description|
-|-----|------------|
-|id   | u8 array of length 64 as a base64 string.|
-|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1)).|
-|data| Data to be saved in the Structured Data as base 64 string.|
 
 ##### Response
 
