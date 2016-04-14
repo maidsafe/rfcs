@@ -27,6 +27,10 @@ permission at the time of authorisation with the Launcher.
 
 **Only Authorised requests can access the low level APIs.**
 
+1. Authorised requests should contain the token in the Authorization header.
+2. The query parameters and the request body must be encrypted using the symmetric key.
+3. Response body will be encrypted using the symmetric key.
+
 ## Structured Data
 
 Structured Data can be used to reference data in the network using an ID and the `tag_type`.
