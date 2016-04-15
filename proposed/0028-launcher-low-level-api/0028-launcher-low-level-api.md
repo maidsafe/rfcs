@@ -164,6 +164,9 @@ If the user tries to update an older version of the Structured Data - based upon
 In the case of the versioned Structured Data, the `SD-Version` will be a base64 string representing the version id.
 For the Unversioned Structured Data the `SD-Version` will be a u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
 
+The response header will also have a `Owner` field, which will hold the owners public key as a
+base64 string.
+
 ##### Request
 
 ###### End point
@@ -517,7 +520,7 @@ Authorization: Bearer <TOKEN>
 
 ###### Body
 ```
-Data as base64 String
+Byte Array to be encrypted as base64 String
 ```
 
 ##### Response
@@ -529,7 +532,7 @@ Status: 200 Ok
 
 ###### Body
 ```
-Encrypted data as base64 String
+Encrypted byte array as base64 String
 ```
 
 #### Hybrid Decryption
@@ -553,7 +556,7 @@ Authorization: Bearer <TOKEN>
 
 ###### Body
 ```
-Encrypted Data as base64 String
+Encrypted byte array as base64 String
 ```
 
 ##### Response
@@ -565,10 +568,13 @@ Status: 200 Ok
 
 ###### Body
 ```
-Decrypted data as base64 String
+Decrypted byte array as base64 String
 ```
 
 #### Get Public Key
+
+Public key will refer to the owner of the Structured Data. The public key can be
+used to assert the ownership of Structured Data.
 
 ##### Request
 
@@ -596,7 +602,7 @@ Status: 200 Ok
 
 ###### Body
 ```
-[u8;64] Array as base64 String
+sodiumoxide box public key as base64 String
 ```
 
 # Drawbacks
@@ -606,6 +612,7 @@ supporting large file content.
 2. Raw data cannot be completely re-written. It can only be updated (partial update)
 or appended. A workaround will be to create a new DataMap.
 3. Multi Signature support is not exposed in the API.
+4. Version of the Structured Data can not be deleted.
 
 # Alternatives
 
