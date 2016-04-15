@@ -332,6 +332,9 @@ The DataMap obtained is saved to network as Immutable Data and the ID of the Imm
 refer to the DataMap. This will make it easier and avoid passing the serialised DataMap to and fro
 between the launcher and the application.
 
+If the DataMap is > 1 MB, then the DataMap will undergo self-encryption and yield another
+DataMap and this process will re-curse until a DataMap of less than 1 MB is obtained.
+
 After a create or update operation a new ID relating to the DataMap will be returned.
 
 #### Create
