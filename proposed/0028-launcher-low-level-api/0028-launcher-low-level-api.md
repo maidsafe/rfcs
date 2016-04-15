@@ -27,6 +27,10 @@ permission at the time of authorisation with the Launcher.
 
 **Only Authorised requests can access the low level APIs.**
 
+1. Authorised requests should contain the token in the Authorization header.
+2. The query parameters and the request body must be encrypted using the symmetric key.
+3. Response body will be encrypted using the symmetric key.
+
 ## Structured Data
 
 Structured Data can be used to reference data in the network using an ID and the `tag_type`.
@@ -73,8 +77,13 @@ The version Id will be base64 string representing [u8;64]
 
 ###### End point
 ```
-/structuredData
+/structuredData/{id}/{tagType}
 ```
+
+|Field| Description|
+|-----|------------|
+|id   | u8 array of length 64 as a base64 string.|
+|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1)).|
 
 ###### Method
 ```
@@ -88,17 +97,8 @@ Authorization: Bearer <TOKEN>
 
 ###### Body
 ```javascript
-{
-  "id": base64 string // [u8;64] array of u8's of length 64 as a base64 String
-  "tagType": U64 // Within the permitted range
-  "data": base64 // Data that has to be stored as a base64 string    
-}
+Data that has to be stored as a base64 string  
 ```
-|Field| Description|
-|-----|------------|
-|id   | u8 array of length 64 as a base64 string.|
-|tagType| Must be a permitted u64 value (9 - 11 or 10001 - (2^64 - 1)).|
-|data| Data to be saved in the Structured Data as base 64 string.|
 
 ##### Response
 
@@ -164,6 +164,9 @@ If the user tries to update an older version of the Structured Data - based upon
 In the case of the versioned Structured Data, the `SD-Version` will be a base64 string representing the version id.
 For the Unversioned Structured Data the `SD-Version` will be a u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
 
+The response header will also have a `Owner` field, which will hold the owners public key as a
+base64 string.
+
 ##### Request
 
 ###### End point
@@ -191,6 +194,7 @@ Authorization: Bearer <TOKEN>
 ```
 Status: 200 Ok
 SD-Version: {version-reference}
+Owner: base64 string - representing public key of user
 ```
 
 ###### Body
@@ -229,6 +233,7 @@ Authorization: Bearer <TOKEN>
 ```
 status: 200 Ok
 SD-Version: {version-reference}
+Owner: base64 string - representing public key of user
 ```
 
 ###### Body
@@ -327,19 +332,27 @@ The DataMap obtained is saved to network as Immutable Data and the ID of the Imm
 refer to the DataMap. This will make it easier and avoid passing the serialised DataMap to and fro
 between the launcher and the application.
 
+If the DataMap is > 1 MB, then the DataMap will undergo self-encryption and yield another
+DataMap and this process will re-curse until a DataMap of less than 1 MB is obtained.
+
 After a create or update operation a new ID relating to the DataMap will be returned.
 
 #### Create
 
-When the raw data is written to the network, the ID of the Immutable Data chunk referring to
-the DataMap is returned.
+This DataMap is saved in the Network as an Immutable Data and the ID of the Immutable Data is returned.
+The DataMap can be encrypted using the user's key and stored, else it can stored without encryption
+making it readable for public.
 
 ##### Request
 
 ##### Endpoint
 ```
-/rawData
+/rawData/{isEncrypted}
 ```
+
+|Field|Description|
+|-----|-----------|
+|isEncrypted| The DataMap will be encrypted and saved in the network, else it would be saved without encryption. Defaults to false|
 
 ##### Method
 ```
@@ -368,16 +381,57 @@ status: 200 Ok
 ID [u8;64] as bas64 string
 ```
 
+#### Get Meta Data
+
+##### Request
+
+##### Endpoint
+```
+/rawData/{id}/{isEncrypted}
+```
+
+|Field|Description|
+|-----|-----------|
+|isEncrypted| true or false based on how the Raw Data was initially created. Defaults to false|
+|id| ID referring to the DataMap, obtained after the create operation.|
+|offset| Optional parameter - if offset is not specified the data is appended to the end of the DataMap.|
+
+##### Method
+```
+HEAD
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+#### Response
+
+##### Header
+```
+status: 200 Ok
+```
+
+##### Body
+```javascript
+{
+  length: u64 // Actual length of the raw data
+}
+```
+
 #### Update
 
 ##### Request
 
 ###### Endpoint
 ```
-/rawData/{id}?offset=0
+/rawData/{id}/{isEncrypted}?offset=0
 ```
+
 |Field|Description|
 |-----|-----------|
+|isEncrypted| true or false based on how the RawData was initially created. Defaults to false|
 |id| ID referring to the DataMap, obtained after the create operation.|
 |offset| Optional parameter - if offset is not specified the data is appended to the end of the DataMap.|
 
@@ -409,10 +463,12 @@ ID [u8;64] as bas64 string
 
 ###### Endpoint
 ```
-/rawData/{id}?offset=0&length=100
+/rawData/{id}/{isEncrypted}?offset=0&length=100
 ```
+
 |Field|Description|
 |-----|-----------|
+|isEncrypted| true or false based on how the Raw Data was initially created. Defaults to false|
 |id| ID obtained after the create/update operation.|
 |offset| Optional parameter - if offset is specified, the data is read from the specified position. Else it will be read from the start|
 |length| Optional parameter - if length is not specified, the value defaults to the full length.|
@@ -439,6 +495,119 @@ status: 200 Ok
 Data as base64 String
 ```
 
+### Utility APIs
+
+#### Hybrid Encryption
+
+Combined Asymmectric and Symmetric encryption. The data is encrypted using random Key and
+IV with Xsalsa-symmetric encryption. Random IV ensures that same plain text produces different
+cipher-texts for each fresh symmetric encryption even with the same key. The Key and IV are then asymmetrically
+enrypted using Public-MAID and the whole thing is then serialised into a single Vec<u8>.
+
+##### Request
+
+###### End Point
+```
+/util/encrypt
+```
+
+###### Method
+```
+POST
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+###### Body
+```
+Byte Array to be encrypted as base64 String
+```
+
+##### Response
+
+###### Headers
+```
+Status: 200 Ok
+```
+
+###### Body
+```
+Encrypted byte array as base64 String
+```
+
+#### Hybrid Decryption
+
+Decrypt data that was encrypted using the hybrid encryption API.
+
+###### End Point
+```
+/util/decrypt
+```
+
+###### Method
+```
+POST
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+###### Body
+```
+Encrypted byte array as base64 String
+```
+
+##### Response
+
+###### Headers
+```
+Status: 200 Ok
+```
+
+###### Body
+```
+Decrypted byte array as base64 String
+```
+
+#### Get Public Key
+
+Public key will refer to the owner of the Structured Data. The public key can be
+used to assert the ownership of Structured Data.
+
+##### Request
+
+###### End Point
+```
+/util/publicKey
+```
+
+###### Method
+```
+GET
+```
+
+###### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+##### Response
+
+###### Headers
+```
+Status: 200 Ok
+```
+
+###### Body
+```
+sodiumoxide box public key as base64 String
+```
+
 # Drawbacks
 
 1. Large file sizes cannot be supported. Streaming API will be needed for
@@ -446,6 +615,7 @@ supporting large file content.
 2. Raw data cannot be completely re-written. It can only be updated (partial update)
 or appended. A workaround will be to create a new DataMap.
 3. Multi Signature support is not exposed in the API.
+4. Version of the Structured Data can not be deleted.
 
 # Alternatives
 
