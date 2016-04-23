@@ -23,7 +23,7 @@ and other services is also a motivation for implementing such a system.
 
 # Detailed design
 
-This is a simple use case for `Unified Structured Data` (see RFC XXXX). In this case we require to set three items
+This is a simple use case for `Unified Structured Data` (see RFC 0000). In this case we require to set three items
 
 1. The `type_tag` shall be type `4`
 
