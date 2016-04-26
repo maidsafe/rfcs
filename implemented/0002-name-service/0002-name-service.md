@@ -12,8 +12,7 @@ This data includes, long name (could be real name is users wish), web site id, b
 
 # Motivation
 
-In networks people expect to be able to lookup services related to names. In the SAFE network this includes the ability to retrieve public keys to encrypt data to that id, in cases where privacy is a requirement (e.g. in SAFE all messages are encrypted between identities). The opportunity for people to create and link web sites
-and other services is also a motivation for implementing such a system.
+In networks people expect to be able to lookup services related to names. In the SAFE network this includes the ability to retrieve public keys to encrypt data to that id, in cases where privacy is a requirement (e.g. in SAFE all messages are encrypted between identities). The opportunity for people to create and link web sites and other services is also a motivation for implementing such a system.
 
 # Detailed design
 
@@ -28,7 +27,7 @@ This is a simple use case for `Unified Structured Data` (see RFC 0000). In this 
 ```rust
 struct dns {
   long_name: String
-  encrytion_key: crypto::encrypt::public_key
+  encryption_key: crypto::encrypt::public_key
   //      service, location
   HashMap<String, (NameType, u64, bool, bool)> // As Directories are identified by a tuple of 4 parameters (NameType, tag, if private/encrypted, if versioned) it makes sense to have the 4 identifies stored for better scalability.
 }
