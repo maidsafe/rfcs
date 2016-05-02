@@ -1,4 +1,5 @@
 - Feature Name: Add deletion values to `MpidMessageWrapper`
+- Status: active
 - Type: Enhancement
 - Related components: [mpid_messaging](https://github.com/maidsafe/mpid_messaging), [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client)
 - Start Date: 03-02-2016
@@ -51,7 +52,7 @@ The effect of this on the `MpidManager` would be the inclusion of the following 
 
 ```
 pub fn handle_delete(&mut self, routing_node: &RoutingNode, request: &RequestMessage) -> Result<(), InternalError> {
-    match Parse request content 
+    match Parse request content
         MpidMessageWrapper::DeleteMessage(name) => {
         	Delete a message from a client's outbox.
         }
@@ -68,7 +69,7 @@ Since no `Authority` is defined for `MpidManager`'s, `PlainData` messages used f
 
 # Alternatives
 
-Add an `Mpidmanager` authority to separate the responsibilty of handling individual data types on a per persona basis. Mostly related to the drawback observed above, and will nevertheless require some form of deletion capability to be included, anticipated to be that suggested by the current proposal. 
+Add an `Mpidmanager` authority to separate the responsibilty of handling individual data types on a per persona basis. Mostly related to the drawback observed above, and will nevertheless require some form of deletion capability to be included, anticipated to be that suggested by the current proposal.
 
 # Unresolved questions
 

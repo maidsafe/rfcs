@@ -1,4 +1,5 @@
 - Feature Name: MPID Messaging System
+- Status: active
 - Type: New Feature
 - Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client), [mpid_messaging](https://github.com/maidsafe/mpid_messaging)
 - Start Date: 22-09-2015
@@ -418,7 +419,7 @@ impl MpidManager {
                 let forward_pd = PlainData {
                     name: mpid_message_name(mpid_message),
                     value: serialise(MpidMessageWrapper::PutHeader(
-                            mpid_message.mpid_header, 
+                            mpid_message.mpid_header,
                             ::mpid_manager::Authority(mpid_message.mpid_header.sender_name())),
                 }
                 routing.put_request(::mpid_manager::Authority(mpid_message.recipient), forward_pd);

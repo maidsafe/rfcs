@@ -1,4 +1,5 @@
 - Feature Name: Launcher as a service
+- Status: active
 - Type: New Product
 - Related components: [safe_client](https://github.com/maidsafe/safe_client), [safe_nfs](https://github.com/maidsafe/safe_nfs)
 - Start Date: 11-September-2015

@@ -1,4 +1,5 @@
 - Feature Name: UDP-hole-punching
+- Status: active
 - Type new: feature
 - Related components: crust
 - Start Date: 22-09-2015
@@ -146,7 +147,7 @@ is limited in number of NAT types it can successfully punch through.
 
 Another approach would work with the use of multiplexing. That is, if we had a UDP socket
 which is already connected to a remote peer, we could also use it to communicate
-with other peers as the hole has already been punched. Problem with this approach is 
+with other peers as the hole has already been punched. Problem with this approach is
 that it would only help with `Full-cone NAT` types because it is the only NAT
 type where a hole punched to one peer/host can be reused with another peers/hosts.
 
@@ -174,7 +175,7 @@ Here are the available options:
 3. Futures: these (AFAIK) have bigger combinatorial power than coroutines and
    many libraries already ship with these patterns abstracted (think of functions
    like `when_any` or `when_all`). That said, they have the disadvantage
-   that they combine blocking and non blocking paradigms, resulting in 
+   that they combine blocking and non blocking paradigms, resulting in
    slower code (read [this](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4045.pdf) for
    more info on the topic).
 
@@ -321,7 +322,7 @@ fn blocking_udp_punch_hole(udp_socket : UdpSocket,
           // New payload with `received` set to true.
           periodic_sender.reset_payload(HolePunch::new(secret, true));
         }
- 
+
         periodic_sender.block_until_finished();
         break;
       },
