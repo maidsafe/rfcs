@@ -1,4 +1,5 @@
 - Feature Name: safe_dns API from safe_launcher
+- Status: proposed
 - Type: Enhancement
 - Related components safe_launcher
 - Start Date: 24-11-2015

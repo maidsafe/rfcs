@@ -1,4 +1,5 @@
 - Feature Name: nat_traversal
+- Status: proposed
 - Type: enhancement
 - Related components: crust
 - Start Date: 11-11-2015
@@ -106,7 +107,7 @@ pub fn gen_rendezvous_info(endpoints: Vec<MappedSocketAddr>)
 impl MappedUdpSocket {
     /// Map an existing `UdpSocket`. The mapped addresses include all the addresses that a peer
     /// may be able to connect to the socket on. This includes the socket's local address for the
-    /// sake of peers that are on the same local network. It may also include 
+    /// sake of peers that are on the same local network. It may also include
     pub fn map(socket: UdpSocket, mc: &MappingContext)
         -> MappedUdpSocket
 
@@ -219,4 +220,3 @@ Not do this.
 
 What other existing techniques are there for NAT traversal? Is this API
 actually forward-compatible if we wish to add these techniques in the future?
-

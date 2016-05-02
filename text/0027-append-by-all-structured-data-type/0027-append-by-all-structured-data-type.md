@@ -1,5 +1,6 @@
 - Feature Name: Append By All Structured Data Type
 - Type New feature
+- Status: proposed
 - Related components safe_launcher, safe_ffi, safe_core, safe_vault
 - Start Date: 04-04-2016
 - RFC PR: (leave this empty)

@@ -1,5 +1,6 @@
 - Feature Name: Exposing Low level APIs for Structured Data and Immutable Data handling
 - Type New Feature
+- Status: proposed
 - Related components safe_launcher, safe_ffi, safe_core
 - Start Date: 06-04-2016
 - RFC PR: (leave this empty)

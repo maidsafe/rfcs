@@ -1,4 +1,5 @@
 - Feature Name: beacon
+- Status: proposed
 - Type: enhancement
 - Related components: crust
 - Start Date: 12-11-2015
@@ -74,4 +75,3 @@ Not do this.
 # Unresolved questions
 
 None.
-

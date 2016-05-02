@@ -1,4 +1,5 @@
 - Feature Name: Safecoin implementation
+- Status: propsed
 - Type: new feature
 - Related Components: safe_vault, safe_client
 - Start Date: 12-10-2015

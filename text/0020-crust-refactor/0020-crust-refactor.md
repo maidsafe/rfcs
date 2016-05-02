@@ -1,4 +1,5 @@
 - Feature Name: crust_redesign
+- Status: proposed
 - Type: enhancement
 - Related components: crust
 - Start Date: 02-11-2015
@@ -105,7 +106,7 @@ sensible goals are to be:
   is because any blocking function can be made into a callback-based function
   simply by executing it another thread with a callback. ie. it's possible to
   write the following function:
-  
+
   ```rust
   fn callbackerize<A, R, B, C>(blocking: B, arg: A, callback: C)
       where B: FnOnce(A) -> R,
@@ -114,7 +115,7 @@ sensible goals are to be:
       thread::spawn(move || callback(blocking(arg)));
   }
   ```
-  
+
   A reason blocking calls are not more popular in other languages is due to the
   difficulty in writing safe, truly concurrent code in other languages. Often,
   programs in these languages are based on a single thread executing an event
@@ -187,4 +188,3 @@ Not do this
 # Unresolved Questions
 
 None.
-

@@ -1,9 +1,10 @@
 - Feature Name: crust_library
+- Status: proposed
 - Type: enhancement
 - Related components crust
 - Start Date: 13-12-2015
-- RFC PR: 
-- Issue number: 
+- RFC PR:
+- Issue number:
 
 # Summary
 
@@ -283,4 +284,3 @@ Not do this.
 # Unresolved questions
 
 None.
-

@@ -1,4 +1,5 @@
 Feature Name: transport_library
+- Status: proposed
 - Type: enhancement
 - Related components: crust
 - Start Date: 11-11-2015
@@ -180,4 +181,3 @@ None.
 * Make endpoints representable as strings (perhaps in a format like
   `"utp://[::1]:345/?pubkey=0123456789abcdef"`)
 * Make `Stream`, `Listener` and `ListenerSet` asynchronous and switch to mio.
-

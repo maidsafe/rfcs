@@ -1,4 +1,5 @@
 - Feature Name: Launcher as a local server
+- Status: proposed
 - Type New Product
 - Related components safe_launcher
 - Start Date: 11-01-2016

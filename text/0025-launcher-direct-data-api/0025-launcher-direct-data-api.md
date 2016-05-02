@@ -1,10 +1,11 @@
 - Feature Name: Add `self_encryptor` data IO to `safe_ffi` and `safe_launcher` API
+- Status: proposed
 - Type: new feature
 - Related components: [self\_encryption](https://github.com/maidsafe/self_encryption),
   [safe\_ffi](https://github.com/maidsafe/safe_ffi), [safe\_launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 08-03-2016
-- RFC PR: 
-- Issue number: 
+- RFC PR:
+- Issue number:
 
 # Summary
 
@@ -22,7 +23,7 @@ safe network. Also since NFS implies the use of structured data for metadata, th
 for those that don't need that extra metadata.
 
 This is the self-encryption equivalent of [the issue](https://github.com/maidsafe/rfcs/issues/77) for supporting core
-data types via the launcher API. 
+data types via the launcher API.
 
 # Detailed design
 
