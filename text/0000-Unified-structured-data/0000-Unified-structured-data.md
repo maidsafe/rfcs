@@ -1,4 +1,5 @@
 - Feature Name: Unify Structured  data
+- Status: implemented
 - Type: Enhancement
 - Related components: routing, maidsafe_types, maidsafe_vault, maidsafe_client, sentinel
 - Start Date: 13-06-2015

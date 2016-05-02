@@ -1,4 +1,5 @@
 - Feature Name: Crust mock
+- Status: implemented
 - Type: feature
 - Related components: crust, routing
 - Start Date: 18-02-2016

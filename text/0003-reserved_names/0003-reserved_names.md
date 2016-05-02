@@ -1,4 +1,5 @@
 - Feature Name: Reserved name list
+- Status: implemented
 - Type enhancement
 - Related components maidsafe_client, maidsafe_vault
 - Start Date: 27-06-2015

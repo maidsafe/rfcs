@@ -1,4 +1,5 @@
 - Feature Name: new_kademlia_routing_logic
+- Status: implemented
 - Type enhancement
 - Related components kademlia_routing_table, routing
 - Start Date: 23-01-2016

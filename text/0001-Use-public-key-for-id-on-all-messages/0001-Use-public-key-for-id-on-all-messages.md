@@ -1,4 +1,5 @@
 - Feature Name: Use public key alone to authorise actions
+- Status: implemented
 - Type Enhancement
 - Related components routing, maidsafe_types, maidsafe_client, maidsafe_vault
 - Start Date: 23-06-2015

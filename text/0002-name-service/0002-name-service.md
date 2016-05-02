@@ -1,4 +1,5 @@
 - Feature Name: Decentralised Naming System (dns)
+- Status: implemented
 - Type new feature
 - Related components maidsafe_client, maidsafe_vault, maidsafe_dns
 - Start Date: 27-06-2015
