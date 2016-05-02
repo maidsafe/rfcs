@@ -1,4 +1,5 @@
 - Feature Name: (fill me in with a unique identity, my_awesome_feature)
+- Status: proposed ("proposed", "agreed", "active", "implemented" or "rejected")
 - Type: (new feature, enhancement)
 - Related components: (if any)
 - Start Date: (fill me in with today's date, DD-MM-YYYY)
