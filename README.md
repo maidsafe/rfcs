@@ -21,6 +21,7 @@ the direction in which the network is evolving.
 
 ## Table of Contents
 [Table of Contents]: #table-of-contents
+* [Active RFCs](#active-rfcs)
 * [When you need to follow this process]
 * [Before creating an RFC]
 * [What the process is]
@@ -29,6 +30,20 @@ the direction in which the network is evolving.
 * [Reviewing RFCs]
 * [Implementing an RFC]
 * [Help! This is all too informal]
+
+## List of active RFCs
+[List of actively developed RFCs]: #active-rfcs
+
+This is an excerpt of the [List of RFCs by status](./RFCs-by-status.md) showing all currently actively developed RFCS:
+
+ - [#0008 UDP-hole-punching](./text/0008-UDP-hole-punching/0008-UDP-hole-punching.md)
+ - [#0009 MPID Messaging System](./text/0009-MPID-Messaging/0009-MPID-Messaging.md)
+ - [#0010 Launcher as a service](./text/0010-Launcher-as-a-service/0010-Launcher-as-a-service.md)
+ - [#0011 Improved Connection Management](./text/0011-Connection_management/0011-Connection_management.md)
+ - [#0013 ImmutableData naming based on type](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
+ - [#0015 Vault Config File](./text/0015-vault-config-file/0015-vault-config-file.md)
+ - [#0021 Add deletion values to `MpidMessageWrapper`](./text/0021-MPID-Messaging-delete/0021-MPID-Messaging-delete.md)
+ - [#0023 Naming of Immutable Data Types](./text/0023-immutable-data-type-naming/0023-immutable-data-type-naming.md)
 
 ## When you need to follow this process
 [When you need to follow this process]: #when-you-need-to-follow-this-process
