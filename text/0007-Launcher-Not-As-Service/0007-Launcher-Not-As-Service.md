@@ -1,4 +1,5 @@
-- Feature Name: Launcher not as a serivce
+- Feature Name: Launcher not as a service
+- Status: rejected
 - Type: New Product
 - Related components: [safe_client](https://github.com/maidsafe/safe_client), [safe_nfs](https://github.com/maidsafe/safe_nfs), [safe_vault](https://github.com/maidsafe/safe_vault)
 - Start Date: 11-September-2015

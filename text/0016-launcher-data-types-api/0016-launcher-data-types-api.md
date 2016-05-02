@@ -1,4 +1,5 @@
 - Feature Name: Expose API for structured data and immutable data from safe_launcher
+- Status: rejected
 - Type: new feature
 - Related components: safe_launcher
 - Start Date: 20-11-2015

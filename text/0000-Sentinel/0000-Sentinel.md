@@ -1,9 +1,10 @@
 - Feature Name: Sentinel
+- Status: rejected
 - Type: Security component
 - Related components: routing
 - Start Date: 30-06-2015
-- RFC PR: 
-- Issue number: 
+- RFC PR:
+- Issue number:
 
 # Summary
 
@@ -85,7 +86,7 @@ The sequesnce of steps is as follows:
    with a `FindGroupResponse` which is roughly isomorphic to a list
    of (NameType, PublicKey, _additional data_) tuples.
 
-Notice the analogy with the previous sentinel where the step (1) 
+Notice the analogy with the previous sentinel where the step (1)
 would correspond to sending the `GetGroupKey` message and step (2)
 would correspond to receiving the group keys. The difference is
 that the `FindGroupResponse` message contains additional information
@@ -132,4 +133,3 @@ This in turn requires more code in both libraries and reduces expresiveness
 of the code using it. As it is debatable whether these sentinels
 have use in other libraries apart from `Routing` it might be
 desirable to make it part of the `Routing` library.
-

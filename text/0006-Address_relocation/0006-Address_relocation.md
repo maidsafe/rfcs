@@ -1,4 +1,5 @@
 - Feature Name: Prevent any single address being used more than once during address relocation.
+- Status: rejected
 - Type enhancement
 - Related components routing
 - Start Date: 21-09-2015
