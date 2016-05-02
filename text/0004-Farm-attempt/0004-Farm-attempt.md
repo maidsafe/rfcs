@@ -1,4 +1,5 @@
 - Feature Name: Farm attempt
+- Status: agreed
 - Type: new feature
 - Related components: maidsafe_vault
 - Start Date: 24-06-2015
