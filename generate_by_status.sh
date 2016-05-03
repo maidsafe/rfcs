@@ -20,11 +20,11 @@ generate 'active'
 echo ""
 echo "## Proposed RFCs"
 echo ""
-generate 'agreed'
+generate 'proposed'
 echo ""
 echo "## Agreed RFCs"
 echo ""
-generate 'proposed'
+generate 'agreed'
 echo ""
 echo "## Implemented RFCs"
 echo ""
