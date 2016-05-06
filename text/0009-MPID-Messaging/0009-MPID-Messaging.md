@@ -87,7 +87,7 @@ This can be implemented as a `Vec<MpidMessage>`.
 
 ## Inbox
 
-Again this will be one per MPID (owner), held on the `MpidManager`̨s, and synchronised by them at churn events.
+Again this will be one per MPID (owner), held on the `MpidManager`s, and synchronised by them at churn events.
 
 This can be implemented as a `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, mpid_header: MpidHeader)>` or having the headers from the same sender grouped: `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<mpid_header: MpidHeader>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
 
