@@ -14,9 +14,9 @@ This RFC outlines the system components and design for general communications in
 
 ## Rationale
 
-A messaging system on the SAFE Network will obviously be useful.  Over and above this, the proposed messaging system is secure and private without the possibility of snooping or tracking.
+A messaging system on the SAFE Network will obviously be useful. Over and above this, the proposed messaging system is secure and private without the possibility of snooping or tracking.
 
-A large abuse of modern day digital communications is the ability of spammers and less than ethical marketing companies to flood the Internet with levels of unsolicited email to a level of circa 90%.  This is a waste of bandwidth and a significant nuisance.
+A large abuse of modern day digital communications is the ability of spammers and less than ethical marketing companies to flood the Internet with levels of unsolicited email to a level of circa 90%. This is a waste of bandwidth and a significant nuisance.
 
 ## Supported Use-Cases
 
@@ -30,26 +30,26 @@ The provision of a secure messaging system which will eradicate unwanted and int
 
 ## Overview
 
-A fundamental principle is that the cost of messaging is with the sender, primarily to deter unsolicited messages.  To achieve this, the sender will maintain messages in a network [outbox][3] until they are retrieved by the recipient.  The recipient will have a network [inbox][4] comprising a list of metadata relating to messages which are trying to be delivered to it.
+A fundamental principle is that the cost of messaging is with the sender, primarily to deter unsolicited messages. To achieve this, the sender will maintain messages in a network [outbox][3] until they are retrieved by the recipient. The recipient will have a network [inbox][4] comprising a list of metadata relating to messages which are trying to be delivered to it.
 
 If the message is unwanted, the recipient simply does not retrieve the message.  The sender will thus quickly fill their own outbox with undelivered mail and be forced to clean this up themselves before being able to send further messages.
 
-This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists.  If people are not picking up messages, it is because they do not want them.  So the sender has to do a better job.  It is assumed this shift of responsibilities will lead to a better-managed bandwidth solution and considerably less stress on the network and the users of the network.
+This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists. If people are not picking up messages, it is because they do not want them. So the sender has to do a better job. It is assumed this shift of responsibilities will lead to a better-managed bandwidth solution and considerably less stress on the network and the users of the network.
 
 ## Implementation Details
 
 The two relevant structs (other than the MPID itself which is a [standard Client key][0]) are the [`MpidHeader`][1] and the [`MpidMessage`][2].
 
-Broadly speaking, the `MpidHeader` contains metadata and the `MpidMessage` contains a signed header and message.  We also want to define some upper limits which will be described later.
+Broadly speaking, the `MpidHeader` contains metadata and the `MpidMessage` contains a signed header and message. We also want to define some upper limits which will be described later.
 
-### Consts
+### Constants
 
 ```rust
 pub const MPID_MESSAGE: u64 = 51000;
 pub const MAX_HEADER_METADATA_SIZE: usize = 128;  // bytes
 pub const MAX_BODY_SIZE: usize = 102400 - 512 - MAX_HEADER_METADATA_SIZE;
-pub const MAX_INBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
-pub const MAX_OUTBOX_SIZE: usize = 1 << 27;  // bytes, i.e. 128 MiB
+pub const MAX_INBOX_SIZE: usize = 1 << 27;       // bytes, i.e. 128 MiB
+pub const MAX_OUTBOX_SIZE: usize = 1 << 27;      // bytes, i.e. 128 MiB
 ```
 
 ### `MpidHeader`
@@ -63,9 +63,9 @@ pub struct MpidHeader {
 }
 ```
 
-The `sender` field is hopefully self-explanatory.  The `guid` allows the message to be uniquely identified, both by receivers and by the manager Vaults which need to hold the messages in a map-like structure.
+The `sender` field is hopefully self-explanatory. The `guid` allows the message to be uniquely identified, both by receivers and by the Manager Vaults which need to hold the messages in a map-like structure. The signature contains the cryptographic evidence over the values of `sender_name`, `guid` and `metadata` (in this order) signed by the secret key of the sender.
 
-The `metadata` field allows passing arbitrary user/app data.  It must not exceed `MAX_HEADER_METADATA_SIZE` bytes.
+The `metadata` field allows passing arbitrary user/app data. It must not exceed `MAX_HEADER_METADATA_SIZE` bytes.
 
 ### `MpidMessage`
 
@@ -77,17 +77,17 @@ pub struct MpidMessage {
     recipient_and_body_signature: ::sodiumoxide::crypto::sign::Signature,
 }
 ```
-Each `MpidMessage` instance only targets one recipient.  For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below).  This is to ensure spammers will run out of limited resources quickly.
+Each `MpidMessage` instance only targets one recipient. For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below). This is to ensure spammers will run out of limited resources quickly.
 
 ## Outbox
 
-This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s.  There will be one such map per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
+This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s. There will be one such map per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
 This can be implemented as a `Vec<MpidMessage>`.
 
 ## Inbox
 
-Again this will be one per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
+Again this will be one per MPID (owner), held on the `MpidManager`s, and synchronised by them at churn events.
 
 This can be implemented as a `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, mpid_header: MpidHeader)>` or having the headers from the same sender grouped: `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<mpid_header: MpidHeader>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
 
@@ -101,7 +101,7 @@ let pd = PlainData {
 }
 ```
 
-When handling churn, MpidManagers will synchronise their outboxes by sending each included MpidMessage as a single network message.  However, since MpidHeaders are significantly smaller, inboxes will be sent as a message containing a vector of all contained headers.
+When handling churn, MpidManagers will synchronise their outboxes by sending each included MpidMessage as a single network message. However, since MpidHeaders are significantly smaller, inboxes will be sent as a message containing a vector of all contained headers.
 
 ## Message Flow
 
@@ -111,26 +111,26 @@ When handling churn, MpidManagers will synchronise their outboxes by sending eac
 
 The MPID Client shall provide the following key functionalities :
 
-1. Send Message (Put from sender)
-1. Accept Message header (Push from MpidManagers to recipient)
-1. Retrieve Full Message (Get from receiver)
-1. Query own inbox to get list of all remaining MpidHeaders
-1. Query own inbox for a vector of specific MpidHeaders to see whether they remain in the outbox or not.
-1. Remove unwanted MpidHeader (Delete from recipient)
-1. Query own outbox to get list of all remaining MpidMessages
-1. Remove sent Message (Delete from sender)
+1. Send Message (`Put` from sender)
+1. Accept Message header (`Push` from `MpidManager`s to recipient)
+1. Retrieve Full Message (`Get` from receiver)
+1. Query own inbox to get list of all remaining `MpidHeader`s
+1. Query own inbox for a vector of specific `MpidHeader`s to see whether they remain in the outbox or not.
+1. Remove unwanted `MpidHeader` (`Delete` from recipient)
+1. Query own outbox to get list of all remaining `MpidMessage`s
+1. Remove sent Message (`Delete` from sender)
 
-If the "push" model is used, an MPID Client is expected to have its own routing object (not shared with the MAID Client).  In this way it can directly connect to its own MpidManagers (or the connected ClientManager will register itself as the proxy to the corresponding MpidManagers), allowing them to know its online status and hence they can push message headers to it as and when they arrive.
+If the `Push` model is used, an MPID Client is expected to have its own routing object (not shared with the MAID Client). In this way it can directly connect to its own `MpidManager`s (or the connected `ClientManager` will register itself as the proxy to the corresponding `MpidManager`s), allowing them to know its online status and hence they can push message headers to it as and when they arrive.
 
-Such a separate routing object (or the registering procedure) is not required if the "pull" model is employed.  This is where the MPID Client periodically polls its network inbox for new headers.  It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
+Such a separate routing object (or the registering procedure) is not required if the `Pull` model is employed. This is where the MPID Client periodically polls its network inbox for new headers. It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
 
 ## Planned Work
 
 1. MPID-Messaging
     1. Definition of `MpidMessage`.
     1. Definition of `MpidHeader`.
-    1. Definition of constants.
-    1. Structure of PlainData::value for messaging.
+    1. Definition of `Constant`s.
+    1. Structure of `PlainData::value` for messaging.
 
 1. Vault
     1. Definition of `Outbox`.
@@ -146,7 +146,7 @@ Such a separate routing object (or the registering procedure) is not required if
     1. Put `MpidMessage`.
     1. Get all `MpidHeader`s (pull).
     1. Accept all/single `MpidHeader` (push).
-    1. Get `MpidMessage`.  This shall also include the work of removing corresponding `MpidHeader`s.
+    1. Get `MpidMessage`. This shall also include the work of removing corresponding `MpidHeader`s.
     1. Delete `MpidMessage`.
     1. Delete `MpidHeader`.
 
@@ -159,7 +159,7 @@ None identified, other than increased complexity of Vault and Client codebase.
 
 No other in-house alternatives have been documented as yet.
 
-If we were to _not_ implement some form of secure messaging system, a third party would be likely to implement a similar system using the existing interface to the SAFE Network.  This would be unlikely to be as efficient as the system proposed here, since this will be "baked into" the Vault protocols.
+If we were to _not_ implement some form of secure messaging system, a third party would be likely to implement a similar system using the existing interface to the SAFE Network. This would be unlikely to be as efficient as the system proposed here, since this will be "baked into" the Vault protocols.
 
 We also have identified a need for some form of secure messaging in order to implement safecoin, so failure to implement this RFC would impact on that too.
 
@@ -169,9 +169,9 @@ None.
 
 # Future Work
 
-- This RFC doesn't address how Clients get to "know about" each other.  Future work will include details of how Clients can exchange MPIDs in order to build an address book of peers.
+- This RFC doesn't address how Clients get to "know about" each other. Future work will include details of how Clients can exchange MPIDs in order to build an address book of peers.
 
-- It might be required to provide Vault-to-Vault, Client-to-Vault or Vault-to-Client communications in the future.  Potential use cases for this are:
+- It might be required to provide Vault-to-Vault, Client-to-Vault or Vault-to-Client communications in the future. Potential use cases for this are:
 
     1. Vault-to-Client notification of a successful safecoin mining attempt
     1. Client-to-Vault request to take ownership of the Vault
@@ -179,9 +179,9 @@ None.
 
     In this case, the existing library infrastructure would probably need significant changes to allow a Vault to act as an MPID Client (e.g. the MPID struct is defined in the SAFE Client library).
 
-- Another point is that (as with MAID accounts), there is no cleanup done by the network of MpidMessages if the user decides to stop using SAFE.
+- Another point is that (as with MAID accounts), there is no cleanup done by the network of `MpidMessage`s if the user decides to stop using SAFE.
 
-- Also, not exactly within the scope of this RFC, but related to it; MPID packets at the moment have no human-readable name.  It would be more user-friendly to provide this functionality.
+- Also, not exactly within the scope of this RFC, but related to it; MPID packets at the moment have no human-readable name. It would be more user-friendly to provide this functionality.
 
 # Appendix
 
@@ -225,7 +225,7 @@ enum MpidMessageWrapper {
 }
 ```
 
-The following list of all MPID-related messages show how this enum is used.  (In these tables, Client(A) is the original sender, Client(B) is the recipient, and Managers(A) and Managers(B) are their respective MpidManagers ).
+The following list of all MPID-related messages show how this enum is used. (In these tables, Client(A) is the original sender, Client(B) is the recipient, and Managers(A) and Managers(B) are their respective `MpidManager`s).
 
 Requests composed by Client:
 
@@ -238,7 +238,7 @@ Requests composed by Client:
 | Delete  | Client(B) deleting a "read" message from sender's outbox            | `XorName`                              | Managers(A)                     |
 | Post    | Client announcing to Managers it's connected to network             | `Wrapper::Online`                      | Managers                        |
 
-Requests composed by MpidManager:
+Requests composed by `MpidManager`:
 
 | Request      | Usage Scenario                                             | Content                                                 | From Authority | Destination Authority |
 |:-------------|:-----------------------------------------------------------|:--------------------------------------------------------|:---------------|:----------------------|
@@ -405,7 +405,7 @@ struct MailBox {
 }
 ```
 
-Pseudo-code for MpidManager:
+Pseudo-code for `MpidManager`:
 
 ```rust
 impl MpidManager {
