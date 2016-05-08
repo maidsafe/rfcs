@@ -22,9 +22,6 @@ reply.
 
 # Detailed design
 
-This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
-with the network to understand, and for somebody familiar with the code practices to implement.
-This should get into specifics and corner-cases, and include examples of how the feature is used.
 
 In the current implementation as seen in this sequence diagram XXXXX involves several steps. This
 proposal involves altering this only slightly.
