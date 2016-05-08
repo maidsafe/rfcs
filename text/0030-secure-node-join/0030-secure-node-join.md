@@ -34,7 +34,8 @@ proposal involves altering this only slightly.
 6. Group (X) then sends this valid request onto group (Y).
 7. Group (Y) then hold this request in a join cache (lruCache) of GroupSize
 8. Node (A) then generates keypairs until it generates one that would fall within group (Y)
-9. Node (A) then sends a join request for this newly created ID to (Y) but signs this with the
+9. THe Node then uses this signing key as first part of address and appends an encryption key to last part (64 bytes in all)
+10. Node (A) then sends a join request for this newly created ID to (Y) but signs this with the
 previous key for (A).
 10. Group (Y) receive this request and check their cache, if accepted then joining resumes as
 normal, This new ID is added to expected nodes and group (Y) wait on `ConnectRequests` from node
