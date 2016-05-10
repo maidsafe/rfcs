@@ -38,7 +38,6 @@ This is an excerpt of the [List of RFCs by status](./RFCs-by-status.md) showing 
 
  - [#0008 UDP-hole-punching](./text/0008-UDP-hole-punching/0008-UDP-hole-punching.md)
  - [#0009 MPID Messaging System](./text/0009-MPID-Messaging/0009-MPID-Messaging.md)
- - [#0010 Launcher as a service](./text/0010-Launcher-as-a-service/0010-Launcher-as-a-service.md)
  - [#0011 Improved Connection Management](./text/0011-Connection_management/0011-Connection_management.md)
  - [#0013 ImmutableData naming based on type](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
  - [#0015 Vault Config File](./text/0015-vault-config-file/0015-vault-config-file.md)
