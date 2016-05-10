@@ -1,5 +1,5 @@
 - Feature Name: Launcher communication with unregistered client
-- Status: proposed
+- Status: rejected
 - Type: New Feature
 - Related components: [safe_launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 03-November-2015
