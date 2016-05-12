@@ -104,7 +104,7 @@ is "proposed" and may be implemented with the goal of eventual inclusion
 into SAFE, at which point it becomes "active".
 
 * Fork the RFC repo https://github.com/maidsafe/rfcs
-* Copy `0000-template.md` to `proposed/0000-my-feature.md` (where
+* Copy `0000-template.md` to `text/0000-my-feature.md` (where
 'my-feature' is descriptive, don't assign an RFC number yet).
 * Fill in the RFC. Put care into the details: RFCs that do not
 present convincing motivation, demonstrate understanding of the

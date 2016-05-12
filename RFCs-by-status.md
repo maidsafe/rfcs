@@ -16,11 +16,14 @@ A list of all RFCs by their current status.
 
  - [#0030 Secure node join](./text/0030-secure-node-join/0030-secure-node-join.md)
  - [#0022 Add messaging example to `safe_core`](./text/0022-messaging_example_in_safe_core/messaging_example_in_safe_core.md)
+ - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
+ - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
  - [#0024 crust_library](./text/0024-crust-refactor/crust-library.md)
  - [#0024 nat_traversal](./text/0024-crust-refactor/nat-traversal-library.md)
  - [#0024 transport_library](./text/0024-crust-refactor/transport-library.md)
  - [#0024 beacon](./text/0024-crust-refactor/beacon-library.md)
  - [#0027 Append By All Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
+ - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
  - [#0025 Add `self_encryptor` data IO to `safe_ffi` and `safe_launcher` API](./text/0025-launcher-direct-data-api/0025-launcher-direct-data-api.md)
  - [#0012 Safecoin implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
  - [#0020 crust_redesign](./text/0020-crust-refactor/0020-crust-refactor.md)
@@ -53,4 +56,4 @@ A list of all RFCs by their current status.
  - [#0010 Launcher as a service](./text/0010-Launcher-as-a-service/0010-Launcher-as-a-service.md)
 
 
-(Last updated _Tue 10 May 14:05:15 BST 2016_ at REV [4216efd](https://github.com/maidsafe/rfcs/commit/4216efda2f8a1bad5cc318500fc356d06c8c540f))
+(Last updated _Thu 12 May 13:19:35 BST 2016_ at REV [bc17492](https://github.com/maidsafe/rfcs/commit/bc17492e8ba3f7bf59aff7c7d201007c9ace0c5b))
