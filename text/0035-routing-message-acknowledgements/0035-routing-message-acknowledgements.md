@@ -3,8 +3,9 @@
 - Type: enhancement
 - Related components: Routing
 - Start Date: 11-05-2016
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/133
+- Supersedes:
+- Superseded by:
 
 # Summary
 
