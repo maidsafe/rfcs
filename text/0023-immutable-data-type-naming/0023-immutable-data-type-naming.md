@@ -3,8 +3,9 @@
 - Type: Enhancement
 - Related components: [Routing](https://github.com/maidsafe/routing) and [SAFE Vault](https://github.com/maidsafe/safe_vault)
 - Start Date: 26-03-2016
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/111
+- Supersedes:
+- Superseded by:
 
 # Summary
 

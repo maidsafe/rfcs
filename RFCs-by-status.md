@@ -56,4 +56,4 @@ A list of all RFCs by their current status.
  - [#0010 Launcher as a service](./text/0010-Launcher-as-a-service/0010-Launcher-as-a-service.md)
 
 
-(Last updated _Thu 12 May 13:19:35 BST 2016_ at REV [bc17492](https://github.com/maidsafe/rfcs/commit/bc17492e8ba3f7bf59aff7c7d201007c9ace0c5b))
+(Last updated _Fri 13 May 14:07:29 BST 2016_ at REV [017b19a](https://github.com/maidsafe/rfcs/commit/017b19abc8a3ace1015cc4bf6276e7b239ec1474))

@@ -5,6 +5,9 @@
 - Start Date: 02-11-2015
 - RFC PR: #59
 - Issue number: Proposed - #65
+- Discussion: https://github.com/maidsafe/rfcs/issues/102
+- Supersedes:
+- Superseded by:
 
 # Summary
 

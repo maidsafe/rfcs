@@ -3,8 +3,9 @@
 - Type New Product
 - Related components safe_Launcher
 - Start Date: 08-01-2016
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/84
+- Supersedes:
+- Superseded by:
 
 # Summary
 

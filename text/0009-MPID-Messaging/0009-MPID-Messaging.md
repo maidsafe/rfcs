@@ -5,6 +5,9 @@
 - Start Date: 22-09-2015
 - RFC PR: #43
 - Issue number: Agreed - #50
+- Discussion: https://github.com/maidsafe/rfcs/issues/96
+- Supersedes:
+- Superseded by:
 
 # Summary
 

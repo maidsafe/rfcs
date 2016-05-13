@@ -3,8 +3,9 @@
 - Type: Enhancement
 - Related components: [safe_core](https://github.com/maidsafe/safe_core)
 - Start Date: 09-02-2016
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- Discussion: https://github.com/maidsafe/rfcs/issues/98
+- Supersedes:
+- Superseded by:
 
 # Summary
 

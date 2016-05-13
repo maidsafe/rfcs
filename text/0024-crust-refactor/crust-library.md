@@ -3,8 +3,9 @@
 - Type: enhancement
 - Related components crust
 - Start Date: 13-12-2015
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/107
+- Supersedes:
+- Superseded by:
 
 # Summary
 
