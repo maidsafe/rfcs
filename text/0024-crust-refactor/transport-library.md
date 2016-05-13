@@ -3,8 +3,9 @@ Feature Name: transport_library
 - Type: enhancement
 - Related components: crust
 - Start Date: 11-11-2015
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/107
+- Supersedes:
+- Superseded by:
 
 # Summary
 

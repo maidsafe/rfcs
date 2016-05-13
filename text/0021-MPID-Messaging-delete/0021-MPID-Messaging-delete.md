@@ -3,8 +3,9 @@
 - Type: Enhancement
 - Related components: [mpid_messaging](https://github.com/maidsafe/mpid_messaging), [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client)
 - Start Date: 03-02-2016
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- Discussion: https://github.com/maidsafe/rfcs/issues/95
+- Supersedes:
+- Superseded by:
 
 # Summary
 

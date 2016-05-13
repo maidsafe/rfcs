@@ -4,8 +4,9 @@
 - Related components: [self\_encryption](https://github.com/maidsafe/self_encryption),
   [safe\_ffi](https://github.com/maidsafe/safe_ffi), [safe\_launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 08-03-2016
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/109
+- Supersedes:
+- Superseded by:
 
 # Summary
 

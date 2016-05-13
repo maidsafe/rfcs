@@ -3,8 +3,9 @@
 - Status: proposed
 - Related components safe_launcher, safe_ffi, safe_core
 - Start Date: 06-04-2016
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- Discussion: https://github.com/maidsafe/rfcs/issues/115
+- Supersedes:
+- Superseded by:
 
 # Summary
 

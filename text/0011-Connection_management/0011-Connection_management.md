@@ -5,6 +5,9 @@
 - Start Date: 23-09-2015
 - RFC PR: #48
 - Issue Number: Active - #52
+- Discussion: https://github.com/maidsafe/rfcs/issues/52
+- Supersedes:
+- Superseded by:
 
 # Summary
 
