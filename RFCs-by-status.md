@@ -4,12 +4,8 @@ A list of all RFCs by their current status.
 
 ## Active RFCs
 
- - [#0015 Vault Config File](./text/0015-vault-config-file/0015-vault-config-file.md)
- - [#0011 Improved Connection Management](./text/0011-Connection_management/0011-Connection_management.md)
  - [#0009 MPID Messaging System](./text/0009-MPID-Messaging/0009-MPID-Messaging.md)
  - [#0008 UDP-hole-punching](./text/0008-UDP-hole-punching/0008-UDP-hole-punching.md)
- - [#0013 ImmutableData naming based on type](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
- - [#0023 Naming of Immutable Data Types](./text/0023-immutable-data-type-naming/0023-immutable-data-type-naming.md)
  - [#0021 Add deletion values to `MpidMessageWrapper`](./text/0021-MPID-Messaging-delete/0021-MPID-Messaging-delete.md)
 
 ## Proposed RFCs
@@ -38,12 +34,16 @@ A list of all RFCs by their current status.
 
  - [#0018 Launcher as a local server](./text/0018-launcher-as-rest-server/authorisation_api.md)
  - [#0018 Launcher as a local server](./text/0018-launcher-as-rest-server/0018-launcher-as-local-rest-server.md)
+ - [#0015 Vault Config File](./text/0015-vault-config-file/0015-vault-config-file.md)
  - [#0001 Use public key alone to authorise actions](./text/0001-Use-public-key-for-id-on-all-messages/0001-Use-public-key-for-id-on-all-messages.md)
+ - [#0011 Improved Connection Management](./text/0011-Connection_management/0011-Connection_management.md)
  - [#0003 Reserved name list](./text/0003-reserved_names/0003-reserved_names.md)
  - [#0002 Decentralised Naming System (dns)](./text/0002-name-service/0002-name-service.md)
  - [#0019 new_kademlia_routing_logic](./text/0019-new-kademlia-routing-logic/0019-new-kademlia-routing-logic.md)
  - [#0000 Unify Structured  data](./text/0000-Unified-structured-data/0000-Unified-structured-data.md)
  - [#0026 Crust mock](./text/0026-crust-mock/0026-crust-mock.md)
+ - [#0013 ImmutableData naming based on type](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
+ - [#0023 Naming of Immutable Data Types](./text/0023-immutable-data-type-naming/0023-immutable-data-type-naming.md)
 
 ## Rejected RFCs
 
@@ -56,4 +56,4 @@ A list of all RFCs by their current status.
  - [#0010 Launcher as a service](./text/0010-Launcher-as-a-service/0010-Launcher-as-a-service.md)
 
 
-(Last updated _Fri 13 May 14:07:29 BST 2016_ at REV [017b19a](https://github.com/maidsafe/rfcs/commit/017b19abc8a3ace1015cc4bf6276e7b239ec1474))
+(Last updated _Wed 18 May 13:58:47 BST 2016_ at REV [cb3d252](https://github.com/maidsafe/rfcs/commit/cb3d252aa2c6bd96634c66929d48e9a1e44e3b58))

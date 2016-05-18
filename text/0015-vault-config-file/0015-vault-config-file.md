@@ -1,5 +1,5 @@
 - Feature Name: Vault Config File
-- Status: active
+- Status: implemented
 - Type: New Feature
 - Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 10-11-2015
