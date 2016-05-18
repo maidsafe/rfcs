@@ -1,5 +1,5 @@
 - Feature Name: Improved Connection Management
-- Status: active
+- Status: implemented
 - Type: Enhancement
 - Related Components: routing, crust
 - Start Date: 23-09-2015

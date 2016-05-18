@@ -1,5 +1,5 @@
 - Feature Name: Naming of Immutable Data Types
-- Status: active
+- Status: implemented
 - Type: Enhancement
 - Related components: [Routing](https://github.com/maidsafe/routing) and [SAFE Vault](https://github.com/maidsafe/safe_vault)
 - Start Date: 26-03-2016
