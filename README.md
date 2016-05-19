@@ -100,12 +100,11 @@ is "proposed" and may be implemented with the goal of eventual inclusion
 into SAFE, at which point it becomes "active".
 
 * Fork the RFC repo https://github.com/maidsafe/rfcs
-* Copy `0000-template.md` to `text/0000-my-feature.md` (where
-'my-feature' is descriptive, don't assign an RFC number yet).
-* Fill in the RFC. Put care into the details: RFCs that do not
-present convincing motivation, demonstrate understanding of the
-impact of the design, or are disingenuous about the drawbacks or
-alternatives tend to be poorly-received.
+* Decide on a clear and brief title for the new rfc, make it descriptive and unique. Copy `0000-template.md` to `text/0000-my-new-rfc/0000-my-new-rfc.md`, where 'my-new-rfc' is the [kebab-cased version](https://en.wikipedia.org/wiki/Letter_case#Case_styles) of the RFC title, any non-letters removed. Don't assign an RFC number yet!
+* Fill in the RFC.
+  - The first line should be the [titled-cased version](https://en.wikipedia.org/wiki/Letter_case#Case_styles) of the RFC, prefixed with the `# ` (hash and space) followed by a blank line. This should be the only first-degree headline in the entire RFC!
+  - Put care into the details: RFCs that do not present convincing motivation, demonstrate understanding of the impact of the design, or are disingenuous about the drawbacks or alternatives tend to be poorly-received.
+  - If it makes sense, feel free to add further files in the same folder, giving further information, images or appendix, as long as they start with a non-number letter. For example, you may split the details of separate files per component touched.
 * Submit a pull request. As a pull request the RFC will receive design
 feedback from the larger community and the author should be prepared
 to revise it in response.
