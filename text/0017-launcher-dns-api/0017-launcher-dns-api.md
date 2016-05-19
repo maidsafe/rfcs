@@ -1,4 +1,5 @@
-- Feature Name: safe_dns API from safe_launcher
+# Launcher DNS API
+
 - Status: rejected
 - Type: Enhancement
 - Related components safe_launcher

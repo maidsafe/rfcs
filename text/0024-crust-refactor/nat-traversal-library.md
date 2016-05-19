@@ -1,4 +1,4 @@
-- Feature Name: nat_traversal
+# nat_traversal
 - Status: proposed
 - Type: enhancement
 - Related components: crust

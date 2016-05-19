@@ -1,4 +1,5 @@
-- Feature Name: Farm attempt
+# Farm attempt
+
 - Status: agreed
 - Type: new feature
 - Related components: maidsafe_vault
