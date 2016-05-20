@@ -1,4 +1,6 @@
-- Feature Name: Add `self_encryptor` data IO to `safe_ffi` and `safe_launcher` API
+# Launcher Direct Data API
+
+
 - Status: proposed
 - Type: new feature
 - Related components: [self\_encryption](https://github.com/maidsafe/self_encryption),
@@ -9,6 +11,8 @@
 - Superseded by:
 
 # Summary
+
+Add `self_encryptor` data IO to `safe_ffi` and `safe_launcher` API.
 
 Currently NFS is exposed via `safe_ffi` and the `safe_launcher` REST API which uses self encryption under the hood. This
 RFC is to provide direct access to `self_encryption` for those that don't need/want full file system structures.

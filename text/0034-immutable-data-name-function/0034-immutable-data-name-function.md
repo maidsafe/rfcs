@@ -1,4 +1,5 @@
-- Feature Name: Refactor `ImmutableData::name()` Function
+# Refactor `ImmutableData::name()` Function
+
 - Status: proposed
 - Type: enhancement
 - Related components: Routing, SAFE Vault and SAFE Core

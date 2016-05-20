@@ -1,4 +1,5 @@
-- Feature Name: Safecoin implementation
+# Safecoin Implementation
+
 - Status: proposed
 - Type: new feature
 - Related Components: safe_vault, safe_client

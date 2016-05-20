@@ -1,4 +1,5 @@
-- Feature Name: crust_redesign
+# Crust Refactor
+
 - Status: proposed
 - Type: enhancement
 - Related components: crust

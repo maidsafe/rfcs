@@ -1,4 +1,5 @@
-- Feature Name: Launcher as a service
+# Launcher as a Service
+
 - Status: rejected
 - Type: New Product
 - Related components: [safe_client](https://github.com/maidsafe/safe_client), [safe_nfs](https://github.com/maidsafe/safe_nfs)

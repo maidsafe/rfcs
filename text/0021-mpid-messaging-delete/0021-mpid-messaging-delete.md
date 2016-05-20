@@ -1,4 +1,5 @@
-- Feature Name: Add deletion values to `MpidMessageWrapper`
+# MPID Message Delete
+
 - Status: active
 - Type: Enhancement
 - Related components: [mpid_messaging](https://github.com/maidsafe/mpid_messaging), [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client)

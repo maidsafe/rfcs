@@ -1,4 +1,4 @@
-- Feature Name: beacon
+## beacon
 - Status: proposed
 - Type: enhancement
 - Related components: crust

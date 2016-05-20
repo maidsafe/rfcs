@@ -2,10 +2,10 @@
 
 function generate {
 
-  for file in $( grep -l -r --include="*.md" "\- Status: $1" text);
+  for file in $( grep -l -r --include="[0-9]*-*.md" "\- Status: $1" text | sort);
   do
     num=$(echo $file | sed -e "s/.*\/\([0-9]*\)-.*\.md/\1/")
-    feature=$(head -n1 $file | sed -e "s/.*Feature Name: \(.*\)$/\1/")
+    feature=$(head -n1 $file | sed -e "s/#[ \t]*\(.*\)$/\1/")
     echo " - [#$num $feature](./$file)"
   done
 }

@@ -1,4 +1,4 @@
-- Feature Name: crust_library
+## crust_library
 - Status: proposed
 - Type: enhancement
 - Related components crust

@@ -1,4 +1,5 @@
-- Feature Name: UDP-hole-punching
+# UDP Hole Punching
+
 - Status: active
 - Type new: feature
 - Related components: crust

@@ -1,4 +1,5 @@
-- Feature Name: ImmutableData naming based on type
+# Immutable Data Naming
+
 - Status: implemented
 - Type: New Feature
 - Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_core](https://github.com/maidsafe/safe_core), [routing](https://github.com/maidsafe/routing)

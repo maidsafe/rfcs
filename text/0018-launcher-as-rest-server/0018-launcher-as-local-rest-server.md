@@ -1,4 +1,5 @@
-- Feature Name: Launcher as a local server
+# Launcher as a local Rest Server
+
 - Status: implemented
 - Type New Product
 - Related components safe_Launcher
