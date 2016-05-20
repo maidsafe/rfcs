@@ -36,7 +36,7 @@ the direction in which the network is evolving.
 
 This is an excerpt of the [List of RFCs by status](./RFCs-by-status.md) showing all currently actively developed RFCS:
 
- - [#0008 UDP-hole-punching](./text/008-udp-hole-punching/0008-udp-hole-punching.md)
+ - [#0008 UDP-hole-punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0021 Add deletion values to `MpidMessageWrapper`](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
 
