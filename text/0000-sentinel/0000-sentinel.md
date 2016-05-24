@@ -1,4 +1,5 @@
-- Feature Name: Sentinel
+# Sentinel
+
 - Status: rejected
 - Type: Security component
 - Related components: routing

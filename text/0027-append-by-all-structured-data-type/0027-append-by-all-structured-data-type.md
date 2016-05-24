@@ -1,4 +1,5 @@
-- Feature Name: Append By All Structured Data Type
+# Append by all Structured Data Type
+
 - Type New feature
 - Status: proposed
 - Related components safe_launcher, safe_ffi, safe_core, safe_vault

@@ -1,4 +1,5 @@
-- Feature Name: Add messaging example to `safe_core`
+# Messaging Example in `safe_core`
+
 - Status: proposed
 - Type: Enhancement
 - Related components: [safe_core](https://github.com/maidsafe/safe_core)

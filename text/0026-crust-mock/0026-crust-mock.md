@@ -1,4 +1,5 @@
-- Feature Name: Crust mock
+# Crust Mock
+
 - Status: implemented
 - Type: feature
 - Related components: crust, routing

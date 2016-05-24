@@ -1,4 +1,5 @@
-- Feature Name: Routing Message Acknowledgements
+# Routing Message Acknowledgements
+
 - Status: proposed
 - Type: enhancement
 - Related components: Routing

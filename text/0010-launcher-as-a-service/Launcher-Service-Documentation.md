@@ -1,4 +1,4 @@
-- Feature Name: Launcher service documentation
+# Launcher service documentation
 - Type: New Product
 - Related components: safe_launcher_core (accompanying RFC)
 - Start Date: 05-October-2015

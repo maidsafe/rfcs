@@ -1,4 +1,5 @@
-- Feature Name: Use public key alone to authorise actions
+# Use Public Key for ID on all Messages
+
 - Status: implemented
 - Type Enhancement
 - Related components routing, maidsafe_types, maidsafe_client, maidsafe_vault

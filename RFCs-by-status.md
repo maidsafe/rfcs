@@ -4,56 +4,51 @@ A list of all RFCs by their current status.
 
 ## Active RFCs
 
- - [#0009 MPID Messaging System](./text/0009-MPID-Messaging/0009-MPID-Messaging.md)
- - [#0008 UDP-hole-punching](./text/0008-UDP-hole-punching/0008-UDP-hole-punching.md)
- - [#0021 Add deletion values to `MpidMessageWrapper`](./text/0021-MPID-Messaging-delete/0021-MPID-Messaging-delete.md)
+ - [#0008 UDP Hole Punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
+ - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
+ - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
 
 ## Proposed RFCs
 
+ - [#0012 Safecoin Implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
+ - [#0020 Crust Refactor](./text/0020-crust-refactor/0020-crust-refactor.md)
+ - [#0022 Messaging Example in `safe_core`](./text/0022-messaging-example-in-safe_core/0022-messaging-example-in-safe_core.md)
+ - [#0025 Launcher Direct Data API](./text/0025-launcher-direct-data-api/0025-launcher-direct-data-api.md)
+ - [#0027 Append by all Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
+ - [#0028 Launcher Low Level API](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
  - [#0030 Secure node join](./text/0030-secure-node-join/0030-secure-node-join.md)
- - [#0022 Add messaging example to `safe_core`](./text/0022-messaging_example_in_safe_core/messaging_example_in_safe_core.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
- - [#0024 crust_library](./text/0024-crust-refactor/crust-library.md)
- - [#0024 nat_traversal](./text/0024-crust-refactor/nat-traversal-library.md)
- - [#0024 transport_library](./text/0024-crust-refactor/transport-library.md)
- - [#0024 beacon](./text/0024-crust-refactor/beacon-library.md)
- - [#0027 Append By All Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
  - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
- - [#0025 Add `self_encryptor` data IO to `safe_ffi` and `safe_launcher` API](./text/0025-launcher-direct-data-api/0025-launcher-direct-data-api.md)
- - [#0012 Safecoin implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
- - [#0020 crust_redesign](./text/0020-crust-refactor/0020-crust-refactor.md)
- - [#0028 Exposing Low level APIs for Structured Data and Immutable Data handling](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
 
 ## Agreed RFCs
 
- - [#0005 Balance network resources](./text/0005-balance_network_resources/0005-balance_network_resources.md)
- - [#0004 Farm attempt](./text/0004-Farm-attempt/0004-Farm-attempt.md)
+ - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
+ - [#0005 Balance Network Resources](./text/0005-balance-network-resources/0005-balance-network-resources.md)
 
 ## Implemented RFCs
 
- - [#0018 Launcher as a local server](./text/0018-launcher-as-rest-server/authorisation_api.md)
- - [#0018 Launcher as a local server](./text/0018-launcher-as-rest-server/0018-launcher-as-local-rest-server.md)
+ - [#0000 Unify Structured Data](./text/0000-unified-structured-data/0000-unified-structured-data.md)
+ - [#0001 Use Public Key for ID on all Messages](./text/0001-use-public-key-for-id-on-all-messages/0001-use-public-key-for-id-on-all-messages.md)
+ - [#0002 Name Service](./text/0002-name-service/0002-name-service.md)
+ - [#0003 Reserved Names](./text/0003-reserved-names/0003-reserved-names.md)
+ - [#0011 Improved Connection Management](./text/0011-improved-connection-management/0011-improved-connection-management.md)
+ - [#0013 Immutable Data Naming](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
  - [#0015 Vault Config File](./text/0015-vault-config-file/0015-vault-config-file.md)
- - [#0001 Use public key alone to authorise actions](./text/0001-Use-public-key-for-id-on-all-messages/0001-Use-public-key-for-id-on-all-messages.md)
- - [#0011 Improved Connection Management](./text/0011-Connection_management/0011-Connection_management.md)
- - [#0003 Reserved name list](./text/0003-reserved_names/0003-reserved_names.md)
- - [#0002 Decentralised Naming System (dns)](./text/0002-name-service/0002-name-service.md)
- - [#0019 new_kademlia_routing_logic](./text/0019-new-kademlia-routing-logic/0019-new-kademlia-routing-logic.md)
- - [#0000 Unify Structured  data](./text/0000-Unified-structured-data/0000-Unified-structured-data.md)
- - [#0026 Crust mock](./text/0026-crust-mock/0026-crust-mock.md)
- - [#0013 ImmutableData naming based on type](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
- - [#0023 Naming of Immutable Data Types](./text/0023-immutable-data-type-naming/0023-immutable-data-type-naming.md)
+ - [#0018 Launcher as a local Rest Server](./text/0018-launcher-as-rest-server/0018-launcher-as-local-rest-server.md)
+ - [#0019 New Kademlia Routing Logic](./text/0019-new-kademlia-routing-logic/0019-new-kademlia-routing-logic.md)
+ - [#0023 Naming of ImmutableData Types](./text/0023-immutable-data-type-naming/0023-immutable-data-type-naming.md)
+ - [#0026 Crust Mock](./text/0026-crust-mock/0026-crust-mock.md)
 
 ## Rejected RFCs
 
- - [#0007 Launcher not as a service](./text/0007-Launcher-Not-As-Service/0007-Launcher-Not-As-Service.md)
- - [#0017 safe_dns API from safe_launcher](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
- - [#0006 Prevent any single address being used more than once during address relocation.](./text/0006-Address_relocation/0006-Address_relocation.md)
- - [#0000 Sentinel](./text/0000-Sentinel/0000-Sentinel.md)
- - [#0014 Launcher communication with unregistered client](./text/0014-unregistered-client-support-in-launcher/0014-unregistered-client-support-in-launcher.md)
- - [#0016 Expose API for structured data and immutable data from safe_launcher](./text/0016-launcher-data-types-api/0016-launcher-data-types-api.md)
- - [#0010 Launcher as a service](./text/0010-Launcher-as-a-service/0010-Launcher-as-a-service.md)
+ - [#0000 Sentinel](./text/0000-sentinel/0000-sentinel.md)
+ - [#0006 Address Relocation](./text/0006-address-relocation/0006-address-relocation.md)
+ - [#0007 Launcher Not as a Service](./text/0007-launcher-not-as-service/0007-launcher-not-as-a-service.md)
+ - [#0010 Launcher as a Service](./text/0010-launcher-as-a-service/0010-launcher-as-a-service.md)
+ - [#0014 Unregistered Client Support in Launcher](./text/0014-unregistered-client-support-in-launcher/0014-unregistered-client-support-in-launcher.md)
+ - [#0016 Launcher Data Types API](./text/0016-launcher-data-types-api/0016-launcher-data-types-api.md)
+ - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Wed 18 May 13:58:47 BST 2016_ at REV [cb3d252](https://github.com/maidsafe/rfcs/commit/cb3d252aa2c6bd96634c66929d48e9a1e44e3b58))
+(Last updated _Thu May 19 17:08:01 CEST 2016_ at REV [05e6b4b](https://github.com/maidsafe/rfcs/commit/05e6b4b2289eefb12a6d9bfdff21f59a425de4eb))

@@ -1,4 +1,5 @@
-- Feature Name: Secure node join
+# Secure node join
+
 - Status: proposed
 - Type: enhancement
 - Related components: routing

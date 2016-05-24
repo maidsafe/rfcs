@@ -1,4 +1,5 @@
-- Feature Name: Improved Connection Management
+# Improved Connection Management
+
 - Status: implemented
 - Type: Enhancement
 - Related Components: routing, crust

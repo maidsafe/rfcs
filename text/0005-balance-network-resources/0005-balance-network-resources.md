@@ -1,4 +1,5 @@
-- Feature Name: Balance network resources
+# Balance Network Resources
+
 - Status: agreed
 - Type new feature
 - Related components maidsafe_vault

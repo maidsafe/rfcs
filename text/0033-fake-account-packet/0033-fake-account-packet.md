@@ -1,4 +1,5 @@
-- Feature Name: Fake Account Packet
+# Fake Account Packet
+
 - Status: proposed
 - Type: enhancement
 - Related components: SAFE Vault and Routing
