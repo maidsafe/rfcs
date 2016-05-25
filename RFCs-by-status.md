@@ -7,6 +7,7 @@ A list of all RFCs by their current status.
  - [#0008 UDP Hole Punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
+ - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
 
 ## Proposed RFCs
 
@@ -19,7 +20,6 @@ A list of all RFCs by their current status.
  - [#0030 Secure node join](./text/0030-secure-node-join/0030-secure-node-join.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
- - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
 
 ## Agreed RFCs
 
@@ -51,4 +51,4 @@ A list of all RFCs by their current status.
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Thu May 19 17:08:01 CEST 2016_ at REV [05e6b4b](https://github.com/maidsafe/rfcs/commit/05e6b4b2289eefb12a6d9bfdff21f59a425de4eb))
+(Last updated _Wed 25 May 10:45:54 BST 2016_ at REV [3b46a6b](https://github.com/maidsafe/rfcs/commit/3b46a6b6a582597a678692842bdf070a304519b0))
