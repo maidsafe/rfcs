@@ -324,11 +324,14 @@ Nil
 
 Additional API can be added to facilitate the streaming uploads from the web browsers.
 It can be a two legged process,
+
 1. The local launcher server can also listen for web socket connections at the same launcher port.
+
 2. The client will call an api (PUT /nfs/file?worker). The API will get the metadata
 to locate the file as a part of the request and get the self_encryption handle for writing the file contents
 and hold the handle in memory(HashMap<UUID, SE_HANDLE>) associating to a random ID. The random ID
 is sent as part of the response.
+
 3. Once the client gets the ID, it can spawn a WebWorker and start streaming the data through the websocket connection.
   ```
   {
