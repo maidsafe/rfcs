@@ -1,4 +1,4 @@
-# Title-cased Name of the Feature
+# safe_launcher API v0.5
 
 - Status: proposed
 - Type: new feature, enhancement
@@ -10,15 +10,16 @@
 
 # Summary
 
-Adding new features to the safe_launcher API to make it more developer friendly and also to
+Adding new features to the safe_launcher API to improve efficiency and also to
 incorporate the standards that were missing in the 0.4 version of the API.
 
 # Motivation
 
-New features to the existing API can improve handling large data volume in an efficient manner.
-This can have a significant improvement in the performance of the launcher and the safe-core ffi
-for handling large data volume. Incorporating the standards in the API will also improve the
-stability of the APIs and make it easier for third party applications to integrate.
+New features to the existing API can improve handling large data volume in an efficiently
+using streaming APIs. This can have a significant improvement in the performance
+of the launcher and the safe-core ffi for handling large data volume.
+Incorporating the standards in the API will also improve the stability of the APIs
+and make it easier for third party applications to integrate.
 
 # Detailed design
 
@@ -34,6 +35,10 @@ session based encryption can have a significant improvement in the performance.
 However the JWT tokens for validating and authorising the applications would still hold
 good. The authorisation process workflow will be the same and the applications
 have to pass the JWT token in the `authorization` header for authorised requests.
+if the user denies authorisation, Unauthorised (401) status code is returned.
+
+**Authorised requests need no encryption for parameters or even the payload. But must
+pass the authorisation token in the request header**
 
 #### Authorisation Request
 
@@ -60,23 +65,18 @@ have to pass the JWT token in the `authorization` header for authorised requests
 
 ##### Response
 
-###### On Success
+###### Status code
+```
+200
+```
 
-####### Status code
-`200`
-
-####### Body
+###### Body
 ```
 {
   token: String, // JWT token
   permissions: Array[String]  
 }
 ```
-
-###### On Failure
-
-####### Status code
-`401`
 
 ### Remove unnecessary Base64 conversions
 
@@ -95,9 +95,9 @@ Removal of base64 encoding has to be handled across all the APIs
 ### Renaming custom headers
 
 Rename custom headers to start with `X-` as mentioned in the [RFC](http://www.ietf.org/rfc/rfc2047.txt).
-At present the custom headers used in the [NFS](https://maidsafe.readme.io/docs/nfs-get-file#section-response)
-and [DNS](https://maidsafe.readme.io/docs/dns-get-file-unauth#section-response) while fetching a file does
+At present the custom headers used in the [NFS](https://github.com/krishnaIndia/rfcs/blob/launcher_enhancement/text/0018-launcher-as-rest-server/nfs_api.md#response-headers-5) while fetching a file does
 not follow the standards. And any custom header used should follow the naming convention.
+
 
 ## New Features
 
@@ -126,9 +126,9 @@ Content-Type: application/json
 
 |Field|Description|
 |-----|-----------|
-|srcPath| Source path which has to be copied or moved|
+|srcPath| Source directory path which has to be copied or moved|
 |isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|destPath| Destination path to which the source directory must be copied or moved|
+|destPath| Destination directory path to which the source directory must be copied or moved|
 |isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false|
 |action| ENUM value - MOVE or COPY. Defaults to MOVE|
 
@@ -175,7 +175,7 @@ Content-Type: application/json
 |-----|-----------|
 |srcPath| Source path which has to be copied or moved. eg, `/a/b/c.txt`|
 |isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|destPath| Destination path to which the source directory must be copied or moved|
+|destPath| Destination path to which the file must be copied or moved. eg, `a/b`|
 |isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false|
 |action| Optional value. ENUM value - MOVE or COPY. Defaults to MOVE|
 
@@ -243,6 +243,11 @@ Content-Length: Number
 Last-Modified: DATE in UTC
 X-Created-On: DATE in UTC
 ```
+
+### Refactor Read File Response Headers
+
+The get file response of the [NFS](https://github.com/krishnaIndia/rfcs/blob/launcher_enhancement/text/0018-launcher-as-rest-server/nfs_api.md#response-headers-5) APIs has custom headers. Would be better to remove the custom headers, because we can use the metadata request
+to fetch the metadata of a file and use the GET file requests only for reading the content of the file.
 
 ### Streaming API
 
