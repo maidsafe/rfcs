@@ -317,7 +317,7 @@ Streaming over HTTP is out of the box supported in most of the platforms. Simila
 web browsers also provide support for the streaming data using the default widgets(audio/video controls) provided.
 
 Could not find an out of the box option for streaming upload of large data. The available
-options to write huge files is to user the HTML Form or FormData and send using multipart upload.
+options to write huge files is to use the HTML Form or FormData and send using multipart upload.
 The other option was to write data in chunks to the server, that again will not be a very ideal
 solution, since the client has to create many short lived connections for uploading the data in smaller chunks.
 
