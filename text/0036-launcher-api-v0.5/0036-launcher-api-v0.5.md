@@ -288,7 +288,7 @@ Range: bytes 0-100
 ```
 
 If the range header is not specified, the entire file is streamed while reading and
-the data is appended from the 0th position while writing.
+the data is appended to the end while writing.
 
 ### Response headers
 
