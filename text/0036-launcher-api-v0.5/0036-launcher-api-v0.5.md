@@ -24,6 +24,7 @@ and make it easier for third party applications to integrate.
 # Detailed design
 
 Categorising the proposals into two sections `Enhancements` and `New Features`.
+These features are also based on the suggestion from @cretz in the [forum thread](https://forum.safenetwork.io/t/safe-launcher-dev-issues-suggestions/7890)
 
 ## Enhancements
 
@@ -283,8 +284,8 @@ and drift towards a standard approach for partial read/write operations.
 
 Example usage,
 ```
-Range: bytes 0-
-Range: bytes 0-100
+Range: bytes=0-
+Range: bytes=0-100
 ```
 
 If the range header is not specified, the entire file is streamed while reading and
@@ -296,6 +297,14 @@ the data is appended to the end while writing.
 
 If the entire file is streamed then the Status code returned will be `200`.
 If only a partial section of the file is read, then the status code will be `206`.
+
+Response headers,
+```
+Accept-Ranges: bytes
+Content-Length: <Length that is requested based on the byte range>
+Content-Type: <mime type if available based on the extension or application/octet-stream>
+Content-Range: bytes <START>-<END>/<TOTAL>
+```
 
 #### File write
 
