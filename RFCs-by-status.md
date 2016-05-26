@@ -20,6 +20,7 @@ A list of all RFCs by their current status.
  - [#0030 Secure node join](./text/0030-secure-node-join/0030-secure-node-join.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
+ - [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
 
 ## Agreed RFCs
 
@@ -51,4 +52,4 @@ A list of all RFCs by their current status.
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Wed 25 May 10:45:54 BST 2016_ at REV [3b46a6b](https://github.com/maidsafe/rfcs/commit/3b46a6b6a582597a678692842bdf070a304519b0))
+(Last updated _Thu 26 May 14:17:10 BST 2016_ at REV [026e2db](https://github.com/maidsafe/rfcs/commit/026e2db4f469fe422e89a7184eec85ac8d1ec213))
