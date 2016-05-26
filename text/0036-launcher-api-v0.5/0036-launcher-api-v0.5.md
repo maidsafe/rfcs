@@ -5,8 +5,8 @@
 - Related components: safe_launcher
 - Start Date: 25-05-2016
 - Discussion: https://github.com/maidsafe/rfcs/issues/141
-- Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
-- Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
+- Supersedes:
+- Superseded by:
 
 # Summary
 
@@ -102,7 +102,7 @@ Rename custom headers to start with `X-` as mentioned in the [RFC](http://www.ie
 
 ### NFS APIs
 
-#### Move/Copy Directory
+#### Move / Copy Directory
 API to move or copy the directory from source to a destination.
 The source path and destination path must already exists or Bad Request(400) error will
 be returned.
@@ -125,11 +125,11 @@ Content-Type: application/json
 
 |Field|Description|
 |-----|-----------|
-|srcPath| Source directory path which has to be copied or moved|
-|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|destPath| Destination directory path to which the source directory must be copied or moved|
-|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|action| ENUM value - MOVE or COPY. Defaults to MOVE|
+|srcPath| Source directory path which has to be copied or moved.|
+|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false.|
+|destPath| Destination directory path to which the source directory must be copied or moved.|
+|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false.|
+|action| ENUM value - MOVE or COPY. Defaults to MOVE.|
 
 ```
 {
@@ -148,7 +148,7 @@ Content-Type: application/json
 200
 ```
 
-#### Move/Copy File
+#### Move / Copy File
 
 API to move or copy the file from source directory to a destination directory.
 The source path and destination path must already exists or Bad Request(400) error will
@@ -172,11 +172,11 @@ Content-Type: application/json
 
 |Field|Description|
 |-----|-----------|
-|srcPath| Source path which has to be copied or moved. eg, `/a/b/c.txt`|
-|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|destPath| Destination path to which the file must be copied or moved. eg, `a/b`|
-|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|action| Optional value. ENUM value - MOVE or COPY. Defaults to MOVE|
+|srcPath| Source path which has to be copied or moved e.g. `/a/b/c.txt`.|
+|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false.|
+|destPath| Destination path to which the file must be copied or moved e.g. `a/b`.|
+|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false.|
+|action| Optional value. ENUM value - MOVE or COPY. Defaults to MOVE.|
 
 ```
 {
@@ -202,15 +202,15 @@ Content-Type: application/json
 ###### Endpoint
 |Field|Description|
 |-----|-----------|
-|filePath| Full file path. Must be URL encoded|
-|isPathShared| Optional Value. Boolean value to indicate whether the path is shared or private. Defaults to false|
+|filePath| Full file path. Must be URL encoded.|
+|isPathShared| Optional Value. Boolean value to indicate whether the path is shared or private. Defaults to false.|
 
 ```
 /nfs/file/:filePath/:isPathShared
 ```
 
 ###### Header
-Required only for private data
+Required only for private data.
 
 ```
 Authorization: Bearer <TOKEN>
@@ -231,11 +231,11 @@ HEAD
 ###### Header
 |Field|Description|
 |-----|-----------|
-|Accept-Ranges| Refers to the range accepted in the Range header|
-|Content-Length| Size of the file in bytes|
-|X-Created-On| created data and time in UTC |
-|Last-Modified| Last modified date and time in UTC |
-|X-Metadata| Present only if the metadata is available. Metadata as base64 String|
+|Accept-Ranges| Refers to the range accepted in the Range header.|
+|Content-Length| Size of the file in bytes.|
+|X-Created-On| created data and time in UTC.|
+|Last-Modified| Last modified date and time in UTC.|
+|X-Metadata| Present only if the metadata is available. Metadata as base64 String.|
 
 ```
 Accept-Ranges: bytes
@@ -260,9 +260,9 @@ being created in the network when a large file is saved.
 Exposing a streaming API can improve the efficiency to handle larger data upload.
 For creating and reading binary data, the APIs must be able to support streaming (read / write).
 
-Nodejs exposes [Stream API](https://nodejs.org/api/stream.html) for creating a custom Read / Write streams.
+Nodejs exposes [Stream API](https://nodejs.org/api/stream.html) for creating a custom read / write streams.
 The GET APIs must be able to serve the data from the network using a readable stream,
-while the PUT/POST APIs must be able to use a writable stream to pipe the received data to the network.
+while the PUT / POST APIs must be able to use a writable stream to pipe the received data to the network.
 
 The FFI interface must pass the self_encryption handle to the caller and the caller can use the
 handle to read and write the data. After the operation is complete, the caller must call the ffi
@@ -281,9 +281,9 @@ writable stream.
 ### Using Content Range Header
 
 Using the `Range` HTTP header can help in removing the offset and length parameters
-and drift towards a standard approach for partial read/write operations.
+and drift towards a standard approach for partial read / write operations.
 
-Example usage,
+Example usage:
 ```
 Range: bytes=0-
 Range: bytes=0-100
@@ -292,7 +292,7 @@ Range: bytes=0-100
 If the range header is not specified, the entire file is streamed while reading and
 the data is appended to the end while writing.
 
-### Response headers
+### Response Headers
 
 #### File Read
 
@@ -311,18 +311,18 @@ Content-Range: bytes <START>-<END>/<TOTAL>
 
 Status code `200` will be returned on success.
 
-### Streaming issue in the Web platform
+### Streaming Issue in the Web Platform
 
 Streaming over HTTP is out of the box supported in most of the platforms. Similarly,
-web browsers also provide support for the streaming data using the default widgets(audio/video controls) provided.
+web browsers also provide support for the streaming data using the default widgets (audio / video controls) provided.
 
 Could not find an out of the box option for streaming upload of large data. The available
 options to write huge files is to use the HTML Form or FormData and send using multipart upload.
-The other option was to write data in chunks to the server, that again will not be a very ideal
+The other option was to write data in chunks to the server, that again is not an ideal
 solution, since the client has to create many short lived connections for uploading the data in smaller chunks.
 
 Thus the NFS file content upload API must be able to support multipart upload. The API
-would consider the upload only for one file at a time, i.e, can not upload the file contents
+would consider the upload only for one file at a time, i.e. can not upload the file contents
 of multiple files at one go. The API will be reading the data only for one file and
 close the response accordingly if it is a multipart request.
 
