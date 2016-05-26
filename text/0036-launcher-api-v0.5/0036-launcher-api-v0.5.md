@@ -24,7 +24,8 @@ and make it easier for third party applications to integrate.
 # Detailed design
 
 Categorising the proposals into two sections `Enhancements` and `New Features`.
-These features are also based on the suggestion from @cretz in the [forum thread](https://forum.safenetwork.io/t/safe-launcher-dev-issues-suggestions/7890)
+These features are also based on the suggestion from [cretz](https://forum.safenetwork.io/users/cretz/activity)
+in the [forum thread](https://forum.safenetwork.io/t/safe-launcher-dev-issues-suggestions/7890)
 
 ## Enhancements
 
