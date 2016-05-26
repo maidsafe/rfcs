@@ -3,7 +3,7 @@
 - Status: proposed
 - Type: new feature, enhancement
 - Related components: safe_launcher
-- Start Date: 25-05-2016)
+- Start Date: 25-05-2016
 - Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
 - Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
@@ -15,7 +15,7 @@ incorporate the standards that were missing in the 0.4 version of the API.
 
 # Motivation
 
-New features to the existing API can improve handling large data volume in an efficiently
+New features to the existing API can improve handling large data volume efficiently
 using streaming APIs. This can have a significant improvement in the performance
 of the launcher and the safe-core ffi for handling large data volume.
 Incorporating the standards in the API will also improve the stability of the APIs
@@ -85,14 +85,15 @@ the raw data can be directly sent over HTTP. The request and response can
 directly use the actual content based on the `Content-type`.
 
 For example, the APIs which accept the JSON payload can simply `POST/PUT` the JSON payload
-without any encoding or encryption. Like wise the response will also be a plain JSON String.
+without base64 encoding or encryption. Like wise the response will also be a plain JSON String (UTF-8).
 
-For the APIs which involves raw data such as the file upload, the binary can be
-directly sent instead of encrypting and then encoding to a base64 string.
+For the APIs which involves binary data such as the file upload, the binary data
+can be directly sent instead of encrypting and then encoding to a base64 string.
 
-Removal of base64 encoding has to be handled across all the APIs
+**Removal of base64 encoding has to be handled across all the APIs**
 
 ### Custom headers naming convention
+
 Rename custom headers to start with `X-` as mentioned in the [RFC](http://www.ietf.org/rfc/rfc2047.txt)
 
 ## New Features
@@ -244,19 +245,18 @@ X-Metadata: base64 string
 
 ### Refactor Read File Response Headers
 
-The get file response of the [NFS](./text/0018-launcher-as-rest-server/nfs_api.md#response-headers-5) API has custom headers. Remove the custom headers because the metadata request (HEAD) can be used
-to fetch the file metadata and use the GET file requests only for reading the content of the file.
+The get file response of the [NFS API](./text/0018-launcher-as-rest-server/nfs_api.md#response-headers-5)
+has custom headers. Remove the custom headers because the metadata request (HEAD) can be used
+to fetch the file metadata and restrict the GET file requests only for reading the content of the file.
 
 ### Streaming API
 
-Right now the launcher API is not efficient to handle large file sizes. There are
-excess chunks being created when a large file is saved. Moreover, this requires the entire
-content to be held in the memory and sent to the ffi interface.
+The launcher API can not to handle large file sizes as it requires to read the entire content
+in memory to upload the whole file content and also in a chunked upload there are excess data chunks
+being created in the network when a large file is saved.
 
-Exposing a streaming API can improve this inefficiency along with the changes in the ffi interface,
-to support the same.
-
-While creating and reading binary data, the APIs must be able to support streaming (read / write).
+Exposing a streaming API can improve the efficiency to handle larger data upload.
+For creating and reading binary data, the APIs must be able to support streaming (read / write).
 
 Nodejs exposes [Stream API](https://nodejs.org/api/stream.html) for creating a custom Read / Write streams.
 The GET APIs must be able to serve the data from the network using a readable stream,
@@ -279,7 +279,7 @@ writable stream.
 ### Using Content Range Header
 
 Using the `Range` HTTP header can help in removing the offset and length parameters
-and drift towards a standard approach for chunked read/write operations.
+and drift towards a standard approach for partial read/write operations.
 
 Example usage,
 ```
@@ -287,15 +287,15 @@ Range: bytes 0-
 Range: bytes 0-100
 ```
 
-If the range header is not specified then the entire file is streamed while reading and
-while writing the data is appended from the 0th position.
+If the range header is not specified, the entire file is streamed while reading and
+the data is appended from the 0th position while writing.
 
 ### Response headers
 
 #### File Read
 
 If the entire file is streamed then the Status code returned will be `200`.
-If only a partial section of the file is read then the status code will be `206`.
+If only a partial section of the file is read, then the status code will be `206`.
 
 #### File write
 
@@ -304,12 +304,12 @@ Status code `200` will be returned on success.
 ### Streaming issue in the Web platform
 
 Streaming over HTTP is out of the box supported in most of the platforms. Similarly,
-web browsers also provide support for the streaming data using the default widgets provided.
+web browsers also provide support for the streaming data using the default widgets(audio/video controls) provided.
 
 Could not find an out of the box option for streaming upload of large data. The available
 options to write huge files is to user the HTML Form or FormData and send using multipart upload.
-The other option was to write data in chunks to the server, that would again be an inefficient
-approach in our case.
+The other option was to write data in chunks to the server, that again will not be a very ideal
+solution, since the client has to create many short lived connections for uploading the data in smaller chunks.
 
 Thus the NFS file content upload API must be able to support multipart upload. The API
 would consider the upload only for one file at a time, i.e, can not upload the file contents
@@ -318,17 +318,15 @@ close the response accordingly if it is a multipart request.
 
 # Drawbacks
 
-Nil
+TLS option is not considered in this version.
 
 # Alternatives
 
-Additional API can be added to facilitate the streaming uploads from the web browsers.
-It can be a two legged process,
-
+### Additional API can be added to facilitate the streaming uploads from the web browsers
 1. The local launcher server can also listen for web socket connections at the same launcher port.
 
-2. The client will call an api (PUT /nfs/file?worker). The API will get the metadata
-to locate the file as a part of the request and get the self_encryption handle for writing the file contents
+2. The client will call an api (PUT /nfs/file/worker/:filePath/:isPathShared). The API will get the metadata
+to locate the file as a part of the request and get the self_encryptor handle for writing the file contents
 and hold the handle in memory(HashMap<UUID, SE_HANDLE>) associating to a random ID. The random ID
 is sent as part of the response.
 
@@ -342,6 +340,13 @@ is sent as part of the response.
   ```
   when the data is received the server can validate the ID and write the data to
   network.
+
+### File Metadata Request (HEAD)
+
+The file metadata request sends the response in in the header fields. As an alternate approach,
+instead of the headers the metadata can be sent as a JSON response. [AWS](http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectHEAD.html)
+uses the headers approach while [GCS](https://cloud.google.com/storage/docs/json_api/v1/objects/get#parameters) uses JSON response.
+Since the fields that are sent back is minimal, the preference was for using the headers.
 
 # Unresolved questions
 
