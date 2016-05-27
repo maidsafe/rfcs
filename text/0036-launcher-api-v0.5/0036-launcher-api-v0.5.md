@@ -326,6 +326,68 @@ would consider the upload only for one file at a time, i.e. can not upload the f
 of multiple files at one go. The API will be reading the data only for one file and
 close the response accordingly if it is a multipart request.
 
+
+## Error message propagation
+
+The FFI interface returns error codes as its return value. The problem with this
+approach is that the error message or reason for the error has to be mapped in the launcher.
+
+FFI interface can respond in a JSON format which will help in propagating the error codes
+and also the associated reason,
+
+### On Failure
+
+```javascript
+{  
+  "error": {
+    "code": -100,
+    "reason": "Low data balance error"
+  }  
+}
+```
+
+### On Success
+
+If the response does not return any data, for example, create public-id API,
+
+```javascript
+{
+  "error": null, // Optional - error field can be removed
+}
+```
+
+**or** `just an empty String`.
+
+If the response has to return data, for example service list, the JSON format can be
+
+```javascript
+{
+  "error": null, // Optional - error field can be removed on success response
+  "data": [
+    'www',
+    'blog'
+  ]
+}
+```
+
+FFI interface has two functions `execute` and `exceute_for_content`. The `exceute_for_content`
+method can be dropped and the `execute` method can be modified to accept the parameters
+as in `execute_for_content`,
+
+```
+pub extern "C" fn execute(c_payload: *const c_char,
+                          c_size: *mut int32_t,
+                          c_capacity: *mut int32_t,
+                          c_result: *mut int32_t,
+                          ffi_handle: *const c_void) {
+    // Do the processing here
+    // write the result to the c_result pointer
+}
+```
+
+The REST APIs can send the error message in the response as plain text. The error code of the
+FFI can be ignored and only the error message will be sent to the integrating applications.
+
 # Drawbacks
 
 TLS option is not considered in this version.
