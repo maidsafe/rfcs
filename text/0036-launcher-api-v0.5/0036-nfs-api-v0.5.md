@@ -1,6 +1,6 @@
 # NFS API
 
-This is a supporting a document for the parent [RFC](./036-launcher-api-v0.5.md).
+This is a supporting a document for the parent [RFC](./0036-launcher-api-v0.5.md).
 This details about the NFS API changes and also the new MOVE/COPY APIs that are getting added.
 
 ## Directory
@@ -29,8 +29,8 @@ Content-Type: application/json
 |Field|Description|
 |-----|-----------|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory.|
-|isVersioned| Boolean value to indicate whether the directory should support versioning. Defaults to false|
+|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory. Optional. Defaults to false|
+|isVersioned| Boolean value to indicate whether the directory should support versioning. Optional. Defaults to false|
 |metadata| Optional String. Metadata as UTF-8 String|
 
 ```
@@ -314,7 +314,7 @@ Authorization: Bearer {TOKEN}
 ```
 {
     "filePath": String,
-    "isPathShared": Boolean, // Optional
+    "isPathShared": Boolean, // Optional - defaults to false
     "metadata": base64 string // Optional
 }
 ```
