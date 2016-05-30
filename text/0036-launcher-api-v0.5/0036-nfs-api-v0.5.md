@@ -1,6 +1,6 @@
 # NFS API
 
-This is a supporting a document for the parent [RFC](./text/036-launcher-api-v0.5/036-launcher-api-v0.5.md).
+This is a supporting a document for the parent [RFC](./036-launcher-api-v0.5.md).
 This details about the NFS API changes and also the new MOVE/COPY APIs that are getting added.
 
 ## Directory
@@ -29,7 +29,7 @@ Content-Type: application/json
 |Field|Description|
 |-----|-----------|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory itself. Defaults to false|
+|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory.|
 |isVersioned| Boolean value to indicate whether the directory should support versioning. Defaults to false|
 |metadata| Optional String. Metadata as UTF-8 String|
 
@@ -60,8 +60,8 @@ Content-Type: application/json
 
 ### List Directory Versions
 
-Fetch the list of version names. The version names are just Base64 Strings
-corresponding to a specific version of the directory. Can be invoked on directories
+Fetch the list of version names. The version names are Base64 Strings
+representing a specific version of the directory. Can be invoked on directories
 with version support else Bad Request(400) error will be returned
 
 #### Request
@@ -69,7 +69,7 @@ with version support else Bad Request(400) error will be returned
 ##### Endpoint
 |Field|Description|
 |-----|-----------|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory itself|
+|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
 
 ```
@@ -117,7 +117,7 @@ Authorization: Bearer <TOKEN> // Optional for public directory
 ##### Endpoint
 |Field|Description|
 |-----|-----------|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory itself|
+|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
 |versionId| version of the Directory to be fetched. Optional parameter. Can be passed only for versioned directories. If the version is not passed the latest version is fetched by default|
 
@@ -334,7 +334,7 @@ Status: 200 Ok
 |Field|Description|
 |-----|-----------|
 |filePath| Full file path. Eg, /home/docs/sample.txt|
-|isPathShared| Optional Value. Boolean value to indicate whether the path is shared or private. Defaults to false|
+|isPathShared| Boolean value to indicate whether the path is shared or private.|
 |versionId| Query parameter to fetch the file metadata specific to a version. If not
 specified then the latest version is read. Optional parameter|
 
@@ -390,7 +390,7 @@ Version-Id: base64 String
 |Field|Description|
 |-----|-----------|
 |filePath| Full file path|
-|isPathShared| Optional Value. Boolean value to indicate whether the path is shared or private. Defaults to false|
+|isPathShared| Boolean value to indicate whether the path is shared or private.|
 
 ```
 /nfs/file/versions/:isPathShared/:filePath
@@ -436,7 +436,7 @@ Content-Type: application/json
 |Field|Description|
 |-----|-----------|
 |filePath| Full file path|
-|isPathShared| Optional Value. Boolean value to indicate whether the path is shared or private. Defaults to false|
+|isPathShared| Boolean value to indicate whether the path is shared or private.|
 |versionId| Query parameter to fetch the file metadata specific to a version. If not
 specified then the latest version is read by default. Optional parameter|
 
@@ -490,7 +490,7 @@ Binary data
 |Field|Description|
 |-----|-----------|
 |filePath| Full file path|
-|isPathShared| Optional Value. Boolean value to indicate whether the path is shared or private. Defaults to false|
+|isPathShared| Boolean value to indicate whether the path is shared or private.|
 
 ```
 /nfs/file/{isPathShared}/{filePath}/
