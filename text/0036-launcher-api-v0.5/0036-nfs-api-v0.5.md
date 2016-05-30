@@ -1,6 +1,6 @@
 # NFS API
 
-This is a supporting a document for the parent [RFC](/032-launcher-api-v0.5.md).
+This is a supporting a document for the parent [RFC](./text/036-launcher-api-v0.5/036-launcher-api-v0.5.md).
 This details about the NFS API changes and also the new MOVE/COPY APIs that are getting added.
 
 ## Directory
@@ -29,8 +29,7 @@ Content-Type: application/json
 |Field|Description|
 |-----|-----------|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive
-or from the application directory itself. Defaults to false|
+|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory itself. Defaults to false|
 |isVersioned| Boolean value to indicate whether the directory should support versioning. Defaults to false|
 |metadata| Optional String. Metadata as UTF-8 String|
 
@@ -70,8 +69,7 @@ with version support else Bad Request(400) error will be returned
 ##### Endpoint
 |Field|Description|
 |-----|-----------|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive
-or from the application directory itself|
+|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory itself|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
 
 ```
@@ -119,12 +117,9 @@ Authorization: Bearer <TOKEN> // Optional for public directory
 ##### Endpoint
 |Field|Description|
 |-----|-----------|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive
-or from the application directory itself|
+|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory itself|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
-|versionId| version of the Directory to be fetched. Optional parameter. Can
-be passed only for versioned directories. If the version is not passed the latest
-version is fetched by default|
+|versionId| version of the Directory to be fetched. Optional parameter. Can be passed only for versioned directories. If the version is not passed the latest version is fetched by default|
 
 ```
 /nfs/directory/{isPathShared}/{dirPath}?version={versionId}
