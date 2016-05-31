@@ -4,10 +4,8 @@ A list of all RFCs by their current status.
 
 ## Active RFCs
 
- - [#0008 UDP Hole Punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
- - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
 
 ## Proposed RFCs
 
@@ -40,16 +38,18 @@ A list of all RFCs by their current status.
  - [#0019 New Kademlia Routing Logic](./text/0019-new-kademlia-routing-logic/0019-new-kademlia-routing-logic.md)
  - [#0023 Naming of ImmutableData Types](./text/0023-immutable-data-type-naming/0023-immutable-data-type-naming.md)
  - [#0026 Crust Mock](./text/0026-crust-mock/0026-crust-mock.md)
+ - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
 
 ## Rejected RFCs
 
  - [#0000 Sentinel](./text/0000-sentinel/0000-sentinel.md)
  - [#0006 Address Relocation](./text/0006-address-relocation/0006-address-relocation.md)
  - [#0007 Launcher Not as a Service](./text/0007-launcher-not-as-service/0007-launcher-not-as-a-service.md)
+ - [#0008 UDP Hole Punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
  - [#0010 Launcher as a Service](./text/0010-launcher-as-a-service/0010-launcher-as-a-service.md)
  - [#0014 Unregistered Client Support in Launcher](./text/0014-unregistered-client-support-in-launcher/0014-unregistered-client-support-in-launcher.md)
  - [#0016 Launcher Data Types API](./text/0016-launcher-data-types-api/0016-launcher-data-types-api.md)
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Thu 26 May 14:17:10 BST 2016_ at REV [026e2db](https://github.com/maidsafe/rfcs/commit/026e2db4f469fe422e89a7184eec85ac8d1ec213))
+(Last updated _Tue 31 May 17:03:49 BST 2016_ at REV [897545b](https://github.com/maidsafe/rfcs/commit/897545b9aa1621e13dc475b853a7006ba0552039))
