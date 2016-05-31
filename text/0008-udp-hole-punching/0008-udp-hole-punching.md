@@ -1,6 +1,6 @@
 # UDP Hole Punching
 
-- Status: active
+- Status: rejected
 - Type new: feature
 - Related components: crust
 - Start Date: 22-09-2015
