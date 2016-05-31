@@ -1,6 +1,6 @@
 # Routing Message Acknowledgements
 
-- Status: active
+- Status: implemented
 - Type: enhancement
 - Related components: Routing
 - Start Date: 11-05-2016
