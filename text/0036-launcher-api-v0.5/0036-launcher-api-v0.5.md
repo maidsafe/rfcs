@@ -121,12 +121,13 @@ data is saved for public read.
 
 ### CORS validation
 
-The CORS validation must be improved to validate XHR requests, based on the origin.
-Allow requests only if the `Origin` ends with `.safenet` extension.
+The CORS validation must be based on the request origin for the XHR Requests.
+Allow XHR requests only if the `Origin` ends with `.safenet` extension. At present CORS
+is enabled for all XHR requests.
 
 ### CSP Headers
 
-Enforcing CSP headers on all requests from the launcher helps to mitigate security threats
+Enforcing CSP headers on all responses from the launcher helps to mitigate security threats
 on the web clients.
 
 ```
@@ -134,8 +135,8 @@ Content-Security-Policy → default-src self *.safenet; object-src none; base-ur
 X-Frame-Options → SAMEORIGIN
 ```
 
-`frame-ancestors` policy is supported only on chrome and firefox. Thus adding `X-Frame-Options` headers
-will act as a fallback for other browsers.
+[CSP Level 2](http://content-security-policy.com/) policy `frame-ancestors` is supported only on
+chrome and firefox. Adding `X-Frame-Options` headers will act as a fallback for other browsers.
 
 #### Launcher workflow for handling the FFI client handle
 

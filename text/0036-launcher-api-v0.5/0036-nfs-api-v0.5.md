@@ -1,6 +1,6 @@
 # NFS API
 
-This is a supporting a document for the parent [RFC](./0036-launcher-api-v0.5.md).
+This is a supporting document for the parent [RFC](./0036-launcher-api-v0.5.md).
 This details the NFS API changes and also the new MOVE/COPY APIs that are getting added.
 
 ## Directory
