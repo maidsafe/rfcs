@@ -1,7 +1,7 @@
 # NFS API
 
 This is a supporting a document for the parent [RFC](./0036-launcher-api-v0.5.md).
-This details about the NFS API changes and also the new MOVE/COPY APIs that are getting added.
+This details the NFS API changes and also the new MOVE/COPY APIs that are getting added.
 
 ## Directory
 
@@ -30,14 +30,12 @@ Content-Type: application/json
 |-----|-----------|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
 |isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory. Optional. Defaults to false|
-|isVersioned| Boolean value to indicate whether the directory should support versioning. Optional. Defaults to false|
 |metadata| Optional String. Metadata as UTF-8 String|
 
 ```
 {
   dirPath: String,
-  isPathShared: Boolean,
-  isVersioned: Boolean,
+  isPathShared: Boolean,  
   metadata: String
 }
 ```
@@ -58,58 +56,6 @@ Content-Type: application/json
 401 / 400
 ```
 
-### List Directory Versions
-
-Fetch the list of version names. The version names are Base64 Strings
-representing a specific version of the directory. Can be invoked on directories
-with version support else Bad Request(400) error will be returned
-
-#### Request
-
-##### Endpoint
-|Field|Description|
-|-----|-----------|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory|
-|dirPath| Full directory path as String. Example - /home, /home/photos|
-
-```
-/nfs/directory/versions/{isPathShared}/{dirPath}
-```
-
-##### Method
-```
-GET
-```
-
-##### Headers
-```
-Authorization: Bearer <TOKEN> // Optional for public directory
-```
-
-#### Response
-
-##### On Success
-
-###### Status Code
-```
-200
-```
-
-###### Body
-```
-[
-  version1, // base64 strings
-  version2, // base64 strings
-]
-```
-
-##### On Failure
-
-###### Status Code
-```
-401 / 400
-```
-
 ### Get Directory
 
 #### Request
@@ -119,10 +65,9 @@ Authorization: Bearer <TOKEN> // Optional for public directory
 |-----|-----------|
 |isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
-|versionId| version of the Directory to be fetched. Optional parameter. Can be passed only for versioned directories. If the version is not passed the latest version is fetched by default|
 
 ```
-/nfs/directory/{isPathShared}/{dirPath}?version={versionId}
+/nfs/directory/{isPathShared}/{dirPath}
 ```
 
 ##### Method
@@ -151,8 +96,7 @@ status: 200 Ok
       "name": String,
       "creationTime": Integer, // milliseconds            
       "modificationTime": Integer, // milliseconds            
-      "isPrivate": Boolean,
-      "isVersioned": Boolean,
+      "isPrivate": Boolean,      
       "metadata": base64 String,
     },
     "subDirectories": [
@@ -160,8 +104,7 @@ status: 200 Ok
             "name": String,
             "creationTime": Integer, // milliseconds            
             "modificationTime": Integer, // milliseconds
-            "isPrivate": Boolean,
-            "isVersioned": Boolean,
+            "isPrivate": Boolean,            
             "metadata": base64 String
         },
         ...
@@ -335,11 +278,9 @@ Status: 200 Ok
 |-----|-----------|
 |filePath| Full file path. Eg, /home/docs/sample.txt|
 |isPathShared| Boolean value to indicate whether the path is shared or private.|
-|versionId| Query parameter to fetch the file metadata specific to a version. If not
-specified then the latest version is read. Optional parameter|
 
 ```
-/nfs/file/:isPathShared/:filePath?version={versionId}
+/nfs/file/:isPathShared/:filePath
 ```
 
 ##### Header
@@ -369,8 +310,6 @@ HEAD
 |Created-On| Created date and time in UTC |
 |Last-Modified| Last modified date and time in UTC |
 |Metadata| Present only if the metadata is available. Base64 String|
-|Versioned| Boolean value to indicate whether the file is versioned or not |
-|Version-Id| versionId fetched. If specified in the query parameter |
 
 ```
 Accept-Ranges: bytes
@@ -378,56 +317,7 @@ Content-Length: Number
 Last-Modified: DATE in UTC
 Created-On: DATE in UTC
 Metadata: base64 string
-Versioned: Boolean
-Version-Id: base64 String
 ```
-
-### List File Versions
-
-#### Request
-
-##### Endpoint
-|Field|Description|
-|-----|-----------|
-|filePath| Full file path|
-|isPathShared| Boolean value to indicate whether the path is shared or private.|
-
-```
-/nfs/file/versions/:isPathShared/:filePath
-```
-
-##### Header
-Required only for private data
-
-```
-Authorization: Bearer <TOKEN>
-```
-
-##### Method
-```
-GET
-```
-
-#### Response
-
-##### Status Code
-```
-200
-```
-
-##### Header
-```
-Content-Type: application/json
-```
-
-##### Body
-```
-[
- versionid1, // base64 string representing a version
- versionid2
-]
-```
-
 ### Read File
 
 #### Request
@@ -437,11 +327,9 @@ Content-Type: application/json
 |-----|-----------|
 |filePath| Full file path|
 |isPathShared| Boolean value to indicate whether the path is shared or private.|
-|versionId| Query parameter to fetch the file metadata specific to a version. If not
-specified then the latest version is read by default. Optional parameter|
 
 ```
-/nfs/file/:isPathShared/:filePath?version={versionId}
+/nfs/file/:isPathShared/:filePath
 ```
 
 ##### Header
@@ -473,8 +361,6 @@ Content-Range: bytes <START>-<END>/<TOTAL>
 Last-Modified: DATE in UTC
 Created-On: DATE in UTC
 Metadata: base64 string
-Versioned: Boolean
-Version-Id: {versionId if specified in the query parameter}
 ```
 
 ##### Body
@@ -554,9 +440,6 @@ status: 200 Ok
 API to move or copy the file from source directory to a destination directory.
 The source path and destination path must already exists or Bad Request(400) error will
 be returned.
-
-If a file is moved/copied the version history will be not be available at the destination
-directory.
 
 #### Request
 
