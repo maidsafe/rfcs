@@ -4,9 +4,9 @@
 - Type: new feature, enhancement
 - Related components: safe_launcher
 - Start Date: 25-05-2016
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
-- Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
-- Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
+- Discussion: https://github.com/maidsafe/rfcs/issues/141
+- Supersedes:
+- Superseded by:
 
 # Summary
 
