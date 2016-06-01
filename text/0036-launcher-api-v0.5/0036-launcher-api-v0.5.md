@@ -23,7 +23,7 @@ and make it easier for third party applications to integrate.
 
 # Detailed design
 
-Categorising the proposals into two sections `Enhancements` and `New Features`.
+Categorising the proposals into two sections `Enhancements` and `New API Features`.
 These features are also based on the suggestion from [cretz](https://forum.safenetwork.io/users/cretz/activity)
 in the [forum thread](https://forum.safenetwork.io/t/safe-launcher-dev-issues-suggestions/7890)
 
@@ -94,164 +94,72 @@ can be directly sent instead of encrypting and then encoding to a base64 string.
 
 **Removal of base64 encoding has to be handled across all the APIs**
 
-### Custom headers naming convention
+### Parameter Validation
 
-Rename custom headers to start with `X-` as mentioned in the [RFC](http://www.ietf.org/rfc/rfc2047.txt)
+The REST API must ensure that the parameters are validated before sending the request
+through the FFI. The FFI errors are sent to caller as 500 Status code in few cases.
 
-## New Features
+As linked in the [issue](https://github.com/maidsafe/safe_launcher/issues/144), the parameters
+must be validated according to needs of the API. For example, the DNS API must also validate the service
+name and public name to be alphanumeric and can contain `-`.
 
-### NFS APIs
+**Regex for validating the service and public name `^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]+$`**
 
-#### Move / Copy Directory
-API to move or copy the directory from source to a destination.
-The source path and destination path must already exists or Bad Request(400) error will
-be returned.
+### Using Single Client
 
-##### Request
+Launcher uses two separate client instances for handling authorised and unauthorised requests.
+Launcher should use only one client instance to do the network related operations.
 
-###### Endpoint
-`/nfs/movedir`
+The NFS API in safe_core must be modified to support this change. The NFS APIs, [uses the
+encryption keys](https://github.com/maidsafe/safe_core/blob/master/src/nfs/helper/directory_helper.rs#L159)
+based on the client object. Instead the APIs must be modified [as in DNS](https://github.com/maidsafe/safe_core/blob/master/src/dns/dns_operations/mod.rs#L67)
+to accept `Option<(&public_key::PublicKey, &secret_key::SecretKey, &nonce::Nonce)`
 
-###### Method
-`POST`
+The FFI can decide whether to pass the keys or not based on the need for encryption/decryption.
+If the keys are passed, then the NFS API can use the keys to decrypt/encrypt, else the
+data is saved for public read.
 
-###### Header
-```
-Authorization: Bearer <TOKEN>
-Content-Type: application/json
-```
+### CORS validation
 
-###### Body
+The CORS validation must be based on the request origin for the XHR Requests.
+Allow XHR requests only if the `Origin` ends with `.safenet` extension. At present CORS
+is enabled for all XHR requests.
 
-|Field|Description|
-|-----|-----------|
-|srcPath| Source directory path which has to be copied or moved.|
-|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false.|
-|destPath| Destination directory path to which the source directory must be copied or moved.|
-|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false.|
-|action| ENUM value - MOVE or COPY. Defaults to MOVE.|
+### CSP Headers
 
-```
-{
-  "srcPath": String,
-  "isSrcPathShared": Boolean,
-  "destPath": String,
-  "isDestPathShared": Boolean,
-  "action": ENUM (MOVE or COPY)
-}
-```
-
-##### Response
-
-###### Status code
-```
-200
-```
-
-#### Move / Copy File
-
-API to move or copy the file from source directory to a destination directory.
-The source path and destination path must already exists or Bad Request(400) error will
-be returned.
-
-##### Request
-
-###### Endpoint
-`/nfs/movefile`
-
-###### Method
-`POST`
-
-###### Header
-```
-Authorization: Bearer <TOKEN>
-Content-Type: application/json
-```
-
-###### Body
-
-|Field|Description|
-|-----|-----------|
-|srcPath| Source path which has to be copied or moved e.g. `/a/b/c.txt`.|
-|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false.|
-|destPath| Destination path to which the file must be copied or moved e.g. `a/b`.|
-|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false.|
-|action| Optional value. ENUM value - MOVE or COPY. Defaults to MOVE.|
+Enforcing CSP headers on all responses from the launcher helps to mitigate security threats
+on the web clients.
 
 ```
-{
-  "srcPath": String,
-  "isSrcPathShared": Boolean,
-  "destPath": String,
-  "isDestPathShared": Boolean,
-  "action": ENUM (MOVE or COPY)
-}
+Content-Security-Policy : default-src self *.safenet; object-src none; base-uri self; form-action http://api.safenet; frame-ancestors self;
+X-Frame-Options : SAMEORIGIN
 ```
 
-##### Response
+[CSP Level 2](http://content-security-policy.com/) policy `frame-ancestors` is supported only on
+chrome and firefox. Adding `X-Frame-Options` headers will act as a fallback for other browsers.
 
-###### Status code
-```
-200
-```
+#### Launcher workflow for handling the FFI client handle
 
-#### File Metadata
+When the launcher is started, the unauthorised client is created. This will allow
+applications to read public data without the need of user logging in.
+Once the user logs in successfully, the unauthorised client handle must be dropped and
+the authorised client handle obtained should be used.
 
-##### Request
+### Gulp script for updating error codes (npm run update-error-codes)
 
-###### Endpoint
-|Field|Description|
-|-----|-----------|
-|filePath| Full file path. Must be URL encoded.|
-|isPathShared| Optional Value. Boolean value to indicate whether the path is shared or private. Defaults to false.|
+FFI interface returns error codes as return value for every method call. The errors must
+be looked up based on the error code from the client modules (Core, NFS and DNS).
+A gulp script must be integrated to fetch the error codes from the master branch of the `safe_core` and build the [`error_code_lookup.js`](https://github.com/maidsafe/safe_launcher/blob/master/app/server/error_code_lookup.js) file.
 
-```
-/nfs/file/:filePath/:isPathShared
-```
+## New API Features
 
-###### Header
-Required only for private data.
+### NFS API
 
-```
-Authorization: Bearer <TOKEN>
-```
+All the existing NFS API have endpoint changes. The variables `isPathShared` and the
+`filePath` are swapped. New APIs for move/copy directory, metadata request are added.
+The detail documentation of the NFS API is updated in the [supporting document](./0036-nfs-api-v0.5.md)
 
-###### Method
-```
-HEAD
-```
-
-##### Response
-
-###### Status Code
-```
-200
-```
-
-###### Header
-|Field|Description|
-|-----|-----------|
-|Accept-Ranges| Refers to the range accepted in the Range header.|
-|Content-Length| Size of the file in bytes.|
-|X-Created-On| created data and time in UTC.|
-|Last-Modified| Last modified date and time in UTC.|
-|X-Metadata| Present only if the metadata is available. Metadata as base64 String.|
-
-```
-Accept-Ranges: bytes
-Content-Length: Number
-Last-Modified: DATE in UTC
-X-Created-On: DATE in UTC
-X-Metadata: base64 string
-```
-
-### Refactor Read File Response Headers
-
-The get file response of the [NFS API](./text/0018-launcher-as-rest-server/nfs_api.md#response-headers-5)
-has custom headers. Remove the custom headers because the metadata request (HEAD) can be used
-to fetch the file metadata and restrict the GET file requests only for reading the content of the file.
-
-### Streaming API
+### Streaming Support for API
 
 The launcher API can not to handle large file sizes as it requires to read the entire content
 in memory to upload the whole file content and also in a chunked upload there are excess data chunks
@@ -260,9 +168,9 @@ being created in the network when a large file is saved.
 Exposing a streaming API can improve the efficiency to handle larger data upload.
 For creating and reading binary data, the APIs must be able to support streaming (read / write).
 
-Nodejs exposes [Stream API](https://nodejs.org/api/stream.html) for creating a custom read / write streams.
+Nodejs exposes [Stream API](https://nodejs.org/api/stream.html) for creating a custom Read / Write streams.
 The GET APIs must be able to serve the data from the network using a readable stream,
-while the PUT / POST APIs must be able to use a writable stream to pipe the received data to the network.
+while the PUT/POST APIs must be able to use a writable stream to pipe the received data to the network.
 
 The FFI interface must pass the self_encryption handle to the caller and the caller can use the
 handle to read and write the data. After the operation is complete, the caller must call the ffi
@@ -281,18 +189,18 @@ writable stream.
 ### Using Content Range Header
 
 Using the `Range` HTTP header can help in removing the offset and length parameters
-and drift towards a standard approach for partial read / write operations.
+and drift towards a standard approach for partial read/write operations.
 
-Example usage:
+Example usage,
 ```
 Range: bytes=0-
 Range: bytes=0-100
 ```
 
-If the range header is not specified, the entire file is streamed while reading and
-the data is appended to the end while writing.
+**If the range header is not specified, the entire file is streamed while reading and
+the data is appended to the end while writing.**
 
-### Response Headers
+### Response headers
 
 #### File Read
 
@@ -311,7 +219,7 @@ Content-Range: bytes <START>-<END>/<TOTAL>
 
 Status code `200` will be returned on success.
 
-### Streaming Issue in the Web Platform
+### Streaming issue in the Web platform (Browser based clients)
 
 Streaming over HTTP is out of the box supported in most of the platforms. Similarly,
 web browsers also provide support for the streaming data using the default widgets (audio / video controls) provided.
@@ -322,7 +230,7 @@ The other option was to write data in chunks to the server, that again is not an
 solution, since the client has to create many short lived connections for uploading the data in smaller chunks.
 
 Thus the NFS file content upload API must be able to support multipart upload. The API
-would consider the upload only for one file at a time, i.e. can not upload the file contents
+would consider the upload only for one file at a time, i.e, can not upload the file contents
 of multiple files at one go. The API will be reading the data only for one file and
 close the response accordingly if it is a multipart request.
 
@@ -335,7 +243,7 @@ TLS option is not considered in this version.
 ### Additional API can be added to facilitate the streaming uploads from the web browsers
 1. The local launcher server can also listen for web socket connections at the same launcher port.
 
-2. The client will call an api (PUT /nfs/file/worker/:filePath/:isPathShared). The API will get the metadata
+2. The client will call an api (PUT /nfs/file/worker/:isPathShared/:filePath/). The API will get the metadata
 to locate the file as a part of the request and get the self_encryptor handle for writing the file contents
 and hold the handle in memory(HashMap<UUID, SE_HANDLE>) associating to a random ID. The random ID
 is sent as part of the response.
