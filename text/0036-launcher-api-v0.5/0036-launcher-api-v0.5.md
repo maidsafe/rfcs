@@ -155,7 +155,7 @@ A gulp script must be integrated to fetch the error codes from the master branch
 
 ### NFS API
 
-All the existing NFS API has endpoint changes. The `isPathShared` variable and the
+All the existing NFS API have endpoint changes. The variables `isPathShared` and the
 `filePath` are swapped. New APIs for move/copy directory, metadata request are added.
 The detail documentation of the NFS API is updated in the [supporting document](./0036-nfs-api-v0.5.md)
 
@@ -222,11 +222,11 @@ Status code `200` will be returned on success.
 ### Streaming issue in the Web platform (Browser based clients)
 
 Streaming over HTTP is out of the box supported in most of the platforms. Similarly,
-web browsers also provide support for the streaming data using the default widgets(audio/video controls) provided.
+web browsers also provide support for the streaming data using the default widgets (audio / video controls) provided.
 
 Could not find an out of the box option for streaming upload of large data. The available
 options to write huge files is to use the HTML Form or FormData and send using multipart upload.
-The other option was to write data in chunks to the server, that again will not be a very ideal
+The other option was to write data in chunks to the server, that again is not an ideal
 solution, since the client has to create many short lived connections for uploading the data in smaller chunks.
 
 Thus the NFS file content upload API must be able to support multipart upload. The API
