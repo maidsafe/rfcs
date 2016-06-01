@@ -131,8 +131,8 @@ Enforcing CSP headers on all responses from the launcher helps to mitigate secur
 on the web clients.
 
 ```
-Content-Security-Policy → default-src self *.safenet; object-src none; base-uri self; form-action http://api.safenet; frame-ancestors self;
-X-Frame-Options → SAMEORIGIN
+Content-Security-Policy : default-src self *.safenet; object-src none; base-uri self; form-action http://api.safenet; frame-ancestors self;
+X-Frame-Options : SAMEORIGIN
 ```
 
 [CSP Level 2](http://content-security-policy.com/) policy `frame-ancestors` is supported only on
