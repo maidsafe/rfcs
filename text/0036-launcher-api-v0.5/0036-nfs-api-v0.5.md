@@ -3,6 +3,30 @@
 This is a supporting document for the parent [RFC](./0036-launcher-api-v0.5.md).
 This details the NFS API changes and also the new MOVE/COPY APIs that are getting added.
 
+The `isPathShared` boolean variable is changed to an enum representation (app / drive).
+This varaible can be called as `rootPath` with values `app / drive`. This will
+make the variable name self explanatory.
+
+
+### SAFE_Drive and Application Directory
+
+`SAFE_Drive` directory is created by default for every account. Applications can not access
+SAFE_Drive directory unless the user grants the permission at the time of authorisation.
+
+SAFE_Drive is meant for private storage for the account. Files/Folders can be accessed by applications
+from SAFE_Drive only if the `SAFE_DRIVE_ACCESS` permission is granted.
+
+Likewise when an application is authorised for the first time, a root directory for the
+application is created and mapped to the account. The applications can store and retrieve data only
+from the app's root folder. In case if the app needs to access SAFE_Drive, the app must authorise
+with the `SAFE_DRIVE_ACCESS` permission and the user must grant the permission.
+
+`SAFE_Drive` is a special folder, which can be accessed by applications for sharing
+data.
+
+For example, a camera app can store images on the SAFE_Drive. While another image editor
+application, can read the images from the SAFE_Drive.
+
 ## Directory
 
 ### Create Directory
@@ -10,9 +34,17 @@ This details the NFS API changes and also the new MOVE/COPY APIs that are gettin
 #### Request
 
 ##### Endpoint
+|Field|Description|
+|-----|-----------|
+|rootPath| Enum Value (app/drive).|
+|dirPath| Full directory path as String. Example - /home, /home/photos|
+
 ```
-/nfs/directory
+/nfs/directory/{rootPath}/{dirPath}
 ```
+
+Example endpoint URL: `/nfs/directory/drive/home/music`
+
 
 ##### Method
 ```
@@ -28,15 +60,13 @@ Content-Type: application/json
 ##### Body
 |Field|Description|
 |-----|-----------|
-|dirPath| Full directory path as String. Example - /home, /home/photos|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory. Optional. Defaults to false|
-|metadata| Optional String. Metadata as UTF-8 String|
+|metadata| Optional String. Metadata as base64 String|
+|isPrivate| Optional Boolean value to indicate whether the folder should be private or readable by all. Defaults to true|
 
 ```
 {
-  dirPath: String,
-  isPathShared: Boolean,  
-  metadata: String
+  metadata: String,
+  isPrivate: Boolean
 }
 ```
 
@@ -61,13 +91,14 @@ Content-Type: application/json
 #### Request
 
 ##### Endpoint
+
 |Field|Description|
 |-----|-----------|
-|isPathShared| Boolean value to indicate whether the path is shared from SAFEDrive or from the application directory|
+|rootPath| Enum Value (app/drive).|
 |dirPath| Full directory path as String. Example - /home, /home/photos|
 
 ```
-/nfs/directory/{isPathShared}/{dirPath}
+/nfs/directory/{rootPath}/{dirPath}
 ```
 
 ##### Method
@@ -128,7 +159,7 @@ status: 200 Ok
 
 ##### End point
 ```
-/nfs/directory/{isPathShared}/{dirPath}
+/nfs/directory/{rootPath}/{dirPath}
 ```
 
 ##### Method
@@ -182,17 +213,17 @@ Content-Type: application/json
 |Field|Description|
 |-----|-----------|
 |srcPath| Source directory path which has to be copied or moved|
-|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false|
+|srcRootPath| Enum value - app/drive. Defaults to app|
 |destPath| Destination directory path to which the source directory must be copied or moved|
-|isSrcPathShared| Boolean value to indicate whether the source path is shared or private. Defaults to false|
+|destRootPath| Enum value - app/drive. Defaults to app|
 |action| ENUM value - MOVE or COPY. Defaults to MOVE|
 
 ```
 {
   "srcPath": String,
-  "isSrcPathShared": Boolean,
+  "srcRootPath": Boolean,
   "destPath": String,
-  "isDestPathShared": Boolean,
+  "destRootPath": Boolean,
   "action": ENUM (MOVE or COPY)
 }
 ```
@@ -210,7 +241,7 @@ Content-Type: application/json
 
 ##### End point
 ```
-/nfs/directory/{isPathShared}/{dirPath}
+/nfs/directory/{rootPath}/{dirPath}
 ```
 
 ##### Method
@@ -238,7 +269,7 @@ status: 200 ok
 
 ##### End point
 ```
-/nfs/file
+/nfs/file/{rootPath}/{filePath}
 ```
 
 ##### Method
@@ -255,9 +286,7 @@ Authorization: Bearer {TOKEN}
 ##### Body
 
 ```
-{
-    "filePath": String,
-    "isPathShared": Boolean, // Optional - defaults to false
+{    
     "metadata": base64 string // Optional
 }
 ```
@@ -274,13 +303,8 @@ Status: 200 Ok
 #### Request
 
 ##### Endpoint
-|Field|Description|
-|-----|-----------|
-|filePath| Full file path. Eg, /home/docs/sample.txt|
-|isPathShared| Boolean value to indicate whether the path is shared or private.|
-
 ```
-/nfs/file/:isPathShared/:filePath
+/nfs/file/:rootPath/:filePath
 ```
 
 ##### Header
@@ -323,13 +347,8 @@ Metadata: base64 string
 #### Request
 
 ##### Endpoint
-|Field|Description|
-|-----|-----------|
-|filePath| Full file path|
-|isPathShared| Boolean value to indicate whether the path is shared or private.|
-
 ```
-/nfs/file/:isPathShared/:filePath
+/nfs/file/:rootPath/:filePath
 ```
 
 ##### Header
@@ -379,7 +398,7 @@ Binary data
 |isPathShared| Boolean value to indicate whether the path is shared or private.|
 
 ```
-/nfs/file/{isPathShared}/{filePath}/
+/nfs/file/metadata/{rootPath}/{filePath}/
 ```
 
 ###### Method
@@ -415,7 +434,7 @@ Authorization: Bearer {TOKEN}
 
 ##### End point
 ```
-/nfs/file/{isPathShared}/{filePath}
+/nfs/file/{rootPath}/{filePath}
 ```
 
 ##### Method
@@ -459,22 +478,21 @@ Content-Type: application/json
 
 |Field|Description|
 |-----|-----------|
-|srcPath| Source path which has to be copied or moved. eg, `/a/b/c.txt`|
-|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|destPath| Destination directory path to which the file must be copied or moved. eg, `a/b`|
-|isSrcPathShared| Optional value. Boolean value to indicate whether the source path is shared or private. Defaults to false|
-|action| Optional value. ENUM value - MOVE or COPY. Defaults to MOVE|
+|srcPath| Source path which has to be copied or moved. eg, /a/b/c.txt|
+|srcRootPath| Enum value - app/drive. Defaults to app|
+|destPath| Destination directory path to which the file must be copied or moved. eg, a/b|
+|destRootPath| Enum value - app/drive. Defaults to app|
+|action| ENUM value - MOVE or COPY. Defaults to MOVE|
 
 ```
 {
   "srcPath": String,
-  "isSrcPathShared": Boolean,
+  "srcRootPath": Boolean,
   "destPath": String,
-  "isDestPathShared": Boolean,
+  "destRootPath": Boolean,
   "action": ENUM (MOVE or COPY)
 }
 ```
-
 #### Response
 
 ##### Status code

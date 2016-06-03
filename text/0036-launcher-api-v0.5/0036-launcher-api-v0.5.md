@@ -97,13 +97,12 @@ can be directly sent instead of encrypting and then encoding to a base64 string.
 ### Parameter Validation
 
 The REST API must ensure that the parameters are validated before sending the request
-through the FFI. The FFI errors are sent to caller as 500 Status code in few cases.
+through the FFI. The FFI errors mut be resolved internally and proper error codes must be
+sent to caller instead of 500 Status code.
 
 As linked in the [issue](https://github.com/maidsafe/safe_launcher/issues/144), the parameters
 must be validated according to needs of the API. For example, the DNS API must also validate the service
 name and public name to be alphanumeric and can contain `-`.
-
-**Regex for validating the service and public name `^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]+$`**
 
 ### Using Single Client
 
@@ -125,9 +124,9 @@ The CORS validation must be based on the request origin for the XHR Requests.
 Allow XHR requests only if the `Origin` ends with `.safenet` extension. At present CORS
 is enabled for all XHR requests.
 
-### CSP Headers
+### CSP Headers on Web Proxy
 
-Enforcing CSP headers on all responses from the launcher helps to mitigate security threats
+Enforcing CSP headers on all responses through the proxy helps to mitigate security threats
 on the web clients.
 
 ```
