@@ -3,14 +3,17 @@
 This is a supporting document for the parent [RFC](./0036-launcher-api-v0.5.md).
 This details the NFS API changes and also the new MOVE/COPY APIs that are getting added.
 
-The `isPathShared` variable is changed to an enum representation (app / drive).
+The `isPathShared` boolean variable is changed to an enum representation (app / drive).
 This varaible can be called as `rootPath` with values `app / drive`. This will
 make the variable name self explanatory.
+
+
+### SAFE_Drive and Application Directory
 
 `SAFE_Drive` directory is created by default for every account. Applications can not access
 SAFE_Drive directory unless the user grants the permission at the time of authorisation.
 
-SAFE_Drive is intended for private storage. Files/Folders can be accessed by applications
+SAFE_Drive is meant for private storage for the account. Files/Folders can be accessed by applications
 from SAFE_Drive only if the `SAFE_DRIVE_ACCESS` permission is granted.
 
 Likewise when an application is authorised for the first time, a root directory for the
