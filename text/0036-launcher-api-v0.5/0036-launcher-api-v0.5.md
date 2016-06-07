@@ -150,12 +150,16 @@ FFI interface returns error codes as return value for every method call. The err
 be looked up based on the error code from the client modules (Core, NFS and DNS).
 A gulp script must be integrated to fetch the error codes from the master branch of the `safe_core` and build the [`error_code_lookup.js`](https://github.com/maidsafe/safe_launcher/blob/master/app/server/error_code_lookup.js) file.
 
+The gulp build task will look for the safe_core project on the local machine based on
+a path from the gulpfile.
+If the `safe_core` project is located, then the error_code_lookup.js file is updated based on the local safe_core
+source. Else the `error_code_lookup.js` file wont be updated by the script.
+
 ## New API Features
 
 ### NFS API
 
-All the existing NFS API have endpoint changes. The variables `isPathShared` and the
-`filePath` are swapped. New APIs for move/copy directory, metadata request are added.
+All the existing NFS API have endpoint changes. New APIs for move/copy directory, metadata request are added.
 The detail documentation of the NFS API is updated in the [supporting document](./0036-nfs-api-v0.5.md)
 
 ### Streaming Support for API
@@ -232,6 +236,24 @@ Thus the NFS file content upload API must be able to support multipart upload. T
 would consider the upload only for one file at a time, i.e, can not upload the file contents
 of multiple files at one go. The API will be reading the data only for one file and
 close the response accordingly if it is a multipart request.
+
+### Account Status Display
+
+At present there is no means for the user to know the space that has been utilised. Presenting
+an UI for displaying the storage stats for the logged in account would be useful. The stats would
+be fetched when the launcher starts and the user can check the latest stats by using a refresh option.
+
+A refresh option is provided instead of polling to avoid more network traffic at this time.
+Once the messaging is implemented, real time updates for the account status can be implemented.
+
+### Manage Proxy from login page
+
+By default, the proxy is started when the launcher starts. Provide option to disable the proxy before
+even logging in to the launcher. Until a dedicated browser for SAFE Network is in place, we would have to
+depend on proxy for facilitating web apps.
+
+The settings should be persistent and while starting the launcher next time, the proxy
+server starting up should depend on the user's settings.
 
 # Drawbacks
 
