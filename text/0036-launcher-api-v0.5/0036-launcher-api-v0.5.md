@@ -252,6 +252,8 @@ By default, the proxy is started when the launcher starts. Provide option to dis
 even logging in to the launcher. Until a dedicated browser for SAFE Network is in place, we would have to
 depend on proxy for facilitating web apps.
 
+The settings should be persistent and while starting the launcher next time, the proxy
+server starting up should depend on the user's settings.
 
 # Drawbacks
 
