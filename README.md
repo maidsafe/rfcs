@@ -38,6 +38,7 @@ This is an excerpt of the [List of RFCs by status](./RFCs-by-status.md) showing 
 
 - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
 - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
+- [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
 
 ## When you need to follow this process
 [When you need to follow this process]: #when-you-need-to-follow-this-process

@@ -1,6 +1,6 @@
 # safe_launcher API v0.5
 
-- Status: proposed
+- Status: active
 - Type: new feature, enhancement
 - Related components: safe_launcher
 - Start Date: 25-05-2016
