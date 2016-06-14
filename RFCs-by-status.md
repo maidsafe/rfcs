@@ -6,6 +6,7 @@ A list of all RFCs by their current status.
 
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
+ - [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
 
 ## Proposed RFCs
 
@@ -18,7 +19,6 @@ A list of all RFCs by their current status.
  - [#0030 Secure node join](./text/0030-secure-node-join/0030-secure-node-join.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
- - [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
 
 ## Agreed RFCs
 
@@ -52,4 +52,4 @@ A list of all RFCs by their current status.
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Tue 31 May 17:03:49 BST 2016_ at REV [897545b](https://github.com/maidsafe/rfcs/commit/897545b9aa1621e13dc475b853a7006ba0552039))
+(Last updated _Tue 14 Jun 11:57:22 BST 2016_ at REV [48fd6af](https://github.com/maidsafe/rfcs/commit/48fd6af74df19a9de6a6d1b048d25d539abf9ec3))
