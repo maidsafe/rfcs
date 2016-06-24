@@ -89,7 +89,7 @@ For private data the data filed will be encrypted (at client discretion), for pu
 - serialise any structure into `Vec<u8>` and include in data field (can be any structure that is serialisable)
 - store on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
 - Get from network via `routing::Get(Identity: name, Data::type : type, u64: type_tag);`
-- Mutate on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
+- Mutate on network via `routing::Post(Identity: location, Data::StructuredData : data, u64: type_tag);`
 - Delete from network via `routing::Delete(Identity: name, Data::type : type, u64: type_tag);`
 
 ## Security
