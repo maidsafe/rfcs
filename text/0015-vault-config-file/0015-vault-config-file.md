@@ -52,8 +52,8 @@ It needs to be mentioned that there is an internal distribution ratio between pm
 A sample config file may looks like (1GB for pmid_node and 100MB for sd_manager):
 ```rust
 {
-	wallet_address : 245df3245df3245df3245df300000000000000001cc0dd1cc0dd1cc0dd1cc0dd
-	max_space : 100
+	"wallet_address": "245df3245df3245df3245df300000000000000001cc0dd1cc0dd1cc0dd1cc0dd",
+	"max_space": "100"
 }
 ```
 
