@@ -8,15 +8,15 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 Expand the current example in `safe_core` to include the features of creating an mpid_account for messaging and send/receive a message to/from a peer user.
 
-# Motivation
+## Motivation
 
 The current `safe_core` has an example `safe_client` showing how a user can create an account and login to the Vault network. With the messaging feature now having been implemented on the Vault and Client side, we wish to expand the `safe_core` example to include this messaging feature. This can shall showcase how secured messaging works within the distributed Vault network, and also to testify the current implementation from both Vault and the Client side.
 
-# Detailed design
+## Detailed design
 
 The account creation and login part within the current `safe_client` will remain unchanged.
 
@@ -67,7 +67,7 @@ loop {
 ```
 
 
-# Drawbacks
+## Drawbacks
 
 1, To avoid exchanging long hex code mpid_account, the example code needs to carry out a hash function, so that it is a human readable memorable word that can be used as an mpid_account name.
 
@@ -75,10 +75,10 @@ loop {
 
 3, The secret key from maid_account has been used as the signing secret key for the mpid messaging.
 
-# Alternatives
+## Alternatives
 
 N/A
 
-# Unresolved questions
+## Unresolved questions
 
 N/A

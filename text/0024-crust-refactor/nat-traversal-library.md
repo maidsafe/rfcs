@@ -7,18 +7,18 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 Create a separate library for NAT traversal techniques.
 
-# Motivation
+## Motivation
 
 The MaidSAFE network needs to be able to operate through NATs. Currently NAT
 traversal is implemented in Crust, however these techniques may be useful
 elsewhere and to other Rust developers. We can achieve better separation of
 concerns by implementing a generic NAT-traversal library as a separate crate.
 
-# Detailed design
+## Detailed design
 
 The actual techniques used in this library are described in [RFC-008 UDP Hole Punching](https://github.com/maidsafe/rfcs/tree/master/active/0008-UDP-hole-punching).
 
@@ -209,15 +209,15 @@ let PunchedUdpSocket { socket, peer_addr } = punched_udp_socket;
 // can be used to talk to `peer_addr` through NATs and firewalls.
 ```
 
-# Drawbacks
+## Drawbacks
 
 I can't see a reason not to do this.
 
-# Alternatives
+## Alternatives
 
 Not do this.
 
-# Unresolved questions
+## Unresolved questions
 
 What other existing techniques are there for NAT traversal? Is this API
 actually forward-compatible if we wish to add these techniques in the future?

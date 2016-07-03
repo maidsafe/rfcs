@@ -10,37 +10,37 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 This RFC outlines the system components and design for how the three immutable data types (Normal, Backup and Sacrificial) get calculated and handled on the SAFE Network.
 
-# Motivation
+## Motivation
 
-## Rationale
+### Rationale
 
 The SAFE Network keeps multiple copies of a single ImmutableData chunk, not only for availability but also for security reasons.  To that end, three different types of ImmutableData have been defined: Normal, Backup and Sacrificial.  These differ only in how their name is calculated; their contents are identical.
 
 Having three different types bearing different but deterministic names will increase the difficulty of any attack, as it will probably be three different groups of Vaults, which need to be tackled at the same time.
 
-## Supported Use-Cases
+### Supported Use-Cases
 
 From the client perspective, the use-case stays the same: storing or fetching immutable data.  While clients are aware of the different types (as they're part of the public interface of Routing), they'll only ever have to deal with Normal chunks, both when putting and getting ImmutableData.
 
-## Expected Outcome
+### Expected Outcome
 
 Replication of the different immutable data types bearing different names, which will be handled by the DataManager group closest to the given chunk's name.  Vaults will not be required to do any calculations on whether it should hold a particular chunk - Routing will ensure that only appropriate chunks are passed to Vaults.
 
-# Detailed design
+## Detailed design
 
-## Overview
+### Overview
 
 For each type (Normal, Backup and Sacrificial) of a given chunk, the management will be done by the ImmutableDataManagers closest to the chunk's name, and a copy will be stored on two PmidNodes within that close group.
 
 The Normal DMs (DataManagers comprising closest group to the Normal name), forward client Put requests to the Backup and Sacrificial DMs, and forward Get requests to the Backup and Sacrificial DMs only if required (e.g. in case of heavy churn where the Normal copies are unavailable).  This minimises client exposure to the network data types and their management.
 
-## Implementation Details
+### Implementation Details
 
-### Put
+#### Put
 
 MMs (MaidManagers) should respond with failure for any Put or Get requests from Clients for Backup or Sacrificial types.
 
@@ -59,7 +59,7 @@ DMs handling a Put failure for Normal or Backup chunks should send Delete reques
 
 If a PN is ultimately unable to store a chunk even after having been instructed by the DMs to delete all Sacrificial chunks, it should be marked as "bad" by the DMs and not retried as a holder for that chunk.  The Put process stops at a DM group once a copy is held on two different PNs from the close group for that chunk, or once all Vaults in the close group have been attempted and failed.
 
-### Get
+#### Get
 
 DMs handling a Get request for a Normal chunk from client should send a Get request to each "good" PN concurrently.  As soon as a successful response arrives, the Client's request should be responded to.
 
@@ -69,11 +69,11 @@ When receiving a successful Get response for a Backup or Sacrificial chunk, if t
 
 It is expected that three groups should never all fail for any given chunk.
 
-### Churn
+#### Churn
 
 If a current PN ceases to be a holder for a chunk due to churn (either it has disconnected or it has been pushed out of the close group for that chunk due to other Vaults joining the network) then it should be removed from the list of holders and a replacement copy should be Put to a new PN.  This will likely involve following the Get procedure first.
 
-## Planned Work
+### Planned Work
 
 1. MaidManager
     1. Block attempts to Put or Get Backup or Sacrificial chunks
@@ -92,18 +92,18 @@ If a current PN ceases to be a holder for a chunk due to churn (either it has di
 1. PmidNode
     1. Handle Delete requests from PMs for Sacrificial chunks only
 
-# Drawbacks
+## Drawbacks
 
 Increased complexity of Vault codebase.
 
-# Alternatives
+## Alternatives
 
 1. The SAFE network itself could be free of carrying out any naming calculations and handling based on types if the Client only was aware of these and made requests bearing the different type-dependent names.
 
 1. It is possible that to reduce the code complexity, the Normal DataManager group of an immutable data chunk shall still be DM(normal_name). Then such a group can forward the requests to pmid_nodes closest to normal_name, backup_name, and sacrificial_name. However, due to the fact the pmid_nodes are all already the closest nodes to the data_manager, such a forwarding mechanism may not be able to secure a highly diverse distribution. i.e. some pmid_nodes may hold different type copies at the same time.
 
-# Unresolved Questions
+## Unresolved Questions
 
-# Future Work
+## Future Work
 
-# Appendix
+## Appendix

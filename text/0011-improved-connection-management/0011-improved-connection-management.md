@@ -10,17 +10,17 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 Introduce the notion of clearly defined connection phases and establish directed routing network connections in conjunction with crust version 0.3 and later. The combined objective with crust proposed here for routing is to prepare for NAT traversal using UDP/uTP.
 
-# Motivation
+## Motivation
 
 Starting with crust version 0.3, the API provides directional information on newly established connections.  This information is helpful for establishing a routing network with the correct topology. Already at bootstrapping it simplifies the logic for the routing node. No artificial distinction is needed for a "new bootstrap connection", as that depends on the state of the node and whether the node accepts or has connected to another node.
 
-# Detailed design
+## Detailed design
 
-## Rebootstrapping
+### Rebootstrapping
 
 A first objective is the replacement of previous conditional variables with a clean flow through states.  This enables rebootstrapping, ie. when the connections to the network are lost, routing can automatically reconnect.  The states proposed in flow-order are `Disconnected`, `Bootstrapped`, `Relocated`, `Connected`, `GroupConnected`, `Terminated`.
 
@@ -30,7 +30,7 @@ A full node that cannot bootstrap (as such `Disconnected`), but accepts a connec
 
 A client will have a reduced cycle: `Disconnected`, `Bootstrapped`, `Terminated`.  Rebootstrapping is achieved through cycling through the first two states.
 
-## Asynchronous flowchart for connection management
+### Asynchronous flowchart for connection management
 
 We consider first the case where the connection is not started through crust bootstrapping.  We assume that a node `A` is either already connected into the network, or has established a relay node in the network through crust bootstrapping.  
 
@@ -58,7 +58,7 @@ The objective of this two-way connection cycle is to ensure that any node can co
 
 ![Asynchronous flowchart for Connection Management](Connection%20Management.png)
 
-## Asynchronous flowchart for connection management for bootstrapping
+### Asynchronous flowchart for connection management for bootstrapping
 
 With the asynchronous behaviour outlined above for two named nodes, a node can connect as a client when it has not yet obtained a name from the network, or has no desire to obtain a network name.  Bootstrapping is essential when starting up, as the node does not yet have connections to the network.  It hence has no knowledge of the nodes that exist on the network or their IP locations on the internet.  To overcome this start-up problem, the node will rely on the decentralised mechanisms provided by crust.
 
@@ -68,15 +68,15 @@ As there is no exchange of routing messages in this bootstrapping process in the
 
 ![Asynchronous flowchart for Connection Management for bootstrapping](Connection%20Management%20for%20Bootstrapping.png)
 
-## Integration of Address Relocation into connection management
+### Integration of Address Relocation into connection management
 
 The current mechanism of Address Relocation is compatible with the proposal here.  To activate Address Relocation a new proposal will be written that integrates Address Relocation into the `ConnectRequest`.
 
 For clients it can be of interest to announce their relay location to the ClientManager group.  This can also be done with the `ConnectRequest`.
 
-# Implementation blueprint
+## Implementation blueprint
 
-## State
+### State
 
 Introduce a `State` object to `RoutingCore` representing the distinct states of connectedness for network entities, characterised as follows.
 
@@ -97,7 +97,7 @@ pub enum State {
 }
 ```
 
-## Expected Connections
+### Expected Connections
 
 The following types and events form an integral part of the connection management proposal.
 
@@ -119,7 +119,7 @@ enum ExpectedConnection {
 ::crust::Event::ExternalEndpoints(::crust::Endpoint)
 ```
 
-## On ConnectRequest and on ConnectResponse
+### On ConnectRequest and on ConnectResponse
 
 ```rust
 fn handle_on_connect_request(&mut self, connect_request) {
@@ -142,7 +142,7 @@ fn handle_on_connect_response(&mut self, connect_response) {
 }
 ```
 
-## On accept and on connect
+### On accept and on connect
 
 ```rust
 fn handle_on_accept(&mut self, connection) {
@@ -185,7 +185,7 @@ fn handle_on_connect(&mut self, connection) {
 }
 ```
 
-## Hello and confirmation
+### Hello and confirmation
 
 ```rust
 fn handle_hello(&mut self, connection, ::direct_message::Hello) {
@@ -225,7 +225,7 @@ fn on_confirmation(&mut self, confirmation, connection) {
 
 NOTE: this is unfinished and the implementation for a bootstrap connection, is not integrated in the above pseudo-code.
 
-### Routing Core
+#### Routing Core
 
 ```rust
 struct RoutingCore {
@@ -235,7 +235,7 @@ struct RoutingCore {
 }
 ```
 
-### utilities
+#### utilities
 
 ```rust
 /// ExpirationMap holds the Key and Value with a timestamp but pushes
@@ -255,21 +255,21 @@ impl ExpirationMap {
 }
 ```
 
-## Updates to Existing Code
+### Updates to Existing Code
 
 1. Merge the `RoutingNode` functions `handle_new_connection` and `handle_new_bootstrap_connection`.
 1. Remove `Unidentified` connections from `ConnectionName`.
 1. In the event of disconnect implement re-bootstrapping.
 1. Integrate `Hello` in line with crust events and updated methodology.
 
-# Drawbacks
+## Drawbacks
 
 A double connection is established to ensure that a connection can be made in both direction. On cryptographically establishing the valid two-way-established connection, the original connection (from network to requester) is confirmed and the secondary connection is dropped.  This imposes more work to establishing a connection, but is fundamental to ensure the correct routing topology.  It is argued that without this secondary connection it is not possible to cryptographically ensure that IP-connection is authentic to the routing connection.
 
-# Alternatives
+## Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
 
-# Unresolved questions
+## Unresolved questions
 
 What parts of the design are still to be done?

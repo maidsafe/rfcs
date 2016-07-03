@@ -8,12 +8,12 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 This proposes an enhancement whereby the network will respond to a `Get` request for a non-existent
 account packet (`StructuredData` with `type_tag` 0) with a fake account packet.
 
-# Motivation
+## Motivation
 
 The objective is to deter an attack where random account packets are requested by a malicious Client
 in the hopes of finding one in order to attempt decryption of it.
@@ -22,9 +22,9 @@ The defence is to have the network respond to requests for non-existent account 
 which will appear valid to the recipient.  This will make it expensive for the attacker, since it
 won't know whether the decrypted packet will yield useful data or not.
 
-# Detailed design
+## Detailed design
 
-## Issues to Overcome
+### Issues to Overcome
 
 The main issue is to be able to have a group of Vaults agree a fake packet which will be accumulated
 by the attacker - i.e. the group all need to generate an identical fake.  Essentially we just need a
@@ -41,7 +41,7 @@ list of Vault names.  It would then be easy to deduce that the responses contain
 A more trivial issue is that while account packets are currently the highest-value targets for an
 attacker, it should be possible to extend the defence to other `StructuredData` types easily.
 
-## Proposed Solution
+### Proposed Solution
 
 There is an example implementation at https://gitlab.com/Fraser999/Fake-Account-Packet.
 
@@ -179,7 +179,7 @@ fn create_fake_account_packet(id: XorName, session_ids: &[SessionId]) -> Structu
 }
 ```
 
-# Drawbacks
+## Drawbacks
 
 This presents a very basic implementation.  It requires the Vaults to generate throwaway
 cryptographic keys in order to create a plausible fake - a relatively expensive operation.  For an
@@ -188,7 +188,7 @@ proposed defence may need to become more complex, e.g. monitoring and reacting t
 rates of `Get` requests for non-existent data, or caching spare throwaway crypto keys during quiet
 periods for later use in generating fakes.
 
-# Alternatives
+## Alternatives
 
 1. Don't respond to `Get` requests for non-existent data.  While this would be simple to implement
 in Vaults and would be the optimal way to avoid allowing an attacker to make Vaults "do work", it
@@ -202,7 +202,7 @@ passing by.  This would need to be handled by the Vault through which the Client
 an unacceptably high rate of `GetFailure`s is reached, the Client is dropped.  This seems fairly
 simple to implement, but an attacker would be able to work around this by using many Clients.
 
-# Unresolved questions
+## Unresolved questions
 
 1. Should the seed be generated using all members' names from the close group, or just a subset of
 closest ones?

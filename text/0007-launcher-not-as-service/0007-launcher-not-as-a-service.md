@@ -6,17 +6,17 @@
 - Start Date: 11-September-2015
 - RFC PR: #41
 
-# Summary
+## Summary
 
 Launcher will be a gateway for any app that wants to work on the SAFE Network on a user's behalf. It will generate a single set of ownership and crypto keys which it will give to all the apps that want to access the Network on user's behalf. It will also give access to `SAFEDrive` with an intention to allow apps to share data among themselves.
 
-# Motivation
+## Motivation
 
-## Why?
+### Why?
 
 App's access of the SAFE Network on behalf of the user is an issue with high security concerns. Without Launcher, every app would ask for user credentials to log into the Network. This means that sensitive information like user's session packet etc., are compromised and can be potentially misused. Launcher will prevent this from happening by being the only one that gets the user credential. Apps only communicate with the Network with keys given by Launcher on user's behalf. These will be different to the user's MAID keys.
 
-## What cases does it support?
+### What cases does it support?
 
 Launcher
 
@@ -27,9 +27,9 @@ Launcher
 1. will manage metadata related to apps to give uniformity in experience when shifting from one machine to another - e.g. if app `A` is installed in machine 1 then when the user logs into machine 2 using his/her SAFE Account via Launcher, he/she will be presented with a union of all the apps that were installed on all the machines which access the SAFE Network on his/her behalf.
 
 1. along with [safe_vault](https://github.com/maidsafe/safe_vault) will manage the mapping and de-mapping of ownership keys for an app.
-# Detailed design
+## Detailed design
 
-## User's Login Session Packet (for reference)
+### User's Login Session Packet (for reference)
 This is only to provide a context to the references to it below. This might change in future without affecting this RFC (i.e. only a small portion of this is actually relevant for this RFC).
 ```
 Account {
@@ -45,7 +45,7 @@ Account {
 ```
 - The Root Directories are encrypted with MAID-keys.
 
-## Start Flow
+### Start Flow
 
 **step 0:** Start Launcher.
 
@@ -65,7 +65,7 @@ Account {
 
 **step 8:** Launcher will listen on local host: `127.0.9.9:30000`. If unavailable, it will increment the port till a valid TCP Listener is in place. This will be thus `127.0.9.9:Launcher-Port`. This will remain on till Launcher is closed. We will call this combination `<Laucher-IP:Launcher-Port>`.
 
-## Add App Flow
+### Add App Flow
 
 **step 0:** User drags `XYZ` App binary into the Launcher to add it. Launcher will ask the user if the app should have access to `SAFEDrive`.
 
@@ -158,11 +158,11 @@ struct Response {
 where `DirectoryKey` is defined [here](https://github.com/ustulation/safe_nfs/blob/master/src/metadata/directory_key.rs).
 - Launcher closes the connection and is no longer needed for this session for this app.
 
-## Reads and Mutations by the App
+### Reads and Mutations by the App
 
 - All `GET/PUT/POST/DELETE`s will go directly to the Network. The app will use `<Launcher Keys>` to encrypt and sign data.
 
-## Remove App Flow
+### Remove App Flow
 
 **procedure 0:** Launcher removes the App as follows:
 - Delete from `<LOCAL-CONFIG-FILE>` (on the user's machine) the following:
@@ -178,13 +178,13 @@ where `DirectoryKey` is defined [here](https://github.com/ustulation/safe_nfs/bl
 
 **procedure 1:** While the other procedure would work, there might be occassions when the user wants to immediately remove the app completely (which also translates as revoke App's permission to mutate network on user's behalf). He may not have access to other machines where the App was installed and may be currently running and the previous procedure requires the user to remove it from all machines. Thus there shall be an option in Launcher to remove App completely irrespective of if it is installed and/or running in other machines. In such cases Launcher will reduce `Reference Count` to 0 and proceed as above for the detection of zero reference count.
 
-## Misc
+### Misc
 - If the App is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his/her account via Launcher on that machine. However when the App is attempted to be activated on a machine via Launcher where it was not previously added to Launcher then he/she will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
 - When the App is started via Launcher, it will first check if the `SHA512(App-Binary)` matches any one of the corresponding entries in the vector in `<LAUNCHER-CONFIG-FILE>`. If it does not Launcher will interpret this as a malacious App that has replaced the App-binary on user's machine, and thus will show a dialog to the user for confirmation  of whether to still continue, because there can be genuine reasons for binary not matching like the App was updated etc.
 
-# Alternatives
+## Alternatives
 There is an RFC proposal for a more robust and complicated design of Launcher which aims at solving many more security concerns.
 
-# Drawbacks
+## Drawbacks
 1. Since same keys are used by all apps, an app can easily gain access to another app's root directory and config files.
 1. Since same keys are used by all apps, an app can continue to access the Network even after it's removal from Launcher. Revocation is not easy and is a tedious process of fetching all user data from the Network, and encrypting and signing them with different keys and making these available to all other authenticated apps (in all machines). The vaults too must be informed and asked to un-map the previous keys and map new ones.

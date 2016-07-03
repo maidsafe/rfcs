@@ -8,12 +8,12 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 This RFC proposes that Routing's parallel message sending mechanism is replaced by a message
 acknowledgement (ack) mechanism.
 
-# Motivation
+## Motivation
 
 Routing currently implements sending messages via eight parallel routes for reliability and security
 reasons.  While the routes for a given message will likely converge as the message nears its
@@ -22,7 +22,7 @@ Routing nodes.
 
 The proposed ack mechanism should allow these costs to be reduced significantly.
 
-# Detailed design
+## Detailed design
 
 Rather than a message being sent via parallel routes, instead it will be sent via a single route and
 will require an ack to be sent by the recipient(s).  Should an ack *not* be received within a
@@ -74,17 +74,17 @@ pub enum ResponseContent {
 
 As above, the value will be the SipHash of the received `SignedMessage`.
 
-# Drawbacks
+## Drawbacks
 
 This is a less secure mechanism.  However, the security concerns will be addressed in a future RFC.
 
-# Alternatives
+## Alternatives
 
 There are some possible improvements which are not being considered at the moment in the interests
 of simplicity.  Some ideas which have surfaced are:
 * variable timeouts depending on the distance the message has to travel and/or the size of message
 * selective acks - not all messages need acknowledged
 
-# Unresolved questions
+## Unresolved questions
 
 None.

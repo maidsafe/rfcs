@@ -8,11 +8,11 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 Securely join a node to network
 
-# Motivation
+## Motivation
 
 Currently node relocation involves a convoluted mechanism that ends with a non cryptographically
 validatable Id. A much more secure mechanism will ensure group membership is easily confirmed as
@@ -22,7 +22,7 @@ network to confirm they are in fact network connected nodes. This is achieved by
 to a group that is encrypted for a single group member. Only the member can read the message and
 reply.
 
-# Detailed design
+## Detailed design
 
 
 In the current implementation as seen in this sequence diagram XXXXX involves several steps. This
@@ -47,14 +47,14 @@ Node (A) will then have and ID that is cryptographically validated and allow the
 much more flexibility in handling requests and data for node A.
 
 
-# Drawbacks
+## Drawbacks
 
 None known at this time.
 
-# Alternatives
+## Alternatives
 
 The status quo does indeed work, but loses cryptographic guarantees that this scheme offers.
 
-# Unresolved questions
+## Unresolved questions
 
 TBD
