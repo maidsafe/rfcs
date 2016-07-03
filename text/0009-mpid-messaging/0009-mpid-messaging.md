@@ -10,29 +10,29 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 This RFC outlines the system components and design for general communications infrastructure and security on the SAFE Network.
 
-# Motivation
+## Motivation
 
-## Rationale
+### Rationale
 
 A messaging system on the SAFE Network will obviously be useful. Over and above this, the proposed messaging system is secure and private without the possibility of snooping or tracking.
 
 A large abuse of modern day digital communications is the ability of spammers and less than ethical marketing companies to flood the Internet with levels of unsolicited email to a level of circa 90%. This is a waste of bandwidth and a significant nuisance.
 
-## Supported Use-Cases
+### Supported Use-Cases
 
 The system will support secure, private, bi-directional communications between pairs of Clients.
 
-## Expected Outcome
+### Expected Outcome
 
 The provision of a secure messaging system which will eradicate unwanted and intrusive communications.
 
-# Detailed design
+## Detailed design
 
-## Overview
+### Overview
 
 A fundamental principle is that the cost of messaging is with the sender, primarily to deter unsolicited messages. To achieve this, the sender will maintain messages in a network [outbox][3] until they are retrieved by the recipient. The recipient will have a network [inbox][4] comprising a list of metadata relating to messages which are trying to be delivered to it.
 
@@ -40,13 +40,13 @@ If the message is unwanted, the recipient simply does not retrieve the message. 
 
 This paradigm shift will mean that the obligation to unsubscribe from mailing lists, etc. is now with the owner of these lists. If people are not picking up messages, it is because they do not want them. So the sender has to do a better job. It is assumed this shift of responsibilities will lead to a better-managed bandwidth solution and considerably less stress on the network and the users of the network.
 
-## Implementation Details
+### Implementation Details
 
 The two relevant structs (other than the MPID itself which is a [standard Client key][0]) are the [`MpidHeader`][1] and the [`MpidMessage`][2].
 
 Broadly speaking, the `MpidHeader` contains metadata and the `MpidMessage` contains a signed header and message. We also want to define some upper limits which will be described later.
 
-### Constants
+#### Constants
 
 ```rust
 pub const MPID_MESSAGE: u64 = 51000;
@@ -56,7 +56,7 @@ pub const MAX_INBOX_SIZE: usize = 1 << 27;       // bytes, i.e. 128 MiB
 pub const MAX_OUTBOX_SIZE: usize = 1 << 27;      // bytes, i.e. 128 MiB
 ```
 
-### `MpidHeader`
+#### `MpidHeader`
 
 ```rust
 pub struct MpidHeader {
@@ -71,7 +71,7 @@ The `sender` field is hopefully self-explanatory. The `guid` allows the message 
 
 The `metadata` field allows passing arbitrary user/app data. It must not exceed `MAX_HEADER_METADATA_SIZE` bytes.
 
-### `MpidMessage`
+#### `MpidMessage`
 
 ```rust
 pub struct MpidMessage {
@@ -83,19 +83,19 @@ pub struct MpidMessage {
 ```
 Each `MpidMessage` instance only targets one recipient. For multiple recipients, multiple `MpidMessage`s need to be created in the [Outbox][3] (see below). This is to ensure spammers will run out of limited resources quickly.
 
-## Outbox
+### Outbox
 
 This is a simple data structure for now and will be a hash map of serialised and encrypted `MpidMessage`s. There will be one such map per MPID (owner), held on the MpidManagers, and synchronised by them at churn events.
 
 This can be implemented as a `Vec<MpidMessage>`.
 
-## Inbox
+### Inbox
 
 Again this will be one per MPID (owner), held on the `MpidManager`s, and synchronised by them at churn events.
 
 This can be implemented as a `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, mpid_header: MpidHeader)>` or having the headers from the same sender grouped: `Vec<(sender_name: XorName, sender_public_key: ::sodiumoxide::crypto::sign::PublicKey, headers: Vec<mpid_header: MpidHeader>)>` (however this may incur a performance slow down when looking up for a particular mpid_header).
 
-## Messaging Format Among Nodes
+### Messaging Format Among Nodes
 
 Messages between Clients and MpidManagers will utilise [`::routing::plain_data::PlainData`][5], for example:
 ```rust
@@ -107,11 +107,11 @@ let pd = PlainData {
 
 When handling churn, MpidManagers will synchronise their outboxes by sending each included MpidMessage as a single network message. However, since MpidHeaders are significantly smaller, inboxes will be sent as a message containing a vector of all contained headers.
 
-## Message Flow
+### Message Flow
 
 ![Flowchart showing MPID Message flow through the SAFE Network](MPID%20Message%20Flow.png)
 
-## MPID Client
+### MPID Client
 
 The MPID Client shall provide the following key functionalities :
 
@@ -128,7 +128,7 @@ If the `Push` model is used, an MPID Client is expected to have its own routing 
 
 Such a separate routing object (or the registering procedure) is not required if the `Pull` model is employed. This is where the MPID Client periodically polls its network inbox for new headers. It may also have the benefit of saving the battery life on mobile devices, as the client app doesn't need to keep MPID Client running all the time.
 
-## Planned Work
+### Planned Work
 
 1. MPID-Messaging
     1. Definition of `MpidMessage`.
@@ -155,11 +155,11 @@ Such a separate routing object (or the registering procedure) is not required if
     1. Delete `MpidHeader`.
 
 
-# Drawbacks
+## Drawbacks
 
 None identified, other than increased complexity of Vault and Client codebase.
 
-# Alternatives
+## Alternatives
 
 No other in-house alternatives have been documented as yet.
 
@@ -167,11 +167,11 @@ If we were to _not_ implement some form of secure messaging system, a third part
 
 We also have identified a need for some form of secure messaging in order to implement safecoin, so failure to implement this RFC would impact on that too.
 
-# Unresolved Questions
+## Unresolved Questions
 
 None.
 
-# Future Work
+## Future Work
 
 - This RFC doesn't address how Clients get to "know about" each other. Future work will include details of how Clients can exchange MPIDs in order to build an address book of peers.
 
@@ -187,9 +187,9 @@ None.
 
 - Also, not exactly within the scope of this RFC, but related to it; MPID packets at the moment have no human-readable name. It would be more user-friendly to provide this functionality.
 
-# Appendix
+## Appendix
 
-### Further Implementation Details
+#### Further Implementation Details
 
 All MPID-related messages will be in the form of a Put, Post or Delete of `PlainData`.
 

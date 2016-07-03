@@ -10,14 +10,14 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 Add `self_encryptor` data IO to `safe_ffi` and `safe_launcher` API.
 
 Currently NFS is exposed via `safe_ffi` and the `safe_launcher` REST API which uses self encryption under the hood. This
 RFC is to provide direct access to `self_encryption` for those that don't need/want full file system structures.
 
-# Motivation
+## Motivation
 
 App developers will need to directly write self-encrypted chunks to the network and receive a data map back with
 information about the chunks. While the Rust lib can be used directly, by exposing it via the launcher REST service
@@ -30,13 +30,13 @@ for those that don't need that extra metadata.
 This is the self-encryption equivalent of [the issue](https://github.com/maidsafe/rfcs/issues/77) for supporting core
 data types via the launcher API.
 
-# Detailed design
+## Detailed design
 
 This design will center around how the `safe_launcher` HTTP API will look. This obviously implies that the operations
 need to be exposed via `safe_ffi`. This should be considered an advanced API and documentation for it should carry a
 disclaimer encouraging devs to use NFS if they can.
 
-## Self-Encrypted Data Identifier
+### Self-Encrypted Data Identifier
 
 In order for data to be accessed, a data map must be provided. This can be seen as an identifier to the data. The data
 map will be a base 64'd JSON structure. Several options for passing the data map were considered. The size can get
@@ -98,9 +98,9 @@ launcher would use TLS instead of rolling its own).
 Of course, `safe_ffi` can accept more proper data structures and the decoding/deserialization of the data map can just
 be part of the HTTP API.
 
-## HTTP Calls
+### HTTP Calls
 
-### GET /data/:dataMapIdentifier?offset=123&length=123
+#### GET /data/:dataMapIdentifier?offset=123&length=123
 
 Obtain a self encrypted set of data. The data map identifier may be part of the path or it may be sent in the HTTP
 header `Safe-Data-Map`. If they are both present and don't match or if neither are present, a 400 error is returned with
@@ -115,7 +115,7 @@ The query parameter `offset` is optional and defaults to 0. The query parameter 
 full length. Ideally these would be proper HTTP `Range` headers but they are in the query string to be consistent with
 `GET /nfs/file` (which arguably should be using proper HTTP semantics here and not the query string).
 
-### POST /data/:dataMapIdentifier?offset=123
+#### POST /data/:dataMapIdentifier?offset=123
 
 Write a self encrypted set of data. If this is editing an existing data piece, the data map identifier may be part of
 the path or it may be sent in the HTTP header `Safe-Data-Map`. If they are both present and don't match it is a 400
@@ -138,7 +138,7 @@ The reason POST was chosen is that despite the existing service using a combinat
 method for creating/updating. Also since the data map changes upon write the URL does not represent an unchanging
 RESTful resource URL, POST is more appropriate than PUT.
 
-# Drawbacks
+## Drawbacks
 
 Reasons why not:
 
@@ -147,12 +147,12 @@ Reasons why not:
 1. The Maidsafe devs do not want people leveraging the low level data persistence over HTTP (and thereby possibly
    avoiding the GPL).
 
-# Alternatives
+## Alternatives
 
 1. Do TLS properly on the API so we can stream data back and forth instead of whole-body NACL crypto
 1. Use proper HTTP `Range` headers instead of the primitive query string approach
 
-# Unresolved questions
+## Unresolved questions
 
 1. Should we expose truncate?
 1. Should we expose raw encrypt/decrypt just in case devs wanted to encrypt some data for the user for other uses?

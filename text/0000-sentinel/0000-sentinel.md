@@ -7,12 +7,12 @@
 - RFC PR:
 - Issue number:
 
-# Summary
+## Summary
 
 This document tries to explain basic principles behind security
 on the SAFE network.
 
-# Motivation
+## Motivation
 
 Big part of algorihms behind the SAFE network rely on so called local
 group consensus. What it basically means is that for a node to act in some
@@ -29,7 +29,7 @@ adversary to enter an arbitrary group of close nodes. The purpose of the
 Sentinel is then to ensure that the set of these instructing
 nodes really lives in a Group surrounding the given HASH.
 
-# Detailed design
+## Detailed design
 
 Currently we have a need for three kinds of sentinels:
 
@@ -46,7 +46,7 @@ allows us to request fewer network send calls as shall be explained later.
 * __AccountSentinel__: This one validates `Refresh` messages which arrived from
 our `close group` (i.e. a group we're part of).
 
-## PureSentinel
+### PureSentinel
 
 Let's consider a situation where a group G sends us a `Put` message. Since
 this is a group message we expect to receive many copies of it. And since we want
@@ -74,7 +74,7 @@ it turns out that this step is essential because this way it
 is the network that decides who belongs to G (by means of the
 parallel send implemented by routing).
 
-## KeySentinel
+### KeySentinel
 
 This sentinel is intended for use when a node wants to find
 a group of nodes at some location. This normally hapens during
@@ -95,7 +95,7 @@ apart from the NameType and the PublicKey which is then used
 by the Routing library. The rest of the validation procedure
 is analoguous as well.
 
-## AccountSentinel
+### AccountSentinel
 
 This one is simplest of the three. It is because we're only expecting
 messages to go through this sentinel if they arrive from our own
@@ -107,12 +107,12 @@ accumulating messages by a certain key and once a quorum of messages
 with the same key is reached, they are gathered in a list and returned
 for further processing by the Routing library.
 
-# Drawbacks
+## Drawbacks
 
 The Pure and Key sentinels request public keys of group members, this
 crates additional traffic.
 
-# Alternatives
+## Alternatives
 
 Sentinels currently validate nodes by requiring that at least
 a quorum size of other nodes confirm their public key. It is unclear
@@ -125,7 +125,7 @@ if A confirms C and C confirms B then that means A confirms B.
 If we did decide this stronger requirement is essential, the
 algorighm would reduce to finding loops in a graph.
 
-# Unresolved questions
+## Unresolved questions
 
 All three types of sentinels currently live in the `Sentinel` library.
 In order to achieve genericity of such library it avoids using

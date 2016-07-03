@@ -10,13 +10,13 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 This RFC outlines the config file that being required by the vault to initialise personas.
 
-# Motivation
+## Motivation
 
-## Rationale
+### Rationale
 
 During the disscussion [safecoin implementation](https://github.com/maidsafe/rfcs/issues/61) of [RFC SafeCoin Implementation](https://github.com/maidsafe/rfcs/blob/master/proposed/0012-safecoin-implementation/0012-safecoin-implementation.md), it is being assumed that a pmid_node persona needs to be aware of it's owner's wallet address.
 
@@ -24,7 +24,7 @@ In addition to this, when chunk_store being intialized (currently being used by 
 
 To resolved the above issues, a separate config file for vault is proposed to allow user configurable parameters can be loaded and keeps retained across session (restarting of vault).
 
-## Supported Use-Cases
+### Supported Use-Cases
 
 1. User can specify the storage space for pmid_node and sd_manager
 
@@ -35,13 +35,13 @@ To resolved the above issues, a separate config file for vault is proposed to al
 1. In case of the re-installation of Vault executable, the config file shall not be changed.
 
 
-## Expected Outcome
+### Expected Outcome
 
 A separated config file co-existing with the vault exectuable. This will only be accessed during the intialization procedure. Vault executable no longer using any fixed assumed value for chunk_store initialization.
 
-# Detailed design
+## Detailed design
 
-## Overview
+### Overview
 
 The config file shall contains following items:
 	1. wallet_address : the associated address that shall get rewarded for the service provided, in a format of hex code
@@ -63,10 +63,10 @@ Following rules shall also be applied:
 
     2. A default vault of 1000MB for the max storage space will be used if it is not set.
 
-## Implementation Details
+### Implementation Details
 
 
-## Planned Work
+### Planned Work
 
 1. Vault
     1. Config file handler
@@ -79,23 +79,23 @@ Following rules shall also be applied:
 
 
 
-# Drawbacks
+## Drawbacks
 
 None identified, other than increased complexity of Vault and Launcher.
 
-# Alternatives
+## Alternatives
 
 1. It is possible to use command line interaction or passing the listed configurations as program parameters. However, this may cause some issue to the user experience, especially when vault executable needs to be restarted.
 
 1. Regarding the max_space, it is also being proposed by David that a percentage of free space shall be used as a measurement. The recent update in rust file system may enable such calculation to be supported across platforms. Considering there might be multiple vaults running on same machine, a constant check of free space during each store might be necessary.
 
 
-# Unresolved Questions
+## Unresolved Questions
 
 
 
-# Future Work
+## Future Work
 
 
 
-# Appendix
+## Appendix

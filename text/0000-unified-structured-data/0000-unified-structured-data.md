@@ -6,44 +6,44 @@
 - Start Date: 13-06-2015
 - Issue number: #27
 
-# Summary
+## Summary
 
 Have network only recognise two primary data types, Immutable and Structured. These types will have `tag_id`s to allow them to contain several data types that can be used in the network by users of the client interface.
 This does mean a change to default behaviour and is, therefore, a significant change. ImmutableData has already two sub-types (Backup and Sacrificial). This proposal should simplify the sentinel and interfaces from routing to users of routing as there will be no need to pass down type information (i.e. how to get the name or owner etc.). These types can actually be defined in the routing library, allowing users of the library to use the `type_tag` to create their own types and actions on those types.
 
-# Motivation
+## Motivation
 
-## Why?
+### Why?
 
 The primary goal is two-fold, reduce network traffic (by removing an indirection, of looking up a value and using that as a key to lookup next) and also to remove complexity (thereby increasing security).
 
 Another facet of this proposal is extensibility. In networks such as SAFE for instance, client app developers can define their own types (say of the `fix` protocol for financial transactions) and instantiate this type on the network. For users creating their own network they may whitelist or blacklist types and `type_id`s as they wish, but the possibility would exist for network builders (of new networks) to allow extensibility of types.  
 
-## What cases does it support?
+### What cases does it support?
 
 This change supports all use of non immutable data (structured data). This covers all non `content only` data on the network and how it is handled.
 
-### Data storage and retrieval
+#### Data storage and retrieval
 
 `ImmutableData` is fixed self validating non mutable chunks. These require `StructuredData` types to manipulate information. These `StructuredData` types may then create a global application acting on a key value store with very high degrees of availability and security (i.e. create network scale apps). Such apps could easily include medical condition analysis linked with genomic and proteomic sequencing to advance health based knowledge on a global scale. This proposal allows such systems to certainly be prototyped and tested with a high degree of flexibility.
 
-### New protocols
+#### New protocols
 
 As these data types are now self validating and may contain different information, such as new protocols, `rdf`/`owl` data types, the limit of new data types and ability to link such data is extremely scalable. Such protocols could indeed easily encompass token based systems (a form of 'crypto-currency'), linked data, natural language learning databases, pre-compilation units, distributed version control systems (git like) etc.
 
-### Compute
+#### Compute
 
 Such a scheme would allow global computation types, possibly a Domain Specific Language (DSL) would define operator types to allow combination of functions. These could be made monotonic and allow out of order processing of programs (disorderly programming) which in itself presents an area that may prove to be well aligned with decentralised 'intelligence' efforts. Linked with 'zk-snarks' to alleviate any 'halting problem' type issues then a global Turing complete programming environment that optionally acts on semantic ('owl' / 'json-ld' etc.) data is a possible.
 
-## Expected outcome
+### Expected outcome
 
 It is expected removing `TransactionManager`s from network will reduce complexity, code and increase security on the network, whilst allowing a greater degree of flexibility. These types now allow the users of this network to create their own data types and structures to be securely managed. This is hoped to allow many new types of application to exist.
 
-# Detailed design
+## Detailed design
 
 The design entails reducing all `StructuredData` types to a single type, therefore it should be able to be recognised by the network as `StructuredData` and all such sub-types handled exactly in the same manner.
 
-## StructuredData
+### StructuredData
 
 ```rust
 struct StructuredData {
@@ -61,7 +61,7 @@ Fixed (immutable fields)
 - `tag_type`
 - `identifier`
 
-## Validation
+### Validation
 
 - To confirm name (storage location on network) we `SHA512(tag_type + identifier)`. As these are much smaller than the hash it prevents flooding of a network location.
 - To validate data we confirm signature using hash of (tag_type + version) as nonce. Initial `Put` does not require this signature, but does require the owner contain a value.
@@ -82,7 +82,7 @@ To update such a type the client will `Post` direct (not paying for this again) 
 
 For private data the data filed will be encrypted (at client discretion), for public data this need not be the case as anyone can read that, but only the owner can update it.
 
-## Client perspective
+### Client perspective
 
 - Decide on a `type_tag` for a new type.
 - use whichever mechanism to create an `Identity` for this type
@@ -92,22 +92,22 @@ For private data the data filed will be encrypted (at client discretion), for pu
 - Mutate on network via `routing::Put(Identity: location, Data::StructuredData : data, u64: type_tag);`
 - Delete from network via `routing::Delete(Identity: name, Data::type : type, u64: type_tag);`
 
-## Security
+### Security
 
-### Replay attack avoidance
+#### Replay attack avoidance
 
 The inclusion of the version number will provide resistance to replay attacks.
 
-### GetKey removal
+#### GetKey removal
 
 The removal and validation of client keys is also a significant reduction in complexity and means instead of lookups to get keys, these keys are included as part of the data. This makes the data self validating and reduces security risks from Spartacus type attacks. It also removes ability for any key replacement attack on data.
 
-# Drawbacks
+## Drawbacks
 
 This will put a heavier requirement on `Refresh` calls on the network in times of churn, rather than transferring only keys and versions (which may be small) this will require sending up to 100kB per `StructuredData` element. If content was always held as immutable data then it is not transferred at every churn event.
 The client will also have more work as when the `StructuredData` type is larger than 100kB it then has to self_encrypt the remainder and store the datamap in the data filed of the `StructuredData`. This currently happens in a manner, but every time and without calculation of when.
 
-# Alternatives
+## Alternatives
 
 Status quo is an option and realistic.
 
@@ -115,32 +115,32 @@ Status quo is an option and realistic.
 - Another possibility proposed by Qi is the `PmidManager` (`NodeManager`) stores the data size separate from the immutableData size.  
 
 
-# Unresolved questions
+## Unresolved questions
 
 1. Size of `StructuredData` packet, it would be nice if it were perhaps 512Bytes to have the best chance to fit into a single UDP packet, although not guaranteed. Means a payload after serialisation of only a few hundred bytes (maybe less)
 2. Version conflicts or out of order updates, will upper layers handle this via a wait condition?
 
 --------------------------------------------------------------------------------
-# Addendum
+## Addendum
 
-# Summary
+## Summary
 
 [RFC Unified Structured Data](https://github.com/dirvine/rfcs/blob/unified-structured-data/proposed/0000-Unified-structured-data.md) introduces `StructuredData` as a fundamental type for the network.
 This RFC explores in more detail the implications for applying this change for routing and sentinel library.  This is not the exact implementation as completed after Rust-3, but appended for reference.
 
-# Motivation
+## Motivation
 
 For the motivation on introducing `Unified Structured Data` we refer back to the parent RFC. The motivation for the current RFC is to establish a collective understanding of the changes needed for routing and sentinel to implementing the parent RFC. This RFC explicitly excludes the intend to change the design of the actual `StructuredData` and any such discussions should be posted on the parent RFC.
 
-# Detailed design
+## Detailed design
 
 For the design of the actual `StructuredData` we again refer to the parent RFC.
 
-## Types
+### Types
 In routing three new fundamental types will be introduced `PlainData`,
 `ImmutableData`, `StructuredData`
 
-### Plain data
+#### Plain data
 
 ```rust
 struct PlainData {
@@ -151,7 +151,7 @@ struct PlainData {
 
 Routing will not perform any additional validation on the `PlainData` type. Default routing behaviour applies to this type, which is briefly recapitulated below.
 
-### Immutable data
+#### Immutable data
 
 ``` rust
 struct ImmutableData {
@@ -176,7 +176,7 @@ impl ImmutableData {
 Routing considers `ImmutableData` valid when a requested `name` equals
 `immutable_data.name()`.
 
-### Structured data
+#### Structured data
 
 We repeat the structure as defined in the parent RFC
 
@@ -235,7 +235,7 @@ as serialised bytes.
 
 Corresponding `get` functions for all data fields are implied.
 
-#### Logic for valid succession of structured data
+##### Logic for valid succession of structured data
 
 The structured data is recursively validated strictly on the preceding version. That is the validity of a `StructuredData` of version `n` can only depend on the validity of the same `StructuredData` of version `n-1`.  Here "same" means "have the same name". For `StructuredData` of version `n = 0` the validity is `true` (and hence ClientManagers can charge an account to create new valid `StructuredData_v0`).
 
@@ -251,7 +251,7 @@ of version `n` must match the `owner_keys` of version `n-1`. The `previous_owner
 A non-empty `previous_owner_keys` vector implies that there is an intent to transfer ownership. In this case the `previous_owner_keys` of version `n` must match the `owner_keys` of version `n-1`. The signatures must be
 validatable with a majority of the keys of `previous_owner_keys` of version `n`.
 
-#### efficiency consideration when validating the signatures
+##### efficiency consideration when validating the signatures
 
 As outlined above, a signed vector of public keys defines a fixed order of the public keys that will be checked to validate the signatures (see above on previous owners or not). On construction of a `StructuredData`
 the `Vec<Signatures>` will be ordered to the fixed order defined by the
@@ -260,7 +260,7 @@ relevant `Vec<PublicKey>`.
 Any validation effort will then in sequence iterate over the signatures, and in sequence check the keys, starting from the same index. This is an
 easy algorithm for minimizing the search for matching signatures. A better algorithm can be suggested.
 
-## Impact on routing message
+### Impact on routing message
 
 Currently `RoutingMessage` has the following declaration with
 an obligatory signature from the `Header::Source::fromNode`
@@ -278,7 +278,7 @@ we can keep this obligatory signature and have it signed by the relay node. This
 
 `RoutingClient` will sign `RoutingMessage`s with the generic unrelocated `Id` it self-generates on construction. This generic `Id` is unrelated to the keys for signing ownership of structured data; it is purely and internally used by routing to identify client-relay connections, per session.
 
-## Conservative approach to `MessageType`
+### Conservative approach to `MessageType`
 
 Routing can reduce to the following message types; the main motivation
 is to simplify the message handlers. However, we will first go for
@@ -297,7 +297,7 @@ pub enum UnifiedData {
 }
 ```
 
-## Update with UnifiedData enumeration
+### Update with UnifiedData enumeration
 This list is not exhaustive; all previously `serialised bytes` need to be updated to a `UnifiedData`:
 
 - `NameTypeAndId`
@@ -308,17 +308,17 @@ This list is not exhaustive; all previously `serialised bytes` need to be update
 - `NodeInterface`
 - `ClientInterface`
 
-# Drawbacks
+## Drawbacks
 
 Why should we *not* do this?
 (uncompleted)
 
-# Alternatives
+## Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
 (uncompleted)
 
-# Unresolved questions
+## Unresolved questions
 
 What parts of the design are still to be done?
 (uncompleted)

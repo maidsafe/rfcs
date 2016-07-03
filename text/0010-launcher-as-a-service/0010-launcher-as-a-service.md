@@ -7,21 +7,21 @@
 - RFC PR: #42
 - Issue number: Active - #51
 
-# Summary
+## Summary
 
 Launcher will be a gateway for any app that wants to work on the SAFE Network on a user's behalf. It will run as a background process and will be responsible for decrypting data from the Network and re-encrypting using app specific keys while fetching data on app's behalf and vice-versa during app's request to put/post/delete data on the Network.
 
-# Conventions
+## Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 - `JSON`s used  in this document are only for demonstration purposes. Actual service request/response `JSON`s are formally documented in the accompanying file - [Launcher-Service-Documentation](Launcher-Service-Documentation.md)
 
-# Motivation
+## Motivation
 
-## Why?
+### Why?
 
 App's access of the SAFE Network on behalf of the user is an issue with high security concerns. Without Launcher, every app would ask for user credentials to log into the Network. This means that sensitive information like user's session packet etc., are compromised and can be potentially misused. Launcher will prevent this from happening by being the only one that gets the user credential. Apps only communicate with the Network indirectly via Launcher on user's behalf.
 
-## What cases does it support?
+### What cases does it support?
 
 Launcher
 
@@ -35,9 +35,9 @@ Launcher
 
 5. shall easily revoke app's ability to read and mutate the Network on user's behalf.
 
-# Detailed design
+## Detailed design
 
-## User's Login Session Packet (for reference)
+### User's Login Session Packet (for reference)
 This is only to provide a context to the references to it below. This might change in future without affecting this RFC (i.e. only a small portion of this is actually relevant for this RFC).
 ```rust
 Account {
@@ -53,7 +53,7 @@ Account {
 ```
 - The Root Directories are encrypted with MAID-keys.
 
-## Start Flow
+### Start Flow
 
 **step 0:** Start Launcher.
 
@@ -71,7 +71,7 @@ Account {
 
 **step 7:** Launcher will listen on local host: `127.0.9.9:30000`. If unavailable, it will increment the port till a valid TCP Listener is in place. This will be thus `127.0.9.9:Launcher-Port`. This will remain on till either the OS is shutdown or Launcher Background Process is killed. We will call this combination `<Launcher-IP:Launcher-Port>`.
 
-## Add App Flow
+### Add App Flow
 
 **step 0:** User drags `XYZ` app binary into Launcher to add it. Launcher will ask the user if the app should have access to `SAFEDrive`.
 
@@ -149,7 +149,7 @@ All parameters are UTF-8 strings.
 
 - From this point onwards all data exchanges between Launcher and the app will happen in JSON format, subsequently encrypted by `<App-Specific-Symm-Key>`.
 
-## Reads and Mutations by the App
+### Reads and Mutations by the App
 
 - Every service provided by Launcher will be documented in Launcher service document (a separate RFC). The communication between Launcher and an app shall be in JSON subsequently encrypted by `<App-Specific-Symm-Key>`.
 - The services provided by Launcher and their format are prone to change, hence every new document will have a version information. An app may do a version negotiation anytime after a successful RSA key exchange. Unless an explicit version negotiation happens at-least once, Launcher may default to the latest version. The version negotiation may happen via documented JSON format - e.g. of probable format:
@@ -204,15 +204,15 @@ NfsActions {
 
 Since `<App-Specific-Symm-Key>` is recognised by Launcher only for current session, there is no security risk and the app will not be able to trick Launcher the next time it starts to use the previous keys to mutate network or read data on its behalf.
 
-## Share Directory App Flow
+### Share Directory App Flow
 
 Every time the app tries to access `SAFEDrive` Launcher will check the permission in `<MAIDSAFE-SPECIFIC-CONFIG-ROOT>/LauncherReservedDirectory/LauncherConfigurationFile`.
 
-### Grant and Revoke Access
+#### Grant and Revoke Access
 
 - User can grant the app read/write access to the `SAFEDrive` directory or revoke that access by asking Launcher to do so.
 
-## Remove App Flow
+### Remove App Flow
 
 **procedure 0:** Launcher removes the app as follows:
 - Delete from `<LOCAL-CONFIG-FILE>` (on the user's machine) the following:
@@ -230,23 +230,23 @@ Every time the app tries to access `SAFEDrive` Launcher will check the permissio
 
 In both procedures, Launcher will terminate the TCP connection with the app and forget the `<App-Specific-Symm-Keys>` so effect of removal and hence revocation is immediate.
 
-## Misc
+### Misc
 - If the app is added to Launcher in one machine, the mention of this will go into `<LAUNCHER-CONFIG-FILE>` as stated previously. It will thus be listed on every machine when user logs into his/her account via Launcher on that machine. However when the app is attempted to be activated on a machine via Launcher where it was not previously added to Launcher then he/she will be prompted to associate a binary. Once done, the information as usual will go into the `<LOCAL-CONFIG-FILE>` on that machine and the user won't be prompted the next time.
 - When the app is started via Launcher, it will first check if the `SHA512(App-Binary)` matches any one of the corresponding entries in the vector in `<LAUNCHER-CONFIG-FILE>`. If it does not Launcher will interpret this as a malacious app that has replaced the App-binary on user's machine, and thus will show a dialog to the user for confirmation  of whether to still continue, because there can be genuine reasons for binary not matching like the app was updated etc.
 
-# Alternatives
+## Alternatives
 There is an RFC proposal for a simplified version of Launcher which does not go to as deep an extent to cover all facets of security.
 
-# Current Limitations and Future Scope
+## Current Limitations and Future Scope
 - All apps need to be started from within Launcher. This is a current limitation and possible future solution is to have Launcher write it's listening TCP endpoint to publicly readable file in a fixed location. The app-devs will be asked to construct shortcuts to their apps such that when activated the shortcut points to a binary that reads the current endpoints from the mentioned file, connects to the Launcher there passing it the path to the actual app binary and finally terminating itself. Launcher then checks for this path's validity in its local config file and starts the app as usual (as described in this RFC). An alternative to a file containing public readable endpoints could be a fixed UDP endpoint on which Launcher listens for path to binaries given by app-shortcuts.
 - There is no provision for an app that is required to be started at system start up. For this we can have Launcher marked as a startup process and all apps (which make use of Launcher) that need to be activated at system start up be marked thus in Launcher. Launcher would then activate these once it has itself been successfully activated.
 
-# Unresolved questions
+## Unresolved questions
 **(Q0)** A local background service process to channel all requests through while may be ok for desktop platforms, might definitely need a feasibility check on mobile platforms. Would this approach work for mobiles ?
 
-# Appendix
+## Appendix
 
-## Implementation hints
+### Implementation hints
 
 - Crate level design:
 
@@ -273,7 +273,7 @@ safe_nfs  safe_client
   ipc        app_handling           ffi
 ```
 
-### ffi
+#### ffi
 This module is intended to interface with code written in other languages especially for Launcher-UI. FFI for self-authentication must be provided as this will provide the client-engine necessary to do anything useful in the SAFE Network:
 ```rust
 /// Create an unregistered client. This or any one of the other companion functions to get a
@@ -352,10 +352,10 @@ Another approach (instead of passing `client_handle` to and fro the FFI) could b
 
 Apart from this FFI will evolve more and more as Launcher-UI takes shape in future. It will provide convenient ways to interface with other core Launcher modules.
 
-### app_handling
+#### app_handling
 This module will contain rust code to be invoked when apps are dropped into Launcher, are removed from it or have related parameters (`SAFEDrive` authorisation) changed. This module will be responsible for handling of `LauncherConfigurationFile` and local config file. Some hint of this can already be found in the way `safe_dns` handles `DnsConfigurationFile` [here](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/dns_configuration.rs#L29).
 
-### ipc
+#### ipc
 A TCP listener would try and bind to `127.0.9.9:30000`. If unsuccessfull keep incrementing the port number. Once that reaches 65535 and still no available ports are found, increment the IP and repeat the procedure for `127.0.9.10:30000`. Once bound to an endpoint, keep a note of it to be returned when asked by `app_handling` module for invoking an app with command line parameters.
 ```
 pub fn get_launcher_endpoint() -> std::net::SocketAddr;

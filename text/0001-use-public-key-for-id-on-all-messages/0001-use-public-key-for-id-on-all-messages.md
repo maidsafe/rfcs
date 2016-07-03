@@ -6,7 +6,7 @@
 - Start Date: 23-06-2015
 - Issue number: #22
 
-# Summary
+## Summary
 
 At the moment client Id packets are created and a hash of these packets used as identity. This is stored on the network as a `key` (ie the hash) / `value` (the public key) pair. These packets have to be available prior to the client storing data onto the network.
 
@@ -16,13 +16,13 @@ As such this requires an initial unauthorised `Put` as the client is not known t
 
 This proposal removes all of this indirection and instead allows the client to be recognised by the public key included in messages or data types. Such messages and data types will be signed by the `secret key` that is paired with this public key. As only the owner should have access to this `secret key` then it can be assumed the message or request to mutate data is indeed valid in a cryptographically secure manner.
 
-# Motivation
+## Motivation
 
 Storing Id packets is a strain on the network. Lookups are a strain and will slow down network actions. Id packets themselves may be a security issue (can they be hacked), although highly unlikely, it is impossible to hack if they do not exist!
 
 This mechanism does not reduce the total number of clients or types of clients as they all exist in an address space of 2^256 and app developers can use multiple Id's in very clever ways, such as the SAFE network does not distinguish between public id's and private id's. Now these and more are possible. Id's could be created to share data types (as co-owners) and allow shares access and write capability between applications and groups.
 
-# Detailed design
+## Detailed design
 
 As clients `Put` data or messages on the network (i.e. ask to create) they send such requests via the `ClientManager` type persona (`MaidManager` in the case of data). These requests are signed and include the clients `PublicKey`. This public key can be allocated for, or matched to an existing, client account. The `ClientManager` may then take any action, such as authorising the `Put`, taking a balance etc. and all against the key.
 
@@ -32,14 +32,14 @@ Clients may identify themselves using the public key as their node address by si
 
 Clients themselves no longer will require to store Id's packets on the network (although they can via `StructuredData`). `PublicId` types are no longer required in the maidsafe_types library (maidsafe_client exclusive now).
 
-# Drawbacks
+## Drawbacks
 
 To be identified
 
-# Alternatives
+## Alternatives
 
 Alternatively the status quo could be left in place
 
-# Unresolved questions
+## Unresolved questions
 
 To be resolved during evaluation.

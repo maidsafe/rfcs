@@ -8,11 +8,11 @@
 - Supersedes:
 - Superseded by:
 
-# Summary
+## Summary
 
 This RFC proposes some alternative implementations for `ImmutableData::name()`.
 
-# Motivation
+## Motivation
 
 The existing `ImmutableData::name()` function is highly inefficient as it performs a SHA512 hash
 operation on every call.  It has to do this since it doesn't have a `name` member variable.  This
@@ -39,7 +39,7 @@ The proposed alternatives are:
   an instance of `ImmutableData` guaranteeing that `ImmutableData` instances will always be valid,
   uncorrupted chunks
 
-## Comparison
+### Comparison
 
 | Type          | Can be Invalid | Contents Hashed        | Needs Custom Encode Functions <sup>1</sup> | Can Derive `Ord`, `PartialOrd` and `Hash` |
 |:--------------|:---------------|:-----------------------|:-------------------------------------------|:------------------------------------------|
@@ -51,12 +51,12 @@ The proposed alternatives are:
 1: We can't use the `serialise()` and `deserialise()` functions from maidsafe_utilities for any that
 need custom encode functions, as they won't implement the required traits.
 
-# Detailed design
+## Detailed design
 
 There is an example implementation along with tests and benchmark code at
 https://gitlab.com/Fraser999/DataName.
 
-## <a name="Existing"></a>Existing Implementation
+### <a name="Existing"></a>Existing Implementation
 
 For comparison, the existing (abbreviated) implementation of `ImmutableData` is:
 
@@ -83,7 +83,7 @@ impl ImmutableData {
 
 ---
 
-## <a name="Lazy"></a>Lazy Implementation
+### <a name="Lazy"></a>Lazy Implementation
 
 ```rust
 #[derive(Clone, Eq, PartialEq)]
@@ -139,7 +139,7 @@ impl Decodable for ImmutableData {
 
 ---
 
-## <a name="Minimal"></a>Minimal Implementation
+### <a name="Minimal"></a>Minimal Implementation
 
 ```rust
 #[derive(Hash, Clone, Eq, PartialEq, Ord, PartialOrd)]
@@ -189,7 +189,7 @@ impl Decodable for ImmutableData {
 
 ---
 
-## <a name="Safe"></a>Safe Implementation
+### <a name="Safe"></a>Safe Implementation
 
 ```rust
 #[derive(Hash, Clone, Eq, PartialEq, Ord, PartialOrd)]
@@ -253,7 +253,7 @@ impl From<SerialisationError> for DataError {
 
 ---
 
-## Sample Benchmarks for 1MB Chunks
+### Sample Benchmarks for 1MB Chunks
 
 These results are from a 64-bit Windows 10 machine with an Intel Core i7-4790K and 8GB RAM.
 
@@ -264,15 +264,15 @@ These results are from a 64-bit Windows 10 machine with an Intel Core i7-4790K a
 | [Minimal][2]  |         0 ns/iter (+/- 1)      | 2,314,490 ns/iter (+/- 29,752)  | 8,081,331 ns/iter (+/- 183,989) |
 | [Safe][3]     |         0 ns/iter (+/- 0)      | 3,026,149 ns/iter (+/- 89,004)  | 7,237,680 ns/iter (+/- 108,792) |
 
-# Drawbacks
+## Drawbacks
 
 None over existing implementation.
 
-# Alternatives
+## Alternatives
 
 None.
 
-# Unresolved questions
+## Unresolved questions
 
 Which of the alternatives should be used?
 

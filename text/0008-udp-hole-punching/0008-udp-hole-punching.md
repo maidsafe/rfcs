@@ -7,13 +7,13 @@
 - RFC PR: #46
 - Issue number: Active - #49
 
-# Summary
+## Summary
 
 In this text we describe an implementation of UDP hole punching process
 to allow for P2P connections of nodes behind NATs in a fully decentralised
 network.
 
-# Motivation
+## Motivation
 
 Most users of the Crust library are expected to run the software on home PCs connected
 to the internet through a router. Routers usually implement some kind of a firewall to
@@ -31,14 +31,14 @@ In the following text the reader is expected to know basic NAT types and how the
 The section 'Methods of translation' on [wikipedia](https://en.wikipedia.org/wiki/Network_address_translation)
 gives a nice overview.
 
-# Detailed design
+## Detailed design
 
 The UDP hole punching process described here consists of two steps:
 
 1. Finding an external mapping of a UDP socket
 2. Do the actual hole punching.
 
-## Finding an external mapping of a UDP socket
+### Finding an external mapping of a UDP socket
 
 Suppose, we have two nodes `A` and `B`, where each one is possibly behind a NAT and
 they want to connect to each other.  Routing needs to send `A` an endpoint of `B` and
@@ -76,7 +76,7 @@ Once upper layers receive such event, they can send/route `MappedUdpSocket::publ
 to node `B`. Once `B` does the same, and upper layers receive `B`’s public endpoint, upper
 layers are ready for the actual hole punching.
 
-## Hole punching
+### Hole punching
 
 The act of hole punching shall be initiated by a function with the following signature:
 
@@ -129,7 +129,7 @@ the following structure:
       peer_addr: io::Result<SocketAddr>,
     }
 
-## Using the punched hole
+### Using the punched hole
 
 After a successful hole-punch, it is assumed that the two peers can communicate
 with each other over the unreliable UDP protocol. At this point we'd like to
@@ -138,13 +138,13 @@ use that UDP socket with protocols such as uTP for added reliability.
 Unfortunatelly, the rust-utp library doesn't currently support rendezvous
 connections, so this functionality will need to be added.
 
-# Drawbacks
+## Drawbacks
 
 The alternative approach described in the next section is simpler in that it doesn't require
 two async calls, instead, it uses only one. Other than that, the simpler approach
 is limited in number of NAT types it can successfully punch through.
 
-# Alternatives
+## Alternatives
 
 Another approach would work with the use of multiplexing. That is, if we had a UDP socket
 which is already connected to a remote peer, we could also use it to communicate
@@ -152,9 +152,9 @@ with other peers as the hole has already been punched. Problem with this approac
 that it would only help with `Full-cone NAT` types because it is the only NAT
 type where a hole punched to one peer/host can be reused with another peers/hosts.
 
-# Unresolved questions
+## Unresolved questions
 
-## What asynchronous primitives should be used for this?
+### What asynchronous primitives should be used for this?
 
 Here are the available options:
 
@@ -186,7 +186,7 @@ Here are the available options:
    for complex and hard-to-read patterns to be hidden behind
    other callback taking functions with more descriptive names.
 
-## How to chose `C(X)`?
+### How to chose `C(X)`?
 
 One criterion for `C(X)` is that it should not be on the same local network as `X`.
 For this we could use the `getifaddrs` function, it gives us `SocketAddrs`
@@ -194,7 +194,7 @@ of our network interfaces, plus the netmasks they use. This information should
 be enough to determine whether `C(X)` is in the same subnet as a given
 interface.
 
-## Should `C(X)` be only one node?
+### Should `C(X)` be only one node?
 
 If we allow for `C(X)` to be more than one node, we could get a reponse quicker
 and more reliable. Additionally getting more than one response can reveal
@@ -204,7 +204,7 @@ the information whether we're behind a Symmetric NAT as two different
 On the other hand, if X is behind a Symmetric NAT, then contacting
 multiple `C(X)`s would disable port prediction.
 
-# Implementation details
+## Implementation details
 
 ```rust
 /// Generate a new number each time this function is called, the new
@@ -360,9 +360,9 @@ pub fn Service::udp_punch_hole(&self,
 
 ```
 
-# Room for improvements
+## Room for improvements
 
-## More robustness on devices with multiple network interfaces
+### More robustness on devices with multiple network interfaces
 
 When `X` connects to `C(X)`, the handshake exchanged contains `U(C(X))`. The
 handshake represents `U(C(X))` like the following:
