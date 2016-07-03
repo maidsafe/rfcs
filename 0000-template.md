@@ -8,28 +8,28 @@
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
 - Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
 
-# Summary
+## Summary
 
 One paragraph explanation of the feature.
 
-# Motivation
+## Motivation
 
 Why are we doing this? What use cases does it support? What is the expected outcome?
 
-# Detailed design
+## Detailed design
 
 This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
 with the network to understand, and for somebody familiar with the code practices to implement.
 This should get into specifics and corner-cases, and include examples of how the feature is used.
 
-# Drawbacks
+## Drawbacks
 
 Why should we *not* do this?
 
-# Alternatives
+## Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
 
-# Unresolved questions
+## Unresolved questions
 
 What parts of the design are still to be done?
