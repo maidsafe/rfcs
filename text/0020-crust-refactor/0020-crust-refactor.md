@@ -1,17 +1,19 @@
-- Feature Name: crust_redesign
+# Crust Refactor
+
 - Status: proposed
 - Type: enhancement
 - Related components: crust
 - Start Date: 02-11-2015
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/89
+- Supersedes:
+- Superseded by:
 
-# Summary
+## Summary
 
 The current design of crust is inefficient and cumbersome to use. This RFC
 proposes a restructure of crust and it's API.
 
-# Motivation
+## Motivation
 
 * Efficiency
 
@@ -81,9 +83,9 @@ monitor and filter it's own events.
     This makes it easy to write code where a thread can block forever and never
     get cleaned up.
 
-# Detailed design
+## Detailed design
 
-## Design goals
+### Design goals
 
 Everything considered, what sort of design goals should crust strive for? In my view, some
 sensible goals are to be:
@@ -139,7 +141,7 @@ sensible goals are to be:
   `Service` the user should be able to statically guarantee that all resources
   associated with the service have been cleaned up.
 
-## Components
+### Components
 
 The unix philosophy is that programs (or libraries as it may be) should do one
 thing and do it well but crust currently performs several distinct tasks. Some
@@ -160,7 +162,7 @@ proposed APIs of these libraries are introduced in four separate documents
 * [transport](transport-library.md)
 * [crust](crust-library.md)
 
-## Libraries
+### Libraries
 
 This RFC proposes that we make of use of [mioco](https://github.com/dpc/mioco)
 as the basis of the transport library. Mioco will allow us to write code that
@@ -177,14 +179,14 @@ recommends the use of scoped threads from the crossbeam library. These will
 allow us to statically guarantee that threads are not leaked and allows threads
 to share borrowed data with the their child threads.
 
-# Drawbacks
+## Drawbacks
 
 Needs to be implemented.
 
-# Alternatives
+## Alternatives
 
 Not do this
 
-# Unresolved Questions
+## Unresolved Questions
 
 None.

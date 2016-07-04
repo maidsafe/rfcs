@@ -1,16 +1,17 @@
-- Feature Name: safe_dns API from safe_launcher
-- Status: proposed
+# Launcher DNS API
+
+- Status: rejected
 - Type: Enhancement
 - Related components safe_launcher
 - Start Date: 24-11-2015
 - RFC PR: #76
 - Issue number: Proposed - #78
 
-# Summary
+## Summary
 
 Expose needed APIs from safe_launcher to perform public name and service lookup
 
-# Motivation
+## Motivation
 
 At present the launcher exposes API for Registering public names and adding service for a public name.
 To intercept the scheme and serve the content from the browser add-on, the dns_api for
@@ -20,18 +21,18 @@ would allow variety of applications to be built on the network.
 For example, SAFENetwork Service management application could be something which can help users to manage the
 services exposed under their public name.
 
-# Detailed design
+## Detailed design
 
 The APIs are just an extension from the already existing [dns API](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/parser/dns/mod.rs) exposed from the safe_launcher.
 
-### Get Service Home Directory
+#### Get Service Home Directory
 
-#### Implementation
+##### Implementation
 The request would make use of the [get_home_service_directory](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/mod.rs#L150)
 function from safe_dns crate and get the DirectoryKey. Using the directory key the actual directory content is retrieved using the safe_nfs crate.
 The fetched directory is returned as part of the response.
 
-#### Request
+##### Request
 ```javascript
 {
   endpoint: 'safe-api/v1.0/dns/get-service-directory',
@@ -42,9 +43,9 @@ The fetched directory is returned as part of the response.
 }
 ```
 
-#### Response
+##### Response
 
-##### On Success
+###### On Success
 ```javascript
 {
   'id': String, // Base64 String - [ uint8 ... ] SHA512(Request)
@@ -90,7 +91,7 @@ The fetched directory is returned as part of the response.
 }
 ```
 
-##### On Error
+###### On Error
 
 ```javascript
 {
@@ -102,18 +103,18 @@ The fetched directory is returned as part of the response.
 }
 ```
 
-### Get Content from URL Path
+#### Get Content from URL Path
 
 This API would be able to fetch the contents of the file corresponding to the path specified.
 
-#### Implementation
+##### Implementation
 
 Using the `safe_dns` crate the the Service home DirectoryKey can be fetched, and using the
 DirectoryKey the actual Directory can be fetched from the network. Once the directory is
 fetched the file corresponding to the path can be traversed. Error is returned, if the file is not found at the path specified.
 Else the file is retrieved and sent back as response.
 
-#### Request
+##### Request
 ```javascript
 {
   endpoint: 'safe-api/v1.0/dns/get-file-from-service-directory',
@@ -129,9 +130,9 @@ Else the file is retrieved and sent back as response.
 }
 ```
 
-#### Response
+##### Response
 
-##### On Success
+###### On Success
 ```javascript
 {
   id: String
@@ -151,7 +152,7 @@ Else the file is retrieved and sent back as response.
 }
 ```
 
-##### On Error
+###### On Error
 
 ```javascript
 {
@@ -163,14 +164,14 @@ Else the file is retrieved and sent back as response.
 }
 ```
 
-### List Public Names
+#### List Public Names
 
 API would list all the public name associated to the User Account.
 
-#### Implementation
+##### Implementation
 This is simple a direct API call to the [get_all_registered_names](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/mod.rs#L119) function
 
-#### Request
+##### Request
 ```javascript
 {
   endpoint: 'safe-api/v1.0/dns/list-public-names',
@@ -178,9 +179,9 @@ This is simple a direct API call to the [get_all_registered_names](https://githu
 }
 ```
 
-#### Response
+##### Response
 
-##### on Success
+###### on Success
 ```javascript
 {
   id: String,
@@ -190,7 +191,7 @@ This is simple a direct API call to the [get_all_registered_names](https://githu
 }
 ```
 
-##### On Error
+###### On Error
 
 ```javascript
 {
@@ -202,14 +203,14 @@ This is simple a direct API call to the [get_all_registered_names](https://githu
 }
 ```
 
-### List all registered Services for a Public Name
+#### List all registered Services for a Public Name
 
 API would list all the registered services for a public name associated to the User Account
 
-#### Implementation
+##### Implementation
 This is a direct API call to the [get_all_services](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/mod.rs#L132) function
 
-#### Request
+##### Request
 ```javascript
 {
   endpoint: 'safe-api/v1.0/dns/list-services',
@@ -219,9 +220,9 @@ This is a direct API call to the [get_all_services](https://github.com/maidsafe/
 }
 ```
 
-#### Response
+##### Response
 
-##### on Success
+###### on Success
 ```javascript
 {
   id: String,
@@ -231,7 +232,7 @@ This is a direct API call to the [get_all_services](https://github.com/maidsafe/
 }
 ```
 
-##### On Error
+###### On Error
 
 ```javascript
 {
@@ -243,14 +244,14 @@ This is a direct API call to the [get_all_services](https://github.com/maidsafe/
 }
 ```
 
-### Delete a Public Name
+#### Delete a Public Name
 
 API would delete a public name associated to the User Account
 
-#### Implementation
+##### Implementation
 This is a direct API call to the [delete_dns](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/mod.rs#L95) function
 
-#### Request
+##### Request
 ```javascript
 {
   endpoint: 'safe-api/v1.0/dns/delete-public-name',
@@ -260,9 +261,9 @@ This is a direct API call to the [delete_dns](https://github.com/maidsafe/safe_d
 }
 ```
 
-#### Response
+##### Response
 
-##### on Success
+###### on Success
 ```javascript
 {
   id: String,
@@ -270,7 +271,7 @@ This is a direct API call to the [delete_dns](https://github.com/maidsafe/safe_d
 }
 ```
 
-##### On Error
+###### On Error
 
 ```javascript
 {
@@ -282,13 +283,13 @@ This is a direct API call to the [delete_dns](https://github.com/maidsafe/safe_d
 }
 ```
 
-### Delete a Service for a Public Name
+#### Delete a Service for a Public Name
 API would delete a service for a public name associated to the User Account.
 
-#### Implementation
+##### Implementation
 This is a direct API call to the [remove_service](https://github.com/maidsafe/safe_dns/blob/master/src/dns_operations/mod.rs#L180) function
 
-#### Request
+##### Request
 ```javascript
 {
   endpoint: 'safe-api/v1.0/dns/delete-service',
@@ -299,9 +300,9 @@ This is a direct API call to the [remove_service](https://github.com/maidsafe/sa
 }
 ```
 
-#### Response
+##### Response
 
-##### on Success
+###### on Success
 ```javascript
 {
   id: String,
@@ -309,7 +310,7 @@ This is a direct API call to the [remove_service](https://github.com/maidsafe/sa
 }
 ```
 
-##### On Error
+###### On Error
 
 ```javascript
 {
@@ -321,14 +322,14 @@ This is a direct API call to the [remove_service](https://github.com/maidsafe/sa
 }
 ```
 
-# Drawbacks
+## Drawbacks
 
 None
 
-# Alternatives
+## Alternatives
 
 None
 
-# Unresolved questions
+## Unresolved questions
 
 None

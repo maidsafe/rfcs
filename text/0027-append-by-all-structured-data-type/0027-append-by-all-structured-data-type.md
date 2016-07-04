@@ -1,18 +1,20 @@
-- Feature Name: Append By All Structured Data Type
+# Append by all Structured Data Type
+
 - Type New feature
 - Status: proposed
 - Related components safe_launcher, safe_ffi, safe_core, safe_vault
 - Start Date: 04-04-2016
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- Discussion: https://github.com/maidsafe/rfcs/issues/113
+- Supersedes:
+- Superseded by:
 
-# Summary
+## Summary
 
 The proposal details on how a new Structured Data Type which can be appended by all
 can enable dynamic data handling.
 
 
-# Motivation
+## Motivation
 
 Currently the SAFE Network supports static data storage and retrieval. This limits
 potential application developers to building only static applications and in real world the majority
@@ -20,7 +22,7 @@ of applications are dynamic in nature. Enabling dynamic data handling will allow
 developers to create and manage their own data structures using Structured Data and Immutable Data
 from the SAFE Network.
 
-# Detailed Design
+## Detailed Design
 
 Structured data at present can only be modified by the owner. If it has multiple owners,
 then at least (n/2) + 1 owners must sign the Structured Data for any update or delete.
@@ -41,12 +43,12 @@ from the Launcher. The applications must request `LOW_LEVEL_API_ACCESS` permissi
 authorisation for invoking the low level APIs for Structured Data and
 Immutable Data access.
 
-## A Practical Use Case - Simple Forum Application
+### A Practical Use Case - Simple Forum Application
 
 The appendable Structured Data and Immutable Data can be used to create a dynamic
 application like a `Forum`.
 
-### Hosting the Application - Same as we do for the static websites
+#### Hosting the Application - Same as we do for the static websites
 
 - The admin of the application creates a public name and a service name. Let us consider,
 that the service name is `forum` and the public name is `maidsafe`, making it accessible
@@ -54,7 +56,7 @@ from a browser as `http://forum.maidsafe.net`
 - The application is hosted on the SAFE Network just like a website is hosted by mapping
 the public folder (source of the application) with the service.
 
-### Initial Configuration - Creating Root / Master Appendable Structured Data
+#### Initial Configuration - Creating Root / Master Appendable Structured Data
 
 - After making the application public, the admin registers themselves as the owner / admin of the
 application.
@@ -81,27 +83,27 @@ for identifying the root Structured Data.
 - The hash of service name and public name can be used as the ID for the root / master Structured
 Data.
 
-#### Summing it up
+##### Summing it up
 
 When the admin configures the application for the first time. The application will create a root
 Structured Data with `tag_type as 8` and with id `SHA512(service name + public name)`.
 The data part of the Structured Data can be anything that would fit the needs of the application
 like, `csv, toml, json` etc. In this use case we will be using a JSON object.
 
-#### Application looking up for the master Structured Data on start
+##### Application looking up for the master Structured Data on start
 
 When a user reaches the end point (forum.maidsafe.safenet), the application will be able to lookup
 the Structured Data with the id `SHA512(service name + public name)`. Once the data is retrieved,
 based on the JSON object the rest of the data needed by the application can be fetched.
 
-#### When a new thread is created
+##### When a new thread is created
 
 Say user ABC has set up the forum and they become the admin. Now, let consider user XYZ wants to
 create a new thread. When a new thread is created, the data related to the thread is stored in the
 network as a JSON object in the form of Immutable Data chunks. The DataMap of the thread will be
 added to the root / master Structured Data.
 
-##### Detailing the steps in sequence
+###### Detailing the steps in sequence
 
 - User XYZ logs in to the Launcher with their own credentials and goes to `forum.maidsafe.safenet`
 - Application will look up for the master / root Structured Data by hashing the service and long
@@ -129,7 +131,7 @@ New DataMap is added to the posts list in the root Structured Data.
   "replies": []
 }
 ```
-##### When a reply is made to a post
+###### When a reply is made to a post
 
 When other users reply to the thread, a new DataMap can be generated and updated in the root /
 master Structured Data.
@@ -142,7 +144,7 @@ master Structured Data.
 Here v2 represents the new DataMap.
 
 
-# Drawbacks
+## Drawbacks
 
 Since the root / master Structured Data is generated / looked up in a deterministic manner
 and moreover it can also be appended by anyone, this makes it easier for an attacker to corrupt
@@ -152,11 +154,11 @@ DNS also uses a deterministic approach, but the Structured Data is secure as it 
 by the owner. But in this appendable Structured Data, it becomes easier to corrupt the data.
 
 
-# Alternatives
+## Alternatives
 
 None
 
-# Unresolved Questions
+## Unresolved Questions
 
 Concurrency Issue: When two users are replying to a same thread at the same time.
 Only the last updated DataMap will be reflected. This will result in the loss of the

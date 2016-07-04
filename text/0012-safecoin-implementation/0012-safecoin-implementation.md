@@ -1,19 +1,23 @@
-- Feature Name: Safecoin implementation
+# Safecoin Implementation
+
 - Status: proposed
 - Type: new feature
 - Related Components: safe_vault, safe_client
 - Start Date: 12-10-2015
 - RFC PR: #60
 - Issue Number: Proposed - #61
+- Discussion: https://github.com/maidsafe/rfcs/issues/61
+- Supersedes:
+- Superseded by:
 
-# Summary
+## Summary
 
 Full implementation of safecoin v1.0. This RFC brings together the following RFCs
 [Farm Attempt](https://github.com/maidsafe/rfcs/blob/master/agreed/0004-Farm-attempt/0004-Farm-attempt.md)
 [Balance Resources](https://github.com/maidsafe/rfcs/blob/master/agreed/0005-balance_network_resources/0005-balance_network_resources.md)
 In addition this RFC will attempt to calculate the existing magic numbers used in previous implementations.
 
-# Motivation
+## Motivation
 
 Safecoin is a valuable part of the SAFE network and allows resource providers to be paid by users of
 that resource. Users in this case are content producers, or those who upload data to the network.
@@ -27,13 +31,13 @@ consumption of resources.
 This RFC will cover farming and payments as well as define the wallet interface for application
 developers.
 
-# Detailed design
+## Detailed design
 
 Initially the cost of resources in some unit must be identified. There are options to measure these
 units in disk space, CPU, bandwidth and more. It is much simpler to define these units as a safecoin,
 which at this time is simply a name given to this overall unit of measure (as far as this RFC is concerned).
 
-## Data/chunk size consideration
+### Data/chunk size consideration
 
 Data of varying sizes is uploaded to the SAFE network. Immutable data can be up to 1Mb and StructuredData
 can be up to 100Kb. To simplify the algorithm and also avoid bad players attempting to swamp the
@@ -46,7 +50,7 @@ In this design each upload (PUT) will incur the same cost, i.e. 1 unit.
 To facilitate this design we will create an internal name to measure this unit of store. This will
 be referred to as a StoreCost in this document.
 
-## Establishing farming rate
+### Establishing farming rate
 
 This section will introduce the following variables:
 
@@ -100,7 +104,7 @@ Since the farming rate decreases as the network grows, it will push the design o
 to ensure the number of chunks active in the network is not excessive.  Archive nodes will be a
 further RFC and should allow farming rates to have a natural minimum.
 
-## Establishing StoreCost
+### Establishing StoreCost
 
 This is an upgrade to RFC [0005](https://github.com/dirvine/rfcs/blob/safecoin_implementation/agreed/0005-balance_network_resources.md) the initial StoreCost
 
@@ -120,7 +124,7 @@ The calculation therefore becomes a simple one (for version 1.0)
 Therefore a safecoin will purchase an amount of storage equivalent to the amount of data stored (and
 active) and the current number of vaults and users on the network.
 
-## Farm request calculation
+### Farm request calculation
 
 The farming request calculation is also a simple affair, but must mitigate against specific attacks
 on the network. These include, but are not limited to:
@@ -146,7 +150,7 @@ This process is outlined as:
      - The safecoin close group then send a receipt message to the wallet address to inform the user
        of a new minted safecoin allocated to them.
 
-## Safecoin Management
+### Safecoin Management
 
 Each safecoin is represented as a piece of data held by the group closest to it's ID. Safecoin data structure is defined as:
 '''rust
@@ -162,7 +166,7 @@ When being asked to transfer the owevership, the request transcript must provide
 
 When being asked to burn a coin, the request must be signed by the current owner and forwarded through that owner's Client Manager group (which will increase allowed storage space at the same time). The piece of safecoin data will then be removed.
 
-## Account Management
+### Account Management
 
 An Account Management group is a group of nodes closest to a user's wallet address. It is resposible for that user's safecoin relation activities: rewarding, transfering or discarding.
 A user's safecoin account is defined as :
@@ -176,16 +180,16 @@ COINS: Vec<SAFECOIN_ID>
 3. transfer in : when being notified by the sender's account group and the safecoin management group, the correspondent safecoin's ID will be inserted into the record.
 4. discarding : This is a special case that no receiver has been specified. the safecoin will be removed from the account and the chosen safecoins' management groups will be notified with a burning request.
 
-## Bootstrap with clients
+### Bootstrap with clients
 
 Although there has been hostility from the community with regard to "something for nothing" approach, there is a necessity for a bootstrap mechanism. As no safecoin can be farmed until data is uploaded there is a cyclic dependency that requires a resolution. To overcome this limitation this RFC will propose that a user account is composed of two parts: safecoin_account and storage_account, every new account created is initialised with safecoin_account holding 0 coins but storage_account holding 50 safecoin equivalent storage allowance. This may be temporary and only used in test-safecoin, but it is likely essential to allow this for the time being. It may be a mechanism to kickstart the network as well.
 
 
-# Drawbacks
+## Drawbacks
 
 These will be added during the review process and will include any concerns form the community forum.
 
-# Alternatives
+## Alternatives
 
 Initially there was no safecoin and the network would have been built in a quid pro quo manner.
 This involved users requiring a vault to store data and the user then being allocated that
@@ -195,7 +199,7 @@ currency which would have suited this purpose perfectly as safecoin now will.
 
 There is an alternative approach outlined [here](https://forum.safenetwork.io/t/safecoin-divisibility/4806/68) which introduces an alternative coin for artists and app developers. This RFC does not limit this proposal and leaves the way open for such an implementation.
 
-# Unresolved questions
+## Unresolved questions
 
 The application developer rewards are seen as a good start to pay creators of applications on the
 app popularity, measured via its use. This design incorrectly identifies the measure of use as the
@@ -203,9 +207,9 @@ number of GET requests the app carries out. A better solution should be found fo
 
 Some have identified an app may
 
-# Implementation overview
+## Implementation overview
 
-## Farming rate method
+### Farming rate method
 
 ```rust
 fn farming_divisor() -> u64 {
@@ -217,7 +221,7 @@ fn farming_divisor() -> u64 {
 }
 ```
 
-## Client Put (StoreCost)
+### Client Put (StoreCost)
 
 ```rust
 fn store_cost() -> u64 {
@@ -268,7 +272,7 @@ if key.is_in_range() { // we are client manager
 }
 ```
 
-## Client account creation, addition
+### Client account creation, addition
 
 ```rust
 fn new_account(name) {
@@ -280,7 +284,7 @@ fn new_account(name) {
 }
 ```
 
-## Safecoin Manager
+### Safecoin Manager
 ```rust
 if coin.is_in_range() { // we are the manager of that coin
     match operation {

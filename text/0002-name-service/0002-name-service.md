@@ -1,21 +1,23 @@
-- Feature Name: Decentralised Naming System (dns)
+# Name Service
+
+
 - Status: implemented
 - Type new feature
 - Related components maidsafe_client, maidsafe_vault, maidsafe_dns
 - Start Date: 27-06-2015
 - Issue number: #23
 
-# Summary
+## Summary
 
 In the current Internet Domains are referenced via a naming system which comprises an indexing mechanism. This indexing mechanism is centralised and controlled, with the ability for countries and ISPs to switch it off, pollute data with advertising data and much worse. The SAFE network on the other had offers a 'free (as in beer)' mechanism to locate data linked to a name. This proposal outlines a mechanism to look up data related to any name.
 
 This data includes, long name (could be real name is users wish), web site id, blog id, micro-blog id and may be extended to include additional information as the network develops.
 
-# Motivation
+## Motivation
 
 In networks people expect to be able to lookup services related to names. In the SAFE network this includes the ability to retrieve public keys to encrypt data to that id, in cases where privacy is a requirement (e.g. in SAFE all messages are encrypted between identities). The opportunity for people to create and link web sites and other services is also a motivation for implementing such a system.
 
-# Detailed design
+## Detailed design
 
 This is a simple use case for `Unified Structured Data` (see RFC 0000). In this case we require to set three items
 
@@ -42,15 +44,15 @@ This is very likely to extend as the services on the network grows.
 
 To find this information an application will `Hash(Hash(public_name) + type_tag))` and retrieve this packet.
 
-# Drawbacks
+## Drawbacks
 
 None found at this time.
 
-# Alternatives
+## Alternatives
 
 Alternatives could be clients, passing this information via a series of messages, but this requires both parties being online or able to wait for each other to come online.
 
-# Unresolved questions
+## Unresolved questions
 
 1. Should this struct contain the actual public_name (handle) as this may allow some indexing mechanism, which is prevented with this design (on purpose).
 

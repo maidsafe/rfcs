@@ -1,26 +1,27 @@
-- Feature Name: Launcher communication with unregistered client
-- Status: proposed
+# Unregistered Client Support in Launcher
+
+- Status: rejected
 - Type: New Feature
 - Related components: [safe_launcher](https://github.com/maidsafe/safe_launcher)
 - Start Date: 03-November-2015
 - RFC PR: #66
 - Issue number: Proposed - #67
 
-# Summary
+## Summary
 
 Launcher will need to cater to the requests made by unregistered clients to access the SAFE Network. This RFC details why this is required and how this will be done.
 
-# Conventions
+## Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 - `{P}` refers to the payload. More details in the (RFC here](https://github.com/maidsafe/rfcs/blob/master/active/0010-Launcher-as-a-service/Launcher-Service-Documentation.md).
 
-# Motivation
+## Motivation
 
-## Why?
+### Why?
 
 There are plenty of use cases for unregistered clients (those that don't have a valid SAFE Account with `MaidManagers`) to access the SAFE Network. One such example is the browser category. The browsers do not need to create an account to access the SAFE Network nor do they require a registered client engine (one that performs operations on a valid account) because all they care about is the fetching and display of data. This is in line with our philosophy that anyone can fetch data from the SAFE Network - it will be of no use if it is encrypted and client fetching it does not have the decryption keys, but that is another matter. Without Launcher, each such application will have to interface with low level libraries like [safe_core](https://github.com/maidsafe/safe_core) and/or [safe_nfs](https://github.com/maidsafe/safe_nfs). Further every instance of an engine from [safe_core](https://github.com/maidsafe/safe_core) will create a new routing object. All this is unnecessary overhead. Launcher will funnel requests from all unregistered applications through a single instance of an unregistered client engine obtained from [safe_core](https://github.com/maidsafe/safe_core).
 
-# Detailed design
+## Detailed design
 
 There shall be a discovery mechanism in place to detect a Launcher binary running on a machine. For this Launcher shall broadcast a special packet containing a UTF-8 encoded string which will be `--launcher:tcp:<ip>:<port>`. The broadcast shall be done every **5 seconds** on port **59999**. Any application can then connect to Launcher on the announced endpoint. Once the connection is made, it will give Launcher the a special endpoint string that is metioned below. Launcher on receiving this string shall not do further Handshake. It will listen to JSON requests and carry out the tasks as usual, returning either data or error via JSON. The communication will be in plain text instead of cipher text, i.e. these JSONs will be unencrypted. On first such encounter of such a request, Launcher shall request an unregistered client engine from [safe_core](https://github.com/maidsafe/safe_core) and use that for the present as well as for all such future connections. The JSONs are described below.
 
@@ -31,7 +32,7 @@ Handshake for anonymous access:
 }
 ```
 
-## dns
+### dns
 - Addtional requests to those mentioned [here for dns](https://github.com/maidsafe/rfcs/blob/master/active/0010-Launcher-as-a-service/Launcher-Service-Documentation.md)
 ```
 "get-services"
@@ -137,7 +138,7 @@ Associated response
 }
 ```
 
-# Alternative
+## Alternative
 
 1. Another way would be to add applications like browsers like any other app to Launcher and start them via Launcher. During adding of an app, Launcher would additionally prompt the user to specify if this app should be given the previlege to access the Network on his/her behalf or just access the Network anonymously (which will ofcourse limit the permitted operations to only reads). This would have an advantage of not complicating the design by adding UDP discovery mechanism and while also providing a uniform and a consistent interface to the user.
 
@@ -145,7 +146,7 @@ Associated response
 
 3. Third alternative is to just assign a fix TCP endpoint to Launcher process. If Launcher is unable to attach an acceptor to this endpoint it will not start. So we have no discovery process. All apps know where to find Launcher.
 
-# Implementation hints
+## Implementation hints
 
 - [authenticate_app.rs](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/ipc_session/authenticate_app.rs) will need to be changed to handle mulitple forms of handshake. If the endpoint is anonymous-access, it will not go through the process of handshake any further and just inform `IpcSession` that the handshake is over.
 - [AppAuthenticationEvent](https://github.com/maidsafe/safe_launcher/blob/master/src/launcher/ipc_server/ipc_session/events.rs) will have to be changed to:

@@ -1,4 +1,5 @@
-- Feature Name: new_kademlia_routing_logic
+# New Kademlia Routing Logic
+
 - Status: implemented
 - Type enhancement
 - Related components kademlia_routing_table, routing
@@ -7,7 +8,7 @@
 - Issue number:
 
 
-# Summary
+## Summary
 
 The current mechanism implemented in the [kademlia_routing_table][1] and [routing][2] crates has several weaknesses that lead to potential problems affecting security, performance and even basic functionality.
 
@@ -15,7 +16,7 @@ The current mechanism implemented in the [kademlia_routing_table][1] and [routin
 [2]: https://github.com/maidsafe/routing
 
 
-# Motivation
+## Motivation
 
 In the current implementation,
 
@@ -34,7 +35,7 @@ Of course a peer-to-peer network has to deal with lots of unpredictable problems
 Instead of detailing how and where the above points fail, this is a proposal to make some changes to the routing logic, together with a rigorous argument why this will make the following guarantees in common scenarios:
 
 
-## Guaranteed properties
+### Guaranteed properties
 
 1. The number of nodes in the network with `node.is_close(target) == true` is exactly `GROUP_SIZE` for each target address.
 2. Each node in a given address' close group is connected to each other node in that group. In particular, every node is connected to its own close group.
@@ -46,19 +47,19 @@ Instead of detailing how and where the above points fail, this is a proposal to 
 other, ... etc.
 
 
-# Detailed design
+## Detailed design
 
 The network will attempt to always satisfy the following invariant:
 
 
-## The invariant
+### The invariant
 
 In every node, every bucket is maximally filled, and every node knows its close group. That means:
 
 Whenever a bucket has less than `BUCKET_SIZE` entries, it contains *all nodes in the network* that have the corresponding bucket distance.
 
 
-## Changes to the routing logic
+### Changes to the routing logic
 
 In `kademlia_routing_table`:
 
@@ -80,7 +81,7 @@ In routing:
 See the appendix below for proofs that the invariant and these changes will guarantee the desired properties.
 
 
-## Node insertion
+### Node insertion
 
 After adding its close group to the routing table, a new node knows that only the buckets up to the first one that currently has an entry can potentially have entries. (Nodes in later buckets would belong to the close group!) For each such
 bucket `i` that is not full (i. e. has `GROUP_SIZE` entries) yet, the node sends a `GetCloseGroup` request to the `NaeManager` of its `i`-th bucket address.
@@ -95,7 +96,7 @@ So whenever a node `n` adds a new node to a bucket `i` that was not full, `n` ne
 this will reach every node with `bi(m, n) > i`. (In a balanced network with an even distribution of addresses, this should rarely be substantially more than `GROUP_SIZE` nodes.)
 
 
-## Node removal
+### Node removal
 
 Since we keep connections open to each routing table entry, every contact of a leaving node learns about the removal. (Should we change that, a periodic check needs to be introduced.)
 
@@ -104,7 +105,7 @@ If a node loses a connection in a bucket that is not full, no action needs to be
 If the bucket was full before, the entry probably needs to be replaced. To do that, the node sends another `GetPublicIdWithEndpoints` request to the bucket address of the modified bucket, as if it had just joined, to obtain the contact information of the *new* close group of its `i`-th bucket and refill it.
 
 
-## Churn
+### Churn
 
 If a node is joining or leaving, the upper layers are informed about it so that they can adapt to the change in the network, e. g. restore the desired replication number of data chunks. The nodes that need to act on this are those which are in any close group together with the new/lost node.
 
@@ -116,12 +117,12 @@ If the bucket `i` is full, then we are not close to any address that disagrees w
 So a `Churn` event needs to be raised if `n` is in a non-full bucket or we have less than `GROUP_SIZE - 1` contacts with a bucket index greater than `n`'s.
 
 
-# Drawbacks
+## Drawbacks
 
 The expected routing table size for a network with `2ⁿ` nodes will be about `GROUP_SIZE * n`. Each of these entries currently corresponds to at least one open connection and two threads. It would therefore be desirable to reduce the routing table size.
 
 
-# Unresolved questions
+## Unresolved questions
 
 The idea behind group authorities (close groups) as well as parallelism (sending the message along more than one path) is to provide security and redundancy. However, the former measure can easily bypassed if the latter is undermined: A single node could invent a whole close group and claim that it is relaying messages from them. The recipient usually doesn't know the sender: They neither know their public keys, nor do they know the network layout around the sender, so they don't know whether the sender actually *is* close to the source address, nor whether the sender is a legitimate node at all.
 
@@ -140,7 +141,7 @@ Maybe there are ways to change the routing algorithm so that the paths of the co
 * Nodes could have one of `GROUP_SIZE` colours. A close group consists of one node in each colour: the single closest node to the target with that colour. Every message copy is routed via a path that stays exclusively in one colour, until it reaches the destination, making it *impossible* for the copies to collide. This would change the routing algorithm considerably: Instead of one table with bucket size `GROUP_SIZE`, each node would have to keep `GROUP_SIZE` tables - one for each colour - with bucket size 1.
 
 
-# Alternatives
+## Alternatives
 
 If the routing table size turns out to be too large in practice, we could let connections time out: Entries we haven't communicated with within some period of time are disconnected, without being removed from the routing table. The
 connection is reestablished periodically to check whether the node is still there, as well as whenever we need to route messages via them. This should allow us to keep only `PARALLELISM` connections open per bucket most of the time.
@@ -150,7 +151,7 @@ We could also experiment with smaller values for `GROUP_SIZE` and `PARALLELISM`,
 Finally, if it turns out to be a problem that we never drop nodes (it shouldn't, because we are only allowed to add nodes that are close to one of our bucket addresses anyway), nodes could periodically send `IDontWantToTalkToYouAnymore` messages to every entry in an overflowing bucket except the `BUCKET_SIZE` closest ones to the bucket address. The other node then drops the connection if it also doesn't need it anymore.
 
 
-# Appendix: Proofs
+## Appendix: Proofs
 
 We prove that whenever the invariant holds, the desired properties are guaranteed.
 

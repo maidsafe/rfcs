@@ -1,10 +1,11 @@
-- Feature Name: beacon
+## beacon
 - Status: proposed
 - Type: enhancement
 - Related components: crust
 - Start Date: 12-11-2015
-- RFC PR:
-- Issue number:
+- Discussion: https://github.com/maidsafe/rfcs/issues/107
+- Supersedes:
+- Superseded by:
 
 # Summary
 

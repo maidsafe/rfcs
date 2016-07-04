@@ -1,33 +1,35 @@
-- Feature Name: (fill me in with a unique identity, my_awesome_feature)
+# Title-cased Name of the Feature
+
 - Status: proposed ("proposed", "agreed", "active", "implemented" or "rejected")
 - Type: (new feature, enhancement)
 - Related components: (if any)
 - Start Date: (fill me in with today's date, DD-MM-YYYY)
-- RFC PR: (leave this empty)
-- Issue number: (leave this empty)
+- Discussion: (fill me in with link to RFC discussion - shepherd will complete this) 
+- Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
+- Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
 
-# Summary
+## Summary
 
 One paragraph explanation of the feature.
 
-# Motivation
+## Motivation
 
 Why are we doing this? What use cases does it support? What is the expected outcome?
 
-# Detailed design
+## Detailed design
 
 This is the bulk of the RFC. Explain the design in enough detail for somebody familiar
 with the network to understand, and for somebody familiar with the code practices to implement.
 This should get into specifics and corner-cases, and include examples of how the feature is used.
 
-# Drawbacks
+## Drawbacks
 
 Why should we *not* do this?
 
-# Alternatives
+## Alternatives
 
 What other designs have been considered? What is the impact of not doing this?
 
-# Unresolved questions
+## Unresolved questions
 
 What parts of the design are still to be done?
