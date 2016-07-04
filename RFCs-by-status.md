@@ -10,6 +10,7 @@ A list of all RFCs by their current status.
 
 ## Proposed RFCs
 
+ - [#0032 - Feature Name: Forwarding nodes](./text/00032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0012 Safecoin Implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
  - [#0020 Crust Refactor](./text/0020-crust-refactor/0020-crust-refactor.md)
  - [#0022 Messaging Example in `safe_core`](./text/0022-messaging-example-in-safe_core/0022-messaging-example-in-safe_core.md)
@@ -32,7 +33,6 @@ A list of all RFCs by their current status.
  - [#0002 Name Service](./text/0002-name-service/0002-name-service.md)
  - [#0003 Reserved Names](./text/0003-reserved-names/0003-reserved-names.md)
  - [#0011 Improved Connection Management](./text/0011-improved-connection-management/0011-improved-connection-management.md)
- - [#0013 Immutable Data Naming](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
  - [#0015 Vault Config File](./text/0015-vault-config-file/0015-vault-config-file.md)
  - [#0018 Launcher as a local Rest Server](./text/0018-launcher-as-rest-server/0018-launcher-as-local-rest-server.md)
  - [#0019 New Kademlia Routing Logic](./text/0019-new-kademlia-routing-logic/0019-new-kademlia-routing-logic.md)
@@ -47,9 +47,10 @@ A list of all RFCs by their current status.
  - [#0007 Launcher Not as a Service](./text/0007-launcher-not-as-service/0007-launcher-not-as-a-service.md)
  - [#0008 UDP Hole Punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
  - [#0010 Launcher as a Service](./text/0010-launcher-as-a-service/0010-launcher-as-a-service.md)
+ - [#0013 Immutable Data Naming](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
  - [#0014 Unregistered Client Support in Launcher](./text/0014-unregistered-client-support-in-launcher/0014-unregistered-client-support-in-launcher.md)
  - [#0016 Launcher Data Types API](./text/0016-launcher-data-types-api/0016-launcher-data-types-api.md)
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Tue 14 Jun 11:57:22 BST 2016_ at REV [48fd6af](https://github.com/maidsafe/rfcs/commit/48fd6af74df19a9de6a6d1b048d25d539abf9ec3))
+(Last updated _Mon  4 Jul 11:12:48 BST 2016_ at REV [87056ac](https://github.com/maidsafe/rfcs/commit/87056ac8d2463dd9e0771fcb899599b395edac71))
