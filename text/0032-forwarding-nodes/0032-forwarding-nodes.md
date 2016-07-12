@@ -1,5 +1,6 @@
-- Feature Name: Forwarding nodes
-- Status: proposed proposed
+# Forwarding Nodes
+
+- Status: proposed
 - Type: new feature
 - Related components: kademlia_routing_table, routing
 - Start Date: 09-05-2016

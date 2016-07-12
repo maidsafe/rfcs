@@ -1,6 +1,6 @@
 # Refactor `ImmutableData::name()` Function
 
-- Status: proposed
+- Status: implemented
 - Type: enhancement
 - Related components: Routing, SAFE Vault and SAFE Core
 - Start Date: 11-05-2016
@@ -274,9 +274,14 @@ None.
 
 ## Unresolved questions
 
-Which of the alternatives should be used?
+~~Which of the alternatives should be used?~~
+
+## Resolution
+
+The "Minimal" implementation was ultimately chosen and added as part of [PR #1074][4].
 
 [0]: #Existing "Source for existing `ImmutableData` implementation."
 [1]: #Lazy "Source for "Lazy" implementation."
 [2]: #Minimal "Source for "Minimal" implementation."
 [3]: #Safe "Source for "Safe" implementation."
+[4]: https://github.com/maidsafe/routing/pull/1074/files#diff-20ac033e9bb37ccdbfdd202c7769d57c "Routing pull request number 1074."

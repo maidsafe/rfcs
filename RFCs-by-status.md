@@ -6,11 +6,9 @@ A list of all RFCs by their current status.
 
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
- - [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
 
 ## Proposed RFCs
 
- - [#0032 - Feature Name: Forwarding nodes](./text/00032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0012 Safecoin Implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
  - [#0020 Crust Refactor](./text/0020-crust-refactor/0020-crust-refactor.md)
  - [#0022 Messaging Example in `safe_core`](./text/0022-messaging-example-in-safe_core/0022-messaging-example-in-safe_core.md)
@@ -18,8 +16,8 @@ A list of all RFCs by their current status.
  - [#0027 Append by all Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
  - [#0028 Launcher Low Level API](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
  - [#0030 Secure node join](./text/0030-secure-node-join/0030-secure-node-join.md)
+ - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
 
 ## Agreed RFCs
 
@@ -38,7 +36,9 @@ A list of all RFCs by their current status.
  - [#0019 New Kademlia Routing Logic](./text/0019-new-kademlia-routing-logic/0019-new-kademlia-routing-logic.md)
  - [#0023 Naming of ImmutableData Types](./text/0023-immutable-data-type-naming/0023-immutable-data-type-naming.md)
  - [#0026 Crust Mock](./text/0026-crust-mock/0026-crust-mock.md)
+ - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
  - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
+ - [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
 
 ## Rejected RFCs
 
@@ -53,4 +53,4 @@ A list of all RFCs by their current status.
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Mon  4 Jul 11:12:48 BST 2016_ at REV [87056ac](https://github.com/maidsafe/rfcs/commit/87056ac8d2463dd9e0771fcb899599b395edac71))
+(Last updated _12 Jul 2016 16:36:16_ at REV [1b06de5](https://github.com/maidsafe/rfcs/commit/1b06de54d0ee13d8882d575a0fc701e9ba62cd5c))
