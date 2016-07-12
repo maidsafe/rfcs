@@ -1,6 +1,6 @@
 # safe_launcher API v0.5
 
-- Status: active
+- Status: implemented
 - Type: new feature, enhancement
 - Related components: safe_launcher
 - Start Date: 25-05-2016
@@ -76,7 +76,7 @@ pass the authorisation token in the request header**
 ```
 {
   token: String, // JWT token
-  permissions: Array[String]  
+  permissions: Array[String]
 }
 ```
 
