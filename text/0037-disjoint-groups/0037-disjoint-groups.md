@@ -4,7 +4,7 @@
 - Type: feature
 - Related components: kademlia_routing_table, routing, safe_vault
 - Start Date: 20-07-2016
-- Discussion:
+- Discussion: https://github.com/maidsafe/rfcs/issues/161
 - Supersedes: https://github.com/maidsafe/rfcs/blob/master/text/0019-new-kademlia-routing-logic/0019-new-kademlia-routing-logic.md
 - Superseded by:
 
