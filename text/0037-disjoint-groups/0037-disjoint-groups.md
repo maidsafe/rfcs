@@ -49,14 +49,14 @@ When the network is bootstrapped, there is only one group, with the empty prefix
 * Whenever `(p0)` and `(p1)` satisfy certain group requirements (see below), a group `(p)` splits into `(p0)` and `(p1)`.
 * Whenever a group `(p0)` or `(p1)` ceases to satisfy the group requirements, it merges with all its sister groups into the group `(p)` again: All groups that would be a subset of `(p)` are merged back into `(p)`.
 
-These are the only two operations allowed on groups, so it is guaranteed that every address in the network belongs to exactly one group, and that group satisfies the requirements.
+These are the only two operations allowed on groups, so it is guaranteed that every address in the network belongs to exactly one group, and that group satisfies the requirements. Note that the second rule is applied as soon as _at least one_ of the groups does not satisfy the requirements anymore. E.g. if there are groups `(111)`, `(1100)` and `(1101)`, and `(111)` does not satisfy the requirements, then even if the other two do, the three groups merge into `(11)`.
 
 The invariant that needs to be satisfied by the routing table is modified accordingly:
 
 1. A node must have its complete group `(p)` in its routing table.
 2. It must have every member of every group `(q)` in its routing table, for which `p` and `q` differ in exactly one bit.
 
-If `p` and `q` are not of equal length, that does not count as a difference: A differing bit is one that is defined in _both_ prefixes, but is 1 in one of them and 0 in the other. So e. g. `0000` and `001000` differ in exactly one bit.
+If `p` and `q` are not of equal length, that does not count as a difference: A differing bit is one that is defined in _both_ prefixes, but is 1 in one of them and 0 in the other. So e. g. `111`, `1100` and `1101` all differ in exactly one bit from each other.
 
 The groups that differ in the `i`-th bit are the "`i`-th bucket" of `(p)`.
 
@@ -109,7 +109,9 @@ The quorum cannot be a constant anymore, due to varying group sizes. It needs to
 
 ### Joining nodes
 
-A new node needs to first connect to everyone in its target group. After that, it can drop its proxy node. The other group members can provide the node with their routing tables, which should all be identical. It can then make connections to these other groups, too.
+A new node needs to first connect to everyone in its target group `A`. After that, it can drop its proxy node. The other group members can provide the node with their routing tables, which should all be identical. It can then make connections to these other groups, too.
+
+To keep the changes from the current code minimal, the other nodes will just accept the connection for now. This will soon involve another step, though: To be able to trust the new node, all members of all connected groups will need to receive a message signed by the nodes in `A` that confirms that the new node is in fact a new member of `A` now.
 
 ### Group split
 
@@ -123,7 +125,11 @@ Finally, a `GroupSplit` event needs to be raised so that safe_vault can react to
 
 ### Leaving nodes
 
-A leaving node will cause `LostPeer` events in all its connected peers. No further action is necessary, except if it causes a group merge.
+A leaving node `n` will cause `LostPeer` events in all its connected peers. With the current code, this will cause all nodes to look for a tunnel to `n`. Only if it has really left the network (and not e.g. just lost a single connection), this will fail and everyone will drop it from the routing table.
+
+No further action is necessary, except if it causes a group merge.
+
+As a later change, leaving the network will likely need to be made more explicit: The group will have to agree on its new configuration, and send a signed message about it to all connected groups.
 
 ### Group merge
 
