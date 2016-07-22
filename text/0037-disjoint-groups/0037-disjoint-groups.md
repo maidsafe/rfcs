@@ -29,9 +29,9 @@ In that scenario, the chance to intercept any given group request is 71%. With t
 
 ### Banning nodes from the network
 
-The routing tables of all nodes in a group will be identical. This allows the network to ban misbehaving nodes: If a node's group decides to ban the node from the network, it knows exactly whom this node is connected to, and who needs to be notified to make the whole network disconnect from that it.
+The routing tables of all nodes in a group will be identical. This allows the network to ban misbehaving nodes: If a node's group decides to ban it from the network, it knows exactly whom this node is connected to, and who needs to be notified to make the whole network disconnect from it.
 
-### Weigthed votes and node evaluation
+### Weighted votes and node evaluation
 
 If group `A` is connected to group `B`, every node in `B` will know every member of `A`, so group `B` can easily reach a consensus regarding the correctness of the individual `A`-members' behaviour. This allows `B` to evaluate the nodes in `A` and give feedback about them - another requirement for banning misbehaving nodes. But it could be taken one step further and used to assign grades, and make a nodes' vote weight for group consensus depend on it: Making voting rights depend on a proof of work is essential for the security of the network.
 
