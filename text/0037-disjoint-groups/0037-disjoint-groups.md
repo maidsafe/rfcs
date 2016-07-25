@@ -1,6 +1,6 @@
 # Disjoint Groups
 
-- Status: proposed
+- Status: active
 - Type: feature
 - Related components: kademlia_routing_table, routing, safe_vault
 - Start Date: 20-07-2016
