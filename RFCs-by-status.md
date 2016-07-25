@@ -6,6 +6,7 @@ A list of all RFCs by their current status.
 
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
+ - [#0037 Disjoint Groups](./text/0037-disjoint-groups/0037-disjoint-groups.md)
 
 ## Proposed RFCs
 
@@ -18,7 +19,6 @@ A list of all RFCs by their current status.
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0037 Disjoint Groups](./text/0037-disjoint-groups/0037-disjoint-groups.md)
 
 ## Agreed RFCs
 
@@ -54,4 +54,4 @@ A list of all RFCs by their current status.
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Thu Jul 21 20:02:25 EEST 2016_ at REV [830cbaa](https://github.com/maidsafe/rfcs/commit/830cbaa9679e6b5e644e77ee20dd50210d2e78e3))
+(Last updated _Mon Jul 25 14:13:53 EEST 2016_ at REV [3952462](https://github.com/maidsafe/rfcs/commit/3952462a97c743e59c014dcb766cb55fac5ac0de))
