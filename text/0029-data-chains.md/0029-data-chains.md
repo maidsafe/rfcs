@@ -249,7 +249,7 @@ In this case the data chain needs to us another factor to decide quorum has been
 is the group size figure. 
 
 It is hoped that this can be eradicated by a more sophisticated checkpointing mechanism where both 
-sides of a split can sing the split link. This would be identifiable as the split happens at a common
+sides of a split can sign the split link. This would be identifiable as the split happens at a common
 leading bits agreement of a number of the group. At this time using a naive algorithm though may 
 introduce unwanted and potentially insecure side effects. 
 
