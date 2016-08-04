@@ -42,7 +42,7 @@ The current group definition would considerably complicate [data chains](https:/
 
 ## Detailed design
 
-The definition of a close group is modified so that at each point in time, the name space is partitioned into disjoint groups. Each group is defined by a _name prefix_, i.e. a sequence of between 0 and `XOR_NAME_BITS` (currently 256) bits, similar to how IP subnets correspond to IP address prefixes. The group `(p)` consists of all nodes whose name begins with the prefix `p`, and is responsible for all data items whose name begins with `p`. The group thus manages the part of the name space given by the interval `[p00...00, p11...11]`.
+The definition of a close group is modified so that at each point in time, the name space is partitioned into disjoint groups. Each group is defined by a _name prefix_, i.e. a sequence of between 0 and `XOR_NAME_BITS` (currently 256) bits, similar to how IP subnets correspond to IP address prefixes. The group `(p)` consists of all nodes whose name begins with the prefix `p`, and is responsible for all data items whose name begins with `p`. The group thus manages the part of the name space given by the interval `[p00...00, p11...11]`. The routing table needs to keep track of not only which peers a node is connected to, but also how they are grouped.
 
 When the network is bootstrapped, there is only one group, with the empty prefix `()`, responsible for the whole name space.
 
@@ -117,9 +117,9 @@ To keep the changes from the current code minimal, the other nodes will just acc
 
 If a group `(p)` splits, all its nodes stay connected: The new groups are now each other's `i`-th bucket, where `i` is the number of bits in `p`.
 
-The group sends a direct message to all its contacts to inform them about the split. These need to note that the group has split, even if they stay connected to all its members.
+The group sends a direct `GroupSplit(Prefix)` message to all its contacts to inform them about the split. These need to note that the group has split, even if they stay connected to all its members.
 
-The node can then disconnect immediately (no more `ConnectionUnneeded` required) from every group `(q)` for which `q` now differs in more than one bit from its new group prefix.
+A recipient `(q)` of `GroupSplit` can then disconnect from one of the new groups, if `q` now differs in more than one bit from the new group prefix.
 
 Finally, a `GroupSplit` event needs to be raised so that safe_vault can react to the change, if necessary.
 
@@ -133,7 +133,13 @@ As a later change, leaving the network will likely need to be made more explicit
 
 ### Group merge
 
-When a new group `(p)` is created by merging, all its members are already connected. They need to exchange their routing tables, merge them and establish the missing connections. Finally, they need to notify all of their peers about the group merge. Each node's new routing table will be the union of all the group members' previous tables.
+A group merge occurs if a group ceases to satisfy the group requirements. It then initiates a merge that will strip exactly the last bit from its prefix, i.e. only the group `(p0)` or `(p1)` can initiate a merge into group `(p)`. The initiating group is then already connected to all members of the new group: Their prefixes are all extensions of `p`, so they differed in at most one bit from `p0` resp. `p1` and therefore were connected to the initiating group.
+
+All new group members then need to exchange their routing tables, merge them and establish the missing connections. Finally, they need to notify all of their peers about the group merge. Each node's new routing table will be the union of all the group members' previous tables. In detail, the message flow is as follows:
+
+* The group initiating the merge has only one more bit than `p` and already knows all constituent groups. It sends a `GroupMerge(Prefix, Vec<(Prefix, Vec<XorName>)>)` group message to all of them (including itself), containing the new group prefix and all its routing table entries (including itself).
+* Every node accumulating a `GroupMerge` establishes connections to all entries of the list and sends a `GroupMerge(Prefix, Vec<(Prefix, Vec<XorName>)>)` group message to all of them, in the same way.
+* Each node that has accumulated all the `GroupMerge` messages from all constituent groups of `(p)` updates its routing table to reflect the change.
 
 Then, a `GroupMerge` event is raised so that safe_vault can react to the change and start relocating data.
 
