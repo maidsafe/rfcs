@@ -63,6 +63,7 @@ MutationError::InvalidOperation
 ## Drawbacks
 - A slight increase in complexity at vault level for handling of `ImmutableData`.
 - The deletion (and hence the incentive of reimbursement) is not a full guarantee but a best-effort one.
+- The list of owner keys will require to be merged in cases where users are being added/removed from the list. During churn this will need to accumulate all the not yet locked lists.
 
 ## Alternatives
 * Don't implement this and keep everything as is if it is provable that the network will not be impacted by large amount of unneeded data when the network itself grows to enormous sizes.
