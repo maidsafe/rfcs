@@ -33,7 +33,7 @@ For someone to be able to delete it there has to be some notion of ownership tie
 Changing what is mentioned as a conceptual storage of `ImmutableData` in a node above can help achive this:
 ```rust
 enum Owner {
-    Users(Vec<sign::PublicKey>),
+    Users(HashMap<sign::PublicKey, u64>),
     Network,
 }
 
@@ -45,7 +45,7 @@ struct ImmutableDataStorage {
 // New way of storage:
 let new_storage: HashMap<XorName, ImmutableDataStorage>;
 ```
-Each time someone creates the same `ImmutableData`, one's `PublicKey` get appended to the `Owner::Users` field. Similarly each delete request from a user will be considered valid if the user's key is present in the list and if so the found key will be removed from the list. Once the length of `Owner::Users` reduces to zero, the data is deleted from the network. This field must allow duplication because one user can create same `ImmutableData` multiple times. For e.g. if `A` creates same `ImmutableData` thrice, `A` can issue 3 deletes all of which will be successful and will yeild a reimbursement. The last delete will actually delete the data from the network.
+Each time someone creates the same `ImmutableData`, one's `PublicKey` get appended to the `Owner::Users` field. Similarly each delete request from a user will be considered valid if the user's key is present in the list and if so the found key will be removed from the list. Once the length of `Owner::Users` reduces to zero, the data is deleted from the network. This field must allow duplication because one user can create same `ImmutableData` multiple times. For e.g. if `A` creates same `ImmutableData` thrice, `A` can issue 3 deletes all of which will be successful and will yeild a reimbursement. The last delete will actually delete the data from the network. So the value field `u64` of _HashMap_ represents the number of times the same owner uploaded this data.
 
 There is however a downside - for popular data which might be deduplicated a large number of times, `Owner::Users` will grow enormously in size. A solution to this is that deletion of `ImmutableData` must entail a _best-effort_ guarantee. If the deduplication rises above a limit (hence highly popular), we will consider that data to be entirely network owned and can no longer be deleted by any of its creators. At this point the storage will flip `owner` to `Owner::Network` and beyond this, `ImmutableData` can no longer be deleted and has no associated owners. The policy of reimbursement will not be applicable anymore.
 
