@@ -47,7 +47,7 @@ let new_storage: HashMap<XorName, ImmutableDataStorage>;
 ```
 Each time someone creates the same `ImmutableData`, one's `PublicKey` get appended to the `Owner::Users` field. Similarly each delete request from a user will be considered valid if the user's key is present in the list and if so the found key will be removed from the list. Once the length of `Owner::Users` reduces to zero, the data is deleted from the network. This field must allow duplication because one user can create same `ImmutableData` multiple times. For e.g. if `A` creates same `ImmutableData` thrice, `A` can issue 3 deletes all of which will be successful and will yeild a reimbursement. The last delete will actually delete the data from the network.
 
-There is however a downside - for popular data which might be deduplicated a large number of times, `Owner::Users` will grow enormously in size. A solution to this is that deletion of `ImmutableData` must be entail a _best-effort_ guarantee. If the deduplication rises above a limit (hence highly popular), we will consider that data to be entirely network owned and can no longer be deleted by any of its creators. At this point the storage will flip `owner` to `Owner::Network` and beyond this, `ImmutableData` can no longer be deleted and has no associated owners. The policy of reimbursement will not be applicable anymore.
+There is however a downside - for popular data which might be deduplicated a large number of times, `Owner::Users` will grow enormously in size. A solution to this is that deletion of `ImmutableData` must entail a _best-effort_ guarantee. If the deduplication rises above a limit (hence highly popular), we will consider that data to be entirely network owned and can no longer be deleted by any of its creators. At this point the storage will flip `owner` to `Owner::Network` and beyond this, `ImmutableData` can no longer be deleted and has no associated owners. The policy of reimbursement will not be applicable anymore.
 
 This upper limit shall be called `DEDUPLICATION_LIMIT` and shall be defined as follows: _The number of unique keys in `Owner::Users` beyond which this `ImmutableData` is entirely owned by the network_.
 Its value is chosen thus:
@@ -66,3 +66,4 @@ MutationError::InvalidOperation
 
 ## Alternatives
 * Don't implement this and keep everything as is if it is provable that the network will not be impacted by large amount of unneeded data when the network itself grows to enormous sizes.
+* Implement this without the mentioned `DEDUPLICATION_LIMIT`. So a legit delete request will always succeed and be reimbursed as `ImmutableData` is _never_ network-owned. This ofcouse would mean an ever growing list of owner-keys for popular contents.
