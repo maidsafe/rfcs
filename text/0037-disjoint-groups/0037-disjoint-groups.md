@@ -42,29 +42,44 @@ The current group definition would considerably complicate [data chains](https:/
 
 ## Detailed design
 
-The definition of a close group is modified so that at each point in time, the name space is partitioned into disjoint groups. Each group is defined by a _name prefix_, i.e. a sequence of between 0 and `XOR_NAME_BITS` (currently 256) bits, similar to how IP subnets correspond to IP address prefixes. The group `(p)` consists of all nodes whose name begins with the prefix `p`, and is responsible for all data items whose name begins with `p`. The group thus manages the part of the name space given by the interval `[p00...00, p11...11]`. The routing table needs to keep track of not only which peers a node is connected to, but also how they are grouped.
+The definition of a close group is modified so that at each point in time, the name space is partitioned into disjoint groups. That means that every address in the network at every point in time belongs to _exactly one_ group. Each group is defined by a _name prefix_, i.e. a sequence of between 0 and `XOR_NAME_BITS` (currently 256) bits, similar to how IP subnets correspond to IP address prefixes. The group `G(p)` consists of all nodes whose name begins with the prefix `p`, and is responsible for all data items whose name begins with `p`. The group thus manages the part of the name space given by the interval `[p00...00, p11...11]`.
 
-When the network is bootstrapped, there is only one group, with the empty prefix `()`, responsible for the whole name space.
+The routing table needs to keep track of not only which peers a node is connected to, but also how they are grouped. And the network's structure is defined not by only the nodes that are currently part of it, but also by the groups which currently exist. An address belongs to _exactly one group_ if and only if _exactly one_ of the address' prefixes is the prefix of a current group. So to define a partition of the name space:
 
-* Whenever `(p0)` and `(p1)` satisfy certain group requirements (see below), a group `(p)` splits into `(p0)` and `(p1)`.
-* Whenever a group `(p0)` or `(p1)` ceases to satisfy the group requirements, it merges with all its sister groups into the group `(p)` again: All groups that would be a subset of `(p)` are merged back into `(p)`.
+* No two groups must be comparable: If `G(p)` and `G(q)` are different groups, then `p` and `q` cannot be a prefix of each other - they must differ in at least one bit that is defined in both of them.
+* Every address must have a prefix that belongs to a group.
 
-These are the only two operations allowed on groups, so it is guaranteed that every address in the network belongs to exactly one group, and that group satisfies the requirements. Note that the second rule is applied as soon as _at least one_ of the groups does not satisfy the requirements anymore. E.g. if there are groups `(111)`, `(1100)` and `(1101)`, and `(111)` does not satisfy the requirements, then even if the other two do, the three groups merge into `(11)`.
+For example, these sets of groups form valid partitions of the address space:
+
+* `G(00), G(01), G(10), G(11)`
+* `G(0), G(10), G(110), G(1110), G(1111)`
+* `G()`
+
+Whereas `G(0), G(00), G(10), G(01)` would not be valid, because `0` and `00` are comparable. And `G(01), G(10), G(11)` would not be valid because an address starting with `00` belongs to none of those groups.
+
+When the network is bootstrapped, there is only one group, with the empty prefix `G()`, responsible for the whole name space.
+
+* Whenever `G(p0)` and `G(p1)` satisfy certain group requirements (see below), a group `G(p)` splits into `G(p0)` and `G(p1)`.
+* Whenever a group `G(p0)` or `G(p1)` ceases to satisfy the group requirements, it merges with all its sister groups into the group `G(p)` again: All groups that would be a subset of `G(p)` are merged back into `G(p)`.
+
+These are the only two operations allowed on groups, so it is guaranteed that every address in the network belongs to exactly one group, and that group satisfies the requirements. Note that the second rule is applied as soon as _at least one_ of the groups does not satisfy the requirements anymore. E.g. if there are groups `G(111)`, `G(1100)` and `G(1101)`, and `G(111)` does not satisfy the requirements, then even if the other two do, the three groups merge into `G(11)`.
 
 The invariant that needs to be satisfied by the routing table is modified accordingly:
 
-1. A node must have its complete group `(p)` in its routing table.
-2. It must have every member of every group `(q)` in its routing table, for which `p` and `q` differ in exactly one bit.
+1. A node must have its complete group `G(p)` in its routing table.
+2. It must have every member of every group `G(q)` in its routing table, for which `p` and `q` differ in exactly one bit.
 
-If `p` and `q` are not of equal length, that does not count as a difference: A differing bit is one that is defined in _both_ prefixes, but is 1 in one of them and 0 in the other. So e. g. `111`, `1100` and `1101` all differ in exactly one bit from each other.
+If `p` and `q` are not of equal length, that does not count as a difference: A differing bit is one that is defined in _both_ prefixes, but is `1` in one of them and `0` in the other. So e. g. `111`, `1100` and `1101` all differ in exactly one bit from each other.
 
-The groups that differ in the `i`-th bit are the "`i`-th bucket" of `(p)`.
+The groups that differ in the `i`-th bit are the "`i`-th bucket" of `G(p)`.
 
-In a balanced network, point 2 just means that the group `(q)` _is_ the `i`-th bucket. But if it is not perfectly balanced, it might be the two groups `(q0)` and `(q1)` or even more groups with longer prefixes, or some prefix of `q` itself.
+In a balanced network, point 2 just means that the group `G(q)` _is_ the `i`-th bucket. But if it is not perfectly balanced, it might be the two groups `G(q0)` and `G(q1)` or even more groups with longer prefixes, or some prefix of `q` itself.
 
 The requirement is symmetric: I need you in my routing table if and only if you need me in yours!
 
 It also implies the current Kademlia invariant: I am still connected to each of my bucket groups. (The `GROUP_SIZE` nodes closest to my `i`-th bucket address are necessarily in the same group as the bucket address itself, and therefore cannot differ in more than one bit from my own.)
+
+As an example, consider the group `G(0101)`. Its `0`th bucket consists of all groups that differ exactly in the `0`th bit from `0101`, i.e. all groups whose prefix is comparable to `1101`. That might be the group `G(11)`, the group `G(1101)` or _all three of the groups_ `G(11010)`, `G(110110)` and `G(110111)`. Similarly, its `1`st bucket consists of all groups whose prefixes are comparable with `0001` (they differ in exactly the `1`st bit from `0101`). If, for example, that happens to be exactly group `G(000)`, then the `1`st bucket must contain _all_ members of `G(000)` - those whose name starts with `0001` _and_ those whose name starts with `0000`.
 
 ### Group requirements
 
@@ -76,7 +91,7 @@ To avoid repeated splitting and merging due to small fluctuations in group size,
 
 ### Message routing
 
-To relay a message from an individual node on a given `route` in a node `n` in group `(p)` for a destination _node_ `d`:
+To relay a message from an individual node on a given `route` in a node `n` in group `G(p)` for a destination _node_ `d`:
 
 * If `d == n`, handle the message.
 * If `d` is in our routing table, relay it directly to `d`.
@@ -85,7 +100,7 @@ To relay a message from an individual node on a given `route` in a node `n` in g
 
 If the destination is a _group authority_ with address `d`:
 
-* If `p` is a prefix of `d`, handle the message and relay it to everyone else in `(p)`.
+* If `p` is a prefix of `d`, handle the message and relay it to everyone else in `G(p)`.
 * Otherwise relay the message to the `route`-th closest entry to `d` in our routing table.
 
 For any groups `A` and `B`, either everyone in `A` is closer to `d` than everyone in `B`, or vice versa. Therefore, the _group_ that we relay the message to doesn't depend on the route. Since everyone in our group knows everyone in the next hop's group, this means that in the next attempt `route + 1`, a _different_ member of `B` will receive the message. Unless there is churn in between the attempts, this guarantees that all routes are disjoint.
@@ -115,11 +130,11 @@ To keep the changes from the current code minimal, the other nodes will just acc
 
 ### Group split
 
-If a group `(p)` splits, all its nodes stay connected: The new groups are now each other's `i`-th bucket, where `i` is the number of bits in `p`.
+If a group `G(p)` splits, all its nodes stay connected: The new groups are now each other's `i`-th bucket, where `i` is the number of bits in `p`.
 
-The group sends a direct `GroupSplit(Prefix)` message to all its contacts to inform them about the split. These need to note that the group has split, even if they stay connected to all its members.
+The group sends a direct `GroupSplit(p)` message to all its contacts to inform them about the split. These need to note that the group has split, even if they stay connected to all its members. They now know that there is no group `G(p)` anymore, but there are groups `G(p0)` and `G(p1)`.
 
-A recipient `(q)` of `GroupSplit` can then disconnect from one of the new groups, if `q` now differs in more than one bit from the new group prefix.
+A recipient `G(q)` of `GroupSplit` can then disconnect from one of the new groups, if `q` now differs in more than one bit from the new group prefix.
 
 Finally, a `GroupSplit` event needs to be raised so that safe_vault can react to the change, if necessary.
 
@@ -133,13 +148,13 @@ As a later change, leaving the network will likely need to be made more explicit
 
 ### Group merge
 
-A group merge occurs if a group ceases to satisfy the group requirements. It then initiates a merge that will strip exactly the last bit from its prefix, i.e. only the group `(p0)` or `(p1)` can initiate a merge into group `(p)`. The initiating group is then already connected to all members of the new group: Their prefixes are all extensions of `p`, so they differed in at most one bit from `p0` resp. `p1` and therefore were connected to the initiating group.
+A group merge occurs if a group ceases to satisfy the group requirements. It then initiates a merge that will strip exactly the last bit from its prefix, i.e. only the group `G(p0)` or `G(p1)` can initiate a merge into group `G(p)`. The initiating group is then already connected to all members of the new group: Their prefixes are all extensions of `p`, so they differed in at most one bit from `p0` resp. `p1` and therefore were connected to the initiating group.
 
 All new group members then need to exchange their routing tables, merge them and establish the missing connections. Finally, they need to notify all of their peers about the group merge. Each node's new routing table will be the union of all the group members' previous tables. In detail, the message flow is as follows:
 
-* The group initiating the merge has only one more bit than `p` and already knows all constituent groups. It sends a `GroupMerge(Prefix, Vec<(Prefix, Vec<XorName>)>)` group message to all of them (including itself), containing the new group prefix and all its routing table entries (including itself).
-* Every node accumulating a `GroupMerge` establishes connections to all entries of the list and sends a `GroupMerge(Prefix, Vec<(Prefix, Vec<XorName>)>)` group message to all of them, in the same way.
-* Each node that has accumulated all the `GroupMerge` messages from all constituent groups of `(p)` updates its routing table to reflect the change.
+* The group initiating the merge has only one more bit than `p` and already knows all constituent groups. It sends a `GroupMerge(p, Vec<(Prefix, Vec<XorName>)>)` group message to all of them (including itself), containing the new group prefix and all its routing table entries (including itself) and _their_ group prefixes.
+* Every node accumulating a `GroupMerge` establishes connections to all entries of the list and sends a `GroupMerge(p, Vec<(Prefix, Vec<XorName>)>)` group message to all of them, in the same way.
+* Each node that has accumulated all the `GroupMerge` messages from all constituent groups of `G(p)` updates its routing table to reflect the change: It now knows that there exists a group `G(p)` and that all other groups `G(p...)` ceased to exist.
 
 Then, a `GroupMerge` event is raised so that safe_vault can react to the change and start relocating data.
 
