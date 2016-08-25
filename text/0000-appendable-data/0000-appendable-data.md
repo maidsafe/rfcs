@@ -48,7 +48,7 @@ enum FilterType {
 
 struct AppendedData {
     pointer  : DataIdentifier, // Pointer to actual data
-    owner    : sign::PublicKey,
+    sender   : sign::PublicKey,
     signature: Signature, // All the above fields
 }
 ```
@@ -104,6 +104,92 @@ The `Authority` for append operations will always default to `Authority::NaeMana
 
 ## Drawbacks
 - There is currently no _push_ mechanism for append operation, i.e. the owner must resort to polling (as opposed to notifications) to check if `Priv/PubAppendableData` has been updated.
+- Type erasure into `Vec<u8>` for `PrivAppendableData` and reconstruction at vaults via specific parsing logic might not be ideal way to approach this.
 
 ## Alternatives
-- None yet
+### Interface
+The following interface
+```rust
+pub fn send_append_request(data_id: DataIdentifier, data: Vec<u8>, msg_id: MessageId) -> Result<(), InterfaceError>;
+```
+is different from all other mutation-operation interface which look like:
+```rust
+pub fn send_post_request(dest: Authority, data: Data, msg_id: MessageId) -> Result<(), InterfaceError>;
+```
+To make it uniform and provide concrete types instead of type-erasure to `Vec<u8>` in case of `PrivAppendableData` we could divide `AppendedData` as follows:
+```rust
+// Outer cover discarded by vaults; only `data` used
+struct PubAppendData {
+    append_to: DataIdentifier,
+    data     : PubAppendedData,
+}
+
+// Outer cover discarded by vaults after filter check and signature validation.
+// Only `data` used
+struct PrivAppendData {
+    append_to: DataIdentifier,
+    data     : PrivAppendedData,
+    sender   : sign::PublicKey,
+    signature: Signature, // All the above fields
+}
+
+struct PubAppendedData {
+    pointer  : DataIdentifier, // Pointer to actual data
+    owner    : sign::PublicKey,
+    signature: Signature, // All the above fields
+}
+
+struct PrivAppendedData {
+    sender_encrypt_key: box_::PublicKey,
+    encrypted_data    : Vec<u8>,
+}
+}
+```
+and make them known via the usual `Data` interface:
+```rust
+enum Data {
+    // Previously present
+    Structured(StructuredData),
+    Immutable(ImmutableData),
+    Plain(PlainData),
+
+    // Newly added
+    PubAppendable(PubAppendableData),
+    PrivAppendable(PrivAppendableData),
+    PubAppend(PubAppendData),
+    PrivAppend(PrivAppendData),
+}
+```
+
+Now the function signatures and concept for all mutation would be uniform:
+```rust
+pub fn send_append_request(dest: Authority, data: Data, msg_id: MessageId) -> Result<(), InterfaceError>;
+```
+and routing location can be obtained via usual methods like `Data::name()` etc. as for `StructuredData` and `ImmutableData`.
+
+We would change the `Pub/PrivAppendableData` as:
+```rust
+struct PubAppendableData {
+    name        : XorName,
+    version     : u64,
+    owners      : Vec<sign::PublicKey>,
+    prev_owners : Vec<sign::PublicKey>,
+    filter      : (FilterType, Vec<sign::PublicKey>),
+    deleted_data: HashSet<PubAppendedData>,
+    signature   : Signature, // All the above fields
+    data        : HashSet<PubAppendedData>, // Unsigned
+}
+
+struct PrivAppendableData {
+    name        : XorName,
+    version     : u64,
+    owners      : Vec<sign::PublicKey>,
+    prev_owners : Vec<sign::PublicKey>,
+    filter      : (FilterType, Vec<sign::PublicKey>),
+    encrypt_key : box_::PublicKey,
+    deleted_data: HashSet<PrivAppendedData>,
+    signature   : Signature, // All the above fields
+    data        : HashSet<PrivAppendedData>, // Unsigned
+}
+```
+The overhead in this approach is that 3 new types have been introduced.
