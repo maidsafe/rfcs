@@ -105,6 +105,7 @@ The `Authority` for append operations will always default to `Authority::NaeMana
 ## Drawbacks
 - There is currently no _push_ mechanism for the append operation, i.e. the owner must resort to polling (as opposed to notifications) to check if `Priv/PubAppendableData` has been updated.
 - Type erasure into `Vec<u8>` for `PrivAppendableData` and reconstruction at vaults via specific parsing logic might not be ideal way to approach this.
+- There is no way for owner to actually blacklist a spammer in case of `PrivAppendableData`. This is because the outer shell which is discarded by the vaults after verification contains the `sign::PublicKey` which the vaults actually use for filter checks. However what owner sees as `sign::PublicKey` after decrypting the data might not be the same and if owner blacklists this key, there isn't anything that is going to happen because it's the outer key that was malacious. The vaults discard this outer shell for the sake of anonymity preservation (i.e. do not want sender to be traceable).
 
 ## Alternatives
 ### Interface
@@ -169,14 +170,14 @@ and routing location can be obtained via usual methods like `Data::name()` etc. 
 We would change the `Pub/PrivAppendableData` as:
 ```rust
 struct PubAppendableData {
-    name        : XorName,
-    version     : u64,
+    name              : XorName,
+    version           : u64,
     current_owner_keys: Vec<sign::PublicKey>,
-    prev_owners : Vec<sign::PublicKey>,
-    filter      : (FilterType, Vec<sign::PublicKey>),
-    deleted_data: HashSet<PubAppendedData>,
-    signature   : Signature, // All the above fields
-    data        : HashSet<PubAppendedData>, // Unsigned
+    prev_owners       : Vec<sign::PublicKey>,
+    filter            : (FilterType, Vec<sign::PublicKey>),
+    deleted_data      : HashSet<PubAppendedData>,
+    signature         : Signature, // All the above fields
+    data              : HashSet<PubAppendedData>, // Unsigned
 }
 
 struct PrivAppendableData {
