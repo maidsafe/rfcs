@@ -17,26 +17,26 @@ Facility for non-owner updating of owned data for the purposes of information ex
 Some of the features, such as notions of ownership and ability to transfer it etc., are directly borrowed from `StructuredData`. As such we will dive into the type-definition straight away. There shall be two kinds of this new type:
 ```rust
 struct PubAppendableData {
-    name        : XorName,
-    version     : u64,
-    owners      : Vec<sign::PublicKey>,
-    prev_owners : Vec<sign::PublicKey>,
-    filter      : (FilterType, Vec<sign::PublicKey>),
-    deleted_data: HashSet<AppendedData>,
-    signature   : Signature, // All the above fields
-    data        : HashSet<AppendedData>, // Unsigned
+    name              : XorName,
+    version           : u64,
+    current_owner_keys: Vec<sign::PublicKey>,
+    prev_owners       : Vec<sign::PublicKey>,
+    filter            : (FilterType, Vec<sign::PublicKey>),
+    deleted_data      : HashSet<AppendedData>,
+    signature         : Signature, // All the above fields
+    data              : HashSet<AppendedData>, // Unsigned
 }
 
 struct PrivAppendableData {
-    name        : XorName,
-    version     : u64,
-    owners      : Vec<sign::PublicKey>,
-    prev_owners : Vec<sign::PublicKey>,
-    filter      : (FilterType, Vec<sign::PublicKey>),
-    encrypt_key : box_::PublicKey,
-    deleted_data: HashSet<(box_::PublicKey, Vec<u8>)>,
-    signature   : Signature, // All the above fields
-    data        : HashSet<(box_::PublicKey, Vec<u8>)>, // Unsigned
+    name              : XorName,
+    version           : u64,
+    current_owner_keys: Vec<sign::PublicKey>,
+    prev_owners       : Vec<sign::PublicKey>,
+    filter            : (FilterType, Vec<sign::PublicKey>),
+    encrypt_key       : box_::PublicKey,
+    deleted_data      : HashSet<(box_::PublicKey, Vec<u8>)>,
+    signature         : Signature, // All the above fields
+    data              : HashSet<(box_::PublicKey, Vec<u8>)>, // Unsigned
 }
 ```
 where
@@ -135,14 +135,13 @@ struct PrivAppendData {
 
 struct PubAppendedData {
     pointer  : DataIdentifier, // Pointer to actual data
-    owner    : sign::PublicKey,
+    sender   : sign::PublicKey,
     signature: Signature, // All the above fields
 }
 
 struct PrivAppendedData {
     sender_encrypt_key: box_::PublicKey,
-    encrypted_data    : Vec<u8>,
-}
+    encrypted_data    : Vec<u8>, // Encrypted PubAppendedData
 }
 ```
 and make them known via the usual `Data` interface:
@@ -172,7 +171,7 @@ We would change the `Pub/PrivAppendableData` as:
 struct PubAppendableData {
     name        : XorName,
     version     : u64,
-    owners      : Vec<sign::PublicKey>,
+    current_owner_keys: Vec<sign::PublicKey>,
     prev_owners : Vec<sign::PublicKey>,
     filter      : (FilterType, Vec<sign::PublicKey>),
     deleted_data: HashSet<PubAppendedData>,
@@ -181,15 +180,15 @@ struct PubAppendableData {
 }
 
 struct PrivAppendableData {
-    name        : XorName,
-    version     : u64,
-    owners      : Vec<sign::PublicKey>,
-    prev_owners : Vec<sign::PublicKey>,
-    filter      : (FilterType, Vec<sign::PublicKey>),
-    encrypt_key : box_::PublicKey,
-    deleted_data: HashSet<PrivAppendedData>,
-    signature   : Signature, // All the above fields
-    data        : HashSet<PrivAppendedData>, // Unsigned
+    name              : XorName,
+    version           : u64,
+    current_owner_keys: Vec<sign::PublicKey>,
+    prev_owners       : Vec<sign::PublicKey>,
+    filter            : (FilterType, Vec<sign::PublicKey>),
+    encrypt_key       : box_::PublicKey,
+    deleted_data      : HashSet<PrivAppendedData>,
+    signature         : Signature, // All the above fields
+    data              : HashSet<PrivAppendedData>, // Unsigned
 }
 ```
 The overhead in this approach is that 3 new types have been introduced.
