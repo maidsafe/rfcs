@@ -131,19 +131,19 @@ struct PubAppendWrapper {
 struct PrivAppendWrapper {
     append_to: DataIdentifier,
     data     : PrivAppendedData,
-    sender   : sign::PublicKey,
+    sign_key : sign::PublicKey,
     signature: Signature, // All the above fields
 }
 
 struct PubAppendedData {
     pointer  : DataIdentifier, // Pointer to actual data
-    sender   : sign::PublicKey,
+    sign_key : sign::PublicKey,
     signature: Signature, // All the above fields
 }
 
 struct PrivAppendedData {
-    sender_encrypt_key: box_::PublicKey,
-    encrypted_data    : Vec<u8>, // Encrypted PubAppendedData
+    msg_encrypt_key: box_::PublicKey,
+    encrypted_data : Vec<u8>, // Encrypted PubAppendedData
 }
 ```
 and make them known via the usual `Data` interface:
@@ -157,8 +157,8 @@ enum Data {
     // Newly added
     PubAppendable(PubAppendableData),
     PrivAppendable(PrivAppendableData),
-    PubAppend(PubAppendWrapper),
-    PrivAppend(PrivAppendWrapper),
+    PubAppendWrapper(PubAppendWrapper),
+    PrivAppendWrapper(PrivAppendWrapper),
 }
 ```
 
