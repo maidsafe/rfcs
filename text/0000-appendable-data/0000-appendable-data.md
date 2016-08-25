@@ -102,6 +102,10 @@ where
   - For `data_id == DataIdentifier::PubAppendable` : Serialised AppendedData. Vault can deserialise it and extract the sender key for filter check and signature check.
   - For `data_id == DataIdentifier::PrivAppendable`: `Serialised(Signature, sign::PublicKey, Serialised(box_::PublicKey, Encrypted(AppendedData)))`. The signature is the result of signing the other two fields. Encryption is performed using owner's `encrypt_key` and sender's `box_::SecretKey`, the public part of which is transmitted. In this case the vaults will extract the sender key for filter check and signature validation. If successful it will discard them and store only the `Serialised(box_::PublicKey, Encrypted(AppendedData))` part.
 
+The `Authority` for append operations will always default to `Authority::NaeManager`.
+
 ## Drawbacks
+- There is currently no _push_ mechanism for append operation, i.e. the owner must resort to polling (as opposed to notifications) to check if `Priv/PubAppendableData` has been updated.
 
 ## Alternatives
+- None yet
