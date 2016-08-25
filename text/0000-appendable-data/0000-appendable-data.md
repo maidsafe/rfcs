@@ -5,7 +5,7 @@
 - Start Date: 25-August-2016
 
 ## Summary
-Facility for non-owner updating of owned data for the purposes of information exchange.
+Facility for non-owner updates of owned data for the purposes of information exchange.
 
 ## Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
