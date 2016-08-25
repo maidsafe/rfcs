@@ -166,7 +166,7 @@ Now the function signatures and concept for all mutation would be uniform:
 ```rust
 pub fn send_append_request(dest: Authority, data: Data, msg_id: MessageId) -> Result<(), InterfaceError>;
 ```
-and routing location can be obtained via usual methods like `Data::name()` etc. as for `StructuredData` and `ImmutableData`.
+and routing location can be obtained via usual methods like `Data::name()` etc. as for `StructuredData` and `ImmutableData`. If we decide we want appends to be chargable and want to route this via `MaidManager`s we can even do this by specifying the `Authority` just like we do for `PUTs` of `StructuredData` and hence we don't sacrifice the flexibility we already have.
 
 We would change the `Pub/PrivAppendableData` as:
 ```rust
