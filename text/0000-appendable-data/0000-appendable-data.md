@@ -68,7 +68,7 @@ struct AppendedData {
 }
 
 struct PrivAppendedData {
-    encrypt_key: box_::PublicKey,
+    encrypt_key: box_::PublicKey, // Recommended to be a part of a throwaway keypair
     encrypted_appeneded_data : Vec<u8>, // Encrypted AppendedData
 }
 ```
