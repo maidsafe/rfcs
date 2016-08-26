@@ -22,9 +22,9 @@ struct PubAppendableData {
     current_owner_keys       : Vec<sign::PublicKey>,
     previous_owner_keys      : Vec<sign::PublicKey>,
     filter                   : (FilterType, Vec<sign::PublicKey>),
-    deleted_data             : HashSet<AppendedData>,
+    deleted_data             : HashSet<PubAppendedData>,
     previous_owner_signatures: Signature, // All the above fields
-    data                     : HashSet<AppendedData>, // Unsigned
+    data                     : HashSet<PubAppendedData>, // Unsigned
 }
 
 struct PrivAppendableData {
@@ -34,9 +34,9 @@ struct PrivAppendableData {
     previous_owner_keys      : Vec<sign::PublicKey>,
     filter                   : (FilterType, Vec<sign::PublicKey>),
     encrypt_key              : box_::PublicKey,
-    deleted_data             : HashSet<(box_::PublicKey, Vec<u8>)>,
+    deleted_data             : HashSet<PrivAppendedData>,
     previous_owner_signatures: Signature, // All the above fields
-    data                     : HashSet<(box_::PublicKey, Vec<u8>)>, // Unsigned
+    data                     : HashSet<PrivAppendedData>, // Unsigned
 }
 ```
 where
@@ -46,21 +46,42 @@ enum FilterType {
     WhiteList,
 }
 
-struct AppendedData {
-    pointer  : DataIdentifier, // Pointer to actual data
-    sign_key : sign::PublicKey, // The sender
+// Outer cover discarded by vaults; only `data` used
+struct PubAppendWrapper {
+    append_to: DataIdentifier,
+    data     : PubAppendedData,
+}
+
+// Outer cover discarded by vaults after filter check and signature validation.
+// Only `data` used
+struct PrivAppendWrapper {
+    append_to: DataIdentifier,
+    data     : PrivAppendedData,
+    sign_key : sign::PublicKey,
     signature: Signature, // All the above fields
+}
+
+struct PubAppendedData {
+    pointer  : DataIdentifier, // Pointer to actual data
+    sign_key : sign::PublicKey,
+    signature: Signature, // All the above fields
+}
+
+struct PrivAppendedData {
+    msg_encrypt_key: box_::PublicKey,
+    encrypted_data : Vec<u8>, // Encrypted PubAppendedData
 }
 ```
 
 - Both `PubAppendableData` and `PrivAppendableData` shall have max size restriction of **100 KiB**.
-- `AppendedData` contains the location (pointer) of the actual data which can be any type (`Immutable`, `Structured`, etc.) as identified by `DataIdentifier`. The pointer mechanism will keep appended data small as it only contains a pointer to the actual data which could be colossal and fill entire 100 KiB limit by just itself.
-- As shown, all fields apart from `data` are only owner modifiable and need to be signed by the owner(s). `data` however will be unsigned and must be modifiable by anyone who passes the `filter` criteria set by owner(s). Owner(s) can set `filter` to either blacklist or whitelist. In case it is set to `FilterType::BlackList`, the vaults shall enforce the rule of allowing everyone but the blacklisted keys to add to `data` on subsequent updates following the change to `filter`, i.e. existing data in `data` field will not be dealt by the vaults. Similarly, if set to `FilterType::WhiteList`, no one but the the whitelisted keys will be allowed to add data.
-- Simultaneous updates of `data` will be dealt with by a merge operation at the vaults. For e.g. if `data` was originally empty and 3 updates from 3 different sources arrived simultaneously, then vaults would do a union operation, and the resultant appendable data would have all three updates.
-- Deletion of data is done by moving the particular data in `data` field to `deleted_data` by the owner followed by the `POST` of the entire `PubAppendableData`/`PrivAppendableData`. As with any owner related modifications via `POST`, the vaults shall in this case assert the version increment. It is important to delete in this manner otherwise churn can bring back the deleted data in some cases. When data is moved from `data` to `delete_data`, vaults will ensure that any merge operation that tries to put data back into `data` while it also resides in `deleted_data` shall be ignored. Emptying `deleted_data` itself can be done by the user by similar `POST` after some period of time which though is unspecified, but should be safe in excess of 20 min or so (in case it's a heavily churning network at that point of time).
+- `PubAppendedData` contains the location (pointer) of the actual data which can be any type (`Immutable`, `Structured`, etc.) as identified by `DataIdentifier`. The pointer mechanism will keep appended data small as it only contains a pointer to the actual data which could be colossal and fill entire 100 KiB limit by just itself.
+- As shown, all fields of `Pub/PrivAppendableData` apart from `Pub/PrivAppendableData::data` are only owner modifiable and need to be signed by the owner(s). `Pub/PrivAppendableData::data` however will be unsigned and shall be modifiable by anyone who passes the `filter` criteria set by owner(s). Owner(s) can set `filter` to either blacklist or whitelist. In case it is set to `FilterType::BlackList`, the vaults shall enforce the rule of allowing everyone but the blacklisted keys to add to `data` on subsequent updates following the change to `filter`, i.e. existing data in `data` field will not be dealt by the vaults. Similarly, if set to `FilterType::WhiteList`, no one but the the whitelisted keys will be allowed to add data.
+- Simultaneous updates of `Pub/PrivAppendableData::data` will be dealt with by a merge operation at the vaults. For e.g. if `Pub/PrivAppendableData::data` was originally empty and 3 updates from 3 different sources arrived simultaneously, then vaults would do a union operation, and the resultant appendable data would have all three updates.
+- Deletion of data is done by moving the particular data in `Pub/PrivAppendableData::data` field to `Pub/PrivAppendableData::deleted_data` by the owner followed by the `POST` of the entire `Pub/PrivAppendableData`. As with any owner related modifications via `POST`, the vaults shall in this case assert the version increment. It is important to delete in this manner otherwise churn can bring back the deleted data in some cases. When data is moved from `Pub/PrivAppendableData::data` to `Pub/PrivAppendableData::delete_data`, vaults will ensure that any merge operation that tries to put data back into `Pub/PrivAppendableData::data` while it also resides in `Pub/PrivAppendableData::deleted_data` shall be ignored. Emptying `Pub/PrivAppendableData::deleted_data` itself can be done by the user by similar `POST` after some period of time which though is unspecified, but should be safe in excess of 20 min or so (in case it's a heavily churning network at that point of time or much earlier otherwise).
+- `PrivAppendedData::encrypted_data` is encrypted `PubAppendedData` using `PrivAppendableData::encrypt_key` and sender's `box_::SecretKey`, the public part of which is `PrivAppendedData::msg_encrypt_key`. Owner(s) of `PrivAppendableData` will use their `box_::SecretKey` and `PrivAppendedData::msg_encrypt_key` to decrypt data into `PubAppendedData` and then retrive actual data from `PubAppendedData::pointer` which will be usually encrypted in the exact same way.
 
 ### `PubAppendableData` vs `PrivAppendableData`
-In the case of `PubAppendableData`, `AppendedData` can be added as is. This means that anyone can see what has been added and who added them. However if the owner does not want to share this information, `PrivAppendableData` caters for the required privacy. It comes with an extra field called `encrypt_key` where the owner supplies the key with which everyone appending data should encrypt both `AppendedData` and the actual data. Since encryption would also imply that the owner has access to `box_::PublicKey` of the person encrypting and appending, `data` field in this case is a tuple containing encrypted `AppendedData` and sender's `box_::PublicKey`. This `box_::PublicKey` from the sender may be a part of a throw-away key-pair used just for this encryption or something more permanent - it is completely up to the sender.
+In the case of `PubAppendableData`, `PubAppendedData` can be added as is. This means that anyone can see what has been added and who added them. However if the owner does not want to share this information, `PrivAppendableData` caters for the required privacy. It comes with an extra field called `encrypt_key` where the owner supplies the key with which everyone appending data shall encrypt `PubAppendedData` and the actual data pointed to by it. Since encryption would also imply that the owner has access to `box_::PublicKey` of the person encrypting and appending, `data` field in this case is `PrivAppendedData` containing encrypted `PubAppendedData` and sender's `box_::PublicKey`. This `box_::PublicKey` from the sender may be a part of a throw-away key-pair used just for this encryption or something more permanent - it is completely up to the sender.
 
 ## Implementation
 ### Extending Data and DataIdentifier
@@ -92,104 +113,15 @@ enum DataIdentifier {
 ### APPEND API
 In addition to the `PUT/POST/DELETE` mutating operations, we will add an `APPEND` operation to the API. At the routing-safe_core interface this shall be:
 ```rust
-pub fn send_append_request(data_id: DataIdentifier, data: Vec<u8>, msg_id: MessageId) -> Result<(), InterfaceError>;
+pub fn send_pub_append_request(dst: Authority, wrapper: PubAppendWrapper, msg_id: MessageId) -> Result<(), InterfaceError>;
+pub fn send_priv_append_request(dst: Authority, wrapper: PrivAppendWrapper, msg_id: MessageId) -> Result<(), InterfaceError>;
 ```
 where
-- `data_id` is either `DataIdentifier::PubAppendable` or `DataIdentifier::PrivAppendable`
-- `data` is
-  - For `data_id == DataIdentifier::PubAppendable`: Serialised `AppendedData`. Vault can deserialise it and extract the sender key for filter check and signature check.
-  - For `data_id == DataIdentifier::PrivAppendable`: `Serialised(Signature, sign::PublicKey, Serialised(box_::PublicKey, Encrypted(AppendedData)))`. The signature is the result of signing the other two fields. Encryption is performed using the owner's `encrypt_key` and the sender's `box_::SecretKey`, the public part of which is transmitted. In this case the vaults will extract the sender key for filter check and signature validation. If successful it will discard them and store only the `Serialised(box_::PublicKey, Encrypted(AppendedData))` part.
-
-The `Authority` for append operations will always default to `Authority::NaeManager`.
+- `dst` could be `Authority::NaeManager` if append operation is gratis or if we decide we want appends to be chargable and want to route this via `MaidManager`s we can even do this too by specifying `dst` as `Authority::MaidManager` just like we do for `PUTs` of `StructuredData` and hence we don't sacrifice the flexibility we already have.
+- `wrapper` helps route message to either `Priv/PubAppendableData` where it is required to append the data.
+  - For `wrapper == PubAppendWrapper`: Operation is straight forward. Once routed to `PubAppendWrapper::append_to`, vaults will simply throw away the wrapper and store `PubAppendWrapper::data` after signature verification and filter check using  `PubAppendedData::signature` and `PubAppendedData::sign_key`.
+  - For `wrapper == PrivAppendWrapper`: Once routed to `PrivAppendWrapper::append_to`, vaults will perform filter check and signature using `PrivAppendWrapper::sign_key` and `PrivAppendWrapper::signature` and then discard it storing `PrivAppendWrapper::data == PrivAppendedData`.
 
 ## Drawbacks
 - There is currently no _push_ mechanism for the append operation, i.e. the owner must resort to polling (as opposed to notifications) to check if `Priv/PubAppendableData` has been updated.
-- Type erasure into `Vec<u8>` for `PrivAppendableData` and reconstruction at vaults via specific parsing logic might not be ideal way to approach this.
 - There is no way for owner to actually blacklist a spammer in case of `PrivAppendableData`. This is because the outer shell which is discarded by the vaults after verification contains the `sign::PublicKey` which the vaults actually use for filter checks. However what owner sees as `sign::PublicKey` after decrypting the data might not be the same and if owner blacklists this key, there isn't anything that is going to happen because it's the outer key that was malacious. The vaults discard this outer shell for the sake of anonymity preservation (i.e. do not want sender to be traceable).
-
-## Alternatives
-### Interface
-The following interface
-```rust
-pub fn send_append_request(data_id: DataIdentifier, data: Vec<u8>, msg_id: MessageId) -> Result<(), InterfaceError>;
-```
-is different from all other mutation-operation interface which look like:
-```rust
-pub fn send_post_request(dest: Authority, data: Data, msg_id: MessageId) -> Result<(), InterfaceError>;
-```
-To make it uniform and provide concrete types instead of type-erasure to `Vec<u8>` in case of `PrivAppendableData` we could divide `AppendedData` as follows:
-```rust
-// Outer cover discarded by vaults; only `data` used
-struct PubAppendWrapper {
-    append_to: DataIdentifier,
-    data     : PubAppendedData,
-}
-
-// Outer cover discarded by vaults after filter check and signature validation.
-// Only `data` used
-struct PrivAppendWrapper {
-    append_to: DataIdentifier,
-    data     : PrivAppendedData,
-    sign_key : sign::PublicKey,
-    signature: Signature, // All the above fields
-}
-
-struct PubAppendedData {
-    pointer  : DataIdentifier, // Pointer to actual data
-    sign_key : sign::PublicKey,
-    signature: Signature, // All the above fields
-}
-
-struct PrivAppendedData {
-    msg_encrypt_key: box_::PublicKey,
-    encrypted_data : Vec<u8>, // Encrypted PubAppendedData
-}
-```
-and make them known via the usual `Data` interface:
-```rust
-enum Data {
-    // Previously present
-    Structured(StructuredData),
-    Immutable(ImmutableData),
-    Plain(PlainData),
-
-    // Newly added
-    PubAppendable(PubAppendableData),
-    PrivAppendable(PrivAppendableData),
-    PubAppendWrapper(PubAppendWrapper),
-    PrivAppendWrapper(PrivAppendWrapper),
-}
-```
-
-Now the function signatures and concept for all mutation would be uniform:
-```rust
-pub fn send_append_request(dest: Authority, data: Data, msg_id: MessageId) -> Result<(), InterfaceError>;
-```
-and routing location can be obtained via usual methods like `Data::name()` etc. as for `StructuredData` and `ImmutableData`. If we decide we want appends to be chargable and want to route this via `MaidManager`s we can even do this by specifying the `Authority` just like we do for `PUTs` of `StructuredData` and hence we don't sacrifice the flexibility we already have.
-
-We would change the `Pub/PrivAppendableData` as:
-```rust
-struct PubAppendableData {
-    name                     : XorName,
-    version                  : u64,
-    current_owner_keys       : Vec<sign::PublicKey>,
-    previous_owner_keys      : Vec<sign::PublicKey>,
-    filter                   : (FilterType, Vec<sign::PublicKey>),
-    deleted_data             : HashSet<PubAppendedData>,
-    previous_owner_signatures: Signature, // All the above fields
-    data                     : HashSet<PubAppendedData>, // Unsigned
-}
-
-struct PrivAppendableData {
-    name                     : XorName,
-    version                  : u64,
-    current_owner_keys       : Vec<sign::PublicKey>,
-    previous_owner_keys      : Vec<sign::PublicKey>,
-    filter                   : (FilterType, Vec<sign::PublicKey>),
-    encrypt_key              : box_::PublicKey,
-    deleted_data             : HashSet<PrivAppendedData>,
-    previous_owner_signatures: Signature, // All the above fields
-    data                     : HashSet<PrivAppendedData>, // Unsigned
-}
-```
-The overhead in this approach is that 3 new types have been introduced.
