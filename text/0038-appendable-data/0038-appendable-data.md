@@ -3,6 +3,7 @@
 - Type: feature
 - Related components: `safe_core`, `safe_vault`, `safe_launcher`, `routing`
 - Start Date: 25-August-2016
+- Discussion: https://forum.safedev.org/t/rfc-38-appendable-data/72
 
 ## Summary
 Facility for non-owner updates of owned data for the purposes of information exchange.
