@@ -19,6 +19,7 @@ A list of all RFCs by their current status.
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
+ - [#0038 Appendable Data](./text/0038-appendable-data/0038-appendable-data.md)
 
 ## Agreed RFCs
 
@@ -54,4 +55,4 @@ A list of all RFCs by their current status.
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Mon Jul 25 14:13:53 EEST 2016_ at REV [3952462](https://github.com/maidsafe/rfcs/commit/3952462a97c743e59c014dcb766cb55fac5ac0de))
+(Last updated _Mon Aug 29 13:36:09 BST 2016_ at REV [058b385](https://github.com/maidsafe/rfcs/commit/058b3856fcf519e0188da0e534bc92670f173372))
