@@ -29,7 +29,6 @@ A list of all RFCs by their current status.
 
 ## Implemented RFCs
 
- - [#0000 Unify Structured Data](./text/0000-unified-structured-data/0000-unified-structured-data.md)
  - [#0001 Use Public Key for ID on all Messages](./text/0001-use-public-key-for-id-on-all-messages/0001-use-public-key-for-id-on-all-messages.md)
  - [#0002 Name Service](./text/0002-name-service/0002-name-service.md)
  - [#0003 Reserved Names](./text/0003-reserved-names/0003-reserved-names.md)
@@ -42,10 +41,10 @@ A list of all RFCs by their current status.
  - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
  - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
  - [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
+ - [#0040 Unify Structured Data](./text/0040-unified-structured-data/0040-unified-structured-data.md)
 
 ## Rejected RFCs
 
- - [#0000 Sentinel](./text/0000-sentinel/0000-sentinel.md)
  - [#0006 Address Relocation](./text/0006-address-relocation/0006-address-relocation.md)
  - [#0007 Launcher Not as a Service](./text/0007-launcher-not-as-service/0007-launcher-not-as-a-service.md)
  - [#0008 UDP Hole Punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
@@ -54,6 +53,7 @@ A list of all RFCs by their current status.
  - [#0014 Unregistered Client Support in Launcher](./text/0014-unregistered-client-support-in-launcher/0014-unregistered-client-support-in-launcher.md)
  - [#0016 Launcher Data Types API](./text/0016-launcher-data-types-api/0016-launcher-data-types-api.md)
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
+ - [#0039 Sentinel](./text/0039-sentinel/0039-sentinel.md)
 
 
-(Last updated _Tue 30 Aug 14:43:08 BST 2016_ at REV [8636e1d](https://github.com/maidsafe/rfcs/commit/8636e1d2adc8ff26be39c29242fe3a93f5a8ad36))
+(Last updated _Tue 30 Aug 14:50:37 BST 2016_ at REV [fdef8c9](https://github.com/maidsafe/rfcs/commit/fdef8c9399f6c542da9113c5153854b0db755b46))
