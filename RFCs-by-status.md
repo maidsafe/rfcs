@@ -6,6 +6,7 @@ A list of all RFCs by their current status.
 
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
+ - [#0037 Disjoint Groups](./text/0037-disjoint-groups/0037-disjoint-groups.md)
 
 ## Proposed RFCs
 
@@ -15,10 +16,11 @@ A list of all RFCs by their current status.
  - [#0025 Launcher Direct Data API](./text/0025-launcher-direct-data-api/0025-launcher-direct-data-api.md)
  - [#0027 Append by all Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
  - [#0028 Launcher Low Level API](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
- - [#0029 - Feature Name: Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
+ - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
+ - [#0038 Appendable Data](./text/0038-appendable-data/0038-appendable-data.md)
 
 ## Agreed RFCs
 
@@ -54,4 +56,4 @@ A list of all RFCs by their current status.
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
 
 
-(Last updated _Wed 20 Jul 20:15:51 BST 2016_ at REV [e6dc076](https://github.com/maidsafe/rfcs/commit/e6dc076101070f9f02bcc691f85e7a003d0e8de3))
+(Last updated _Tue 30 Aug 14:43:08 BST 2016_ at REV [8636e1d](https://github.com/maidsafe/rfcs/commit/8636e1d2adc8ff26be39c29242fe3a93f5a8ad36))
