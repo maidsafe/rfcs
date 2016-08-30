@@ -14,6 +14,14 @@ Exposing low level API to facilitate direct construction of MaidSafe types by La
 As more and more types become exposed via `safe_core` it would be impractical to provide helper functions geared towards all the use cases of various apps. It would simply lead to expolosion of such functions in the public interface. Instead if `safe_core` could provide direct interfacing with the API's somehow, then the apps/Launcher would simply call what they need and permutations would lie with them as it should be. We already have helper functions to do basic composite dns and nfs operations (like moving a file from one nfs-directory to another etc.). This RFC will deal with exposing the internals of MaidSafe types so that different or more complex operations can be done by Launcher/apps. Also representation of data as nfs-exposed directory hirearchy might not be suitable or applicable for many apps. The low level exposure would allow them to construct their own data representation of choice.
 
 ## Detailed design
+Currently one of the functionality of `Launcher` is to provide sandboxing. Apps which pass through the Launcher (which is the recommended approach because it is considered bad to give one's credentials to every app) have access to data either within specific folder created for them or within `SAFEDrive` which is where common data is. No app is allowed to access data in a folder reserved for another app. However this guarantee will be broken once the low level API's are exposed because apps will have freedom to create whatever data they want and wherever they want it on the network. Under the current implementation this would mean that private data stored by one app can be potentially compromised (accessed by another app). For e.g. say App-0 creates and stores `StructuredData` `abc` somewhere in the network. If App-1 uses a direct `GET` for `abc` there is no way Launcher knows this should not be allowed. Previously apps were only allowed to travel a directory hirarchy to get data and Launcher could assert it travelled only the permissible ones.
+
+To get around this limitation, Launcher shall enforce a rule of separate `box_::gen_keypair()` for each app. Every app that registers successfully with Launcher gets a new `box_` key-pair. All private data created on the network by the app will use this key-pair to encrypt/decrypt data. These keys will need to be persistant, so Launcher will write the details in its configuration file against the registered app.
+
+Though the keys are persistant, there is no way for Launcher to know if one app is mimicking another during the authentication process. So Launcher will ask user each time an app starts and tries to register with Launcher, _even if Launcher was never killed in the meantime_ (unlike currently).
+
+## Alternatives
+
 ### Api's for `StructuredData` manipulation:
 ```rust
 /// _type_tag_:
@@ -293,27 +301,56 @@ pub unsafe extern "C" fn appendable_data_append(append_to: *const DataIdentifier
 
 ### Api's for `ImmutableData` manipulation:
 ```rust
+/// _se_: New Self-Encryptor will be written to this handle.
 #[no_mangle]
 pub unsafe extern "C" fn immut_data_new_self_encryptor(se: *mut *mut SequentialEncryptor) -> i32;
 
 
+/// _se_: Valid Self-Encryptor handle.
+/// _data_: Raw data to be written.
+/// _size_: Size of the raw data to be written.
+/// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
 pub unsafe extern "C" fn immut_data_write_to_self_encryptor(se: *mut SequentialEncryptor,
                                                             data: *const u8,
                                                             size: u64) -> i32;
 
 
+/// _se_: Valid Self-Encryptor handle. The Self-Encryptor will be destroyed after this and must not
+///       be used any further. It is UB to use `se` any further.
+/// _is_encrypted_: If the data map should be encrypted.
+/// _data_id_: DataIdentifier of final ImmutableData will be put into this.
+///              - After self-encryption, the obtained (encrypted or otherwise) data-map will be
+///                tested to be <= 1 MiB. If not it will undergo self-encryption again and the
+///                process repeats till we get a data-map which is <= 1 MiB. This data-map will be
+///                `PUT` to the network as ImmutableData and its DataIdentifier returned.
+/// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
 pub unsafe extern "C" fn immut_data_close_self_encryptor(se: *mut SequentialEncryptor,
                                                          is_encrypted: bool,
                                                          data_id: *mut *mut DataIdentifier) -> i32;
 
 
+/// _data_id_: Valid DataIdentifier.
+/// _se_: Self-Encryptor created from the data-map extracted via reverse process of creation as
+///       detailed above. It is seamless to the app, all work being done by `safe_core`.
 #[no_mangle]
 pub unsafe extern "C" fn immut_data_get_self_encryptor(data_id: *const DataIdentifier,
                                                        se: *mut *mut SequentialEncryptor) -> i32;
 
 
+/// _se_: Valid Self-Encryptor handle.
+/// _size_: Size of total available data will be written to this.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn immut_data_self_encryptor_size(se: *mut SequentialEncryptor,
+                                                        size: *mut u64) -> i32;
+
+
+/// _se_: Valid Self-Encryptor handle.
+/// _offset_: Offset to read from.
+/// _size_: Number of bytes to read from, starting from offset.
+/// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
 pub unsafe extern "C" fn immut_data_read_self_encryptor(se: *mut SequentialEncryptor,
                                                         offset: u64,
@@ -321,4 +358,10 @@ pub unsafe extern "C" fn immut_data_read_self_encryptor(se: *mut SequentialEncry
                                                         data: *mut *mut u8) -> i32;
 ```
 ## Drawbacks
+- If there are many apps and there are configured to work at system start-up then the user will face a barrage of pop-ups to confirm if an app should have access. This undermines the security due to inconveniencing the user.
+
+## Unresolved Problems
+- While other apps will not be able to read the private data created by an app, they can still modify (e.g. overwrite) it, for instance if it were a `StructuredData`. To prevent this not only each app should be given its own `box_` key-pair but also `sign` key-pair. However the problem with that is only one `sign` key-pair is registered in `MaidManagers` for an account. Any other key-pair will be disallowed to create data on the network.
+- The required authentication each time app wants to resume connection with Launcher means that Launcher must detect the app having gone offline. One way to do this could be a persistant connection with heartbeats but it is yet to be seen if this is the most ideal approach.
+
 ## Alternatives
