@@ -67,6 +67,16 @@ pub unsafe extern "C" fn struct_data_get_with_data_id(data_id: *const DataIdenti
                                                       sd: *mut *mut StructuredData) -> i32;
 
 
+/// _type_tag_: type-tag of StructuredData.
+/// _id_: Pointer to array of size 32.
+/// _data_id_: If successful DataIdentifier will be given via this handle.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn struct_data_construct_data_id(type_tag: u64,
+                                                       id: *const [u8; 32],
+                                                       data_id: *mut *mut DataIdentifier) -> i32;
+
+
 /// _sd_: A valid StructuredData handle. `type_tag` shall mean the following:
 ///   - 500 for unversioned StructuredData
 ///     - `safe_core` will ensure that StructuredData is < 100 KiB.
@@ -173,11 +183,23 @@ pub unsafe extern "C" fn struct_data_post(sd: *mut StructuredData) -> i32;
 ///       StructuredData as it will no longer exist in the SAFE Network.
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
-pub unsafe extern "C" fn struct_data_delete(sd: *const StructuredData) -> i32;
+pub unsafe extern "C" fn struct_data_delete(sd: *mut StructuredData) -> i32;
+
+
+/// _sd_: A valid StructuredData handle. After a call to this, it is UB to use the handle any more.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn struct_data_free_handle(sd: *mut StructuredData) -> i32;
 ```
 
 ### Api's for `AppendableData` manipulation:
 ```rust
+/// FFI Handle for a union of AppendableData types to reduce combinatorial explosion of functions.
+pub enum AppendableDataHandle {
+    Pub(PubAppendableData),
+    Priv(PrivAppendableData),
+}
+
 #[rep(C)]
 pub enum FilterType {
     BlackList,
@@ -197,7 +219,7 @@ pub unsafe extern "C" fn pub_appendable_data_create(name: *const [u8; 32],
                                                     filter_type: FilterType,
                                                     filtered_keys: *const *const [u8; sign::PUBLICKEYBYTES],
                                                     data: *const AppendableData,
-                                                    ad: *mut *mut PubAppendableData) -> i32;
+                                                    ad: *mut *mut AppendableDataHandle) -> i32;
 
 
 /// _name_: Pointer to array of size 32.
@@ -213,7 +235,18 @@ pub unsafe extern "C" fn priv_appendable_data_create(name: *const [u8; 32],
                                                      filter_type: FilterType,
                                                      filtered_keys: *const *const [u8; sign::PUBLICKEYBYTES],
                                                      data: *const AppendableData,
-                                                     ad: *mut *mut PrivAppendableData) -> i32;
+                                                     ad: *mut *mut AppendableDataHandle) -> i32;
+
+
+/// _name_: Pointer to array of size 32.
+/// _is_private_: If Pub/PrivAppendableData.
+/// _data_id_: If successful DataIdentifier will be given via this handle.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_construct_data_id(name: *const [u8; 32],
+                                                           is_private: bool,
+                                                           data_id: *mut *mut DataIdentifier)
+                                                           -> i32;
 
 
 /// _name_: Pointer to array of size 32.
@@ -221,7 +254,7 @@ pub unsafe extern "C" fn priv_appendable_data_create(name: *const [u8; 32],
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
 pub unsafe extern "C" fn pub_appendable_data_get(name: *const [u8; 32],
-                                                 ad: *mut *mut PubAppendableData) -> i32;
+                                                 ad: *mut *mut AppendableDataHandle) -> i32;
 
 
 /// _name_: Pointer to array of size 32.
@@ -229,64 +262,56 @@ pub unsafe extern "C" fn pub_appendable_data_get(name: *const [u8; 32],
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
 pub unsafe extern "C" fn priv_appendable_data_get(name: *const [u8; 32],
-                                                  ad: *mut *mut PrivAppendableData) -> i32;
+                                                  ad: *mut *mut AppendableDataHandle) -> i32;
 
 
 /// _ad_: Handle to a valid AppendableData. It will be modified, hence a mutable pointee required.
 /// _filter_key_: New key to be added.
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
-pub unsafe extern "C" fn pub_appendable_data_add_filter_key(ad: *mut PubAppendableData,
-                                                            filter_key: *const [u8; sign::PUBLICKEYBYTES)
-                                                            -> i32;
-
-
-/// _ad_: Handle to a valid AppendableData. It will be modified, hence a mutable pointee required.
-/// _filter_key_: New key to be added.
-/// **return-value**: Non-zero in case of error giving the error-code.
-#[no_mangle]
-pub unsafe extern "C" fn priv_appendable_data_add_filter_key(ad: *mut PrivAppendableData,
-                                                             filter_key: *const [u8; sign::PUBLICKEYBYTES)
-                                                             -> i32;
+pub unsafe extern "C" fn appendable_data_add_filter_key(ad: *mut AppendableDataHandle,
+                                                        filter_key: *const [u8; sign::PUBLICKEYBYTES)
+                                                        -> i32;
 
 
 /// _ad_: Handle to a valid AppendableData.
 /// _num_: Number of AppendedData will be written into this.
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
-pub unsafe extern "C" fn pub_appendable_data_get_list_size(ad: *const PubAppendableData,
-                                                           num: *mut u64) -> i32;
-
-
-/// _ad_: Handle to a valid AppendableData.
-/// _num_: Number of AppendedData will be written into this.
-/// **return-value**: Non-zero in case of error giving the error-code.
-#[no_mangle]
-pub unsafe extern "C" fn priv_appendable_data_get_list_size(ad: *const PrivAppendableData,
-                                                            num: *mut u64) -> i32;
+pub unsafe extern "C" fn appendable_data_get_list_size(ad: *const AppendableDataHandle,
+                                                       num: *mut u64) -> i32;
 
 
 /// _ad_: Handle to a valid AppendableData.
 /// _n_: DataIdentifier pertaining to the _nth_ AppendedData will be returned.
 /// _data_id_: DataIdentifier of actual data pointed to by this AppendedData will be put into this.
+///            Decryption will be performed internally if needed.
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
-pub unsafe extern "C" fn pub_appendable_data_get_nth_data_id(ad: *const PubAppendableData,
-                                                             n: u64,
-                                                             data_id: *mut *mut DataIdentifier)
-                                                             -> i32;
+pub unsafe extern "C" fn appendable_data_get_nth_data_id(ad: *const AppendableDataHandle,
+                                                         n: u64,
+                                                         data_id: *mut *mut DataIdentifier)
+                                                         -> i32;
 
 
 /// _ad_: Handle to a valid AppendableData.
-/// _n_: DataIdentifier pertaining to the _nth_ AppendedData will be returned. Decrypting will be
-///      performed internally by the API.
-/// _data_id_: DataIdentifier of actual data pointed to by this AppendedData will be put into this.
+/// _n_: Sign key pertaining to the _nth_ AppendedData will be returned.
+/// _data_id_: Sign key of this AppendedData will be put into this. Decryption will be performed
+///            internally if needed.
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
-pub unsafe extern "C" fn priv_appendable_data_get_nth_data_id(ad: *const PrivAppendableData,
-                                                              n: u64,
-                                                              data_id: *mut *mut DataIdentifier)
-                                                              -> i32;
+pub unsafe extern "C" fn appendable_data_get_nth_data_sign_key(ad: *const AppendableDataHandle,
+                                                               n: u64,
+                                                               sign_key: *mut *mut [u8; sign::PUBLICKEYBYTES])
+                                                               -> i32;
+
+
+/// _ad_: Handle to a valid AppendableData. Will be modified, hence a mutable pointee.
+/// _n_: nth AppendedData will be removed. It will be moved into the `deleted_data` field.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_delete_nth_data(ad: *mut AppendableDataHandle,
+                                                         n: u64) -> i32;
 
 
 /// _append_to_: Handle to a valid Pub/PrivAppendableData to which we are to append.
@@ -295,8 +320,34 @@ pub unsafe extern "C" fn priv_appendable_data_get_nth_data_id(ad: *const PrivApp
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
 pub unsafe extern "C" fn appendable_data_append(append_to: *const DataIdentifier,
-                                                
                                                 pointer: *const DataIdentifier) -> i32;
+
+
+/// _ad_: A valid AppendableData handle.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_put(ad: *const AppendableDataHandle) -> i32;
+
+
+/// _ad_: A valid AppendableData handle. `AppendableData::version` will automatically be bumped.
+///       Hence it takes a mutable pointer.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_post(ad: *mut AppendableDataHandle) -> i32;
+
+
+/// _ad_: A valid AppendableData handle. `AppendableData::version` will automatically be bumped.
+///       Hence it takes a mutable pointer. After a call to this, it is advisable to destroy the
+///       AppendableData as it will no longer exist in the SAFE Network.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_delete(ad: *mut AppendableDataHandle) -> i32;
+
+
+/// _ad_: A valid AppendableData handle. After a call to this, it is UB to use the handle any more.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_free_handle(ad: *mut AppendableDataHandle) -> i32;
 ```
 
 ### Api's for `ImmutableData` manipulation:
@@ -356,7 +407,14 @@ pub unsafe extern "C" fn immut_data_read_self_encryptor(se: *mut SequentialEncry
                                                         offset: u64,
                                                         size: u64,
                                                         data: *mut *mut u8) -> i32;
+
+
+/// _ad_: A valid Self-Encryptor handle. After a call to this, it is UB to use the handle any more.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn immut_data_free_self_encryptor_handle(se: *mut SequentialEncryptor) -> i32;
 ```
+
 ## Drawbacks
 - If there are many apps and there are configured to work at system start-up then the user will face a barrage of pop-ups to confirm if an app should have access. This undermines the security due to inconveniencing the user.
 
@@ -365,3 +423,4 @@ pub unsafe extern "C" fn immut_data_read_self_encryptor(se: *mut SequentialEncry
 - The required authentication each time app wants to resume connection with Launcher means that Launcher must detect the app having gone offline. One way to do this could be a persistant connection with heartbeats but it is yet to be seen if this is the most ideal approach.
 
 ## Alternatives
+- Instead of passing pointers to Launcher, use a different mechanism which keeps the pointers internally and passes handle (e.g. u64) to Launcher and maps handles to pointers internally in `safe_core`.
