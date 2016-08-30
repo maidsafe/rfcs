@@ -22,7 +22,7 @@ Though the keys are persistant, there is no way for Launcher to know if one app 
 
 ## Alternatives
 
-### Api's for `StructuredData` manipulation:
+### Api's for StructuredData manipulation:
 ```rust
 /// _type_tag_:
 ///   - 500 for unversioned StructuredData
@@ -192,7 +192,7 @@ pub unsafe extern "C" fn struct_data_delete(sd: *mut StructuredData) -> i32;
 pub unsafe extern "C" fn struct_data_free_handle(sd: *mut StructuredData) -> i32;
 ```
 
-### Api's for `AppendableData` manipulation:
+### Api's for AppendableData manipulation:
 ```rust
 /// FFI Handle for a union of AppendableData types to reduce combinatorial explosion of functions.
 pub enum AppendableDataHandle {
@@ -350,7 +350,7 @@ pub unsafe extern "C" fn appendable_data_delete(ad: *mut AppendableDataHandle) -
 pub unsafe extern "C" fn appendable_data_free_handle(ad: *mut AppendableDataHandle) -> i32;
 ```
 
-### Api's for `ImmutableData` manipulation:
+### Api's for ImmutableData manipulation:
 ```rust
 /// _se_: New Self-Encryptor will be written to this handle.
 #[no_mangle]
