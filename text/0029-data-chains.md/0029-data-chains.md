@@ -318,6 +318,27 @@ of chain length.
 If a restart has been detected, any node recognised in the last link of the chain will be allowed
 entry again.
 
+## Merkle tree of checkpoints
+
+A datachain of the group `locks` the node and data status of that group along the timeline. But this
+still leave the risk that a whole forged blockchain cannot be detected by the network. A merkle-tree
+of checkpoints, which `locks` checkpoints network wide (actually creates a snapshot), can expose
+such forged chain easily. Once [DisjointGroup] is deployed, such merkle-tree can be computed as:
+
+1. Every fixed interval (say one hour) each group computes a hash of all the checkpoints generated
+during that period and broadcast to all groups it knows within a MerkelTreeHash request.
+
+2. On receiving a MerkelTreeHash request, the receiver replies with all the hashes it knows.
+
+3. Once all hashes from all groups received, each group calculates the merkle-tree, then broadcast
+the root hash to the network
+
+4. Whenever a group detects a mismatch of the root hash received with the local calculated, it shall
+fetch the whole merkle-tree from others then figure out whether there is missing group to update.
+
+Such merkle-trees (snapshots of network) prove the validatity of datachains when restoring data
+during network restart / mass segmentation.
+
 # Further work
 
 The current implementation of [DataChain]s is secure, but can be made extremely more efficient over
@@ -354,3 +375,4 @@ Not initially required, but should be considered in near future.
 [Proof]: https://dirvine.github.io/data_chain/master/data_chain/chain/node_block/struct.Proof.html
 [BlockIdentifier]: https://dirvine.github.io/data_chain/master/data_chain/enum.BlockIdentifier.html
 [create_link_descriptor()]: https://dirvine.github.io/data_chain/master/data_chain/chain/node_block/fn.create_link_descriptor.html
+[DisjointGroup]: https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md
