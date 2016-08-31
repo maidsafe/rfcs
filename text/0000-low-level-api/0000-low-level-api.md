@@ -30,7 +30,7 @@ If we are encrypting for ourselves then there is no need of asymmetric/hybrid en
 If we are are encrypting for others, then hybrid-encryption shall be used. In this scheme, we generate a throw away symmetric key-nonce combination called `S` and encrypt the data with that. Lets call this ciphertext `C0`. Then we generate a throw away asymmetric key-pair and nonce called `asym-our and nonce-our`. We also need public part of the peer's asymmetric key. This is `Pub-asym-remote`. After this we encrypt `S` with `Sec-asym-our, nonce-our, Pub-asym-remote` and get another ciphertext `C1`. The final data now would be _Serialised(Pub-asym-our + nonce-our + C1 + C0)_. We use this technique because [asymmetric encryption is not suitable for long blocks of plaintexts](http://crypto.stackexchange.com/questions/14/how-can-i-use-asymmetric-encryption-such-as-rsa-to-encrypt-an-arbitrary-length).
 
 ```rust
-#[rep(C)]
+#[repr(C)]
 pub enum CipherOption {
     /// Data will not be encrypted.
     PlainText,
@@ -220,7 +220,7 @@ pub enum AppendableDataHandle {
     Priv(PrivAppendableData),
 }
 
-#[rep(C)]
+#[repr(C)]
 pub enum FilterType {
     BlackList,
     WhiteList,
@@ -466,7 +466,7 @@ pub unsafe extern "C" fn immut_data_free_self_encryptor_handle(se: *mut Sequenti
 
 ### Api's for DataIdentifier manipulation:
 ```rust
-#[rep(C)]
+#[repr(C)]
 enum DataType {
     Structured,
     Immutable,
