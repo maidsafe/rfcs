@@ -70,7 +70,7 @@ pub unsafe extern "C" fn struct_data_create(app: *const AppHandle,
                                             cipher_opt: CipherOption,
                                             peer_key: *const box_::PublicKey,
                                             data: *const u8,
-                                            size: *const u64,
+                                            size: u64,
                                             o_sd: *mut *mut StructuredData) -> i32;
 
 
@@ -100,6 +100,14 @@ pub unsafe extern "C" fn struct_data_extract_data_id(sd: *const StructuredData,
                                                      o_data_id: *mut *mut DataIdentifier) -> i32;
 
 
+/// _sd_: A valid StructuredData handle.
+/// _o_owner_: Boolean result will be put into this.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn struct_data_assert_ownership(sd: *const StructuredData,
+                                                      o_owner: *mut bool) -> i32;
+
+
 /// _sd_: A valid StructuredData handle. `type_tag` shall mean the following:
 ///   - 500 for unversioned StructuredData
 ///     - `safe_core` will ensure that StructuredData is < 100 KiB.
@@ -125,7 +133,7 @@ pub unsafe extern "C" fn struct_data_new_data(app: *const AppHandle,
                                               cipher_opt: CipherOption,
                                               peer_key: *const box_::PublicKey,
                                               data: *const u8,
-                                              size: *const u64) -> i32;
+                                              size: u64) -> i32;
 
 
 /// _sd_: A valid StructuredData handle. `type_tag` shall mean the following:
@@ -494,7 +502,42 @@ pub unsafe extern "C" fn data_id_free_handle(data_id: *mut DataIdentifier) -> i3
 
 ## Unresolved Problems
 - While other apps will not be able to read the private data created by an app, they can still modify (e.g. overwrite) it, for instance if it were a `StructuredData`. To prevent this not only each app should be given its own `box_` key-pair but also `sign` key-pair. However the problem with that is only one `sign` key-pair is registered in `MaidManagers` for an account. Any other key-pair will be disallowed to create data on the network.
-- The required authentication each time app wants to resume connection with Launcher means that Launcher must detect the app having gone offline. One way to do this could be a persistant connection with heartbeats but it is yet to be seen if this is a feasible approach.
+- The required authentication each time app wants to resume connection with Launcher means that Launcher must detect the app having gone offline.
 
 ## Alternatives
-- Instead of passing pointers to Launcher, use a different mechanism which keeps the pointers internally and passes handle (e.g. u64) to Launcher and maps handles to pointers internally in `safe_core`, but this is better done once asyn-safe_core is flushed out.
+### Internal Type-Maps
+Instead of passing pointers to Launcher, use a different mechanism which keeps the objects/pointers internally and passes handle (e.g. `u64`) to Launcher and maps handles to objects/pointers internally in `safe_core`. The difference with this approach (which might be slightly counter-intuitive) is that we get tremendous type-safety. None of the function signatures take any opaque pointers. We would only have raw data and `u64` handle as pointers which are of a trivial types and don't require `safe_core` to allocate/deallocate - can be managed completely by NodeJS code. All types could be stored in their non-pointer form by `safe_core` and are referenced via the `u64` handle that is returned to Launcher/apps. If this approach is followed the function signatures would change from having opaque pointer handles to having `u64`.
+
+For e.g. creating structured data would look like:
+```rust
+#[no_mangle]
+pub unsafe extern "C" fn struct_data_create(app: u64
+                                            type_tag: u64,
+                                            id: *const [u8; 32], // POD - self-managed by JS
+                                            cipher_opt: CipherOption,
+                                            peer_key: u64,
+                                            data: *const u8, // POD - self-managed by JS
+                                            size: u64,
+                                            o_sd: *mut u64 // POD - self-managed by JS
+					    ) -> i32;
+```
+
+Allocation and deallocation functions will change from:
+```rust
+#[no_mangle] pub unsafe extern "C" sample_opaque_allocation(o_opaque_handle: *mut *mut OpaqueType) -> i32;
+
+// An invalid ptr handle would mean UB (could crash etc.).
+#[no_mangle] pub unsafe extern "C" sample_opaque_deallocation(o_opaque_handle: *mut OpaqueType) -> i32;
+```
+to:
+```rust
+#[no_mangle] pub unsafe extern "C" sample_opaque_allocation(o_opaque_handle: *mut u64) -> i32;
+
+// An invalid `u64` handle would never mean UB - it will either end up being ignored and error
+// result returned OR deleting of something else (which is fine as it would give an error next
+// time you accessed that something else).
+#[no_mangle] pub unsafe extern "C" sample_opaque_deallocation(o_opaque_handle: u64) -> i32;
+```
+Internally `safe_core` would remove the object it stored in some `Map<u64, ThisOpaqueType>`.
+
+In both approaches, though, it is a memory leak to not call the deallocation routine as `safe_core` will never remove it from the appropriate map. Some relief might be available in form of Lru-cache kind of data-structure where forgotton objects will eventually be deleted even if the apps misbehave and never call the clean-up api.
