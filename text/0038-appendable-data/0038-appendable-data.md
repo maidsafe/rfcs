@@ -49,14 +49,14 @@ enum Filter {
 
 // Outer cover discarded by vaults; only `data` used
 struct PubAppendWrapper {
-    append_to: DataIdentifier,
+    append_to: XorName,
     data     : AppendedData,
 }
 
 // Outer cover discarded by vaults after filter check and signature validation.
 // Only `data` used
 struct PrivAppendWrapper {
-    append_to: DataIdentifier,
+    append_to: XorName,
     data     : PrivAppendedData,
     sign_key : sign::PublicKey,
     signature: Signature, // All the above fields
