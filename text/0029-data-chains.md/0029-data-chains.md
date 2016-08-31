@@ -326,6 +326,33 @@ a signed checkpoint, but a checkpoint that can evaluate when all contained block
 by xoring back to all zero's. This RFC does not attempt to include any such efficient mechanism,
 instead this is left for further design improvements and RFC's.
 
+## Merkle tree of checkpoints
+
+A datachain of the group `locks` the node and data status of that group along the timeline. But this
+still leave the risk that a whole forged blockchain cannot be detected by the network. A merkle-tree
+of checkpoints, which `locks` checkpoints network wide (actually creates a snapshot), can expose
+such forged chain easily. Once [DisjointGroup] is deployed, such merkle-tree can be computed as:
+
+1. Every fixed interval (say one hour), each group computes a hash of all the checkpoints generated
+during that period. This hash will then be exchanged with group's sibling group to compute an one
+level up hash (say group 000 exchanging with group 001 to compute hash for 00x).
+
+2. Once one level up hash computed, the group exchange it with a group it knows in that level, so
+the hash of that level can be computed (exchange hash of 00x with a group in 01 to compute 0x hash).
+
+3. Repeat this procedure till get a root hash.
+
+4. To verify the computed merkle-tree is correct, the root hash needs to be published to the network
+(or just contact the furthest group knows, which has the highest chance of mismatch, to reduce the
+messages transferred).
+
+Such merkle-trees (snapshots of network) prove the validatity of datachains when restoring data
+during network restart / mass segmentation. To prove identity to the network, a member of group 000
+only needs to provide: root hash, hash of 0x and 1x, hash of 00x and 01x, checkpoints hashes. If the
+duty of providing this set of hashes left to the node joining the network, the existing nodes only
+need to holds the root hash in cache (and probably store the partial merkel-tree containing itself
+in disk, so the joining node can get access to via fetching request).
+
 # Drawbacks
 
 - In very small networks (less than approx 3000) network difficulty is a fluctuating number, this can
@@ -354,3 +381,4 @@ Not initially required, but should be considered in near future.
 [Proof]: https://dirvine.github.io/data_chain/master/data_chain/chain/node_block/struct.Proof.html
 [BlockIdentifier]: https://dirvine.github.io/data_chain/master/data_chain/enum.BlockIdentifier.html
 [create_link_descriptor()]: https://dirvine.github.io/data_chain/master/data_chain/chain/node_block/fn.create_link_descriptor.html
+[DisjointGroup]: https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md
