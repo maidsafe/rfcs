@@ -47,19 +47,19 @@ enum Filter {
     WhiteList(BTreeSet<sign::PublicKey>),
 }
 
-// Outer cover discarded by vaults; only `data` used
-struct PubAppendWrapper {
+// Outer cover discarded by vaults, after filter check and signature validation where applicable.
+// Only data used
+enum AppendWrapper {
+  Pub {
     append_to: XorName,
     data     : AppendedData,
-}
-
-// Outer cover discarded by vaults after filter check and signature validation.
-// Only `data` used
-struct PrivAppendWrapper {
+  }
+  Priv {
     append_to: XorName,
     data     : PrivAppendedData,
     sign_key : sign::PublicKey,
     signature: Signature, // All the above fields
+  }
 }
 
 struct AppendedData {
@@ -114,14 +114,13 @@ enum DataIdentifier {
 ### APPEND API
 In addition to the `PUT/POST/DELETE` mutating operations, we will add an `APPEND` operation to the API. At the routing-safe_core interface this shall be:
 ```rust
-pub fn send_pub_append_request(dst: Authority, wrapper: PubAppendWrapper, msg_id: MessageId) -> Result<(), InterfaceError>;
-pub fn send_priv_append_request(dst: Authority, wrapper: PrivAppendWrapper, msg_id: MessageId) -> Result<(), InterfaceError>;
+pub fn send_append_request(dst: Authority, wrapper: AppendWrapper, msg_id: MessageId) -> Result<(), InterfaceError>;
 ```
 where
 - `dst`: While `routing` expects a generic `Authority`, `safe_core` and `safe_vault` will use the `Authority::MaidManager` authority of the sender to facilitate append operations being charged for the sender.
 - `wrapper` helps route message to either `Priv/PubAppendableData` where it is required to append the data.
-  - For `wrapper == PubAppendWrapper`: Operation is straight forward. Once routed to `PubAppendWrapper::append_to`, vaults will simply throw away the wrapper and store `PubAppendWrapper::data` after signature verification and filter check using  `AppendedData::signature` and `AppendedData::sign_key`.
-  - For `wrapper == PrivAppendWrapper`: Once routed to `PrivAppendWrapper::append_to`, vaults will perform filter check and signature using `PrivAppendWrapper::sign_key` and `PrivAppendWrapper::signature` and then discard it storing `PrivAppendWrapper::data == PrivAppendedData`.
+  - For `wrapper == AppendWrapper::Pub { append_to, data }`: Operation is straight forward. Once routed to `append_to`, vaults will simply throw away the wrapper and store `data` after signature verification and filter check using  `data.signature` and `data.sign_key`.
+  - For `wrapper == AppendWrapper::Priv { append_to, data, sign_key, signature }`: Once routed to `append_to`, vaults will perform filter check and signature using `sign_key` and `signature` and then discard it storing `data == PrivAppendedData`.
 
 ### Deletion
 When onwer `POSTs` a `Pub/PrivAppendableData` with some entires in `Pub/PrivAppendableData::data` moved to `Pub/PrivAppendableData::deleted_data`, vaults (after all the usual version bump, signature etc. checks) shall do a merge (union) of current `Pub/PrivAppendableData::data` they are holding and `Pub/PubAppendableData::data` in the new version they are about to store, purging anything in new version's `Pub/PrivAppendableData::deleted_data`. This makes sure that the new entries that arrived while the owner was in the process of `POSTing` are not discarded.
