@@ -22,10 +22,10 @@ struct PubAppendableData {
     version                  : u64,
     current_owner_keys       : Vec<sign::PublicKey>,
     previous_owner_keys      : Vec<sign::PublicKey>,
-    filter                   : (FilterType, Vec<sign::PublicKey>),
-    deleted_data             : HashSet<AppendedData>,
+    filter                   : Filter,
+    deleted_data             : BTreeSet<AppendedData>,
     previous_owner_signatures: Vec<Signature>, // All the above fields
-    data                     : HashSet<AppendedData>, // Unsigned
+    data                     : BTreeSet<AppendedData>, // Unsigned
 }
 
 struct PrivAppendableData {
@@ -33,18 +33,18 @@ struct PrivAppendableData {
     version                  : u64,
     current_owner_keys       : Vec<sign::PublicKey>,
     previous_owner_keys      : Vec<sign::PublicKey>,
-    filter                   : (FilterType, Vec<sign::PublicKey>),
+    filter                   : Filter,
     encrypt_key              : box_::PublicKey,
-    deleted_data             : HashSet<PrivAppendedData>,
+    deleted_data             : BTreeSet<PrivAppendedData>,
     previous_owner_signatures: Vec<Signature>, // All the above fields
-    data                     : HashSet<PrivAppendedData>, // Unsigned
+    data                     : BTreeSet<PrivAppendedData>, // Unsigned
 }
 ```
 where
 ```rust
-enum FilterType {
-    BlackList,
-    WhiteList,
+enum Filter {
+    BlackList(Vec<sign::PublicKey>),
+    WhiteList(Vec<sign::PublicKey>),
 }
 
 // Outer cover discarded by vaults; only `data` used
@@ -76,7 +76,7 @@ struct PrivAppendedData {
 
 - Both `PubAppendableData` and `PrivAppendableData` shall have max size restriction of **100 KiB**.
 - `AppendedData` contains the location (pointer) of the actual data which can be any type (`Immutable`, `Structured`, etc.) as identified by `DataIdentifier`. The pointer mechanism will keep appended data small as it only contains a pointer to the actual data which could be colossal and fill entire 100 KiB limit by just itself.
-- As shown, all fields of `Pub/PrivAppendableData` apart from `Pub/PrivAppendableData::data` are only owner modifiable and need to be signed by the owner(s). `Pub/PrivAppendableData::data` however will be unsigned and shall be modifiable by anyone who passes the `filter` criteria set by owner(s). Owner(s) can set `filter` to either blacklist or whitelist. In case it is set to `FilterType::BlackList`, the vaults shall enforce the rule of allowing everyone but the blacklisted keys to add to `data` on subsequent updates following the change to `filter`, i.e. existing data in `data` field will not be dealt by the vaults. Similarly, if set to `FilterType::WhiteList`, no one but the the whitelisted keys will be allowed to add data.
+- As shown, all fields of `Pub/PrivAppendableData` apart from `Pub/PrivAppendableData::data` are only owner modifiable and need to be signed by the owner(s). `Pub/PrivAppendableData::data` however will be unsigned and shall be modifiable by anyone who passes the `filter` criteria set by owner(s). Owner(s) can set `filter` to either blacklist or whitelist. In case it is set to `Filter::BlackList`, the vaults shall enforce the rule of allowing everyone but the blacklisted keys to add to `data` on subsequent updates following the change to `filter`, i.e. existing data in `data` field will not be dealt by the vaults. Similarly, if set to `Filter::WhiteList`, no one but the the whitelisted keys will be allowed to add data.
 - Simultaneous updates of `Pub/PrivAppendableData::data` will be dealt with by a merge operation at the vaults. For e.g. if `Pub/PrivAppendableData::data` was originally empty and 3 updates from 3 different sources arrived simultaneously, then vaults would do a union operation, and the resultant appendable data would have all three updates.
 - Deletion of data is done by moving the particular data in `Pub/PrivAppendableData::data` field to `Pub/PrivAppendableData::deleted_data` by the owner followed by the `POST` of the entire `Pub/PrivAppendableData`. As with any owner related modifications via `POST`, the vaults shall in this case assert the version increment. It is important to delete in this manner otherwise churn can bring back the deleted data in some cases. When data is moved from `Pub/PrivAppendableData::data` to `Pub/PrivAppendableData::delete_data`, vaults will ensure that any merge operation that tries to put data back into `Pub/PrivAppendableData::data` while it also resides in `Pub/PrivAppendableData::deleted_data` shall be ignored. Emptying `Pub/PrivAppendableData::deleted_data` itself can be done by the user by similar `POST` after some period of time which though is unspecified, but should be safe in excess of 20 min or so (in case it's a heavily churning network at that point of time or much earlier otherwise).
 - `PrivAppendedData::encrypted_appeneded_data` is encrypted `AppendedData` using `PrivAppendableData::encrypt_key` and sender's `box_::SecretKey`, the public part of which is `PrivAppendedData::encrypt_key`. Owner(s) of `PrivAppendableData` will use their `box_::SecretKey` and `PrivAppendedData::encrypt_key` to decrypt data into `AppendedData` and then retrive actual data from `AppendedData::pointer` which will be usually encrypted in the exact same way.
