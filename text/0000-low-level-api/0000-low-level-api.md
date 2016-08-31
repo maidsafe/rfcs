@@ -506,7 +506,7 @@ pub unsafe extern "C" fn data_id_free_handle(data_id: *mut DataIdentifier) -> i3
 
 ## Alternatives
 ### Internal Type-Maps
-Instead of passing pointers to Launcher, use a different mechanism which keeps the objects/pointers internally and passes handle (e.g. `u64`) to Launcher and maps handles to objects/pointers internally in `safe_core`. The difference with this approach (which might be slightly counter-intuitive) is that we get tremendous type-safety. None of the function signatures take any opaque pointers. We would only have raw data and `u64` handle as pointers which are of a trivial types and don't require `safe_core` to allocate/deallocate - can be managed completely by NodeJS code. All types could be stored in their non-pointer form by `safe_core` and are referenced via the `u64` handle that is returned to Launcher/apps. If this approach is followed the function signatures would change from having opaque pointer handles to having `u64`.
+Instead of passing pointers to Launcher, use a different mechanism which keeps the objects/pointers internally and passes handle (e.g. `u64`) to Launcher and maps handles to objects/pointers internally in `safe_core`. The difference with this approach (which might be slightly counter-intuitive) is that we get tremendous type-safety. None of the function signatures take any opaque pointers. We would only have raw data and `u64` handle as pointers which are trivial types and latter doesn't even require `safe_core` to allocate/deallocate - can be managed completely by NodeJS code. All types could be stored in their non-pointer form by `safe_core` and are referenced via the `u64` handle that is returned to Launcher/apps. If this approach is followed the function signatures would change from having opaque pointer handles to having `u64`.
 
 For e.g. creating structured data would look like:
 ```rust
@@ -534,8 +534,8 @@ to:
 #[no_mangle] pub unsafe extern "C" sample_opaque_allocation(o_opaque_handle: *mut u64) -> i32;
 
 // An invalid `u64` handle would never mean UB - it will either end up being ignored and error
-// result returned OR deleting of something else (which is fine as it would give an error next
-// time you accessed that something else).
+// result returned OR deleting something else (which is fine as it would give an error next time
+// you accessed that something else).
 #[no_mangle] pub unsafe extern "C" sample_opaque_deallocation(o_opaque_handle: u64) -> i32;
 ```
 Internally `safe_core` would remove the object it stored in some `Map<u64, ThisOpaqueType>`.
