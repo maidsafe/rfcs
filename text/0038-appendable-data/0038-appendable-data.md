@@ -1,5 +1,5 @@
 # Appendable Data
-- Status: proposed
+- Status: active
 - Type: feature
 - Related components: `safe_core`, `safe_vault`, `safe_launcher`, `routing`
 - Start Date: 25-August-2016
@@ -49,14 +49,14 @@ enum Filter {
 
 // Outer cover discarded by vaults; only `data` used
 struct PubAppendWrapper {
-    append_to: DataIdentifier,
+    append_to: XorName,
     data     : AppendedData,
 }
 
 // Outer cover discarded by vaults after filter check and signature validation.
 // Only `data` used
 struct PrivAppendWrapper {
-    append_to: DataIdentifier,
+    append_to: XorName,
     data     : PrivAppendedData,
     sign_key : sign::PublicKey,
     signature: Signature, // All the above fields
