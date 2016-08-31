@@ -1,5 +1,5 @@
 # Appendable Data
-- Status: proposed
+- Status: active
 - Type: feature
 - Related components: `safe_core`, `safe_vault`, `safe_launcher`, `routing`
 - Start Date: 25-August-2016
