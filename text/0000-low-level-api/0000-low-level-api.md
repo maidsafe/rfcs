@@ -568,7 +568,7 @@ pub type CipherOptHandle = ObjectHandle;
 pub type EncryptKeyHandle = ObjectHandle;
 pub type SignKeyHandle = ObjectHandle;
 ```
-and then change sigatures from:
+and then change signatures from:
 ```rust
 #[no_mangle]
 pub unsafe extern "C" fn struct_data_get_data(app: ObjectHandle,
@@ -590,7 +590,6 @@ and so on - a slight increase in readability because we are not just relying on 
 
 ## Drawbacks
 - If there are many apps and they are configured to work at system start-up then the user will face a barrage of pop-ups to confirm if an app should have access. This undermines the security due to inconveniencing the user.
-- A few of the interfaces have parameter `peer_key` which should be valid in certain scenarios and will be ignored (hence can be nullified) in others. E.g. `appendable_data_append`, `struct_data_create` etc. This maynot be ideal api but the alternative of separating them will increase the number of functions. So balance between multiple functions vs ignorable parameters needs to be evaluated.
 
 ## Future scope
 - While other apps will not be able to read the private data created by an app, they can still modify (e.g. overwrite) it, for instance if it were a `StructuredData`. To prevent this not only each app should be given its own `box_` key-pair but also `sign` key-pair. However the problem with that is only one `sign` key-pair is registered in `MaidManagers` for an account. Any other key-pair will be disallowed to create data on the network. The are approaches to this problem and is considered future scope right now.
