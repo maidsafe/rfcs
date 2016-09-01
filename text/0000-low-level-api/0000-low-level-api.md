@@ -100,7 +100,6 @@ pub type ObjectHandle = u64;
 ///   - anything else is an error
 /// _id_: Pointer to array of size 32
 /// _cipher_option_: If data needs to be encrypted.
-/// _peer_key_: Must be valid if CipherOption::Hybrid is used. Can be null otherwise.
 /// _data_: Actual data to be stored in StructuredData.
 /// _size_: Size of actual data to be stored in StructuredData.
 /// _o_sd_: If successful StructuredData will be given via this handle.
@@ -163,7 +162,6 @@ pub unsafe extern "C" fn struct_data_assert_ownership(sd: ObjectHandle, o_owner:
 ///   - anything else is an error
 ///   - StructuredData will be modified hence a mutable pointee.
 /// _cipher_option_: If data needs to be encrypted.
-/// _peer_key_: Must be valid if CipherOption::Hybrid is used. Can be null otherwise.
 /// _data_: New data.
 /// _size_: Size of new data.
 /// **return-value**: Non-zero in case of error giving the error-code.
@@ -171,7 +169,6 @@ pub unsafe extern "C" fn struct_data_assert_ownership(sd: ObjectHandle, o_owner:
 pub unsafe extern "C" fn struct_data_new_data(app: ObjectHandle,
                                               sd: ObjectHandle,
                                               cipher_opt: ObjectHandle,
-                                              peer_key: ObjectHandle,
                                               data: *const u8,
                                               size: u64) -> i32;
 
@@ -477,7 +474,6 @@ pub unsafe extern "C" fn immut_data_write_to_self_encryptor(se: ObjectHandle,
 /// _se_: Valid Sequential-Encryptor handle. The Sequential-Encryptor will be destroyed after this
 ///       and must not be used any further.
 /// _cipher_option_: If data needs to be encrypted.
-/// _peer_key_: Must be valid if CipherOption::Hybrid is used. Can be null otherwise.
 /// _o_data_id_: DataIdentifier of final ImmutableData will be put into this.
 ///              - After self-encryption, the obtained (encrypted or otherwise) data-map will be
 ///                tested to be <= 1 MiB. If not it will undergo self-encryption again and the
@@ -554,6 +550,20 @@ pub unsafe extern "C" fn data_id_get_type(data_id: ObjectHandle,
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
 pub extern "C" fn data_id_free_handle(data_id: ObjectHandle) -> i32;
+```
+
+### Api's for Serialisation of data:
+```rust
+#[no_mangle]
+pub unsafe extern "C" fn serialise_data_id(data_id: ObjectHandle,
+                                           o_raw: *mut *mut u8,
+                                           o_size: *mut u8) -> i32;
+#[no_mangle]
+pub unsafe extern "C" fn deserialise_data_id(raw: *const u8,
+                                             size: *const u8,
+                                             o_data_id: *mut ObjectHandle) -> i32;
+
+// Similarly for `StructuredData`, `AppendableData` and any type apps require to serialise.
 ```
 
 ### Implementation
