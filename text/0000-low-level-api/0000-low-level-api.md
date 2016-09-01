@@ -319,6 +319,22 @@ pub unsafe extern "C" fn appendable_data_construct_data_id(name: *const [u8; 32]
 
 
 /// _ad_: Handle to a valid AppendableData.
+/// _o_filter_type_: If successful FilterType will be given via this handle.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_get_filter_type(ad: ObjectHandle,
+                                                         o_filter_type: *mut FilterType) -> i32;
+
+
+/// _ad_: Handle to a valid AppendableData.
+/// _filter_type_: New FilterType.
+/// **return-value**: Non-zero in case of error giving the error-code.
+#[no_mangle]
+pub unsafe extern "C" fn appendable_data_change_filter_type(ad: ObjectHandle,
+                                                            filter_type: FilterType) -> i32;
+
+
+/// _ad_: Handle to a valid AppendableData.
 /// _o_data_id_: If successful DataIdentifier will be given via this handle.
 /// **return-value**: Non-zero in case of error giving the error-code.
 #[no_mangle]
