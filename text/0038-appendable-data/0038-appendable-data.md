@@ -63,11 +63,13 @@ pub enum AppendWrapper {
   Pub {
     append_to: XorName,
     data     : AppendedData,
+    version  : u64,
   }
   Priv {
     append_to: XorName,
     data     : PrivAppendedData,
     sign_key : sign::PublicKey,
+    version  : u64,
     signature: Signature, // All the above fields
   }
 }
