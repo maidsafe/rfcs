@@ -21,6 +21,7 @@ A list of all RFCs by their current status.
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
+ - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
 
 ## Agreed RFCs
 
@@ -56,4 +57,4 @@ A list of all RFCs by their current status.
  - [#0039 Sentinel](./text/0039-sentinel/0039-sentinel.md)
 
 
-(Last updated _Wed Aug 31 12:17:44 EEST 2016_ at REV [137e0c6](https://github.com/maidsafe/rfcs/commit/137e0c6a5861d9c465764970f5aeef144c9d0a36))
+(Last updated _Thu Sep  1 17:15:47 BST 2016_ at REV [77d60f7](https://github.com/maidsafe/rfcs/commit/77d60f743555ca27ad043bd95e2980e92f7cb524))
