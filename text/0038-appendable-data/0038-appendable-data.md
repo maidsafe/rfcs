@@ -18,59 +18,83 @@ Facility for non-owner updates of owned data for the purposes of information exc
 Some of the features, such as notions of ownership and ability to transfer it etc., are directly borrowed from `StructuredData`. As such we will dive into the type-definition straight away. There shall be two kinds of this new type:
 ```rust
 struct PubAppendableData {
-    name                     : XorName,
-    version                  : u64,
-    current_owner_keys       : Vec<sign::PublicKey>,
-    previous_owner_keys      : Vec<sign::PublicKey>,
-    filter                   : Filter,
-    deleted_data             : BTreeSet<AppendedData>,
-    previous_owner_signatures: Vec<Signature>, // All the above fields
-    data                     : BTreeSet<AppendedData>, // Unsigned
+    pub name                     : XorName,
+    pub version                  : u64,
+    pub current_owner_keys       : Vec<sign::PublicKey>,
+    pub previous_owner_keys      : Vec<sign::PublicKey>,
+    pub filter                   : Filter,
+    pub deleted_data             : BTreeSet<AppendedData>,
+    pub previous_owner_signatures: Vec<Signature>, // All the above fields
+    pub data                     : BTreeSet<AppendedData>, // Unsigned
+}
+
+impl PubAppendableData {
+    // Required member function
+    pub fn add_signature(&mut self, secret_key: &sign::SecretKey);
 }
 
 struct PrivAppendableData {
-    name                     : XorName,
-    version                  : u64,
-    current_owner_keys       : Vec<sign::PublicKey>,
-    previous_owner_keys      : Vec<sign::PublicKey>,
-    filter                   : Filter,
-    encrypt_key              : box_::PublicKey,
-    deleted_data             : BTreeSet<PrivAppendedData>,
-    previous_owner_signatures: Vec<Signature>, // All the above fields
-    data                     : BTreeSet<PrivAppendedData>, // Unsigned
+    pub name                     : XorName,
+    pub version                  : u64,
+    pub current_owner_keys       : Vec<sign::PublicKey>,
+    pub previous_owner_keys      : Vec<sign::PublicKey>,
+    pub filter                   : Filter,
+    pub encrypt_key              : box_::PublicKey,
+    pub deleted_data             : BTreeSet<PrivAppendedData>,
+    pub previous_owner_signatures: Vec<Signature>, // All the above fields
+    pub data                     : BTreeSet<PrivAppendedData>, // Unsigned
+}
+
+impl PrivAppendableData {
+    // Required member function
+    pub fn add_signature(&mut self, secret_key: &sign::SecretKey);
 }
 ```
 where
 ```rust
-enum Filter {
+pub enum Filter {
     BlackList(BTreeSet<sign::PublicKey>),
     WhiteList(BTreeSet<sign::PublicKey>),
 }
 
 // Outer cover discarded by vaults, after filter check and signature validation where applicable.
 // Only data used
-enum AppendWrapper {
+pub enum AppendWrapper {
   Pub {
     append_to: XorName,
     data     : AppendedData,
+    version  : u64,
   }
   Priv {
     append_to: XorName,
     data     : PrivAppendedData,
     sign_key : sign::PublicKey,
+    version  : u64,
     signature: Signature, // All the above fields
   }
 }
 
+impl AppendWrapper {
+    pub fn new_pub(append_to: XorName, data: AppendedData) -> Self;
+    pub fn new_priv(append_to: XorName,
+                    data: PrivAppendedData,
+                    sign_pair: (&sign::PublicKey, &sign::SecretKey)) -> Self;
+}
+
 struct AppendedData {
-    pointer  : DataIdentifier, // Pointer to actual data
-    sign_key : sign::PublicKey,
-    signature: Signature, // All the above fields
+    pub pointer  : DataIdentifier, // Pointer to actual data
+    pub sign_key : sign::PublicKey,
+    pub signature: Signature, // All the above fields
+}
+
+impl AppendedData {
+    // Required member function
+    pub fn sign(&mut self, secret_key: &sign::SecretKey);
 }
 
 struct PrivAppendedData {
-    encrypt_key: box_::PublicKey, // Recommended to be a part of a throwaway keypair
-    encrypted_appeneded_data : Vec<u8>, // Encrypted AppendedData
+    pub encrypt_key: box_::PublicKey, // Recommended to be a part of a throwaway keypair
+    pub encrypted_appeneded_data : Vec<u8>, // Encrypted AppendedData
 }
 ```
 
