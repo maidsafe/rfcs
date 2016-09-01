@@ -39,7 +39,7 @@ Authorization: Bearer <TOKEN>
 #### Body
 |Field|Description|
 |-----|-----------|
-| Is-Private | Boolean. Optional Defaults to false |
+| isPrivate | Boolean. Optional Defaults to false |
 | filterType | Enum value. WHITE_LIST, BLACK_LIST |
 | filterKey | List of public keys. Public key as base64 string. Optional value defaults to empty list |
 

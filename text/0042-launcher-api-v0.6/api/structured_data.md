@@ -33,7 +33,7 @@ The tag type and Id combination is needed for fetching the Structured Data from 
 
 The Id is a base64 string representing [u8; 32] array.
 
-The DataIdentifier handle is obtained after creation of a SD. The Data Identifier handle is
+The DataIdentifier handle is obtained after creation of a structured data. The Data Identifier handle is
 needed for working with the structured data and this must be dropped after the usage.
 
 The [appendable data](./appendable_data.md) can accept only Data Identifier to appened.
@@ -217,7 +217,7 @@ Encryption: Enum // optional
 #### Headers
 ```
 Versions-Length: Number
-Version-Number: Number // Version number of the SD currently being served
+Version-Number: Number // Version number currently being served
 Is-Owner: Boolean
 ```
 
@@ -226,7 +226,7 @@ Is-Owner: Boolean
 Binary Data
 ```
 
-## Update SD
+## Update Structured Data
 
 ### Request
 
@@ -257,9 +257,9 @@ binary data
 200
 ```
 
-### Delete SD
+### Delete Structured Data
 
-- Delete of SD will clear the Handle too
+Deletion of Structured Data will clear the Handle from memory
 
 ### Request
 
