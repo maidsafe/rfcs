@@ -11,10 +11,10 @@ Making `safe_core` async with respect to FFI and internally.
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 
 ## Motivation
-Currently `safe_core` has a threaded design. It has properly mutexed core-objects and parallel invocations can be achieved by making calls from different threads. However the frontend coded in NodeJS interfaces via `NodeFFI` which detects the hardware cocurrency and limits the number of threads to that. This is not bad but leads to underutilisation of `safe_core`. This RFC proposes a design in which number of inovcations are not limited. While this will lead to optimal usage of `safe_core` itself, it can cause very high network traffic, so we will try and address such problems too.
+Currently `safe_core` has a threaded design. It has properly mutexed core-objects and parallel invocations can be achieved by making calls from different threads. However the frontend coded in NodeJS interfaces via `NodeFFI` which detects the hardware concurrency and limits the number of threads to that. This is not bad but leads to underutilisation of `safe_core`. This RFC proposes a design in which number of invocations are not limited. While this will lead to optimal usage of `safe_core` itself, it can cause very high network traffic, so we will try and address such problems too.
 
 ## Detailed design
-Let's assume the harware cocurrency is 2 (dual core) for a machine. In current threaded design, if `App_0` makes 2 requests to `Launcher`, `App_1` makes 2, `NodeFFI` module in `Launcher` queues 2 of them and sends only 2 to `safe_core` spawing 2 threads for parallelism. Until atleast one thread returns, none of the 2 queued requests will have any chance of getting through to `safe_core`. `safe_core` invariably waits tremendous amount of time (in terms of CPU speeds) for network responses (_IO_). While it sits doing nothing it could have handled so many more requests if only `NodeFFI` forwarded it. This leads to underutilisation of the core library. However there are positives to this. For instance if `NodeFFI` were to spawn a thread per request, then we could take that to the other extreme saying that 30 combined requests from a few apps will result in 30 threads which is also not good. Further, by restricting number of simulatneous invocations the throttling mechanism can be view as in-built. One would not be allowed to choke the network/bandwidth by making 100's of concurrent requests. So we need to strike a balance.
+Let's assume the hardware concurrency is 2 (dual core) for a machine. In current threaded design, if `App_0` makes 2 requests to `Launcher`, `App_1` makes 2, `NodeFFI` module in `Launcher` queues 2 of them and sends only 2 to `safe_core` spawing 2 threads for parallelism. Until atleast one thread returns, none of the 2 queued requests will have any chance of getting through to `safe_core`. `safe_core` invariably waits tremendous amount of time (in terms of CPU speeds) for network responses (_IO_). While it sits doing nothing it could have handled so many more requests if only `NodeFFI` forwarded it. This leads to underutilisation of the core library. However there are positives to this. For instance if `NodeFFI` were to spawn a thread per request, then we could take that to the other extreme saying that 30 combined requests from a few apps will result in 30 threads which is also not good. Further, by restricting number of simultaneous invocations the throttling mechanism can be view as in-built. One would not be allowed to choke the network/bandwidth by making 100's of concurrent requests. So we need to strike a balance.
 
 To better utilise the library without uncontrolled spawning of resource hogging threads, this RFC proposes async design involving single threaded event loop. We will use `futures-rs` crate. There will be a central event loop running on a single thread which registers futures and dispatches them when ready.
 
@@ -74,9 +74,9 @@ fn listen_to_routing() {
 }
 ```
 
-If multiple apps need to call FFI `foo()` (or a single app calls it multiple times) simultaneously, Launcher spawns a thread per call as stated before. The underutilisation of the library can be seen from the fact that though `Client` is free to handle more task as stated by inline comment in snippet above, `NodeFFI` will limit the number of simulatneous calls to FFI `foo` to hardware concurrency of the system. Time is wasted doing nothing at `Code-point-0`.
+If multiple apps need to call FFI `foo()` (or a single app calls it multiple times) simultaneously, Launcher spawns a thread per call as stated before. The underutilisation of the library can be seen from the fact that though `Client` is free to handle more task as stated by inline comment in snippet above, `NodeFFI` will limit the number of simultaneous calls to FFI `foo` to hardware concurrency of the system. Time is wasted doing nothing at `Code-point-0`.
 
-In the proposed design, we will not have any blocking calls, thus `NodeFFI` invocation of FFI `foo` will returns immediately and it is free to call it as many times it can. The difference would be the way result is returned. In the approach listed above, since it was a blocking call the result of `*const i8` was conveniently returned by `foo` itself. In async desing using event loop and future based mechanism, we will return even if the result is not immediately available. So we accept a callback instead which we will invoke once we do have the result. The aove code will be transformed as follows:
+In the proposed design, we will not have any blocking calls, thus `NodeFFI` invocation of FFI `foo` will returns immediately and it is free to call it as many times it can. The difference would be the way result is returned. In the approach listed above, since it was a blocking call the result of `*const i8` was conveniently returned by `foo` itself. In async design using event loop and future based mechanism, we will return even if the result is not immediately available. So we accept a callback instead which we will invoke once we do have the result. The above code will be transformed as follows:
 ```rust
 pub struct FfiHandle {
     client: Arc<Mutex<Client>>,
@@ -201,7 +201,7 @@ fn f3<F: FnOnce(Type3)>(cb: F) {
     });
 }
 ```
-The level of indentation in functions like `f0` are directly proportional to number of blocking calls in the sync-couterpart in the previous (blocking) code. Here it is 3, but if it called 5 functions the level of indentations would be 5.
+The level of indentation in functions like `f0` are directly proportional to number of blocking calls in the sync-counterpart in the previous (blocking) code. Here it is 3, but if it called 5 functions the level of indentations would be 5.
 
 In future based approach we get the following refactor:
 ```rust
@@ -379,7 +379,7 @@ impl Throttle {
 ```
 Whenever routing responds it gives us the authority. We shall call `Throttle::on_authority_response` to see if there is any queued request corresponding to that authority and if so we release it.
 
-The throtte limit shall be set to **10 per Authority**.
+The throttle limit shall be set to **10 per Authority**.
 
 ## Drawbacks
 - As noted [here](https://github.com/alexcrichton/futures-rs/blob/0dc6e2563f2da56ad9de067a1686127b9230c2d1/TUTORIAL.md#returning-futures), currently there is no clean way to return a `Future` from a function. This suffers from the same disadvantages as `Iterators` traits. We use heap-allocated boxed return to simplify the function signature. Other methods mentioned in the link are uglier (as noted in the link too). Thus until we have [impl Trait](https://github.com/alexcrichton/futures-rs/blob/0dc6e2563f2da56ad9de067a1686127b9230c2d1/TUTORIAL.md#impl-trait) implemented in stable-rust we will have to live with the workaround if we follow this approach.
