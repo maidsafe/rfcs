@@ -23,6 +23,7 @@ A list of all RFCs by their current status.
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
  - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
+ - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
 
 ## Agreed RFCs
 
@@ -58,4 +59,4 @@ A list of all RFCs by their current status.
  - [#0039 Sentinel](./text/0039-sentinel/0039-sentinel.md)
 
 
-(Last updated _Thu Sep  1 23:47:24 IST 2016_ at REV [59a022d](https://github.com/maidsafe/rfcs/commit/59a022deb3eebd26fb1b1606673d26e94edd81a0))
+(Last updated _Fri Sep  2 18:12:49 BST 2016_ at REV [668c6d5](https://github.com/maidsafe/rfcs/commit/668c6d54b9268244180952060a9e9b5bd6d99378))
