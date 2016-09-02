@@ -376,6 +376,20 @@ impl Throttle {
         } 
     }
 }
+
+impl ops::Deref for Throttle {
+    type Target = routing::Client;
+
+    fn deref(&self) -> &Self::Target {
+        &self.routing
+    }
+}
+
+impl ops::DerefMut for Throttle {
+    fn deref(&mut self) -> &mut Self::Target {
+        &mut self.routing
+    }
+}
 ```
 Whenever routing responds it gives us the authority. We shall call `Throttle::on_authority_response` to see if there is any queued request corresponding to that authority and if so we release it.
 
