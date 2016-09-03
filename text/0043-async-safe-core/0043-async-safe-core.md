@@ -3,6 +3,7 @@
 - Type: feature
 - Related components: `safe_core`, `safe_launcher`
 - Start Date: 02-September-2016
+- Discussion: https://forum.safedev.org/t/rfc-43-async-safe-core/99
 
 ## Summary
 Making `safe_core` async with respect to FFI and internally.
@@ -212,7 +213,7 @@ fn f0<F: FnOnce<Type0>)(cb: F) {
     let joined_futures = future_type_1
         .join(future_type_2)
         .join(future_type_3);
-    
+
     joined_futures.map(|((type_1, type_2), type_3)| {
         cb(transform(type_1, type_2, type_3));
     }).forget();
@@ -373,7 +374,7 @@ impl Throttle {
             QueuedRequest::Put { auth, data, msg_id } => self.send_put_request(auth, data, msg_id),
             QueuedRequest::Post { auth, data, msg_id } => self.send_post_request(auth, data, msg_id),
             QueuedRequest::Delete { auth, data, msg_id } => self.send_delete_request(auth, data, msg_id),
-        } 
+        }
     }
 }
 
