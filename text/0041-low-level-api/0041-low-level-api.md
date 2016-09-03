@@ -63,7 +63,7 @@ pub unsafe extern "C" fn manipulate(handle: *mut Opaque) -> i32;
 #[no_mangle]
 pub unsafe extern "C" fn destroy(handle: *mut Opaque) -> i32;
 ```
-However the case here is different - the apps would want the same functionality but are not binary-interfaced with `safe_core`. The are completely separate processes and would talk through RPCs. In such case `safe_core` can avoid passing opaque pointer handles to Launcher and manage it internally itself. This would make interfaces lot safer (far fewer chances Undefined Behaviours). In the present API choice, `safe_core` maintains an LRU-based object cache and handles are returned as `u64`. The interfaces now change to:
+However the case here is different - the apps would want the same functionality but are not binary-interfaced with `safe_core`. They are completely separate processes and would talk through RPCs. In such case `safe_core` can avoid passing opaque pointer handles to Launcher and manage it internally itself. This would make interfaces lot safer (far fewer chances Undefined Behaviours). In the present API choice, `safe_core` maintains an LRU-based object cache and handles are returned as `u64`. The interfaces now change to:
 ```rust
 // Allocation entirely done by NodeJS.
 #[no_mangle]
