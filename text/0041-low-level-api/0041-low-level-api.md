@@ -3,6 +3,7 @@
 - Type: feature
 - Related components: `safe_core`, `safe_launcher`
 - Start Date: 29-August-2016
+- Discussion: https://forum.safedev.org/t/rfc-41-low-level-api/94
 
 ## Summary
 Exposing low level API to facilitate direct construction of MaidSafe types by Launcher and apps.
