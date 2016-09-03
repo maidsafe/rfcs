@@ -40,21 +40,28 @@ Of course any node can also provide these resources in times of need.
 
 ### `RelayNode` reward
 
-On reciept of a `Get` request DataManager trigger safecoin checks. These checks use a balancing algorithm to calculate a modulo that will be tested against the `Get` request and if successful a safecoin is awarded. In this case the very same principle is utlised wiht a slight twist. The saem balancing algorithm is used as this ensure the network has the resources that it requires. 
+On reciept of a `Get` request DataManager trigger safecoin checks. These checks use a balancing algorithm to calculate a modulo that will be tested against the `Get` request and if successful a safecoin is awarded. In this case the very same principle is utlised with a slight twist. The same balancing algorithm is used as this ensure the network has the resources that it requires. 
 
 As the network requires new nodes at whichever rate the algorithm has calculated at any point in time a `RelayNode` can be promoted to a `ManagedNode`. This will require the node is located to a new group and the simplest method do achive this is to allow the node to start via the normal join method. 
 
-This presents the whole picture, a node can only become a `RelayNode` if it starts fresh with no joining token. 
+This presents the larger picture here, a node can **only** become a `RelayNode` if it starts fresh with no joining token. 
 
-A node that starts with a joining token though will become a `ManagedNode` 
-
-__A `RelayNode` will be paid directly from client `Put` actions, which is a simple mechanism that the `MaidManager` atributes payments to the `RelayNode`. This requires some additional code XXXX__
+A node that starts with a joining token though will become a `ManagedNode` As with safecoin this joining token will be recycled on use.
 
 ### Joining token 
 
+A joining token is a structured data type 6. Whereas safecoin itself is type 7 this token can be considered a safecoin clone. 
+
 ####Node
 
+A node can start in two modes:
+
+1. Without a joining token, in which case it can only become a `RelayNode`
+2. With a joining token, in which case it will create and address as usual, connect to that group and pay the joining token (i.e. submit a `Delete`for that token) to the group. That group will then allocate a second group for that node to connect to as in the case above (fresh start). 
+
 ####Client
+
+TBD 
 
 ### 
 
