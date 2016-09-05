@@ -86,7 +86,7 @@ pub enum Authority {
 A `RelayNode` has two funcitons:
 
 1. Allow "not yet connected" nodes to establish network communications (bootstrap).
-2. Relay messages to a non routing table node (relayed connections).
+2. Relay messages to a node not routable on the network i.e. not in group (relayed connections).
 
 These nodes will be a fundamental type `RelayNode` This node will not be considered in group refresh messages, or any messages related to data (i.e. these are **not** routing table nodes), but it would have messages routed back to it (responses). 
 
