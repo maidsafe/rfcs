@@ -1,6 +1,6 @@
 # SAFE Launcher API v0.6
 
-- Status: proposed
+- Status: active
 - Type: new feature, enhancement
 - Related components: safe_launcher, safe_core
 - Start Date: 01-09-2016

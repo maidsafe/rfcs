@@ -1,7 +1,7 @@
 # Launcher Low Level API
 
 - Type New Feature
-- Status: proposed
+- Status: rejected
 - Related components safe_launcher, safe_ffi, safe_core
 - Start Date: 06-04-2016
 - Discussion: https://github.com/maidsafe/rfcs/issues/115
