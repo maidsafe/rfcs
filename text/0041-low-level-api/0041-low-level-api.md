@@ -1,5 +1,5 @@
 # Low Level API
-- Status: proposed
+- Status: active
 - Type: feature
 - Related components: `safe_core`, `safe_launcher`
 - Start Date: 29-August-2016

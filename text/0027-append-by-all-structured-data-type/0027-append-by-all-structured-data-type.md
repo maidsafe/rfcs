@@ -1,7 +1,7 @@
 # Append by all Structured Data Type
 
 - Type New feature
-- Status: proposed
+- Status: rejected
 - Related components safe_launcher, safe_ffi, safe_core, safe_vault
 - Start Date: 04-04-2016
 - Discussion: https://github.com/maidsafe/rfcs/issues/113

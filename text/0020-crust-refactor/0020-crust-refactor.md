@@ -1,6 +1,6 @@
 # Crust Refactor
 
-- Status: proposed
+- Status: rejected
 - Type: enhancement
 - Related components: crust
 - Start Date: 02-11-2015
