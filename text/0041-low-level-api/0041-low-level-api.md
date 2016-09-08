@@ -48,7 +48,7 @@ pub enum CipherOption {
 ```
 
 ### Choice of API
-`safe_core`'s use-case is very different form conventional libraries. Usually one would have the frontend interfacing with the library (dynamic or static) directly resulting in an executable. In these cases we go for the standard FFI interface where many opaque-pointer-handles are exposed via the libary. For instance consider there is a function to obtain handle to an opaque object, a function to manipulate it and a function to destroy it. It would look something standard like:
+`safe_core`'s use-case is very different from conventional libraries. Usually one would have the frontend interfacing with the library (dynamic or static) directly resulting in an executable. In these cases we go for the standard FFI interface where many opaque-pointer-handles are exposed via the libary. For instance consider there is a function to obtain handle to an opaque object, a function to manipulate it and a function to destroy it. It would look something standard like:
 ```rust
 // Allocation of the pointer to pointer done by NodeJS.
 // Allocation of final pointer done by `safe_core`.
