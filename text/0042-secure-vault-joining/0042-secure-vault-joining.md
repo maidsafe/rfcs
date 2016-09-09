@@ -17,7 +17,6 @@ This RFC will propose a method to enforce a joining "cost" for new or restarting
 
 **Effort** - An amount of work performed.
 
-
 ## Motivation
 
 SAFE has already taken advantage of securing groups and group consensus. Also, with disjoint groups, secures hops which prevents nodes masquerading as network identities. It still though has a weakness in a possible attack where an attacker can easily restart many nodes constantly to eventually target a network location. The difficulty of such an attack is not considered here, merely the opportunity of such an attack exists in some form.
@@ -28,65 +27,16 @@ This RFC prevents this attack and claims that this will provide an overall netwo
 
 The "effort" of the network should allow that a proportionate amount of effort is carried out by a node wishing to join. In a balanced network the whole network effort is directly proportional to any group effort at. We do not consider the network fully balanced but do assume there is a large enough population and the hashing algorithm does indeed provide a suitable balanced network.
 
-This distinction requires a measurement of such work as well as a task that is advantageous to the network. One such task that is currently under-rewarded is providing the access points (relays and bootstrap nodes) for client or joining nodes.  This function is onerous on nodes in the network, but at the same time it is critical.  When a node is acting as a `RelayNode` then the node it is relaying for depends on that `RelayNode` to route messages back. This is a problem if there is a single relay, however not so much if the relay is in a group or at least connected to several closest nodes. If the relays are disparate though then the network traffic is amplified. It makes sense the relays are all in the same group. If a client is waiting on a response it makes sense the response returns without a single relay having to persist. For these reasons clients should join groups, but not routing tables.
+This distinction requires a measurement of such work as well as a task that is advantageous to the network. One such task that is currently under-rewarded is providing the access points (relays and bootstrap nodes) for client or joining nodes.  This function is onerous on nodes in the network, but at the same time it is critical.  When a node is acting as a `RelayNode` then the node it is relaying for depends on that `RelayNode` to route messages back. This is a problem if there is a single relay, however not so much if the relay is in a group or at least connected to several closest nodes. If the relays are disparate though then the network traffic is amplified. It makes sense the relays are all in the same group. If a client is waiting on a response it makes sense the response returns without a single relay having to persist.
 
 **For security and anonymity a client connection to the network should not use a key more than once, so a client must create a keypair every time and throw them away at the end of each session. **
-
-### Network authorities
-
-These would change from
-
-```
-pub enum Authority {
-    /// Manager of a Client.  XorName is the hash of the Client's `client_key`.
-    ClientManager(XorName),
-    /// Manager of a network-addressable element.  XorName is the name of the element in question.
-    NaeManager(XorName),
-    /// Manager of a ManagedNode.  XorName is that of the ManagedNode.
-    NodeManager(XorName),
-    /// A non-client node (i.e. a vault) which is managed by NodeManagers.  XorName is provided
-    /// by the network relocation process immediately after bootstrapping.
-    ManagedNode(XorName),
-    /// A Client.
-    Client {
-        /// The client's public signing key.  The hash of this specifies the location of the Client
-        /// in the network address space.
-        client_key: sign::PublicKey,
-        /// The Crust peer ID of the client.
-        peer_id: PeerId,
-        /// The name of the single ManagedNode which the Client connects to and proxies all messages
-        /// through.
-        proxy_node_name: XorName,
-    },
-}
-```
-To
-
-```
-pub enum Authority {
-    /// Manager of a Client.  XorName is the hash of the Client's `client_key`.
-    ClientManager(XorName),
-    /// Manager of a network-addressable element.  XorName is the name of the element in question.
-    NaeManager(XorName),
-    /// Manager of a ManagedNode.  XorName is that of the ManagedNode.
-    NodeManager(XorName),
-    /// A non-client node (i.e. a vault) which is managed by NodeManagers.  XorName is provided
-    /// by the network relocation process immediately after bootstrapping.
-    ManagedNode(XorName),
-    /// A Client. Name is hash of PublicKey
-    Client (XorName),
-    /// This node address, relayed for address
-    RelayNode(XorName, XorName)
-    },
-}
-```
 
 ### `RelayNode` overview
 
 A `RelayNode` has two functions:
 
 1. Allow "not yet connected" nodes to establish network communications (bootstrap).
-2. Relay messages to a node not routable on the network i.e. not in group (relayed connections).
+2. Relay messages to a node that is not on the network i.e. not in group (relayed connections).
 
 These nodes will be a fundamental type `RelayNode` This node will not be considered in group refresh messages, or any messages related to data (i.e. these are **not** routing table nodes), but it would have messages routed back to it (responses).
 
@@ -105,9 +55,9 @@ A bootstrap connection will be limited to only provide a `request_connection` re
 #### Relayed connections
 
 
-### `RelayNode` reward
+### `RelayNode`
 
-On receipt of a `Get` request a DataManager will trigger safecoin checks. These checks use a balancing algorithm to calculate a modulo that will be tested against the `Get` request and if successful a safecoin is awarded. In this case the very same principle is utilised with a slight twist. The same balancing algorithm is used as this ensure the network has the resources that it requires.
+On receipt of a `Get` request a DataManager will trigger safecoin checks. These checks use a balancing algorithm to calculate a modulo that will be tested against the `Get` request and if successful a safecoin is awarded. A group in any part of the network will earn / farm safecoins at approximately the same rate. All group members are involved in the creation of a safecoin.
 
 As the network requires new nodes at whichever rate the algorithm has calculated at any point in time a `RelayNode` can be promoted to a `ManagedNode`. This will require the node is located to a new group and the simplest method to achieve this is to allow the node to start via the normal join method.
 
@@ -116,6 +66,37 @@ As the network requires new nodes at whichever rate the algorithm has calculated
 * A routing table node that is acting as a `RelayNode`, however will be rewarded in safecoin instead of a joining token.
 * On payment of a reward, if the node is routing table connected then the reward is safecoin, otherwise the reward is a joining token.
 
+#### Selection of the `RelayNode` to promote
+
+Several `RelayNode`s will exist in any group and vie for promotoin. Some may be malicious or unable to handle traffic for clients. When a client
+recodnises responses are not comingback form a `RelayNode` or are to slow then the client will stop routing via that node. This will mean the
+responses to the client will not come via that node either. Thus the number of client relay responses thorugh a group allows the group to measure
+the `RelayNode`s value to the network.
+
+As the group are counting what will be valuable information then this is not wasteful. If it were calculating info to prove a node is not valid then
+it would be potentially useless.
+
+When the group creates a safecoin a node can be selected for promotion.
+
+#### `RelayNode` promotion
+
+The group that has now created a safeoin will send a `FullNodeJoin` to the group that is closest to the hash of teh safecoin farmed. This allows the
+group to agree on a ranodm peice of known information. This group will reply as in the normal node join process as specificed in [RFC-30](https://github.com/maidsafe/rfcs/blob/master/text/0030-secure-node-join/0030-nodes_key_as_name.md)
+
+A node joins the network
+
+A node (A) creates a keypair and connects to a group (X).
+Group (X) then take the 2 closest nodes to this and hash the three values (2 closest plus node).
+The resultant hash of the 2 closest nodes yields the target group for the node to join (Y).
+
+After the group (X) mint a safecoin then
+
+Group (X) then sends a JoinRequest (Y).
+Group (Y) then calculates the furthest two nodes apart in group (Y)
+Group (Y) then respond to (A) with JoinResponse with the middle third of the two furthest apart nodes as the target range. (JoinResponse includes all Y members names).
+Group (Y) will set a pending join request for a period of 30 seconds or so.
+This group will not accept any more JoinRequest during this time.
+Node (A) then must create an address that falls between these two nodes and then join (Y).
 
 ### Joining token
 
@@ -152,7 +133,6 @@ A client will boostrap and then join a group exactly the same way a node does. W
 * When a node requests membership of the network the intial group will require to confirm a joining token (`Get`) and send the delete on to that address. This could cause churn issues and requires discussed in detail.
 
 ## Alternatives
-
 * Forced random relocation of nodes (many variants).
 * Nodes performing a proof of work type algorithm.
 * Node ranking and relocation rules.
