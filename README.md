@@ -1,4 +1,4 @@
-# Project SAFE RFCs
+# SAFE Network RFCs
 
 _This process attempts to emulate the success of the Rust programming language
 and as such has almost mirrored the [RFC process the Rust developers
@@ -79,7 +79,7 @@ toward consensus-building.
 
 The most common preparations for writing and submitting an RFC include
 filing and discussing ideas on the [RFC issue tracker][issues], and occasionally
-posting "pre-RFCs" on [discussion forum][weekly meeting] for early
+posting "pre-RFCs" on the [SAFE Dev Forum][rfcs category] for early
 review.
 
 As a rule of thumb, receiving encouraging feedback from long-standing
@@ -218,4 +218,4 @@ driven by consensus and community norms, not impose more structure than
 necessary.
 
 [issues]: https://github.com/maidsafe/rfcs/issues
-[weekly meeting]: https://forum.safenetwork.io/c/development
+[rfcs category]: https://forum.safedev.org/c/rfcs

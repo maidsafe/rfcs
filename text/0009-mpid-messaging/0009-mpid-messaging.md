@@ -1,6 +1,6 @@
 # MPID Messaging System
 
-- Status: active
+- Status: proposed
 - Type: New Feature
 - Related Components: [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client), [mpid_messaging](https://github.com/maidsafe/mpid_messaging)
 - Start Date: 22-09-2015

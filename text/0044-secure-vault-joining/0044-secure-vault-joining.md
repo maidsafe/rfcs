@@ -5,8 +5,7 @@
 - Related components: (vault/routing)
 - Start Date: 03-09-2016
 - Discussion:
-- Supersedes: RFC30
-- Superseded by: N/A
+- Supersedes: https://github.com/maidsafe/rfcs/blob/master/text/0030-secure-node-join/0030-nodes_key_as_name.md
 
 ## Summary
 
