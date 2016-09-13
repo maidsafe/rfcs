@@ -20,7 +20,7 @@ A list of all RFCs by their current status.
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
- - [#0044 Secure vault joining](./text/0044-secure-vault-joining/0044-secure-vault-joining.md)
+ - [#0044 Secure Vault Joining](./text/0044-secure-vault-joining/0044-secure-vault-joining.md)
 
 ## Agreed RFCs
 

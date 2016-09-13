@@ -1,10 +1,10 @@
-# Secure vault joining
+# Secure Vault Joining
 
 - Status: proposed
 - Type: enhancement
-- Related components: (vault/routing)
+- Related components: safe_vault, routing
 - Start Date: 03-09-2016
-- Discussion:
+- Discussion: https://forum.safedev.org/t/rfc-44-secure-vault-joining/119
 - Supersedes: https://github.com/maidsafe/rfcs/blob/master/text/0030-secure-node-join/0030-nodes_key_as_name.md
 
 ## Summary
