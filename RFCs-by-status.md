@@ -20,6 +20,7 @@ A list of all RFCs by their current status.
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
+ - [#0044 Secure vault joining](./text/0044-secure-vault-joining/0044-secure-vault-joining.md)
 
 ## Agreed RFCs
 
@@ -59,4 +60,4 @@ A list of all RFCs by their current status.
  - [#0039 Sentinel](./text/0039-sentinel/0039-sentinel.md)
 
 
-(Last updated _Tue  6 Sep 2016 14:11:29 BST_ at REV [92e99f4](https://github.com/maidsafe/rfcs/commit/92e99f4bfc9c17d09df36382b4c2916f19659d09))
+(Last updated _Tue 13 Sep 2016 11:26:53 EDT_ at REV [642f93a](https://github.com/maidsafe/rfcs/commit/642f93a6953a719f9a478cb74ebdcf2b4ca2f304))
