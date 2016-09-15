@@ -28,9 +28,8 @@ in a possible attack where an attacker can easily restart many nodes constantly 
 a network location. The difficulty of such an attack is not considered here, merely the opportunity
 of such an attack exists in some form.
 
-This RFC prevents this attack and claims that this will provide an overall network security level
-that would be appropriate for securing group creation and thereby groups holding even the most
-valuable data such as digital currencies.
+This RFC allows the network to ensure that joining nodes are tested prior to joining a group. As a
+node is promoted then it can begin to acquire rank. This RFC does not cover rank or relocation.
 
 ## Detailed design
 
@@ -118,6 +117,19 @@ As the network requires new nodes at whichever rate the algorithm has calculated
 time a `RelayNode` can be promoted to a `ManagedNode`. This will require the node is located to a
 new group (Z).
 
+#### `RelayNode` connections
+
+A `RelayNode` will connect to all group members in the current close group only. Relay response
+messages will be relayed through the relay node in the address, if the node is still present,
+otherwise it is relayed via the first available `RelayNode`. This process ensures clients should
+always receive responses, even when the relay used is no longer available.
+
+#### `RelayNode` monitoring
+
+All group members are aware of all `RelayNode`s as they are connected to the group. If a `RelayNode`
+leaves the group all clients connected will instantly be aware of this. If a new `RelayNode` joins
+the group then all group members send this `RelayNode` address to clients to allow the client to
+accumulate this address and make a connection,
 
 #### Selection of the `RelayNode` to promote
 
@@ -174,6 +186,7 @@ On losing any node the client will re-establish connection to the groups `RelayN
 
 This requires a new RPC, `Get_relays()` that the client can send to group X. Nodes will **not** send
 IP information of `ManagedNode`s to any client.
+
 
 
 ## Drawbacks
