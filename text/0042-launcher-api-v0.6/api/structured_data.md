@@ -8,7 +8,7 @@ If the size is more than permitted size after serialisation, error is returned.
 Versioned, Unversioned or Custom Structured data types can be created.
 If the size of the data being passed is greater than 100KiB, the versioned and unversioned
 structured data will ensure that the data is managed and stored successfully.
-But for custom type_tags it becomes the responsibility of the application
+But for custom tag_types it becomes the responsibility of the application
 to handle the size restriction.
 
 
@@ -25,77 +25,74 @@ The data is be encrypted based on the Encryption enum value specified.
 |-----|-----------|
 |NONE| Data is not encrypted|
 |SYMMETRIC| Data is encrypted using symmetric key - only the user can read the data|
-|HYBRID| Data is encrypted using hybrid encryption for sharing the data secure|
+|ASYMMETRIC| Data is encrypted using asymmetric encryption for sharing the data secure|
 
-The hybrid encryption is detailed in the [safe_core low level api RFC](https://github.com/maidsafe/rfcs/blob/master/text/0041-low-level-api/0041-low-level-api.md)
+The asymmetric encryption is detailed in the [safe_core low level api RFC](https://github.com/maidsafe/rfcs/blob/master/text/0041-low-level-api/0041-low-level-api.md)
 
-The tag type and Id combination is needed for fetching the Structured Data from the network.
+The tag_type and Id combination is needed for fetching the Structured Data from the network.
 
 The Id is a base64 string representing [u8; 32] array.
 
-The DataIdentifier handle is obtained after creation of a structured data. The Data Identifier handle is
-needed for working with the structured data and this must be dropped after the usage.
-
-The [appendable data](./appendable_data.md) can accept only Data Identifier to appened.
+The StructuredData handle is needed for working with the structured data and this
+must be dropped after the usage.
 
 ### Request
 
 #### Endpoint
 
 ```
-POST /structured-data/{Id}
+POST /structured-data
 ```
 
 #### Headers
-|Field|Description|
-|-----|-----------|
-|Tag-Type| Accepted values 500, 501 or above 15000. Defaults to 500 |
-|Encryption| Enum values - NONE, SYMMETRIC, HYBRID. Defaults to None |
 
 ```
 Authorization: Bearer <TOKEN>
-Tag-Type: Number
-Encryption: String
 ```
 
 #### Body
+|Field|Description|
+|-----|-----------|
+|id| [u8;32] as Base64 string |
+|tagType| Accepted values 500, 501 or above 15000. Defaults to 500 |
+|encryption| Enum values - NONE, SYMMETRIC, ASYMMETRIC. Defaults to None |
+|encryptKey| Encryption Key handle to use for asymmetric encryption  |
+
 ```
-Binary Data
+{
+  id: [u8; 32] of base64 string,
+  tagType: Number,
+  encryption: ENUM,
+  encryptKey: u64 representing encrypt key handle
+}
 ```
 
 ### Response
 
 #### Status Code
 
- ```
- 200
- ```
-
-#### Headers
 ```
-Handle-Id: u64 representing the DataIdentifier handle Id
+200
 ```
 
-## Get Data Identifier Handle
+#### Body
 
-Get the handle for structured data.
+```
+{
+  handleId: u64 representing the StructuredData handle Id
+}
+```
+
+## Get Structured data Handle
+
+Get the handle id for structured data using DataIdentifier handle.
 Unauthorised access is allowed.
 
 ### Request
 
 #### Endpoint
 ```
-HEAD /structured-data/handle/{Id}
-```
-
-#### Headers
-|Field|Description|
-|-----|-----------|
-|Tag-Type| Accepted values 500, 501 or above 15000. Defaults to 500 |
-
-```
-Authorization: Bearer <TOKEN>
-Tag-Type: Number
+GET /structured-data/handle/{DataIdentifier-Handle}
 ```
 
 ### Response
@@ -106,28 +103,24 @@ Tag-Type: Number
 200
 ```
 
-#### Headers
+#### Body
 
 ```
-Is-Owner: Boolean
-Handle-Id: base64 string representing the Id for the DataIdentifier handle
+{
+  isOwner: Boolean
+  handleId: u64 representing StructuredData handle
+  versionsLength: Number // only for type_tag 501
+}
 ```
 
-## Metadata
-
-Get the metadata of structured data using handle id
+## Get DataIdentifier handle for Structured data
 Unauthorised access is allowed.
 
 ### Request
 
 #### Endpoint
 ```
-HEAD /structured-data/{Handle-Id}
-```
-
-#### Headers
-```
-Authorization: Bearer <TOKEN>
+GET /structured-data/data-id/}{handleId}
 ```
 
 ### Response
@@ -138,46 +131,12 @@ Authorization: Bearer <TOKEN>
 200
 ```
 
-#### Headers
+#### Body
 
 ```
-Is-Owner: Boolean
-```
-
-## Get versions
-
-Get the number of versions available for a versioned structured data (tag type 501).
-
-### Request
-
-#### Endpoint
-```
-HEAD /structured-data/versions/{Handle-Id}
-```
-
-#### Headers
-|Field|Description|
-|-----|-----------|
-|Encryption| Enum value - NONE, SYMMETRIC, HYBRID. Optional value. Defaults to NONE |
-
-
-```
-Authorization: Bearer <TOKEN>
-Encryption: Enum // optional
-```
-
-### Response
-
-#### Status code
-
-```
-200
-```
-
-#### Headers
-
-```
-Versions-Length: Number
+{  
+  handleId: u864 representing DataIdentifier handle  
+}
 ```
 
 ## Read Data
@@ -204,7 +163,6 @@ GET /structured-data/{Handle-Id}/{Version-Number}
 
 ```
 Authorization: Bearer <TOKEN>
-Encryption: Enum // optional
 ```
 
 ### Response
@@ -226,28 +184,63 @@ Is-Owner: Boolean
 Binary Data
 ```
 
-## Update Structured Data
+## Save Structured Data
+
+The safe_core calls PUT to store the data in the network and POST to update
+an existing data in the network. When a structured data is created for the first time
+the application should call the PUT endpoint and while updating a StructuredData the
+application should call the POST endpoint.
+
+### Request
+
+#### PUT Endpoint
+```
+PUT /structured-data/{Handle-Id}
+```
+
+#### POST Endpoint
+```
+POST /structured-data/{Handle-Id}
+```
+
+#### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status code
+```
+200
+```
+
+## Update data
+
+Update the data held by the StructuredData
 
 ### Request
 
 #### Endpoint
 ```
-PUT /structured-data/{Handle-Id}
+PATCH /structured-data/{Handle-Id}
 ```
 
 #### Headers
-|Field|Description|
-|-----|-----------|
-|Encryption| Enum values - NONE, SYMMETRIC, HYBRID. Defaults to NONE |
-
 ```
 Authorization: Bearer <TOKEN>
-Encryption: String
 ```
 
 #### Body
+|Field|Description|
+|-----|-----------|
+|Encryption| Enum values - NONE, SYMMETRIC, HYBRID. Defaults to NONE |
 ```
-binary data
+{
+  encryptionType: Enum,
+  encryptionKeyhandle: u84 handle representing encrypt key handle
+  data: base64 String representing [u8]
+}
 ```
 
 ### Response
@@ -301,4 +294,65 @@ Authorization: Bearer <TOKEN>
 #### Status code
 ```
 200
+```
+
+## Serialise StructuredData
+
+### Request
+
+#### Endpoint
+```
+GET /structured-data/serialise/{Handle-Id}
+```
+
+#### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status Code
+```
+200
+```
+
+#### Body
+```
+Binary data [u8]
+```
+
+## Deserialise
+
+### Request
+
+#### Endpoint
+```
+POST /structured-data/deserialise
+```
+
+#### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+#### Body
+```
+Binary data [u8]
+```
+
+### Response
+
+#### Status Code
+```
+200
+```
+
+#### Body
+```
+{
+  Is-Owner: Boolean
+  Handle-Id: base64 string representing the Id for the StructuredData handle
+  Versions-Length: Number
+}
 ```
