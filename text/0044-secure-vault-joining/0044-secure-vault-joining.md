@@ -69,7 +69,7 @@ Nodes acting as `RelayNodes` have a recognisable address type on the network. Th
 such nodes are already network connected and located in a group, but importantly do **not** require
 to be in the routing table of group members. It is suggested here that there will be a limited
 number of such nodes in any (non full) group. The number of these nodes should be tested during
-implementation testing (initially restricted to < 50% of group size>). Additional attempts to
+implementation testing (initially restricted to < 50% of group size). Additional attempts to
 connect will be rejected in this group. This follows the joining limit already used and tested in
 the network testnets.
 
@@ -176,13 +176,13 @@ JoinRequest during this time.  Node (A) then must create an address that falls b
 nodes and then join (Y).
 
 When the group creates a safecoin a node can be selected for promotion. All existing counts are
-zero'd in this case and the process resumes.
+zeroed in this case and the process resumes.
 
 ####Client
 
-A client will bootstrap and then join a group exactly the same way a node does. When in this group it
-will connect to at least the `RelayNodes` nodes in the group and send requests through these at random.
-On losing any node the client will re-establish connection to the groups `RelayNode`s again.
+A client will bootstrap and then join a group exactly the same way a node does. When in this group
+it will connect to at least the `RelayNodes` nodes in the group and send requests through these at
+random. On losing any node the client will re-establish connection to the groups `RelayNode`s again.
 
 This requires a new RPC, `Get_relays()` that the client can send to group X. Nodes will **not** send
 IP information of `ManagedNode`s to any client.
@@ -191,28 +191,27 @@ IP information of `ManagedNode`s to any client.
 
 ## Drawbacks
 
-* Users vaults will now take longer to become full nodes and therefore will see an increased delay
-* in the time to farm safecoin.  When a node requests membership of the network the intial group
-* will require to confirm a joining token (`Get`) and send the delete on to that address. This could
-* cause churn issues and requires discussed in detail.
+* Users' vaults will now take longer to become full nodes and therefore will see an increased delay
+  in the time to farm safecoin.
+* When a node requests membership of the network the initial group will require to confirm a joining
+  token (`Get`) and send the delete on to that address. This could cause churn issues and requires
+  discussed in detail.
 
 ## Alternatives
 
-* Forced random relocation of nodes (many variants).  Nodes performing a proof of work type
-* algorithm.  Node ranking and relocation rules.
-
+* Forced random relocation of nodes (many variants).
+* Nodes performing a proof of work type algorithm.
+* Node ranking and relocation rules.
 * Clients join groups as non routing table nodes. Use a random Id to do so. Still send Put requests
-* through `MaidManagers`. They need not connect to every group member, but  should at least connect
-* to the closest 2 members.
-
+  through `MaidManagers`. They need not connect to every group member, but  should at least connect
+  to the closest 2 members.
 * `RelayNode`s join a group as non routing table Nodes and act as `Bootstrap` nodes and
-* `RelayNodes`.
-
+  `RelayNodes`.
 * `RelayNode`s earn tokens from group members who agree the modulo of their address on any
-* `GetResponse` is 0. This modulo number is calculated as per safecoin reward and uses the same
-* algorithm. As the network requires resources the rewards are more frequent and as the network
-* decides it has enough resources these nodes will take longer to earn a token. For this reason
-* these nodes must connect to every group member that is a routing table node.
+  `GetResponse` is 0. This modulo number is calculated as per safecoin reward and uses the same
+  algorithm. As the network requires resources the rewards are more frequent and as the network
+  decides it has enough resources these nodes will take longer to earn a token. For this reason
+  these nodes must connect to every group member that is a routing table node.
 
 ## Future work
 
@@ -221,4 +220,4 @@ IP information of `ManagedNode`s to any client.
 
 ## Unresolved questions
 
-* The bootstrap process requires further clarification and should remain seperate form this process.
+* The bootstrap process requires further clarification and should remain separate from this process.
