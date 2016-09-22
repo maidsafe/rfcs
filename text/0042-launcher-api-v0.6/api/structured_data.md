@@ -14,8 +14,8 @@ to handle the size restriction.
 
 |Type| tag| Description|
 |-----|---------|-----------|
-| Unversioned | 500 | Has only the one latest copy |
-| Versioned | 501 | Will hold version history. Can fetch an older version based on a version number|
+| Versioned | 500 | Will hold version history. Can fetch an older version based on a version number |
+| Unversioned | 501 | Has only the one latest copy |
 | Custom | 15000 > | Apps are free to use any tagType value greater than 15000 |
 
 
@@ -54,7 +54,7 @@ Authorization: Bearer <TOKEN>
 |Field|Description|
 |-----|-----------|
 |id| [u8;32] as Base64 string |
-|tagType| Accepted values 500, 501 or above 15000. Defaults to 500 |
+|tagType| Accepted values 500, 501 or above 15000. Defaults to 501 |
 |encryption| Enum values - NONE, SYMMETRIC, ASYMMETRIC. Defaults to None |
 |encryptKey| Encryption Key handle to use for asymmetric encryption  |
 
@@ -107,9 +107,10 @@ GET /structured-data/handle/{DataIdentifier-Handle}
 
 ```
 {
-  isOwner: Boolean
-  handleId: u64 representing StructuredData handle
-  versionsLength: Number // only for type_tag 501
+  isOwner: Boolean,
+  handleId: u64,// representing StructuredData handle
+  version: u64, // version of the structured data  
+  dataVersionsLength: Number // number of data versions - only for tag_type 501
 }
 ```
 
@@ -120,7 +121,7 @@ Unauthorised access is allowed.
 
 #### Endpoint
 ```
-GET /structured-data/data-id/}{handleId}
+GET /structured-data/data-id/{handleId}
 ```
 
 ### Response
@@ -174,8 +175,9 @@ Authorization: Bearer <TOKEN>
 
 #### Headers
 ```
-Versions-Length: Number
-Version-Number: Number // Version number currently being served
+Version: U64 // Version number of structured data
+Data-Versions-Length: Number
+Data-Version-Number: Number // Version number currently being served
 Is-Owner: Boolean
 ```
 
@@ -351,8 +353,9 @@ Binary data [u8]
 #### Body
 ```
 {
-  Is-Owner: Boolean
-  Handle-Id: base64 string representing the Id for the StructuredData handle
-  Versions-Length: Number
+  isOwner: Boolean,
+  Version: u64,
+  handleId: base64 string representing the Id for the StructuredData handle,
+  dataVersionsLength: Number
 }
 ```

@@ -123,6 +123,7 @@ Authorization: Bearer <TOKEN>
 {
   handleId: u64 number representing the appendable data handle id,
   isOwner: Boolean,
+  version: u64,
   isPrivate: Boolean,
   filterType: ENUM,
   dataLength: Number,
@@ -623,6 +624,7 @@ Binary data [u8]
 {
   handleId: u64 number representing the appendable data handle id,
   isOwner: Boolean,
+  version: u64,
   isPrivate: Boolean,
   filterType: ENUM,
   dataLength: Number,
