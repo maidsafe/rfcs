@@ -1,4 +1,4 @@
-# Secure Vault Joining
+# Relaynodes
 
 - Status: proposed
 - Type: enhancement
