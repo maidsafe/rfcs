@@ -31,6 +31,8 @@ of such an attack exists in some form.
 This RFC allows the network to ensure that joining nodes are tested prior to joining a group. As a
 node is promoted then it can begin to acquire rank. This RFC does not cover rank or relocation.
 
+Another important feature of This RFC is that the
+
 ## Detailed design
 
 The "effort" of the network should allow that a proportionate amount of effort is carried out by a
