@@ -20,7 +20,6 @@ A list of all RFCs by their current status.
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
- - [#0044 Secure Vault Joining](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 ## Agreed RFCs
 
@@ -58,6 +57,7 @@ A list of all RFCs by their current status.
  - [#0027 Append by all Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
  - [#0028 Launcher Low Level API](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
  - [#0039 Sentinel](./text/0039-sentinel/0039-sentinel.md)
+ - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Fri 23 Sep 14:33:17 BST 2016_ at REV [c6a2ef7](https://github.com/maidsafe/rfcs/commit/c6a2ef7cf3d86ecb6f1dc7342de362af4d416833))
+(Last updated _Sat 24 Sep 2016 09:45:45 EDT_ at REV [1ebe9f3](https://github.com/maidsafe/rfcs/commit/1ebe9f361f6323fa89a5bbd271ff0f9e9d9e7020))
