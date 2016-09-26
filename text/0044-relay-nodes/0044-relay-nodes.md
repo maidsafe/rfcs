@@ -1,10 +1,10 @@
 # Relay Nodes
 
-- Status: proposed
+- Status: rejected
 - Type: enhancement
 - Related components: safe_vault, routing
 - Start Date: 03-09-2016
-- Discussion: https://forum.safedev.org/t/rfc-44-secure-vault-joining/119
+- Discussion: https://forum.safedev.org/t/rfc-44-relay-nodes/119
 - Supersedes: https://github.com/maidsafe/rfcs/blob/master/text/0030-secure-node-join/0030-nodes_key_as_name.md
 
 ## Summary
@@ -14,6 +14,7 @@ network. This is a mechanism to prevent mass joining quickly and therefore will 
 such an attack that is proportional to the network "effort" over time.
 
 ## Conventions
+
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT",
   "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC
   2119](http://tools.ietf.org/html/rfc2119).
@@ -74,6 +75,7 @@ connect will be rejected in this group. This follows the joining limit already u
 the network testnets.
 
 #### Flow diagram
+
 ```
 |----Node----|----Group X----|------Group Y------|------Group z------|
 |
@@ -104,7 +106,6 @@ the network testnets.
 ```
 
 #### Relayed connections
-
 
 ### `RelayNode`
 
@@ -152,7 +153,6 @@ of this RFC.
 As the group are counting what will be valuable information then this is not wasteful. If it were
 calculating info to prove a node is not valid then it would be potentially useless.
 
-
 #### `RelayNode` promotion
 
 The group that has now created a safecoin will send a `FullNodeJoin` to the group that is closest to
@@ -178,7 +178,7 @@ nodes and then join (Y).
 When the group creates a safecoin a node can be selected for promotion. All existing counts are
 zeroed in this case and the process resumes.
 
-####Client
+#### Client
 
 A client will bootstrap and then join a group exactly the same way a node does. When in this group
 it will connect to at least the `RelayNodes` nodes in the group and send requests through these at
@@ -186,8 +186,6 @@ random. On losing any node the client will re-establish connection to the groups
 
 This requires a new RPC, `Get_relays()` that the client can send to group X. Nodes will **not** send
 IP information of `ManagedNode`s to any client.
-
-
 
 ## Drawbacks
 
