@@ -2,19 +2,21 @@
 
 ## Get DataIdentifier for StructuredData
 
+Unauthorised access is permitted which enables to read plain data
+
 ### Request
 
 #### Endpoint
 
 ```
-POST data-id/structuredData
+POST data-id/structured-data
 ```
 
 #### Body
 ```
 {
-  id: base64 String [u8;32],
-  typeTag: 500, 501 or above 15000. Defaults to 500
+  name: base64 String [u8;32],
+  typeTag: 500, 501 or above 15000. Defaults to 501
 }
 ```
 
@@ -34,18 +36,20 @@ POST data-id/structuredData
 
 ## Get DataIdentifier for AppendableData
 
+Unauthorised access is permitted which enables to read public data
+
 ### Request
 
 #### Endpoint
 
 ```
-POST data-id/appendableData
+POST data-id/appendable-data
 ```
 
 #### Body
 ```
 {
-  id: base64 String [u8;32],
+  name: base64 String [u8;32],
   isPrivate: Boolean. Defaults to false
 }
 ```

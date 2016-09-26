@@ -37,14 +37,14 @@ Authorization: Bearer <TOKEN>
 #### Body
 |Field|Description|
 |-----|-----------|
-| Id | base64 string representing [u8; 32] array |
+| name | base64 string representing [u8; 32] array |
 | isPrivate | Boolean. Optional Defaults to false |
 | filterType | Enum value. WHITE_LIST, BLACK_LIST. Defaults to BLACK_LIST |
 | filterKey | List of signing key handles. Optional value defaults to empty list |
 
 ```
 {
-  id: base64 string,
+  name: base64 string,
   isPrivate: Boolean,
   filterType: Enum,
   filterKeys: list of signing key handles
@@ -54,9 +54,9 @@ Authorization: Bearer <TOKEN>
 ### Response
 
 #### Status Code
- ```
- 200
- ```
+```
+200
+```
 
 #### Body
 ```
@@ -124,7 +124,6 @@ Authorization: Bearer <TOKEN>
   handleId: u64 number representing the appendable data handle id,
   isOwner: Boolean,
   version: u64,
-  isPrivate: Boolean,
   filterType: ENUM,
   dataLength: Number,
   deletedDataLength: Number
@@ -141,7 +140,7 @@ Handle for the encryption key is returned.
 #### Endpoint
 
 ```
-GET /appendable-data/encryptKey/{Handle-Id}
+GET /appendable-data/encrypt-key/{Handle-Id}
 ```
 
 #### Headers
@@ -168,7 +167,7 @@ The handle for the signing key is returned
 #### Endpoint
 
 ```
-GET /appendable-data/signingKey/{Handle-Id}/{index}
+GET /appendable-data/sign-Key/{Handle-Id}/{index}
 ```
 
 #### Headers
@@ -179,6 +178,7 @@ Authorization: Bearer <TOKEN>
 ### Response
 
 #### Body
+
 ```
 {
   handleId: u64 // representing Signing key handle
@@ -194,7 +194,7 @@ Get Signing key from deleted section of the appendable data by index
 #### Endpoint
 
 ```
-GET /appendable-data/signingKey/deleted/{Handle-Id}/{index}
+GET /appendable-data/sign-key/deleted-data/{Handle-Id}/{index}
 ```
 
 #### Headers
@@ -263,17 +263,16 @@ Authorization: Bearer <TOKEN>
 }
 ```
 
-## Read data at index
+## Get Data Id of a Data at Appendable Data - deleted_data
 
-Read data from appendable data at a specific index.
-Unauthorised access is allowed for Public AppendableData
+Returns the dataid handle of a data based on the index from the Appendable data's data section.
 
 ### Request
 
 #### Endpoint
 
 ```
-GET /appendable-data/{Handle-Id}/{index}
+GET /appendable-data/deleted-data/{Handle-Id}/{index}
 ```
 
 #### Headers
@@ -283,44 +282,11 @@ Authorization: Bearer <TOKEN>
 
 ### Response
 
-#### Status Code
-```
-200
-```
-
 #### Body
 ```
-Binary Data
-```
-
-## Read Deleted Data at index
-
-Read data from deleted section at a specific index.
-Unauthorised access is allowed for Public AppendableData.
-
-### Request
-
-#### Endpoint
-
-```
-GET /appendable-data/deleted/{Handle-Id}/{index}
-```
-
-#### Headers
-```
-Authorization: Bearer <TOKEN>
-```
-
-### Response
-
-#### Status Code
-```
-200
-```
-
-#### Body
-```
-Binary Data
+{
+  handleId: u64 // representing DataIdentifier handle
+}
 ```
 
 ## Append Data
@@ -353,7 +319,7 @@ The api will toggle the filter and also reset all the filter keys.
 
 #### Endpoint
 ```
-PUT /appendable-data/toggleFilter/{Handle-Id}
+PUT /appendable-data/toggle-filter/{Handle-Id}
 ```
 
 #### Headers
@@ -488,7 +454,7 @@ Authorization: Bearer <TOKEN>
 #### Endpoint
 
 ```
-DELETE /appendable-data/clearData
+DELETE /appendable-data/clear-data/{handleId}
 ```
 
 ### Headers
@@ -510,28 +476,7 @@ Authorization: Bearer <TOKEN>
 #### Endpoint
 
 ```
-DELETE /appendable-data/clearDeletedData
-```
-
-### Headers
-```
-Authorization: Bearer <TOKEN>
-```
-
-### Response
-
-#### Status code
-```
-200
-```
-
-### Delete AppendableData
-
-### Request
-
-#### Endpoint
-```
-DELETE /appendable-data/{Handle-Id}
+DELETE /appendable-data/clear-deleted-data/{handleId}
 ```
 
 ### Headers
@@ -595,6 +540,8 @@ Binary data [u8]
 
 ## Deserialise
 
+Unauthorised access is permitted
+
 ### Request
 
 #### Endpoint
@@ -625,7 +572,6 @@ Binary data [u8]
   handleId: u64 number representing the appendable data handle id,
   isOwner: Boolean,
   version: u64,
-  isPrivate: Boolean,
   filterType: ENUM,
   dataLength: Number,
   deletedDataLength: Number

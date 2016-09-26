@@ -8,7 +8,7 @@ If the size is more than permitted size after serialisation, error is returned.
 Versioned, Unversioned or Custom Structured data types can be created.
 If the size of the data being passed is greater than 100KiB, the versioned and unversioned
 structured data will ensure that the data is managed and stored successfully.
-But for custom tag_types it becomes the responsibility of the application
+But for custom type_tags it becomes the responsibility of the application
 to handle the size restriction.
 
 
@@ -16,7 +16,7 @@ to handle the size restriction.
 |-----|---------|-----------|
 | Versioned | 500 | Will hold version history. Can fetch an older version based on a version number |
 | Unversioned | 501 | Has only the one latest copy |
-| Custom | 15000 > | Apps are free to use any tagType value greater than 15000 |
+| Custom | 15000 > | Apps are free to use any typeTag value greater than 15000 |
 
 
 The data is be encrypted based on the Encryption enum value specified.
@@ -29,7 +29,7 @@ The data is be encrypted based on the Encryption enum value specified.
 
 The asymmetric encryption is detailed in the [safe_core low level api RFC](https://github.com/maidsafe/rfcs/blob/master/text/0041-low-level-api/0041-low-level-api.md)
 
-The tag_type and Id combination is needed for fetching the Structured Data from the network.
+The type_tag and Id combination is needed for fetching the Structured Data from the network.
 
 The Id is a base64 string representing [u8; 32] array.
 
@@ -53,17 +53,16 @@ Authorization: Bearer <TOKEN>
 #### Body
 |Field|Description|
 |-----|-----------|
-|id| [u8;32] as Base64 string |
-|tagType| Accepted values 500, 501 or above 15000. Defaults to 501 |
+|name| [u8;32] as Base64 string |
+|typeTag| Accepted values 500, 501 or above 15000. Defaults to 501 |
 |encryption| Enum values - NONE, SYMMETRIC, ASYMMETRIC. Defaults to None |
 |encryptKey| Encryption Key handle to use for asymmetric encryption  |
 
 ```
 {
-  id: [u8; 32] of base64 string,
-  tagType: Number,
-  encryption: ENUM,
-  encryptKey: u64 representing encrypt key handle
+  name: [u8; 32] of base64 string,
+  typeTag: Number, // options defaults to 501
+  cipherOpts: u64 representing cipher-opts handle // optional defaults to PLAIN
 }
 ```
 
@@ -110,7 +109,7 @@ GET /structured-data/handle/{DataIdentifier-Handle}
   isOwner: Boolean,
   handleId: u64,// representing StructuredData handle
   version: u64, // version of the structured data  
-  dataVersionsLength: Number // number of data versions - only for tag_type 501
+  dataVersionsLength: Number // number of data versions - only for type_tag 501
 }
 ```
 
@@ -239,8 +238,7 @@ Authorization: Bearer <TOKEN>
 |Encryption| Enum values - NONE, SYMMETRIC, HYBRID. Defaults to NONE |
 ```
 {
-  encryptionType: Enum,
-  encryptionKeyhandle: u84 handle representing encrypt key handle
+  cipherOpts: u64 representing cipher-opts handle,  
   data: base64 String representing [u8]
 }
 ```
@@ -325,6 +323,7 @@ Binary data [u8]
 ```
 
 ## Deserialise
+Unauthorised access is permitted
 
 ### Request
 
