@@ -138,7 +138,7 @@ any more new nodes**.
 
 As groups churn they agree on a new data chain "Link" this block of the chain is named using the
 hash of all nodes in the group at that time. This provides a pseudo random piece of data that the
-group can agree on. The group checks R and the number of churn events so far, if 2^R churn events
+group can agree on. The group checks A and the number of churn events so far, if 2^A churn events
 have occurred the node will be relocated.
 
 A further check of at least a single data block existing between any churn events is required. This
