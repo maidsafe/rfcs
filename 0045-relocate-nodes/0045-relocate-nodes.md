@@ -151,6 +151,10 @@ ensures that in times of massive network churn (network collapse or partition) t
 create more churn by relocating nodes. Therefore any two consecutive churn events with no data
 manipulation between them will not be counted.
 
+If there exists more than one node to relocate then the oldest node should be chosen. If two nodes
+have the same oldest age then the one that has been present for the most churn events is chosen to
+relocate.
+
 ### A node joining proof
 
 On joining a group a node will require to prove capablity. This is on every join attempt to a group
@@ -212,10 +216,11 @@ network at it's last known group. This group will accept the node, but with an a
 members will request any data the node has and use the agreed churn event that the node created by
 joining.
 
-As each node is happy it recieved the data requested then it sends a `JoinRequest` to D on behalf of
-this node with the nodes existing correct age (the age in the datachain). This node then joins D as
-per normal. D accumulates the `JoinRequest`s therefore if the node attempts to not provide the
-requested data it risks non accumulation and therefor having to start again from an actual age of 0.
+As each node is satisfied that it recieved the data requested then it sends a `JoinRequest` to D on
+behalf of this node with the nodes existing correct age (the age in the datachain). This node then
+joins D as per normal. D accumulates the `JoinRequest`s therefore if the node attempts to not
+provide the requested data it risks non accumulation and therefor having to start again from an
+actual age of 0.
 
 ### Limits on relocating or refusing a node
 
