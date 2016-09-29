@@ -125,8 +125,9 @@ impl NodeName {
 
 ```
 
-The `NodeName.name` is the nodes address on the network. We can then confirm this `Key` is actually
-a key that corresponds to the group in question.
+The `NodeName.name` is the nodes address on the network. We can then confirm this `name` is actually
+a name that corresponds to the group in question. This NodeName is also stored in the data chain to
+allow further validation of a nodes group membership.
 
 This struct adds a single byte to the address and requires that byte to be transmitted as part of
 any message the node sends, as is the current mode of operations (nodes send their Id in every
