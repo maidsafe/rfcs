@@ -162,17 +162,27 @@ This node must then
 
 1. Concatenate the key 32768 times to create a chunk of 1Mb in size.
 
-2. Increment an integer value to the end of this message until the sha3 of the message has 4 leading
+2. Increment an integer value to the end of this message until the sha3 of the message has 5 leading
 zero's (a proof of work similar to [hashcash](https://en.wikipedia.org/wiki/Hashcash)). A simple
 script demonstrates this process with sha256 `time (perl -e '$n++ while`echo "A Public
-key$n"|sha256sum`!~/^0000/;print$n')`
+key$n"|sha256sum`!~/^00000/;print$n')`
 
-3. Send this `proof` to the joining group to confirm ability to compute and transfer data.
+3. The current group (S) sends the join request with this nodes current ID + age incremented by 1.
+__if this is a new node then it must Send a join request to the joining group (via bootstrap asit is
+now), the receiving group will set the age at 0 for this node and relocate it on the first churn
+event (this join will create that
+churn event).__
 
-If a join attempt is made to the group the pending connections container is queried for the old node
-Id (that signed the message). If the node "fits" in the group then it is accepted, otherwise a
-message is sent back to the node refusing connection. On receipt of these messages the node would be
-able to refine the generated key to "fit" into D. The node will retry the connection in that time.
+4. This node then makes direct connections to each member of group (D) and then Sends this
+`proof` to each node in the joining group on connect to confirm ability to compute and transfer
+data. Each member of the joining group will send the `NodeBlock` for the new Link when this is
+received. When the link validates this node is added to the routing table.
+
+If a connect attempt as a node is made to the group the pending connections container is queried for
+the old node Id (that signed the message). If the node "fits" in the group then it can try to join,
+otherwise a message is sent back to the node refusing connection. On receipt of these messages the
+node would be able to refine the generated key to "fit" into D. The node will retry the connection
+in that time.
 
 If a node cannot join in time then it will require to start on the network again at age 0.
 
