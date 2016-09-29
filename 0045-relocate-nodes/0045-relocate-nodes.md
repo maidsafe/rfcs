@@ -162,7 +162,7 @@ This node must then
 
 1. Concatenate the key 32768 times to create a chunk of 1Mb in size.
 
-2. increment an integer value to the end of this message until the sha3 of the message has 4 leading
+2. Increment an integer value to the end of this message until the sha3 of the message has 4 leading
 zero's (a proof of work similar to [hashcash](https://en.wikipedia.org/wiki/Hashcash)). A simple
 script demonstrates this process with sha256 `time (perl -e '$n++ while`echo "A Public
 key$n"|sha256sum`!~/^0000/;print$n')`
@@ -191,7 +191,7 @@ forwarding messages throughout the group. A nice feature is the receiving group 
 if they receive the message from every member of this group which node is sending the data they can
 also confirm the data never arrived. Thereby they will send back a resend request to the group with
 the name of the node that did not send the data in time. This node can then be disconnected or have
-it's age reduced (initially disconneting will probably work best).
+it's age reduced (initially disconnecting will probably work best).
 
 If a node does not send `NodeBlock`s then it potentially damages the group integrity. Any node that
 has not sent a link `NodeBlock` since the last churn event should be disconnected, if and only if,
