@@ -150,7 +150,7 @@ manipulation between them will not be counted.
 
 When a churn even does force a node to relocate to a destination group (D) from this source group
 (S) then the hash that is the link block is combined with the nodes existing name and hashed to
-find D. All members of S then send the nodes age incremented (++R) to D with the nodes current
+find D. All members of S then send the nodes age incremented (++A) to D with the nodes current
 PublicKey (Id).
 
 Members of D, accumulate this message and store the node Id and age in a pending connections for a
@@ -160,14 +160,14 @@ The relocating node then generates a key that will fit in D and attempts to join
 
 This node must then
 
-1.  Concatenate the key 32768 times to create a chunk of 1Mb in size.
+1. Concatenate the key 32768 times to create a chunk of 1Mb in size.
 
-2.  increment an integer value to the end of this message until the sha3 of the message has 4 leading
+2. increment an integer value to the end of this message until the sha3 of the message has 4 leading
 zero's (a proof of work similar to [hashcash](https://en.wikipedia.org/wiki/Hashcash)). A simple
 script demonstrates this process with sha256 `time (perl -e '$n++ while`echo "A Public
 key$n"|sha256sum`!~/^0000/;print$n')`
 
-3.  Send this `proof` to the joining group to confirm ability to compute and transfer data.
+3. Send this `proof` to the joining group to confirm ability to compute and transfer data.
 
 If a join attempt is made to the group the pending connections container is queried for the old node
 Id (that signed the message). If the node "fits" in the group then it is accepted, otherwise a
