@@ -168,10 +168,9 @@ script demonstrates this process with sha256 `time (perl -e '$n++ while`echo "A 
 key$n"|sha256sum`!~/^00000/;print$n')`
 
 3. The current group (S) sends the join request with this nodes current ID + age incremented by 1.
-__if this is a new node then it must Send a join request to the joining group (via bootstrap asit is
-now), the receiving group will set the age at 0 for this node and relocate it on the first churn
-event (this join will create that
-churn event).__
+__if this is a new node then it must Send a join request to the joining group (via bootstrap as it
+is now), the receiving group will set the age at 0 for this node and relocate it on the first churn
+event (this join will create that churn event, effectively meaning immediate relocate).__
 
 4. This node then makes direct connections to each member of group (D) and then Sends this
 `proof` to each node in the joining group on connect to confirm ability to compute and transfer
