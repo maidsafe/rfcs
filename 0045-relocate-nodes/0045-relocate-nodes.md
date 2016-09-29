@@ -52,9 +52,13 @@ Nodes will be continually tested that they
 ### Definitions
 
 G : Group size
+
 N : network population
+
 Z : Number of groups (N/G)
+
 Q : Quorum
+
 A : Age of node
 
 ### Overview
@@ -67,7 +71,7 @@ wait prior to joining this would only delay the attack by that time.
 
 A simple way to think of this is that if you start a node it will join a group A. If you then start
 another node it will join a random group (1/number of groups). If this happens quickly then it is
-easy to 1) test if the group you join is A and 2) if not then simply restart. In this scenario a
+easy to 1: test if the group you join is A and 2: if not then simply restart. In this scenario a
 node will simply restart until it's group == A. Repeating this process will quickly gain control of
 a group.
 
@@ -146,6 +150,26 @@ ensures that in times of massive network churn (network collapse or partition) t
 create more churn by relocating nodes. Therefore any two consecutive churn events with no data
 manipulation between them will not be counted.
 
+### A node joining proof
+
+On joining a group a node will require to prove capablity. This is on every join attempt to a group
+and the proof must be sent directly to each node as a connection is made. The steps to create this
+proof are:
+
+1. Concatenate the key create to join the group 32768 times to create a chunk of ~1Mb in size.
+
+2. Increment an integer value to the end of this message until the sha3 of the message has 5 leading
+zero's (a proof of work similar to [hashcash](https://en.wikipedia.org/wiki/Hashcash)). A simple
+script demonstrates this process with sha256 `time (perl -e '$n++ while`echo "A Public
+key$n"|sha256sum`!~/^00000/;print$n')`
+
+### Joining the network for the first time
+
+A node must create a key to join the network and send a `JoinRequest` message to that group. On
+connecting to each group member the node must supply the `JoiningProof` as described above. AS there
+is no history for this node it will be allocated an age == zero. This means the node itself on
+successful join will be immediately relocated.
+
 ### Relocating a node
 
 When a churn even does force a node to relocate to a destination group (D) from this source group
@@ -160,19 +184,14 @@ The relocating node then generates a key that will fit in D and attempts to join
 
 This node must then
 
-1. Concatenate the key 32768 times to create a chunk of 1Mb in size.
+1. Create a `JoinProof` for D
 
-2. Increment an integer value to the end of this message until the sha3 of the message has 5 leading
-zero's (a proof of work similar to [hashcash](https://en.wikipedia.org/wiki/Hashcash)). A simple
-script demonstrates this process with sha256 `time (perl -e '$n++ while`echo "A Public
-key$n"|sha256sum`!~/^00000/;print$n')`
-
-3. The current group (S) sends the join request with this nodes current ID + age incremented by 1.
+2. The current group (S) sends the join request with this nodes current ID + age incremented by 1.
 __if this is a new node then it must Send a join request to the joining group (via bootstrap as it
 is now), the receiving group will set the age at 0 for this node and relocate it on the first churn
 event (this join will create that churn event, effectively meaning immediate relocate).__
 
-4. This node then makes direct connections to each member of group (D) and then Sends this
+3. This node then makes direct connections to each member of group (D) and then Sends this
 `proof` to each node in the joining group on connect to confirm ability to compute and transfer
 data. Each member of the joining group will send the `NodeBlock` for the new Link when this is
 received. When the link validates this node is added to the routing table.
@@ -184,6 +203,18 @@ node would be able to refine the generated key to "fit" into D. The node will re
 in that time.
 
 If a node cannot join in time then it will require to start on the network again at age 0.
+
+### Subsequently joining the network
+
+When a node recieves an identity it should store this locally. On restart the node will join the
+network at it's last known group. This group will accept the node, but with an age of 0. The group
+members will request any data the node has and use the agreed churn event that the node created by
+joining.
+
+As each node is happy it recieved the data requested then it sends a `JoinRequest` to D on behalf of
+this node with the nodes existing correct age (the age in the datachain). This node then joins D as
+per normal. D accumulates the `JoinRequest`s therefore if the node attempts to not provide the
+requested data it risks non accumulation and therefor having to start again from an actual age of 0.
 
 ### Limits on relocating or refusing a node
 
