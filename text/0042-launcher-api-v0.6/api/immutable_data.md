@@ -69,34 +69,6 @@ Authorization: Bearer <TOKEN>
 Binary data
 ```
 
-
-## Close Immutable Data Reader
-
-Unauthorised access is allowed.
-
-### Request
-
-#### Endpoint
-
-```
-DELETE /immutable-data/reader/{Reader-Handle-Id}
-```
-
-#### Headers
-
-```
-Authorization: Bearer <TOKEN>
-```
-
-### Response
-
-#### Status Code
-
-```
-200 or 206
-```
-
-
 ## Get ImmutableData Writer
 
 ### Request
@@ -164,14 +136,65 @@ Binary data
 
 ## Close Immutable Data Writer
 
-Invoking close on writer will generate the DataMap and return the DataIdentifier handle.
+Invoking close on writer will generate the DataMap and save it to the network and
+return the DataIdentifier handle which can be used to read the data.
 
 ### Request
 
 #### Endpoint
 
 ```
-DELETE /immutable-data/writer/{Writer-Handle-Id}/{cipher-opts-handle}
+PUT /immutable-data/{Writer-Handle-Id}/{cipher-opts-handle}
+```
+
+#### Headers
+
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status Code
+
+```
+200
+```
+
+## Drop Immutable Data Reader
+
+Unauthorised access is allowed.
+
+### Request
+
+#### Endpoint
+
+```
+DELETE /immutable-data/reader/{Reader-Handle-Id}
+```
+
+#### Headers
+
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status Code
+
+```
+200
+```
+
+## Drop Immutable Data Writer
+
+### Request
+
+#### Endpoint
+
+```
+DELETE /immutable-data/writer/{Writer-Handle-Id}
 ```
 
 #### Headers
