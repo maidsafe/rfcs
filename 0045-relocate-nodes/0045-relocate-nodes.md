@@ -254,7 +254,8 @@ further investigation though (see below).
 
 A quorum can now be defined as 50% of the groups total age score. In addition a minimum number of
 participants should take part (the new Quorum). This may be set to a low number such as 25% of the
-group size or similar. It is proposed in this RFC the quorum is set at >= 50% of the group.
+group size or similar. It is proposed in this RFC the quorum is set at >= 50% of the group members
+plus 50% of the group total age.
 
 
 ## Future considerations
