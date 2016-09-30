@@ -2,57 +2,54 @@
 
 Immutable data is written to and read from the network via self-encryption.
 
-## Write Immutable Data using self-encryptor
+## Get ImmutableData Reader
 
-Once the write operation is successful, the api returns a Handle-Id corresponding
-to the DataMap. The Handle-Id refers to the pointer held in memory referring to
-the DataMap, this Handle-Id can be used to work with the DataMap.
+Unauthorised access is allowed.
 
 ### Request
 
 #### Endpoint
 
 ```
-POST /self-encrypt
+GET /immutable-data/reader/{DataIdentifier-Handle-Id}
 ```
 
 #### Headers
 
 ```
 Authorization: Bearer <TOKEN>
-Content-Length: The length of the request body
+```
+
+### Response
+
+#### Status Code
+
+```
+200
 ```
 
 #### Body
 
 ```
-Binary data
+{
+  handleId: u64, // representing the ImmutableDataReader
+  size: u64
+}
 ```
 
-### Response
+## Read Immutable Data using Reader
 
-#### Status Code
+Supports streaming and partial read using the range header. Unauthorised access is allowed.
 
-```
-200
-```
-
-#### Headers
-
-```
-Handle-Id: u64 representing DataMap handle
-```
-
-## Get actual size of data from Handle-Id
-Unauthorised access is allowed.
 ### Request
 
 #### Endpoint
+
 ```
-HEAD /self-encrypt/{Handle-Id}
+GET /immutable-data/{Reader-Handle-Id}
 ```
 
-#### Header
+#### Headers
 
 ```
 Authorization: Bearer <TOKEN>
@@ -62,53 +59,131 @@ Authorization: Bearer <TOKEN>
 
 #### Status Code
 
-```
-200
-```
-
-#### Header
-|Field|Description|
-|-----|-----------|
-|Content-Length| Size of the file in bytes|
-
-```
-Content-Length: Number
-```
-
-## Read using self-encryptor
-
-API to read the binary data from the network by passing the DataMap-Handle ID.
-Unauthorised access is allowed.
-
-### Request
-
-#### Endpoint
-
-```
-GET /self-encrypt/{Handle-Id}
-```
-
-#### Headers
-```
-Authorization: Bearer <TOKEN>
-Range: bytes=0- // Optional range for partial read
-```
-
-### Response
-
-#### Status Code
 ```
 200 or 206
 ```
 
-#### Header
+#### Body
+
 ```
-Accept-Ranges: bytes
-Content-Length: <Length that is requested based on the byte range>
-Content-Range: bytes <START>-<END>/<TOTAL>
+Binary data
+```
+
+
+## Close Immutable Data Reader
+
+Unauthorised access is allowed.
+
+### Request
+
+#### Endpoint
+
+```
+DELETE /immutable-data/reader/{Reader-Handle-Id}
+```
+
+#### Headers
+
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status Code
+
+```
+200 or 206
+```
+
+
+## Get ImmutableData Writer
+
+### Request
+
+#### Endpoint
+
+```
+GET /immutable-data/writer
+```
+
+#### Headers
+
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status Code
+
+```
+200
 ```
 
 #### Body
+
+```
+{
+  handleId: u64, // representing the ImmutableDataWriter  
+}
+```
+
+## Write Immutable Data
+
+Supports streaming. Close writer must be invoked to ensure the data is saved completel
+
+### Request
+
+#### Endpoint
+
+```
+POST /immutable-data/{Writer-Handle-Id}
+```
+
+#### Headers
+
+```
+Authorization: Bearer <TOKEN>
+Content-Length: <Length of data to be written>
+```
+
+#### Body
+
 ```
 Binary data
+```
+
+### Response
+
+#### Status Code
+
+```
+200
+```
+
+## Close Immutable Data Writer
+
+Invoking close on writer will generate the DataMap and return the DataIdentifier handle.
+
+### Request
+
+#### Endpoint
+
+```
+DELETE /immutable-data/writer/{Writer-Handle-Id}/{cipher-opts-handle}
+```
+
+#### Headers
+
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status Code
+
+```
+200
 ```
