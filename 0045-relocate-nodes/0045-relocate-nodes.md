@@ -165,8 +165,8 @@ proof are:
 
 2. Increment an integer value to the end of this message until the sha3 of the message has 5 leading
 zero's (a proof of work similar to [hashcash](https://en.wikipedia.org/wiki/Hashcash)). A simple
-script demonstrates this process with sha256 `time (perl -e '$n++ while`echo "A Public
-key$n"|sha256sum`!~/^00000/;print$n')`
+script demonstrates this process with sha256 ``time (perl -e '$n++ while`echo "A Public
+key$n"|sha256sum`!~/^00000/;print$n')``
 
 ### Joining the network for the first time
 
