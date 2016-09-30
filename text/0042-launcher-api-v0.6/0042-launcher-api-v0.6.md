@@ -30,6 +30,7 @@ APIs for,
 - [Structured Data](./api/structured_data.md)
 - [Immutable Data](./api/immutable_data.md)
 - [Appendable Data](./api/appendable_data.md)
+- [Cipher Opts](./api/cipher_opts.md)
 
 are exposed from the launcher through the REST interface.
 
