@@ -144,7 +144,7 @@ return the DataIdentifier handle which can be used to read the data.
 #### Endpoint
 
 ```
-PUT /immutable-data/writer/{Writer-Handle-Id}/{cipher-opts-handle}
+PUT /immutable-data/{Writer-Handle-Id}/{cipher-opts-handle}
 ```
 
 #### Headers
