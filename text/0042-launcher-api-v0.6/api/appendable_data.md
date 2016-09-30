@@ -66,6 +66,10 @@ Authorization: Bearer <TOKEN>
 ```
 
 ## Save AppendableData
+The safe_core calls PUT to store the data in the network and POST to update
+an existing data in the network. When a appendable data is created for the first time
+the application should call the PUT endpoint and while updating an AppendableData the
+application should call the POST endpoint.
 
 ### Request
 
