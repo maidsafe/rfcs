@@ -217,10 +217,10 @@ members will request any data the node has and use the agreed churn event that t
 joining.
 
 As each node is satisfied that it recieved the data requested then it sends a `JoinRequest` to D on
-behalf of this node with the nodes existing correct **age/2** (the age in the datachain).  This node
-then joins D as per normal. D accumulates the `JoinRequest`s therefore if the node attempts to not
-provide the requested data it risks non accumulation and therefore having to start again from an
-actual age of 0.
+behalf of this node with the nodes existing correct **age/2** (the age in the datachain divided by
+2).  This node then joins D as per normal. D accumulates the `JoinRequest`s therefore if the node
+attempts to not provide the requested data it risks non accumulation and therefore having to start
+again from an actual age of 0.
 
 The reason for the node restarting with age 0 is to prevent off line agreement / sale of ID's, which
 is unlikely but possible. The age divinding by 2 prevents malicious restarts to target a group. This
