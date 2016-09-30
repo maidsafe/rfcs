@@ -113,6 +113,40 @@ GET /structured-data/handle/{DataIdentifier-Handle}
 }
 ```
 
+## Get metadata
+
+Get metadata of structured data. Unauthorised access is allowed.
+
+### Request
+
+#### Endpoint
+```
+GET /appendable-data/metadata/Handle-Id}
+```
+
+#### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status code
+
+```
+200
+```
+
+#### Body
+
+```
+{  
+  isOwner: Boolean,  
+  version: u64, // version of the structured data  
+  dataVersionsLength: Number // number of data versions - only for type_tag 501
+}
+```
+
 ## Get DataIdentifier handle for Structured data
 Unauthorised access is allowed.
 

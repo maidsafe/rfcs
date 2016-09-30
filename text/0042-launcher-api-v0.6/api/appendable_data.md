@@ -130,6 +130,43 @@ Authorization: Bearer <TOKEN>
 }
 ```
 
+
+## Get metadata
+
+Get metadata of appendable data. Unauthorised access is allowed.
+
+### Request
+
+#### Endpoint
+```
+GET /appendable-data/metadata/Handle-Id}
+```
+
+#### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status code
+
+```
+200
+```
+
+#### Body
+
+```
+{  
+  isOwner: Boolean,
+  version: u64,
+  filterType: ENUM,
+  dataLength: Number,
+  deletedDataLength: Number
+}
+```
+
 ## Get encryption key
 
 Get encryption key of the owner for private appendable data.
@@ -209,6 +246,30 @@ Authorization: Bearer <TOKEN>
 {
   handleId: u64 // representing signing key handle
 }
+```
+
+## Drop Sign key handle
+
+Drop Sign key handle. Unauthorised access is allowed
+
+### Request
+
+#### Endpoint
+
+```
+DELETE /appendable-data/sign-key/{Handle-Id}
+```
+
+#### Headers
+```
+Authorization: Bearer <TOKEN>
+```
+
+### Response
+
+#### Status code
+```
+200
 ```
 
 ## Get DataIdentifier Handle
@@ -334,7 +395,7 @@ Authorization: Bearer <TOKEN>
 200
 ```
 
-### Add signing keys to filter
+### Add sign keys to filter
 
 #### Endpoint
 ```
@@ -358,7 +419,7 @@ Authorization: Bearer <TOKEN>
 200
 ```
 
-### DELETE signing keys from filter
+### DELETE sign keys from filter
 
 #### Endpoint
 ```
@@ -372,7 +433,7 @@ Authorization: Bearer <TOKEN>
 
 #### Body
 ```
-[] // list of signing key handles
+[] // list of sign key handles
 ```
 
 ### Response
