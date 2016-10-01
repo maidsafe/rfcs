@@ -22,8 +22,12 @@ session.
 
 ## Motivation
 
-The network must secure against targeting groups. Earlier RFC's have solutions for group security,
-nodes faking group membership, this RFC specifically focusses on targeting groups.
+The network must secure against targeting groups. Earlier RFC's such as [disjoint
+groups](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md)
+[node key as
+name](https://github.com/maidsafe/rfcs/blob/master/text/0030-secure-node-join/0030-nodes_key_as_name.md)
+as well as data chains and locked data chains (linked below) have solutions for improved group
+security, nodes faking group membership, this RFC specifically focusses on targeting groups.
 
 This RFC will ensure that nodes are relocated and therefore dilute their impact on the network
 across the address range.
@@ -47,7 +51,7 @@ Nodes will be continually tested that they
   - Continually send `NodeBlock`s for churn events (any missing two consecutive churn events are
     considered invalid nodes).
   - Groups will ***not** accept connections from the same IP address.
-  - Groups will only allow 1, node with 0 age.
+  - Groups will only allow one node with an age of zero.
 
 ### Definitions
 
@@ -64,7 +68,7 @@ A : Age of node
 ### Overview
 
 Without any node relocation an attacker with a single join will enter a group and therefore requires
-(Q - 1) nodes To take over the group completely. An attacker will therefore require the attacker try
+(Q - 1) nodes To take over the group completely. An attack will therefore require the attacker try
 (Q - 1) * Z  times. If an attacker could run X% of the network population then this would mean the
 attack would require starting the nodes in parallel X times. Therefore even if nodes had a time to
 wait prior to joining this would only delay the attack by that time.
