@@ -4,7 +4,7 @@
 - Type: new feature
 - Related components: routing
 - Start Date: 25-09-2016
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
+- Discussion: https://forum.safedev.org/t/rfc-45-node-ageing/157
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
 
 ## Summary
