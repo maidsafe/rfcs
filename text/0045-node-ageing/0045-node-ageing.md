@@ -6,7 +6,6 @@
 - Start Date: 25-09-2016
 - Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
-- Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
 
 ## Summary
 
@@ -22,9 +21,8 @@ session.
 
 ## Motivation
 
-The network must secure against targeting groups. Earlier RFC's such as [disjoint
-groups](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md)
-[node key as
+The network must secure against targeting groups. Earlier RFCs such as [disjoint
+groups](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md) and [node key as
 name](https://github.com/maidsafe/rfcs/blob/master/text/0030-secure-node-join/0030-nodes_key_as_name.md)
 as well as data chains and locked data chains (linked below) have solutions for improved group
 security, nodes faking group membership, this RFC specifically focusses on targeting groups.
@@ -50,7 +48,7 @@ Nodes will be continually tested that they
   - Forward messages
   - Continually send `NodeBlock`s for churn events (any missing two consecutive churn events are
     considered invalid nodes).
-  - Groups will ***not** accept connections from the same IP address.
+  - Groups will **not** accept connections from the same IP address.
   - Groups will only allow one node with an age of zero.
 
 ### Definitions
@@ -105,7 +103,7 @@ A group consensus will require >=50% of nodes and 50% of the age of the whole gr
 
 Nodes throughout the network will have to be able to trust a node's age in any group communications.
 To achieve this the node id requires to carry this information in a manner that does not allow the
-node to fake an age or address. This is described [here](###network-name-redefined).
+node to fake an age or address. This is described [here](#network-name-redefined).
 
 ### Network name redefined
 
