@@ -20,12 +20,12 @@ A list of all RFCs by their current status.
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
- - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
 
 ## Agreed RFCs
 
  - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
  - [#0005 Balance Network Resources](./text/0005-balance-network-resources/0005-balance-network-resources.md)
+ - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
 
 ## Implemented RFCs
 
@@ -61,4 +61,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Mon  3 Oct 2016 18:15:23 EDT_ at REV [b1acfb5](https://github.com/maidsafe/rfcs/commit/b1acfb5d740f9b6937d3ec8c4ce93167c674e3fa))
+(Last updated _Tue 18 Oct 2016 12:28:39 EDT_ at REV [4f81189](https://github.com/maidsafe/rfcs/commit/4f81189638033fc48a5736a39a0557d46b297c58))
