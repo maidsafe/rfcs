@@ -91,36 +91,24 @@ To avoid repeated splitting and merging due to small fluctuations in group size,
 
 ### Message routing
 
-To relay a message from an individual node on a given `route` in a node `n` in group `G(p)` for a destination _node_ `d`:
+When learning about a change in any neighbouring group `B` (new member, group split or merge), each node in a group `A` signs the sorted new list of members of `B` and sends it to each member of `A`, so every node in `A` has a signature from each member of `A`, for the list of current members of `B`.
 
-* If `d == n`, handle the message.
-* If `d` is in our routing table, relay it directly to `d`.
-* If `d` is in our group but no node with that name exists, drop the message. (Log it.)
-* Otherwise relay the message to the `route`-th closest entry to `d` in our routing table.
+A new message variant `HopMessageSignature` is added, containing a hash and a signature. The `HopMessage::signature` field is replaced by `signatures: Vec<Signature>`, and a new field `hop_signatures` is added, containing a list of signed group lists. The message is considered valid if each list in `hop_signatures` has valid signatures from at least a quroum of the entries of the next list, and the `signatures` itself has signatures (signing the message itself) by
 
-If the destination is a _group authority_ with address `d`:
+* a quorum of the entries of `hop_signatures[0]`, if the source authority is a group, or
+* one entry of `hop_signatures[0]`, corresponding to the source, if the source authority is a single node.
 
-* If `p` is a prefix of `d`, handle the message and relay it to everyone else in `G(p)`.
+If a group sends a message, only the `route`-th node sends the full `HopMessage`, and the others only a `HopMessageSignature`. The recipient keeps the full message in cache until it has collected a quorum of signatures. Then it continues relaying the message as detailed below. If an individual node sends a message, it sends the full `HopMessage` with only its own signature.
+
+To relay a message on a given `route` in a node `n` in group `G(p)` for a destination `d`:
+
+* Push the signed list of the previous hop's group members on `hop_signatures` and drop the message if it is not valid. Then:
+* If `n` is a recipient, verify the signatures and handle the message.
+* If `d` is a single node in our routing table, relay it directly to `d`.
+* If `d` is a group in our routing table, relay it everyone in `d`.
 * Otherwise relay the message to the `route`-th closest entry to `d` in our routing table.
 
 For any groups `A` and `B`, either everyone in `A` is closer to `d` than everyone in `B`, or vice versa. Therefore, the _group_ that we relay the message to doesn't depend on the route. Since everyone in our group knows everyone in the next hop's group, this means that in the next attempt `route + 1`, a _different_ member of `B` will receive the message. Unless there is churn in between the attempts, this guarantees that all routes are disjoint.
-
-As mentioned above, the current group message routing mechanism is not secure. To prevent intercepting group messages, we will instead relay them from group to group, verifying quorum in every step:
-
-Assume a node `n` in group `B` receives a group message signed by someone in group `A`:
-
-* If `A` is not connected to `B`, drop the message.
-* If this message has not yet been signed by a quorum of members of `A`, keep it in the cache.
-* If it has been signed by a quorum of members of `A`: If we are the recipient, handle it. If not, find the connected group `C` closest to the destination and send the message, signed by `n`, to _every member_ of `C`.
-
-This creates a number of direct messages in each hop that grows quadratically in the group size. To reduce network traffic, the `route`-th node of group `B` could accumulate `A`'s signatures instead, making the message number linear in the group size, at the cost of having effectively two network hops per group hop:
-
-* If `A` is not connected to `B`, drop the message.
-* If this message has not yet been signed by a quorum of members of `A`, keep it in the cache.
-* If it has been signed by a quorum of members of `A`: If we are the recipient, handle it. If not, find the connected group `C` closest to the destination and send the message, signed by `n`, to the `route`-th closest member of `C`.
-* If it has been signed by a quorum of members of `A` and we are the `route`-th closest member of `B`, send the message with `A`'s signatures to every member of `B`.
-
-The quorum cannot be a constant anymore, due to varying group sizes. It needs to be a percentage strictly greater than 50% instead, and in a group of size `n`, a number `x` of nodes will constitute a quorum if `x / n >= QUORUM`.
 
 ### Joining nodes
 
@@ -172,8 +160,6 @@ How did it know about these two groups and their members? It received the inform
 ## Drawbacks
 
 The main drawback is that, compared to the `GROUP_SIZE` constant, groups and routing tables will become larger. Since `GROUP_SIZE` will turn into a minimum instead of an exact size requirement, and groups will usually (if they are balanced) split when they have about `2 * GROUP_SIZE` members, the average group will probably have at least 50% more than `GROUP_SIZE` members. This increases the entries in the routing table and the number of network connections that are simultaneously open. It also increases traffic whenever _each member_ of a group has to take action, e.g. for group messages or data chain signatures.
-
-The group message routing will involve more steps, either doubling the number of actual network hops, or making the number of direct messages per hop increase quadratically in the average group size!
 
 Finally, churn handling for merging groups will be difficult, and cause a lot of traffic. While in a stable or growing network, this should be a rare event, if it _does_ happen, possibly none of the nodes in the merged group will have all of the group's data now. The vault logic will need to handle this situation appropriately and try to restore data replication as soon as possible, so that there is again a number of nodes that have all the group's data.
 
