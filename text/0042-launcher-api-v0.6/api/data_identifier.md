@@ -16,7 +16,7 @@ POST data-id/structured-data
 ```
 {
   name: base64 String [u8;32],
-  typeTag: 500, 501 or above 15000. Defaults to 501
+  typeTag: 500, 501 or above 15000. Defaults to 500
 }
 ```
 

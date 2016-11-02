@@ -14,8 +14,8 @@ to handle the size restriction.
 
 |Type| tag| Description|
 |-----|---------|-----------|
-| Versioned | 500 | Will hold version history. Can fetch an older version based on a version number |
-| Unversioned | 501 | Has only the one latest copy |
+| Unversioned | 500 | Has only the one latest copy |
+| Versioned | 501 | Will hold version history. Can fetch an older version based on a version number |
 | Custom | 15000 > | Apps are free to use any typeTag value greater than 15000 |
 
 
@@ -54,14 +54,14 @@ Authorization: Bearer <TOKEN>
 |Field|Description|
 |-----|-----------|
 |name| [u8;32] as Base64 string |
-|typeTag| Accepted values 500, 501 or above 15000. Defaults to 501 |
+|typeTag| Accepted values 500, 501 or above 15000. Defaults to 500 |
 |encryption| Enum values - NONE, SYMMETRIC, ASYMMETRIC. Defaults to None |
 |encryptKey| Encryption Key handle to use for asymmetric encryption  |
 
 ```
 {
   name: [u8; 32] of base64 string,
-  typeTag: Number, // options defaults to 501
+  typeTag: Number, // options defaults to 500
   cipherOpts: u64 representing cipher-opts handle // optional defaults to PLAIN
 }
 ```
@@ -108,7 +108,7 @@ GET /structured-data/handle/{DataIdentifier-Handle}
 {
   isOwner: Boolean,
   handleId: u64,// representing StructuredData handle
-  version: u64, // version of the structured data  
+  version: u64, // version of the structured data
   dataVersionsLength: Number // number of data versions - only for type_tag 501
 }
 ```
@@ -140,9 +140,9 @@ Authorization: Bearer <TOKEN>
 #### Body
 
 ```
-{  
-  isOwner: Boolean,  
-  version: u64, // version of the structured data  
+{
+  isOwner: Boolean,
+  version: u64, // version of the structured data
   dataVersionsLength: Number // number of data versions - only for type_tag 501
 }
 ```
@@ -168,8 +168,8 @@ GET /structured-data/data-id/{handleId}
 #### Body
 
 ```
-{  
-  handleId: u864 representing DataIdentifier handle  
+{
+  handleId: u864 representing DataIdentifier handle
 }
 ```
 
@@ -272,7 +272,7 @@ Authorization: Bearer <TOKEN>
 |Encryption| Enum values - NONE, SYMMETRIC, HYBRID. Defaults to NONE |
 ```
 {
-  cipherOpts: u64 representing cipher-opts handle,  
+  cipherOpts: u64 representing cipher-opts handle,
   data: base64 String representing [u8]
 }
 ```
