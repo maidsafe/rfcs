@@ -1,9 +1,9 @@
-# Title-cased Subgroups
+# Subgroups
 
 - Status: proposed
 - Related components: routing, disjoint groups
 - Start Date: 2016-11-04
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this) 
+- Discussion: [link](https://github.com/maidsafe/rfcs/pull/200)
 
 ## Summary
 
