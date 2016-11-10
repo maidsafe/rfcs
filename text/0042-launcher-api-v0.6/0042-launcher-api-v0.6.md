@@ -1,12 +1,10 @@
 # SAFE Launcher API v0.6
 
-- Status: proposed
+- Status: active
 - Type: new feature, enhancement
 - Related components: safe_launcher, safe_core
 - Start Date: 01-09-2016
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
-- Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
-- Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
+- Discussion: https://forum.safedev.org/t/rfc-42-safe-launcher-api-v0-6/95
 
 ## Summary
 
@@ -32,6 +30,7 @@ APIs for,
 - [Structured Data](./api/structured_data.md)
 - [Immutable Data](./api/immutable_data.md)
 - [Appendable Data](./api/appendable_data.md)
+- [Cipher Opts](./api/cipher_opts.md)
 
 are exposed from the launcher through the REST interface.
 

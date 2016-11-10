@@ -1,8 +1,9 @@
 # Low Level API
-- Status: proposed
+- Status: active
 - Type: feature
 - Related components: `safe_core`, `safe_launcher`
 - Start Date: 29-August-2016
+- Discussion: https://forum.safedev.org/t/rfc-41-low-level-api/94
 
 ## Summary
 Exposing low level API to facilitate direct construction of MaidSafe types by Launcher and apps.
@@ -47,7 +48,7 @@ pub enum CipherOption {
 ```
 
 ### Choice of API
-`safe_core`'s use-case is very different form conventional libraries. Usually one would have the frontend interfacing with the library (dynamic or static) directly resulting in an executable. In these cases we go for the standard FFI interface where many opaque-pointer-handles are exposed via the libary. For instance consider there is a function to obtain handle to an opaque object, a function to manipulate it and a function to destroy it. It would look something standard like:
+`safe_core`'s use-case is very different from conventional libraries. Usually one would have the frontend interfacing with the library (dynamic or static) directly resulting in an executable. In these cases we go for the standard FFI interface where many opaque-pointer-handles are exposed via the libary. For instance consider there is a function to obtain handle to an opaque object, a function to manipulate it and a function to destroy it. It would look something standard like:
 ```rust
 // Allocation of the pointer to pointer done by NodeJS.
 // Allocation of final pointer done by `safe_core`.
@@ -62,7 +63,7 @@ pub unsafe extern "C" fn manipulate(handle: *mut Opaque) -> i32;
 #[no_mangle]
 pub unsafe extern "C" fn destroy(handle: *mut Opaque) -> i32;
 ```
-However the case here is different - the apps would want the same functionality but are not binary-interfaced with `safe_core`. The are completely separate processes and would talk through RPCs. In such case `safe_core` can avoid passing opaque pointer handles to Launcher and manage it internally itself. This would make interfaces lot safer (far fewer chances Undefined Behaviours). In the present API choice, `safe_core` maintains an LRU-based object cache and handles are returned as `u64`. The interfaces now change to:
+However the case here is different - the apps would want the same functionality but are not binary-interfaced with `safe_core`. They are completely separate processes and would talk through RPCs. In such case `safe_core` can avoid passing opaque pointer handles to Launcher and manage it internally itself. This would make interfaces lot safer (far fewer chances Undefined Behaviours). In the present API choice, `safe_core` maintains an LRU-based object cache and handles are returned as `u64`. The interfaces now change to:
 ```rust
 // Allocation entirely done by NodeJS.
 #[no_mangle]

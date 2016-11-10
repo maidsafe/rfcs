@@ -1,6 +1,6 @@
 # MPID Message Delete
 
-- Status: active
+- Status: proposed
 - Type: Enhancement
 - Related components: [mpid_messaging](https://github.com/maidsafe/mpid_messaging), [safe_vault](https://github.com/maidsafe/safe_vault), [safe_client](https://github.com/maidsafe/safe_client)
 - Start Date: 03-02-2016

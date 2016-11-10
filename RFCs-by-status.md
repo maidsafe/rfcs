@@ -4,30 +4,28 @@ A list of all RFCs by their current status.
 
 ## Active RFCs
 
- - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
- - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
  - [#0037 Disjoint Groups](./text/0037-disjoint-groups/0037-disjoint-groups.md)
  - [#0038 Appendable Data](./text/0038-appendable-data/0038-appendable-data.md)
+ - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
+ - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
 
 ## Proposed RFCs
 
+ - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
  - [#0012 Safecoin Implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
- - [#0020 Crust Refactor](./text/0020-crust-refactor/0020-crust-refactor.md)
+ - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
  - [#0022 Messaging Example in `safe_core`](./text/0022-messaging-example-in-safe_core/0022-messaging-example-in-safe_core.md)
- - [#0025 Launcher Direct Data API](./text/0025-launcher-direct-data-api/0025-launcher-direct-data-api.md)
- - [#0027 Append by all Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
- - [#0028 Launcher Low Level API](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
  - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
- - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
+ - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
 
 ## Agreed RFCs
 
  - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
  - [#0005 Balance Network Resources](./text/0005-balance-network-resources/0005-balance-network-resources.md)
+ - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
 
 ## Implemented RFCs
 
@@ -55,7 +53,12 @@ A list of all RFCs by their current status.
  - [#0014 Unregistered Client Support in Launcher](./text/0014-unregistered-client-support-in-launcher/0014-unregistered-client-support-in-launcher.md)
  - [#0016 Launcher Data Types API](./text/0016-launcher-data-types-api/0016-launcher-data-types-api.md)
  - [#0017 Launcher DNS API](./text/0017-launcher-dns-api/0017-launcher-dns-api.md)
+ - [#0020 Crust Refactor](./text/0020-crust-refactor/0020-crust-refactor.md)
+ - [#0025 Launcher Direct Data API](./text/0025-launcher-direct-data-api/0025-launcher-direct-data-api.md)
+ - [#0027 Append by all Structured Data Type](./text/0027-append-by-all-structured-data-type/0027-append-by-all-structured-data-type.md)
+ - [#0028 Launcher Low Level API](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
  - [#0039 Sentinel](./text/0039-sentinel/0039-sentinel.md)
+ - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Thu Sep  1 23:47:24 IST 2016_ at REV [59a022d](https://github.com/maidsafe/rfcs/commit/59a022deb3eebd26fb1b1606673d26e94edd81a0))
+(Last updated _Tue 18 Oct 2016 12:28:39 EDT_ at REV [4f81189](https://github.com/maidsafe/rfcs/commit/4f81189638033fc48a5736a39a0557d46b297c58))
