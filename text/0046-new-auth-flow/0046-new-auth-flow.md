@@ -4,9 +4,8 @@
 - Type: new feature
 - Related components: launcher, safe_core, vaults
 - Start Date: 04-11-2016
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
+- Discussion: https://forum.safedev.org/t/rfc-46-new-auth-flow/294
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
-- Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
 - Appendixes: [Authentication Protocol](./authentication-protocol.md), [Containers and their basic Conventions](./containers.md)
 
 ## Summary

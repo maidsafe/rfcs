@@ -4,7 +4,7 @@
 - Type: feature
 - Related components: `safe_core`, `safe_vault`, `routing`, `safe_launcher`
 - Start Date: 10-November-2016
-- Discussion: https://placeholder.com
+- Discussion: https://forum.safedev.org/t/rfc-48-authorise-apps-on-behalf-of-the-owner-to-mutate-data/296
 
 ## Summary
 Detail how apps route their mutation requests to Data-Managers and how revocation works.
@@ -19,7 +19,7 @@ Detail how apps route their mutation requests to Data-Managers and how revocatio
 ## Detailed design
 We require all mutations to go via the owner's Maid-Managers. Maid-Managers will keep a list of `sign::PublicKey` which is the representation of the apps the owner has allowed to mutate the network on their behalf. Maid-Managers will then forward the request to the appropriate Data-Managers. The type `MutableData` thus does not need to store any signatures and Data-Managers will use the group authority to trust the requester of the mutation. Then they will use the `permissions` field to allow or disallow the mutation itself.
 
-New routing messages for request and response will be required to deal with `MutableData` rpcs as listed in the corresponding [RFC here](). These shall be the following:
+New routing messages for request and response will be required to deal with `MutableData` rpcs as listed in the corresponding [RFC here](https://github.com/maidsafe/rfcs/blob/master/text/0047-mutable-data/0047-mutable-data.md). These shall be the following:
 ```rust
 pub enum EntryAction {
     Update(Value),
@@ -234,8 +234,8 @@ As we can see the data types lack the signature field. Mutation of `MutableData`
 ### The rules for `Authenticator` are:
 
 - Generate a sign key-pair for the app: `SKP = (sign_pk, sign_sk) = sign::gen_keypair()`
-- Ask Maid-Manager to map `sign_pk` against its (the owner's) account. The rpc for this is mentioned in this [RFC](https://github.com/maidsafe/rfcs/pull/204).
-The actual set of operations is detailed in the `Authenticator` [RFC](https://github.com/maidsafe/rfcs/pull/203).
+- Ask Maid-Manager to map `sign_pk` against its (the owner's) account. The rpc for this is mentioned in this [RFC](https://github.com/maidsafe/rfcs/blob/master/text/0047-mutable-data/0047-mutable-data.md).
+The actual set of operations is detailed in the `Authenticator` [RFC](https://github.com/maidsafe/rfcs/blob/master/text/0046-new-auth-flow/0046-new-auth-flow.md).
 
 ### The rules at Maid-Managers are:
 
