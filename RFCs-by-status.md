@@ -8,6 +8,7 @@ A list of all RFCs by their current status.
  - [#0038 Appendable Data](./text/0038-appendable-data/0038-appendable-data.md)
  - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
  - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
+ - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
 
 ## Proposed RFCs
 
@@ -19,7 +20,6 @@ A list of all RFCs by their current status.
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
 
 ## Agreed RFCs
 
@@ -61,4 +61,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Tue 18 Oct 2016 12:28:39 EDT_ at REV [4f81189](https://github.com/maidsafe/rfcs/commit/4f81189638033fc48a5736a39a0557d46b297c58))
+(Last updated _Fri 11 Nov 2016 11:53:38 EST_ at REV [60b9e75](https://github.com/maidsafe/rfcs/commit/60b9e752856408c95b7b1e01a0549ebf2977d5c0))

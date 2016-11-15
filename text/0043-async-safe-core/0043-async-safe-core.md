@@ -1,5 +1,5 @@
 # Async safe_core
-- Status: proposed
+- Status: active
 - Type: feature
 - Related components: `safe_core`, `safe_launcher`
 - Start Date: 02-September-2016
