@@ -233,8 +233,8 @@ As we can see the data types lack the signature field. Mutation of `MutableData`
 ### The rules for `Authenticator` are:
 
 - Generate a sign key-pair for the app: `SKP = (sign_pk, sign_sk) = sign::gen_keypair()`
-- Ask Maid-Manager to map `sign_pk` against its (the owner's) account. The rpc for this is mentioned in this [RFC]().
-The actual set of operations is detailed in the `Authenticator` [RFC]().
+- Ask Maid-Manager to map `sign_pk` against its (the owner's) account. The rpc for this is mentioned in this [RFC](https://github.com/maidsafe/rfcs/pull/204).
+The actual set of operations is detailed in the `Authenticator` [RFC](https://github.com/maidsafe/rfcs/pull/203).
 
 ### The rules at Maid-Managers are:
 
