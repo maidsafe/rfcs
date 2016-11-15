@@ -1,9 +1,10 @@
 # MutableData
+
 - Status: proposed
 - Type: feature
 - Related components: `safe_core`, `safe_launcher`, `safe_vault`, `routing`
 - Start Date: 09-November-2016
-- Discussion: 
+- Discussion:
 
 ## Summary
 Combining `StructuredData` and `AppendableData` into a new single data type, `MutableData`, similar to HashMap.
