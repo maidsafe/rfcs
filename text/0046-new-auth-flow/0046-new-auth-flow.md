@@ -1,6 +1,6 @@
 # New Auth Flow
 
-- Status: "proposed"
+- Status: proposed
 - Type: new feature
 - Related components: launcher, safe_core, vaults
 - Start Date: 04-11-2016
@@ -59,7 +59,7 @@ Further notes:
 - As all tokens are persistent, it is the apps responsibility to ensure their safety. If these cannot be guaranteed, the app should only keep them in memory (or even safely discard then if possible) and request the same permissions again on the next startup.
 - Upon receiving permission requests of access level already authorised to an app, the Authenticator should respond with those without any further user interaction immediately.
 - The authorisation flow contains a specific `scope` field, allowing an app to let the authenticator know that this is certain sub-part (a specific website, specific device or instance) is trying to access. App keys and containers are scoped using this field and any request without said field will be granted access to all under that scope.
-- This mechanism should be used by any app that requests access _on behalf_ of another instance, e.g. any web browser (where the scope should be the URL) or a tool that registers IoT/Embedded/headless devices with the authenticator. 
+- This mechanism should be used by any app that requests access _on behalf_ of another instance, e.g. any web browser (where the scope should be the URL) or a tool that registers IoT/Embedded/headless devices with the authenticator.
 
 
 #### Revoking General Access For An App
@@ -98,5 +98,3 @@ Further, it will contain all integrations needed to expose the Rust library to t
 ## Alternatives
 
 None
-
-

@@ -1,4 +1,5 @@
 # Authorise apps on behalf of the owner to mutate data
+
 - Status: proposed
 - Type: feature
 - Related components: `safe_core`, `safe_vault`, `routing`, `safe_launcher`

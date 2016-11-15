@@ -20,6 +20,9 @@ A list of all RFCs by their current status.
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
+ - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
+ - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
+ - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
 
 ## Agreed RFCs
 
@@ -61,4 +64,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Fri 11 Nov 2016 11:53:38 EST_ at REV [60b9e75](https://github.com/maidsafe/rfcs/commit/60b9e752856408c95b7b1e01a0549ebf2977d5c0))
+(Last updated _Tue 15 Nov 2016 12:59:17 EST_ at REV [79da297](https://github.com/maidsafe/rfcs/commit/79da297e1cd91e3abed9121eccb6dd8bb7763883))
