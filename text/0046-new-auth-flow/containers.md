@@ -73,15 +73,15 @@ When creating a user account the authenticator will create the following minimal
 
 ## App Containers
 
-Whenever an app asks for permissions to act in the users name, it may ask for access to any container, and access to a container for the app itself. When this happens the first time, the authenticator creates a container of access information to be shared with the app, encrypted with the apps public key in which it stores the access - called the `AccessContainer` - and will share its address through the authentication protocol. This container is owned by the user and the app will only have `read`-rights on it.
+Whenever an app asks for permissions to act in the users name, it may ask for access to any container, and access to a container for the app itself. When this happens the first time, the authenticator creates a container of access information to be shared with the app, encrypted with the randomly created key in which it stores the access - called the `AccessContainer` - and will share its address and decryption key through the authentication protocol. This container is owned by the user and the app will only have `read`-rights on it.
 
-If the app further requested to have its own container, the authenticator must create new an random app-container, grant  full access to the container to the app, generate a new random symmetric-key-pair and store all this access information in the apps `AccessContainer`. The authenticator must then add link that address to the root container under `_apps/${appId}/@{scope}`. We call this the `AppContainer`.
+If the app further requested to have its own container, the authenticator must create new an random app-container, grant full access to the container to the app, generate a new random symmetric-key-pair and store all this access information in the apps `AccessContainer`. The authenticator must then add link that address to the root container under `_apps/${appId}/@{scope}`. We call this the `AppContainer`.
 
-If the authenticator knows already of the same app without any scope, it should automatically be granted all rights on that `AppContainer`, too.
+If the authenticator knows already of the same app without any scope, it should automatically be granted all rights on that `AppContainer`, too, by putting the access information into that apps `AccessContainer`.
 
-The Authenticator must hold a copy of the app key pair in the `RootKeysContainer`, its `AccessContainer` as well as the metadata that app asked to gain access with for later reference and to automatise the authentication process should the app ask again.
+The Authenticator must hold a copy of the app key pair to the app container in the `RootKeysContainer`, its `AccessContainer`, the encryption keys as well as the metadata that app asked to gain access with for later reference and to automatise the authentication process should the app ask again.
 
-It is recommended that the app should encrypt all data it isn't intending to publicly share with the encryption key it was given for its container.
+It is recommended that the app should encrypt all data it isn't intending to publicly share with the encryption key it was given for its `AppContainer`.
 
 Authenticator should only create the `AccessContainer`, if permissions to any containers were requested and granted. The `AppContainer` must only be created if explicitly asked for it. See the Authenticator protocol for details.
 

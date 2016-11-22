@@ -104,8 +104,12 @@ If the user granted access to the app, it will receive a URI with:
 
 * Action: `auth-granted`
 * JSON Payload:
- - `encryptionKey` _mandatory_: the apps symmetric encryption key
+ - `appSignKey` _mandatory_: a JSON, containing the the apps sign key
+     + `public` _mandatory_: its public key
+     + `private` _mandatory_: its private key
+ - `userSignKey` _mandatory_: the public signing key of the user_
  - `accessContainer`: _optional_: Network address where all the apps access information is stored (encrypted with the apps publickey), given if at least one access was granted or the appContainer requested.
+ - `accessContainerKey`, _optional_: the key used to decrypt the accessContainer content
  - `containers` _optional_: a JSON object of containers and granted access rights for each them (as defined in the shared container access flow), excluding the `appContainer`
 
 **Error Response**
