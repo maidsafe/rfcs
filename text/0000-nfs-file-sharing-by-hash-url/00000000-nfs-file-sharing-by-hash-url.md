@@ -1,6 +1,6 @@
 # NFS File Sharing By Hash URL 
 
-- Status: proposed ("proposed", "agreed", "active", "implemented" or "rejected")
+- Status: proposed
 - Type: new feature
 - Related components: SAFE Beaker Browser, safe-js, safe_core
 - Start Date: 22-11-2016
