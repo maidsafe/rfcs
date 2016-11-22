@@ -5,10 +5,10 @@ A list of all RFCs by their current status.
 ## Active RFCs
 
  - [#0037 Disjoint Groups](./text/0037-disjoint-groups/0037-disjoint-groups.md)
- - [#0038 Appendable Data](./text/0038-appendable-data/0038-appendable-data.md)
- - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
- - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
  - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
+ - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
+ - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
+ - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
 
 ## Proposed RFCs
 
@@ -20,9 +20,6 @@ A list of all RFCs by their current status.
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
- - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
- - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
 
 ## Agreed RFCs
 
@@ -44,7 +41,10 @@ A list of all RFCs by their current status.
  - [#0034 Refactor `ImmutableData::name()` Function](./text/0034-immutable-data-name-function/0034-immutable-data-name-function.md)
  - [#0035 Routing Message Acknowledgements](./text/0035-routing-message-acknowledgements/0035-routing-message-acknowledgements.md)
  - [#0036 safe_launcher API v0.5](./text/0036-launcher-api-v0.5/0036-launcher-api-v0.5.md)
+ - [#0038 Appendable Data](./text/0038-appendable-data/0038-appendable-data.md)
  - [#0040 Unify Structured Data](./text/0040-unified-structured-data/0040-unified-structured-data.md)
+ - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
+ - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
 
 ## Rejected RFCs
 
@@ -64,4 +64,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Tue 15 Nov 2016 12:59:17 EST_ at REV [79da297](https://github.com/maidsafe/rfcs/commit/79da297e1cd91e3abed9121eccb6dd8bb7763883))
+(Last updated _Tue 22 Nov 2016 11:24:14 EST_ at REV [64e691f](https://github.com/maidsafe/rfcs/commit/64e691f0693151e2376dde5b413c1a5145bf0f0d))

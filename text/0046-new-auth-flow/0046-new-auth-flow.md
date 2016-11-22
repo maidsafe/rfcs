@@ -1,6 +1,6 @@
 # New Auth Flow
 
-- Status: proposed
+- Status: active
 - Type: new feature
 - Related components: launcher, safe_core, vaults
 - Start Date: 04-11-2016
