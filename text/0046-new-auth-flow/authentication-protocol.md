@@ -109,7 +109,7 @@ If the user granted access to the app, it will receive a URI with:
      + `private` _mandatory_: its private key
  - `userSignKey` _mandatory_: the public signing key of the user_
  - `accessContainer`: _optional_: Network address where all the apps access information is stored (encrypted with the apps publickey), given if at least one access was granted or the appContainer requested.
- - `acceessContainerKey`, _optional_: the key used to decrypt the accessContainer content
+ - `accessContainerKey`, _optional_: the key used to decrypt the accessContainer content
  - `containers` _optional_: a JSON object of containers and granted access rights for each them (as defined in the shared container access flow), excluding the `appContainer`
 
 **Error Response**
