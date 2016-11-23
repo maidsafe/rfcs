@@ -13,7 +13,7 @@
 This RFC outlines a new process to give applications authorised access to act on the SAFE network with the user's credentials. In particular, it is designed for the mobile and embedded use case in mind.
 
 ## Conventions
-- The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
+- The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119). The word `Account` and `session paket` will be used interchangably both refer to the `Account`-information stored through self-authentication.
 
 ## Motivation
 
@@ -67,17 +67,51 @@ Please refer to the container appendix to learn what happens when the User revok
 
 The Authenticator then removes the apps key from the user session, restricting the app from acting in the user's name. Secondly, it removes the app keys from the apps container and any other container it may have shared access to as defined in the Containers Appendix. However, the Authenticator SHOULD keep the key-pair cached to allow the user to grant the same key-pair again, as well as use it later in time to claim ownership of objects the app might have created.
 
+
 ## Technical Restructure
 
-With apps directly connecting to the network, we will clean up `safe_core` and reduce its features to compass only what an app needs to connect to the network given the authenticator token. It will provide an FFI interface for other languages to bind to.
+With apps directly connecting to the network, we will clean up `safe_core` and reduce its features to compass only what is common between authenticator and apps. Its main entry-point being a client of the following structure:
 
-Everything authenticator specific (like app management facilities) will move into a newly created `safe_authenticator`-rust project, which depends on `safe_core`, which will become the foundation for the newly created Authenticator tool. Learn more about this in the "shipping authenticator" below
+```rust
+// FIXME: this needs refinement!
+pub trait Client {
+  // all of them are most likely asynchronous later
+  fn log_in(locator, password) -> Result<Client, Error>;
+  fn create_account(locator, password)-> Result<Client, Error>;
+  fn get_unregistered_client() -> Result<Client, Error>;
 
-Secondly, we will produce a `safe_auth`-create, which provides an implementation of the URL-scheme-based-authentication protocol (as explained in the Appendix), including an FFI interface. It will offer features to register authentication schemes for the three major Desktop Platforms Mac, Windows and Linux ([as implemented in the webtorrent-desktop-project](https://github.com/feross/webtorrent-desktop/blob/cdb7b6eb443100fe6c46b10222877686c5807720/src/main/handlers.js)). This particular feature might also be made available as a separate crate.
+  // Will register sign keys for app and then save the app info in session packet
+  // Also grant permission for the requested containers and update the access container
+  fn authorise_app($self, appInfo: AppInfo, token: AppAccessToken, permissions: Vec<Permission>) -> Result<Vec<u8>, Error>;
+
+  fn get_access_container(&self) -> Result<DataId, Error>;
+
+  // List the authorised apps from session packet
+  fn get_apps(&self) -> Vec<AppInfo>;
+
+  fn transfer_ownership(&self, mutable_data, toPublicSignKey) -> Result<(), Error>;
+
+  // Should handle complete revoke workflow
+  fn revoke_app(&self, access_token) -> Result<(), Error>;
+
+  // For Apps
+  fn connect(access_token: AppAccessToken, config: Vec<u8>) -> Result<Client, Error>;
+  fn get_public_maid_sign_key(&self) -> Result<PubSignKey, Error>;
+  // Will be used in desktops for registering the scheme with the OS
+  fn register_protocol_scheme(&self, mutId);
+
+  // ..other Data type APIs
+  Mutable Data, Immutable Data (Self Encrypt)
+}
+```
+
+Everything authenticator specific (like app management facilities) will move into a newly created `safe_authenticator`-rust project, which depends on `safe_core`, which will become the foundation for the newly created Authenticator tool. Learn more about this in the "shipping authenticator" below.
+
+Secondly, we will produce a `safe_sdk` for app development that creates all higher feature set that any apps might need: like NFS and other conventions. It will use `safe_core` to connect to the network but also feature a full implementation of the `safe_auth`-protocol including protocol-scheme-registration with the system. This crate will include an FFI interface for non-rust development environments. Some specific features might be split up into separate crates where appropriate.
 
 ### Mobile Infrastructure
 
-The project will provide SDKs for iOS and Android, which will implement the authentication protocol and provide a native interface of `safe_core` (and `safe_auth`) to app developers through FFI. All platforms will use the very same _rust_ core libraries.
+The project will provide SDKs for iOS and Android, which will implement the authentication protocol and provide a native interface of `safe_sdk` to app developers through FFI. All platforms will use the very same _rust_ core libraries.
 
 ### Building and Shipping Authenticator
 

@@ -28,7 +28,7 @@ As containers are just normal MutableData on the network, thus having the same p
 
 ## NFS Convention
 
-Unlike before, NFS convention-following containers are represented in a flat key-value fashion within one container rather than a hierarchy of linked "directories". Where the key is a UTF-8-String encoded full-path filename, mapping to the serialised version of either XOR-Address in the network or a serialised file struct like this:
+Unlike before, NFS convention-following containers are represented in a flat key-value fashion within one container rather than a hierarchy of linked "directories". Where the key is a UTF-8-String encoded full-path filename, mapping to the serialised version of either `DataId` in the network or a serialised file struct like this:
 
 ```rust
 pub struct File {
@@ -37,7 +37,7 @@ pub struct File {
 }
 ```
 
-The XOR-Address should point to another container following the same convention as its parents or to a serialised file struct as described before.
+The `DataId` should point to another container following the same convention as its parents or to a serialised file struct as described before.
 
 ### Hierarchy File-System Emulation
 
@@ -104,7 +104,7 @@ The new key is then distributed in the `AccessContainers` of all apps that still
 
 ## DNS Containers / publicNames
 
-PublicNames are modelled in a two layer container fashion based on Mapped Data, mostly to allow granular access. For the index the authenticator has a top-level locally encrypted container (the `PublicNamesContainer`), which is just a list of the public names the user owns pointing to the XorAddress of the container for the publicName (as it can be looked up using the DNS-Lookup-Scheme), where each service name points to the Network XOR-Address to access that particular service of that public name - we call that its `ServicesContainer` and it is typically not encrypted.
+PublicNames are modelled in a two layer container fashion based on Mapped Data, mostly to allow granular access. For the index the authenticator has a top-level locally encrypted container (the `PublicNamesContainer`), which is just a list of the public names the user owns pointing to the `DataId` of the container for the publicName (as it can be looked up using the DNS-Lookup-Scheme), where each service name points to a Network `DataId` to access that particular service of that public name - we call that its `ServicesContainer` and it is typically not encrypted.
 
 ### Permissions
 
