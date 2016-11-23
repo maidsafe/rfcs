@@ -13,7 +13,7 @@
 This RFC outlines a new process to give applications authorised access to act on the SAFE network with the user's credentials. In particular, it is designed for the mobile and embedded use case in mind.
 
 ## Conventions
-- The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119). The word `Account` and `session paket` will be used interchangably both refer to the `Account`-information stored through self-authentication.
+- The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119). The word `Account` and `session packet` will be used interchangably both refer to the `Account`-information stored through self-authentication.
 
 ## Motivation
 
