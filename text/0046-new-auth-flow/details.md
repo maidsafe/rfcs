@@ -36,11 +36,12 @@ App will send the authorisation request to the authenticator to the authorisatio
 ```rust
 pub struct AppInfo {
 
-  // meta:
+  // meta information to allow a user to identify/find apps easier
   created_at: Time,
   // FIXME: options for first or always enforce to show write all even if its the same value?
   last_authenticated_at: Time, 
   last_updated_at: Time,
+  // only set if the app has been revoked. Can be unset again if granted access again
   revoked: Option<Time>,
 
   // see authentication protocol appendix for details on those
