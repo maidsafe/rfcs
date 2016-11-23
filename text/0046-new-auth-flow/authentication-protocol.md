@@ -155,7 +155,7 @@ pub struct AuthGranted {
     // the access token to the network
     access_token: AppAccessToken,
     bootstrap_config: BootstrapConfig,
-    access_container: DataId,
+    access_container: Option<DataId>,
     containers: Vec<ContainerPermission>
 }
 ```

@@ -30,7 +30,7 @@ App will send the authorisation request to the authenticator to the authorisatio
  3. register the public sign key with MaidManager
  4. If the app is requesting for any container access, the public sign key must added to the container along with the requested permissions
  5. If the app requested to get their own container, it must be created and full access rights granted to the public sign key
- 6. a new random location must be created for the AppsAccessContainer and all container access information must be stored in there - encrypted with the newly creates apps encryption key.
+ 6. if any access have been granted, a new random location must be created for the AppsAccessContainer and all container access information must be stored in there - encrypted with the newly creates apps encryption key.
  7. the application information, together with the auth information must be stored in the session packet as another `AppInfo`:
 
 ```rust
@@ -48,14 +48,14 @@ pub struct AppInfo {
   access_token: AppAccessToken,
 
   // the appsaccess container encrypted with the apps encryption key
-  accessContainer: DataId
+  accessContainer: Option<DataId>
 }
 ```
 
 
 ## Progressive Container Access
 
-Any app can request access to any more containers at any point in time using the `container`-action, as defined in the authentication protocol appendix.
+Any app can request access to any more containers at any point in time using the `container`-action, as defined in the authentication protocol appendix. However, the app must have been granted at least access to one other container (for example its own) prior to have received an `AppAccessContainer`. Does it not have that container yet, any progressive container requests are denied and it must do the initial authentication flow again.
 
 Should any app do that for a container it doesn't have access to just yet - by checking the apps accessContainer using their private keys, authenticator must prompt the user to grant access. It the user grants access authenticator must:
 
