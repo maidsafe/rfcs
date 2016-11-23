@@ -6,7 +6,7 @@
 - Start Date: 04-11-2016
 - Discussion: https://forum.safedev.org/t/rfc-46-new-auth-flow/294
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
-- Appendixes: [Authentication Protocol](./authentication-protocol.md), [Containers and their basic Conventions](./containers.md)
+- Appendixes: [Authentication Protocol](./authentication-protocol.md), [Containers and their basic Conventions](./containers.md), [Implementation details](./details.md)
 
 ## Summary
 
