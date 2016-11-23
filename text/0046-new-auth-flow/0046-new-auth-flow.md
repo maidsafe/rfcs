@@ -74,17 +74,13 @@ With apps directly connecting to the network, we will clean up `safe_core` and r
 
 ```rust
 // FIXME: this needs refinement!
-pub trait Client {
+pub struct Client {
   // all of them are most likely asynchronous later
   fn log_in(locator, password) -> Result<Client, Error>;
   fn create_account(locator, password)-> Result<Client, Error>;
   fn get_unregistered_client() -> Result<Client, Error>;
 
-  // Will register sign keys for app and then save the app info in session packet
-  // Also grant permission for the requested containers and update the access container
-  fn authorise_app($self, appInfo: AppInfo, token: AppAccessToken, permissions: Vec<Permission>) -> Result<Vec<u8>, Error>;
-
-  fn get_access_container(&self) -> Result<DataId, Error>;
+  fn get_access_container(&self) -> Result<DataIdentifier, Error>;
 
   // List the authorised apps from session packet
   fn get_apps(&self) -> Vec<AppInfo>;
@@ -92,13 +88,11 @@ pub trait Client {
   fn transfer_ownership(&self, mutable_data, toPublicSignKey) -> Result<(), Error>;
 
   // Should handle complete revoke workflow
-  fn revoke_app(&self, access_token) -> Result<(), Error>;
+  fn revoke_app(&self, access_token: AppAccessToken) -> Result<(), Error>;
 
   // For Apps
   fn connect(access_token: AppAccessToken, config: Vec<u8>) -> Result<Client, Error>;
   fn get_public_maid_sign_key(&self) -> Result<PubSignKey, Error>;
-  // Will be used in desktops for registering the scheme with the OS
-  fn register_protocol_scheme(&self, mutId);
 
   // ..other Data type APIs
   Mutable Data, Immutable Data (Self Encrypt)

@@ -28,7 +28,7 @@ As containers are just normal MutableData on the network, thus having the same p
 
 ## NFS Convention
 
-Unlike before, NFS convention-following containers are represented in a flat key-value fashion within one container rather than a hierarchy of linked "directories". Where the key is a UTF-8-String encoded full-path filename, mapping to the serialised version of either `DataId` in the network or a serialised file struct like this:
+Unlike before, NFS convention-following containers are represented in a flat key-value fashion within one container rather than a hierarchy of linked "directories". Where the key is a UTF-8-String encoded full-path filename, mapping to the serialised version of either `DataIdentifier` in the network or a serialised file struct like this:
 
 ```rust
 pub struct File {
@@ -37,7 +37,7 @@ pub struct File {
 }
 ```
 
-The `DataId` should point to another container following the same convention as its parents or to a serialised file struct as described before.
+The `DataIdentifier` should point to another container following the same convention as its parents or to a serialised file struct as described before.
 
 ### Hierarchy File-System Emulation
 
@@ -49,7 +49,7 @@ However, no party is obliged to organise its data this way, nor have file paths 
 
 The root container is the main entry point for the user and most apps to interact with. It is a locally encrypted container stored at a random location on the network known only to the user, that generally only the authenticator has write access to. It reference will be stored in the users session packet on account creation. Keys starting with an underscore (`_`) are reserved for internal usage by the authenticator, while the authenticator may also allow the creation of other keys later.
 
-Where the value is a serialised tuple of the `DataId` in the network and a string or tuple of conventions the container follows.
+Where the value is a serialised tuple of the `DataIdentifier` in the network and a string or tuple of conventions the container follows.
 
 Secondly, the authenticator has another mapped data container which holds the encryption keys per each container, which is locally encrypted with a separate key that only the authenticator has access to and will never be shared. That is called the `RootKeysContainer`.
 
@@ -104,7 +104,7 @@ The new key is then distributed in the `AccessContainers` of all apps that still
 
 ## DNS Containers / publicNames
 
-PublicNames are modelled in a two layer container fashion based on Mapped Data, mostly to allow granular access. For the index the authenticator has a top-level locally encrypted container (the `PublicNamesContainer`), which is just a list of the public names the user owns pointing to the `DataId` of the container for the publicName (as it can be looked up using the DNS-Lookup-Scheme), where each service name points to a Network `DataId` to access that particular service of that public name - we call that its `ServicesContainer` and it is typically not encrypted.
+PublicNames are modelled in a two layer container fashion based on Mapped Data, mostly to allow granular access. For the index the authenticator has a top-level locally encrypted container (the `PublicNamesContainer`), which is just a list of the public names the user owns pointing to the `DataIdentifier` of the container for the publicName (as it can be looked up using the DNS-Lookup-Scheme), where each service name points to a Network `DataIdentifier` to access that particular service of that public name - we call that its `ServicesContainer` and it is typically not encrypted.
 
 ### Permissions
 
@@ -124,10 +124,10 @@ Now assuming that through the lookup, the browser/any app might find a container
 In this documentation we have defined these public containers following these conventions
 
 * `AppContainer` => `Map<*, *>`, locally encrypted
-* `AccessContainer` => `Map<ContainerName, serialised(DataId, Conventions, SymmetricKey)>`
-* `RootContainer` => `Map<ContainerName, serialised(DataId)>`, locally encrypted
-* `NFSContainer` => `Map<fileName, serialised(DataId || FileStruct)`, locally encrypted
-* `publicNamesContainer` => `Map<publicName, serialised(DataId)>`, locally encrypted
+* `AccessContainer` => `Map<ContainerName, serialised(DataIdentifier, Conventions, SymmetricKey)>`
+* `RootContainer` => `Map<ContainerName, serialised(DataIdentifier)>`, locally encrypted
+* `NFSContainer` => `Map<fileName, serialised(DataIdentifier || FileStruct)`, locally encrypted
+* `publicNamesContainer` => `Map<publicName, serialised(DataIdentifier)>`, locally encrypted
 * `ServicesContainer` => `Map<serviceName, *>`, not encrypted
 
 And the following authenticator, internal containers:

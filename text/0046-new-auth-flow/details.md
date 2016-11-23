@@ -6,7 +6,7 @@ Outlining the specific network actions, activities and things the authenticator 
 
  - On successful registration the user `RootContainer` and `AccessContainer`  must be created at random locations
  - A symmetric key must be generated for encrypting those containers
- - The dataId of each, together with the must be stored in the Account on the network.
+ - The DataIdentifier of each, together with the must be stored in the Account on the network.
  - The root container will start out with this default set of keys, for each a random location must be chosen and a set of encryption keys generated:
 
 ```
@@ -49,7 +49,7 @@ pub struct AppInfo {
   access_token: AppAccessToken,
 
   // the appsaccess container encrypted with the apps encryption key
-  accessContainer: Option<DataId>
+  accessContainer: Option<DataIdentifier>
 }
 ```
 
