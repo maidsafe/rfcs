@@ -4,7 +4,6 @@
 
 This appendix to the New App Authentication describes how the general NFS and DNS will be working and handled in this new launcher-less approach. After talking about the general cases, this document will also outline how these will be used to manage **App Containers**, **Default Containers** (and which ones will be known to the system from the start), the **Root container** and how containers can be shared between apps.
 
-
 ## Containers
 
 In its core, NFS always has been and will continue to be an emulation on top of generic network data types, which are formed following a specific convention: but while that was previously done with StructuredData, it will now use the new MutableData. And rather than having a hierarchy of StructuredData pointing to "subdirectories", we will flatten the structure into a single key-value-store mapping and emulate a file system like access on top of that.
@@ -75,9 +74,9 @@ When creating a user account the authenticator will create the following minimal
 
 Whenever an app asks for permissions to act in the users name, it may ask for access to any container, and access to a container for the app itself. When this happens the first time, the authenticator creates a container of access information to be shared with the app, encrypted with the randomly created key in which it stores the access - called the `AccessContainer` - and will share its address and decryption key through the authentication protocol. This container is owned by the user and the app will only have `read`-rights on it.
 
-If the app further requested to have its own container, the authenticator must create new an random app-container, grant full access to the container to the app, generate a new random symmetric-key-pair and store all this access information in the apps `AccessContainer`. The authenticator must then add link that address to the root container under `_apps/${appId}/@{scope}`. We call this the `AppContainer`.
+If the app further requested to have its own container, the authenticator must create new an random app-container, grant full access to the container to the app, generate a new random symmetric-key-pair and store all this access information in the app's `AccessContainer`. The authenticator must then add link that address to the root container under `_apps/${appId}/@{scope}`. We call this the `AppContainer`.
 
-If the authenticator knows already of the same app without any scope, it should automatically be granted all rights on that `AppContainer`, too, by putting the access information into that apps `AccessContainer`.
+If the authenticator knows already of the same app without any scope, it should automatically be granted all rights on that `AppContainer`, too, by putting the access information into that app's `AccessContainer`.
 
 The Authenticator must hold a copy of the app key pair to the app container in the `RootKeysContainer`, its `AccessContainer`, the encryption keys as well as the metadata that app asked to gain access with for later reference and to automatise the authentication process should the app ask again.
 

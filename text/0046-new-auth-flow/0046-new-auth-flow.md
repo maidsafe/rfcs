@@ -13,14 +13,15 @@
 This RFC outlines a new process to give applications authorised access to act on the SAFE network with the user's credentials. In particular, it is designed for the mobile and embedded use case in mind.
 
 ## Conventions
-- The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119). The word `Account` and `session packet` will be used interchangably both refer to the `Account`-information stored through self-authentication.
+
+- The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
+- The word `Account` and `session packet` will be used interchangably both refer to the `Account`-information stored through self-authentication.
 
 ## Motivation
 
 The current authentication and permissions handling flow relies on the safe launcher, a stateful intermediate between any particular app and the network. While this allows for fine-grained control over the access flow and user setup, it has the drawback of requiring the process always to run, keep a local state and proxy all network requests. This is particularly cumbersome on embedded devices and mobile, where we cannot provide this pattern reliably.
 
 This document proposes to replace the launcher with an alternative, stateless (if you will) approach.
-
 
 ## Detailed design
 
@@ -41,7 +42,6 @@ Permissions granted to the applications are stored in the user's session packet 
 The applications invoke the authenticator for authorisation using a URL scheme. The data exchange between application and authenticator happen via a custom protocol. The details can be found in Appendix A: The Authentication Protocol.
 
 Through this protocol, the app may gain access to its app container and any of the shared resource the user has (see Appendix B: Containers), given that the User granted access to them. The authentication keys the authenticator returns are persistent and can be used to connect directly to the network in the user's name without any other third party running. Thus the app can connect to the network independently.
-
 
 ### Authorisation flow overview
 
