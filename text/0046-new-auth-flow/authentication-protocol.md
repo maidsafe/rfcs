@@ -110,9 +110,9 @@ pub struct AppExchangeInfo {
 
 pub struct AppAccessToken {
   // TODO: can't we make this a little more specific?
-  pub enc_key: secrectbox::KBYTES,
-  pub sign_key_public: sign::PUBLICKBYTES,
-  pub sign_key_private: sign::PRIVATEKBYTES
+  pub enc_key: [8u; secrectbox::KBYTES],
+  pub sign_key_public: [u8; sign::PUBLICKBYTES],
+  pub sign_key_private: [u8; sign::PRIVATEKBYTES]
 }
 
 
