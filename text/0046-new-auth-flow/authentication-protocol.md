@@ -117,10 +117,6 @@ pub struct AppAccessToken {
   pub sign_key_private: sign::PRIVATEKBYTES
 }
 
-pub struct BootstrapConfig {
-  // To be defined
-}
-
 
 ```
 
@@ -154,7 +150,7 @@ If the user granted access to the app, it will receive a URI with:
 pub struct AuthGranted {
     // the access token to the network
     access_token: AppAccessToken,
-    bootstrap_config: BootstrapConfig,
+    bootstrap_config: Vec<u8>,
     access_container: Option<DataId>,
     containers: Vec<ContainerPermission>
 }
