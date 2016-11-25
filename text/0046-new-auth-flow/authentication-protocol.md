@@ -105,8 +105,6 @@ pub struct AppExchangeInfo {
   pub name: String,
   // (human readable) Name of the vendor of the app.
   pub vendor: String,
-  // Version of the 
-  pub version: String,
 }
 
 

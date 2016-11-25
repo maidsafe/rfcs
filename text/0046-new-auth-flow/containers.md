@@ -143,7 +143,6 @@ struct AppAccessInfo {
   revoked:           Option<timestamp>,
     // App Info
   name:              Vec<u8>,
-  version:           Vec<u8>,
   vendor:            Vec<u8>,
     // access info
   access_container:  Option<XorName>
