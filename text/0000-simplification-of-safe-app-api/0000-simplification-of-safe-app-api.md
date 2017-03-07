@@ -47,9 +47,9 @@ An initial thought was that this could be done at the language bindings layer (e
 
 ### Overview
 
-The following is a draft list the functions that the safe_app library shall expose as per this proposal.
+The following is a draft list of the functions that the safe_app library shall expose for the MutableData as per this proposal.
 
-Factory functions return a MutableData handle, whilst all the other functions expect just a MutableData handle (apart from the corresponding input parameters), i.e. no need to provide handles for the Permissions, PermissionsSet, etc..
+Factory functions return a MutableData handle, whilst all the other functions expect just a MutableData handle (apart from their corresponding input parameters), i.e. no need to provide handles for the Permissions, PermissionsSet, etc..
 
 **Factory functions:**
 
@@ -84,7 +84,6 @@ It applies a bulk of mutations in a single trasaction.
 It returns the latest version.
 
 - `get(key, version) -> (value, version)`
-For the future, not sure how it will work when different owners had permissions for different versions.
 
 - `getEntriesLength()`
 
@@ -168,7 +167,7 @@ class MutableData {
 **safe_app FFI**
 
 `MutableData` is a struct in the `safe_app` crate.
-`MutableDataHandle` is a type of cache handle to hold the entire MutableData data in the LRU cache.
+`MutableDataHandle` is a type of cache handle to hold the MutableData info in the LRU cache.
 
 ```
 pub type MutableDataHandle = ObjectHandle;
@@ -200,7 +199,7 @@ pub unsafe extern "C" fn mdata_insert_entry(md_handle, key, value)
 
 **safe_app Rust crate**
 
-It is hereby proposed to expose the API also in this layer so Rust apps can be linked directly with the crate rather than being forced to use the FFI.
+It is hereby proposed to expose the same API also in this layer so Rust apps can be linked directly with this crate rather than being forced either use the FFI or to  interface with the safe_core crate.
 
 ```
 pub struct MutableData {
@@ -228,7 +227,8 @@ impl MutableData {
 }
 ```
 
-Note that the rest of the MutableData information shall be kept within the scope of the methods that need them, e.g. a `foreach` implementation shall be as follows:
+Note that the rest of the MutableData information like Permissions, PermissionsSet, Entries, etc., shall be kept within the scope of the methods that need them instead of keeping them all in the FFI LRU cache. This will reduce significantly the amount of objects that need to be kept in the safe_app FFI layer.
+E.g. a `foreach` implementation shall be as follows:
 ```
     pub fn foreach_entry(&self, foreach_callback) {
         // Fetch the entries from the network and keep them in scope
