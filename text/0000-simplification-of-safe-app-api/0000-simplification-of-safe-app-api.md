@@ -128,7 +128,7 @@ Note that the proposed API is also exposed as a Rust crate, at the same time as 
 
 `safeapp.mutableData` is of type `MutableDataInterface` from the node.js binding which exposes just the static factory functions.
 
-```nodejs
+```node
 safeapp.mutableData.createPubMutableData("mypublicId", 15001)
   .then((md) => md.insert("key1", "value1"))
   .then(() => {
@@ -243,7 +243,7 @@ E.g. a `foreach` implementation shall be as follows:
     }
 ```
 
-### safe-app Software Architecture
+### Proposed Software Architecture
 
 ![safe-app Software Architecture](proposed-safe-app-architecture.png)
 
