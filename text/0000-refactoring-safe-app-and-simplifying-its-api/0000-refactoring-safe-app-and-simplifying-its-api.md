@@ -4,7 +4,7 @@
 - Type: enhancement
 - Related components: `safe_app`, `safe_app_nodejs`
 - Start Date: 07-03-2017
-- Discussion: https://forum.safedev.org/t/simplification-of-the-mutabledata-api/480 
+- Discussion: https://github.com/maidsafe/rfcs/pull/213
 - Supersedes:
 - Superseded by:
 
