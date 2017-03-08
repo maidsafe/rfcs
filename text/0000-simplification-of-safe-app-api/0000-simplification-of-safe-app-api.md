@@ -247,15 +247,11 @@ E.g. a `foreach` implementation shall be as follows:
 
 ![safe-app Software Architecture](proposed-safe-app-architecture.png)
 
-## Drawbacks
-
-Why should we *not* do this?
-
 ## Alternatives
 
-What other designs have been considered? What is the impact of not doing this?
+The proposal implies that every API function automatically commits the requested changes to the network, and that is why there are some functions to perform operations in bulk like `setUserPermissions(permissionsObj, Anyone | signKey)` and `applyMutations(mutationsObj)` should the user need to.
 
+This could be seen as a  negative aspect if the user is not conscious enough flooding the network with unnecessary requests that can be altrernatively sent in bulks. 
 
-## Unresolved questions
+An altenative design could require the user to explicitly signal each function with an `autocommit` flag if the request shall be automatically and immediately commited to the network, or if otherwise the changes shall be accumulated locally untill a specific function `commit` is invoked. This approach might not be desirable since it could bring several complexities to the implementation which are probably excesive for the problems it can prevent.
 
-What parts of the design are still to be done?
