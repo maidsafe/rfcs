@@ -19,7 +19,7 @@ This RFC proposes a refactoring on the `safe-app` library and the provision of a
 
 A developer can implement a client application to interact with the SAFE network either by interfacing directly with the `safe_core` Rust crate, or by interfacing with the `safe_app` library (part of the `safe_client_libs`) which is intended to simplify the client development process.
 
-Based on th assumption that the `safe_app` library's main purpose is to aid the development of SAFE applications, it shall then expose a much simpler and easier to use API so any developer with no backgorund/knowledge of how the SAFE network internally works can quickly start creating applications for the SAFE network. 
+Based on th assumption that the `safe_app` library's main purpose is to aid the development of SAFE applications, it shall then expose a much simpler and easier to use API so any developer with no background/knowledge of how the SAFE network internally works can quickly start creating applications for the SAFE network. 
 
 A developer shall only need to know that data can be stored in/shared thru the network with this API, that's why functions' names must to not only be picked very carefully but they also have to be abstracted as much as possible from SAFE network internal mechanisms, functioning, and vocabulary. 
 
