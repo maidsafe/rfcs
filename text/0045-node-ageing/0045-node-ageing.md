@@ -97,7 +97,7 @@ relocation then the node will be relocated on next churn event.
 
 ### Consensus measurement
 
-A group consensus will require >=50% of nodes and 50% of the age of the whole group.
+A group consensus will require `>50%` of nodes and `>50%` of the age of the whole group.
 
 ### Transmitting age to network
 
