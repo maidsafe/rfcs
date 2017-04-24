@@ -66,10 +66,12 @@ A : Age of node
 ### Overview
 
 Without any node relocation an attacker with a single join will enter a group and therefore requires
-(Q - 1) nodes To take over the group completely. An attack will therefore require the attacker try
-(Q - 1) * Z  times. If an attacker could run X% of the network population then this would mean the
-attack would require starting the nodes in parallel X times. Therefore even if nodes had a time to
-wait prior to joining this would only delay the attack by that time.
+(Q - 1) more nodes to take over the group completely. An attack will therefore require the attacker
+try (Q - 1) * Z  times on average. If an attacker could run X% of the network population then this
+would mean they can make N * X% attempts at a time, and need to restart each of their nodes only
+(Q - 1) * Z / (N * X%) = (Q - 1) / (G * X%) times, which is on the order of magnitude of 100 / X.
+Therefore even if nodes had a time to wait prior to joining this would only delay the attack by
+that factor.
 
 A simple way to think of this is that if you start a node it will join a group A. If you then start
 another node it will join a random group (1/number of groups). If this happens quickly then it is
