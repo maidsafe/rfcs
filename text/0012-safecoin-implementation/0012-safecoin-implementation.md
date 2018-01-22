@@ -162,23 +162,23 @@ The OWNER of a safecoin is the wallet address provided by the pmid_node as menti
 
 The Safecoin Management group can only approve a farming request when no such targeted safecoin data has been created before.
 
-When being asked to transfer the owevership, the request transcript must provide a valid signature that can be verified by the stored OWNER, which is actually a public-key. And the the owner will be updated to the new owner.
+When being asked to transfer the ownership, the request transcript must provide a valid signature that can be verified by the stored OWNER, which is actually a public-key. And the owner will be updated to the new owner.
 
 When being asked to burn a coin, the request must be signed by the current owner and forwarded through that owner's Client Manager group (which will increase allowed storage space at the same time). The piece of safecoin data will then be removed.
 
 ### Account Management
 
-An Account Management group is a group of nodes closest to a user's wallet address. It is resposible for that user's safecoin relation activities: rewarding, transfering or discarding.
+An Account Management group is a group of nodes closest to a user's wallet address. It is responsible for that user's safecoin relation activities: rewarding, transferring or discarding.
 A user's safecoin account is defined as :
 '''rust
 OWNER: 64 bytes
 COINS: Vec<SAFECOIN_ID>
 '''
 
-1. rewarding : when received notification a safecoin has been sucessfully farmed, record the ID of that coin into the account
+1. rewarding : when received notification a safecoin has been successfully farmed, record the ID of that coin into the account
 2. transfer out : remove certain number of coins from the account record, and notify the receiver's account group and the chosen safecoins' management groups of the ownership transferring.
 3. transfer in : when being notified by the sender's account group and the safecoin management group, the correspondent safecoin's ID will be inserted into the record.
-4. discarding : This is a special case that no receiver has been specified. the safecoin will be removed from the account and the chosen safecoins' management groups will be notified with a burning request.
+4. discarding : This is a special case that no receiver has been specified. The safecoin will be removed from the account and the chosen safecoins' management groups will be notified with a burning request.
 
 ### Bootstrap with clients
 
@@ -268,7 +268,7 @@ if key.is_in_range() { // we are client manager
                 routing.Post(compose_transfer_msg(coin, receiver), coin.id);
             }
         }
-    }    
+    }
 }
 ```
 
@@ -319,6 +319,6 @@ if coin.is_in_range() { // we are the manager of that coin
             // send notification to the requester
             routing.PostResponse(coin, requester);
         }
-    }    
+    }
 }
 ```
