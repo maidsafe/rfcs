@@ -106,7 +106,7 @@ further RFC and should allow farming rates to have a natural minimum.
 
 ### Establishing StoreCost
 
-This is an upgrade to RFC [0005](https://github.com/dirvine/rfcs/blob/safecoin_implementation/agreed/0005-balance_network_resources.md) the initial StoreCost
+This is an upgrade to RFC [0005](https://github.com/maidsafe/rfcs/blob/master/text/0005-balance-network-resources/0005-balance-network-resources.md) the initial StoreCost
 
 and consequent farming reward is 1 safecoin for the first Get and exponentially decreases from that point.
 
