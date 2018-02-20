@@ -18,13 +18,13 @@ Structured data is designed in such a way to enable the developers to create the
 data structures.
 
 For example, safe_nfs uses Structured data for storing the DirectoryListing in the SafeNetwork.
-safe_dns uses the logic as detailed here in this [RFC](https://github.com/maidsafe/rfcs/blob/master/implemented/0002-name-service/0002-name-service.md#detailed-design) to save the name service in the SafeNetwork.
+safe_dns uses the logic as detailed here in this [RFC](https://github.com/maidsafe/rfcs/blob/master/text/0002-name-service/0002-name-service.md#detailed-design) to save the name service in the SafeNetwork.
 
 Providing these APIs would open up the possibilities of using the structured
 data to fit the needs of the developers to manage their own data structures,
 which would facilitate in building wide range of applications on SafeNetwork.
 
-Structured data is detailed in this implemented [unified structured data RFC](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structured-data).
+Structured data is detailed in this implemented [unified structured data RFC](https://github.com/maidsafe/rfcs/blob/master/text/0040-unified-structured-data/0040-unified-structured-data.md#structureddata).
 
 # Detailed design
 
@@ -34,7 +34,7 @@ under the end point `safe-api/v1.0/data_types/`.
 ## Structured data API
 
 #### Create Structured data
-Structure Data with a custom `type_tag` can be created only within the permitted range as specified in the [reserved-names RFC](https://github.com/maidsafe/rfcs/blob/master/implemented/0003-reserved_names/0003-reserved_names.md#detailed-design),
+Structure Data with a custom `type_tag` can be created only within the permitted range as specified in the [reserved-names RFC](https://github.com/maidsafe/rfcs/blob/master/text/0003-reserved-names/0003-reserved-names.md#detailed-design),
 i.e within the permissible range 10,001 to 2^64
 
 ##### Request
