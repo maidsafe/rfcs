@@ -301,7 +301,7 @@ Now a common coin is pretty difficult to obtain in an asynchronous setting with 
 
 #### Full concrete coin protocol
 
-Taking inspiration from Section 3.1.1 of [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2), we follow the following 3 step routine at each round:
+Taking inspiration from Section 3.1.1 of [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2), we follow this three steps routine at each round:
 
 - Step 0: The concrete coin is forced to be `true`
 - Step 1: The concrete coin is forced to be `false`
