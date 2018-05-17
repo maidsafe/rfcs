@@ -117,7 +117,7 @@ struct GossipEvent<T> {
 
 - A gossip event may be created for one of the following reasons:
   - Another node gossiped to us and we record this fact by creating a `GossipEvent` with a `None` `payload`
-    - If we received a `GossipRequestRpc`, we set pattern to `GossipCause::Request`. If we received a `GossipResponseRpc`, we set cause to `GossipCause::Resonse`
+    - If we received a `GossipRequestRpc`, we set pattern to `GossipCause::Request`. If we received a `GossipResponseRpc`, we set cause to `GossipCause::Response`
     - If we received a `GossipRequestRpc`, we are required to immediately gossip back to the sender, bundling the NetworkEvents we think they aren't aware of in a `GossipResponseRpc`
   - We witness a network event and would like to share that. We create a `GossipEvent` containing our `Vote` on that `NodeState`. We set cause to `GossipCause::Observation`
 
@@ -369,7 +369,7 @@ Let's arbitrarily pick: `log2(N)` for now. This can be tuned after testing.
 
 Assuming we agreed on a `GossipEvent` to be used as the source of coin flip, we can obtain a binary value from the Hash of that `GossipEvent` by simply using the least significant bit of that hash.
 
-##### Genuinely fliped concrete coin
+##### Genuinely flipped concrete coin
 
 The algorithm used to obtain a genuine concrete coin is as follows:
 
