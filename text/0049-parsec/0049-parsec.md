@@ -141,8 +141,6 @@ struct GossipResponseRpc {
 gossip_graph: HashMap<Hash, GossipEvent>
 ```
 
-- Finally, `Block`s that have made it through the order consensus are considered stable
-
 ## High level algorithm
 
 - When a node needs to vote on a new `NodeState`, it creates a `GossipEvent` for this with `self_parent` as the hash of the latest event in its own gossip history and `other_parent` as `None`
