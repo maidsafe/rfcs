@@ -52,7 +52,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
   - **Termination**: Eventually the set `bin_values` of each correct node is not empty
 - **estimate**: in the context of binary value gossip, a value proposed by a node for a given variable
 - **`bin_values`**: the array of binary values resulting from applying binary value gossip to a binary value in the gossip graph
-- **auxiliary value**: the first value to make it to a node's `bin_values` or true if a same `GossipEvent` carried both values for the same variable
+- **auxiliary value**: the first value to make it to a node's `bin_values` or true if a same `GossipEvent` carried both values `true` and `false` for a same binary variable
 - **valid auxiliary value**: an auxiliary value emitted by any node that is also part of the `bin_values` of the node assessing its validity
 - **decided value**: a binary value which has reached Binary Byzantine consensus from a node's point of view
 - **`responsiveness_threshold`**: a number of `GossipResponseRpc` after which it is likely that if we didn't hear from a given node, that node is misbehaving. Provisionally, `log2(N)`. Exact value will depend on testing results
