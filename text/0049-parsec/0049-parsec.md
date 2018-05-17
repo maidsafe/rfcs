@@ -55,7 +55,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **auxiliary value**: the first value to make it to a node's `bin_values` or true if a same `GossipEvent` carried both values `true` and `false` for a same binary variable
 - **valid auxiliary value**: an auxiliary value emitted by any node that is also part of the `bin_values` of the node assessing its validity
 - **decided value**: a binary value which has reached Binary Byzantine consensus from a node's point of view
-- **`responsiveness_threshold`**: a number of `GossipResponseRpc` after which it is likely that if we didn't hear from a given node, that node is misbehaving. Provisionally, `log2(N)`. Exact value will depend on testing results
+- **`responsiveness_threshold`**: a number chosen so that in the time it takes for a honest node to create `responsiveness_threshold` `GossipEvent`s of type `GossipCause::Response` after a given instant `T_0`, this node is likely to have been informed of any `GossipEvent` sent by a honest node at, or before `T_0`. Provisionally, `log2(N)`. Exact value will depend on testing results
 - **order consensus**: method to determine a total order for `Block`s from a gossip graph
 - **N**: number of valid voters of a section
 - **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section
