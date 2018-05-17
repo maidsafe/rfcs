@@ -20,7 +20,7 @@ A list of all RFCs by their current status.
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0049 PARSEC ](./text/0049-parsec/0049-parsec.md)
+ - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
 
 ## Agreed RFCs
 
@@ -65,4 +65,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Wed 16 May 17:44:57 BST 2018_ at REV [181efaf](https://github.com/maidsafe/rfcs/commit/181efaff6016dc87169285e5553d6152410661bb))
+(Last updated _Thu 17 May 13:09:55 BST 2018_ at REV [7cd377a](https://github.com/maidsafe/rfcs/commit/7cd377ab5bb81986eb18969c7bd19ff1322f63d6))

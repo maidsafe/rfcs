@@ -1,4 +1,4 @@
-# PARSEC 
+# PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus
 
 - Status: proposed
 - Type: new feature
