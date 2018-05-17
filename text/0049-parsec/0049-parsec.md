@@ -221,7 +221,7 @@ As its name indicates, this algorithm uses broadcast to disseminate the binary v
 
 ### Binary value gossip
 
-In our proposal, the binary values we aim to "BV-broadcast" are already communicated between all nodes through gossip. This means we can modify the algorithm to avoid paying the additional communication cost that we don't need.
+In our proposal, the binary values we aim to "BV-gossip" are already communicated between all nodes through gossip. This means we can modify the algorithm to avoid paying the additional communication cost that we don't need.
 
 This is how we define the binary value gossip algorithm.
 
@@ -268,7 +268,7 @@ As there are at least `N − t` correct nodes, each of them BV_gossips some valu
 
 Please, read section 4.2 of [Signature-Free Asynchronous Byzantine Consensus with `t<n/3` and `O(n^2)` Messages](https://hal.inria.fr/hal-00944019/document) for background.
 
-In our world, all broadcast operations are replaced by normal gossip. BV-Broadcast is replaced by binary value gossip as described above.
+In our world, all broadcast operations are replaced by normal gossip. BV-broadcast is replaced by binary value gossip as described above.
 
 So for a given node to observe consensus on a given meta vote that happened in the past, the algorithm becomes:
 
