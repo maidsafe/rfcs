@@ -149,9 +149,16 @@ gossip_graph: HashMap<Hash, GossipEvent>
   - Send a `GossipRequestRpc` containing all the `GossipEvent`s that it thinks the recipient hasn't seen according to its gossip graph
 - On receipt of a `GossipRequestRpc`, a node will
   - Insert the contained `GossipEvent`s into its gossip graph
-  - Create a new `GossipEvent` that records receipt of the latest gossip. The `self_parent` is the hash of the latest event in its own gossip history and `other_parent` is the hash of the sender's latest event in the `GossipRequestRpc`
+  - Create a new `GossipEvent` that records receipt of the latest gossip. The `self_parent` is the hash of the latest event in its own gossip history and `other_parent` is the hash of the sender's latest event in the `GossipRequestRpc`. The cause for this `GossipEvent` is `GossipCause::Request`
   - Send a `GossipResponseRpc` containing all the `GossipEvent`s that it thinks the sender hasn't seen according to its gossip graph. Send it to the sender
-  - Run our current gossip graph through the order consensus algorithm until it returns None. The output of this algorithm is an `Option` of newly-stable `Block`
+  - Run the current gossip graph through the order consensus algorithm until it returns None. The output of this algorithm is an `Option` of newly-stable `Block`
+- On receipt of a `GossipResponseRpc`, a node will
+  - Insert the contained `GossipEvent`s into its gossip graph
+  - Create a new `GossipEvent` that records receipt of the latest gossip. The `self_parent` is the hash of the latest event in its own gossip history and `other_parent` is the hash of the sender's latest event in the `GossipRequestRpc`. The cause for this `GossipEvent` is `GossipCause::Response`
+  - Run the current gossip graph through the order consensus algorithm until it returns None. The output of this algorithm is an `Option` of newly-stable `Block`
+- On observation of a change in the network structure, a node will
+  - Create a new `GossipEvent` that records observation of said network event. The `self_parent` is the hash of the latest event in its own gossip history and `other_parent` is `None`. The cause for this `GossipEvent` is `GossipCause::Observation`
+  - Insert the newly created `GossipEvent` into its gossip graph
 
 ## Order Consensus
 
