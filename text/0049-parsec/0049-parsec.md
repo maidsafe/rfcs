@@ -38,24 +38,24 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **section**: partition of the network constituted of a number of nodes, satisfying the description in the [Disjoint Section RFC](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md)
 - **sync event**: the `GossipEvent` created by a node, when receiving gossip to record receipt of that latest gossip 
 - **gossip graph**: the directed acyclic graph (DAG) formed by `GossipEvent`s which holds information about the order any given node voted for network events, and which votes a given node knows about
-- **supermajority**: strictly more than 2/3 of the voting members of a section. No member that was consensused Dead in our gossip_graph will ever be considered again as a voting member in this definition
+- **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused `Dead` in our `gossip_graph` will ever be considered again as a voting member in this definition
 - **seen**: a `GossipEvent` is seen by a later one if there is a directed path going from the latter to the former in the gossip graph
 - **strongly seen**: a `GossipEvent` is - strongly seen by another one if it is seen via multiple directed paths passing through a supermajority of the nodes
 - **valid `Block`**: `Block` formed via a strongly seen supermajority of `Vote`s
 - **stable `Block`**: a valid `Block` that has also had its order decided via order consensus
 - **observer**: the first gossip event created by a node X at which node X can see that a supermajority of nodes can see a valid `Block` which is not yet stable. The `Block` that's seen as valid may be different for different nodes
-- **meta vote**: the meta vote of a given observer for a given node X is the binary answer to this question: "does this observer strongly see any vote for a valid `Block` which is not yet stable by node X?" By definition, each observer carries N meta votes where N is the number of valid voters of this section, of which `> 2N/3` are `true`. Note that a meta vote is virtual: no node ever explicitely casts a meta vote, but it is instead an after the fact interpretation of ordinary gossip
+- **meta vote**: the meta vote of a given observer for a given node X is the binary answer to this question: "does this observer strongly see any vote for a valid `Block` which is not yet stable by node X?" By definition, each observer carries `N` meta votes where `N` is the number of valid voters of this section, of which `> 2N/3` are `true`. Note that a meta vote is virtual: no node ever explicitely casts a meta vote, but it is instead an after the fact interpretation of ordinary gossip
 - **binary value gossip**: our adaptation of "binary value broadcast". It is an algorithm used to communicate (virtual) binary values over gossip with the following properties:
-  - **Obligation**: If `>= N/3` correct nodes BV-gossip the same value v, v is eventually added to the set of binary values (`bin_values`) of each correct node
-  - **Justification**: If `bin_values` contains v, it has been BV-gossiped by a correct node
-  - **Uniformity**: If v is added to the set `bin_values` of a correct node, it will eventually be added to all correct nodes' `bin_values`
+  - **Obligation**: If `>= N/3` correct nodes BV-gossip the same value `v`, `v` is eventually added to the set of binary values (`bin_values`) of each correct node
+  - **Justification**: If `bin_values` contains `v`, it has been BV-gossiped by a correct node
+  - **Uniformity**: If `v` is added to the set `bin_values` of a correct node, it will eventually be added to all correct nodes' `bin_values`
   - **Termination**: Eventually the set `bin_values` of each correct node is not empty
 - **estimate**: in the context of binary value gossip, a value proposed by a node for a given variable
 - **`bin_values`**: the array of binary values resulting from applying binary value gossip to a binary value in the gossip graph
 - **auxiliary value**: the first value to make it to a node's `bin_values` or true if a same `GossipEvent` carried both values for the same variable
 - **valid auxiliary value**: an auxiliary value emitted by any node that is also part of the `bin_values` of the node assessing its validity
 - **decided value**: a binary value which has reached Binary Byzantine consensus from a node's point of view
-- **`responsiveness_threshold`**: a number of `GossipResponseRpc` after which it is likely that if we didn't hear from a given node, that node is misbehaving. Provisionally, log2(N). Exact value will depend on testing results
+- **`responsiveness_threshold`**: a number of `GossipResponseRpc` after which it is likely that if we didn't hear from a given node, that node is misbehaving. Provisionally, `log2(N)`. Exact value will depend on testing results
 - **order consensus**: method to determine a total order for `Block`s from a gossip graph
 - **N**: number of valid voters of a section
 - **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section
@@ -100,8 +100,8 @@ enum GossipCause {
 - We define a gossip event as such:
 ```rust
 struct GossipEvent<T> {
-    // `T` normally represents some `NodeState`.
-    // The payload can be `None` if we have nothing new to gossip.
+    // T normally represents some NodeState.
+    // The payload can be None if we have nothing new to gossip.
     payload: Option<Vote<T>>,
     // hash of the latest GossipEvent the node which created this event has seen
     self_parent: Option<Hash>,
@@ -137,7 +137,7 @@ struct GossipResponseRpc {
 
 - Nodes store locally the `GossipEvent`s they created and received.
 ```rust
-// The hashes are the hashes of each `GossipEvent`
+// The hashes are the hashes of each GossipEvent
 gossip_graph: HashMap<Hash, GossipEvent>
 ```
 
@@ -157,13 +157,13 @@ gossip_graph: HashMap<Hash, GossipEvent>
 
 ## Order Consensus
 
-The problem of obtaining consensus on a binary value already has an elegant solution described in this paper: [Signature-Free Asynchronous Byzantine Consensus with t<n/3 and O(n^2)](https://hal.inria.fr/hal-00944019/document) Messages (henceforth referred to as [ABA](https://hal.inria.fr/hal-00944019/document)).
+The problem of obtaining consensus on a binary value already has an elegant solution described in this paper: [Signature-Free Asynchronous Byzantine Consensus with `t<n/3` and `O(n^2)`](https://hal.inria.fr/hal-00944019/document) Messages (henceforth referred to as [ABA](https://hal.inria.fr/hal-00944019/document)).
 
 In our approach, we firstly reduce the general problem of obtaining consensus on a generic Network Event to a Binary Byzantine problem, after which we adapt the algorithm described above to exhibit performance characteristics that are better suited to our problem space.
 
 Our adaptation of [ABA](https://hal.inria.fr/hal-00944019/document) has two major differentiating features:
 
-- It works over gossip, hence reducing the need from O(n^2) messages to O(n*log(n))messages
+- It works over gossip, hence reducing the need from `O(n^2)` messages to `O(n*log(n))` messages
 - We substitute the common coin requirement with the concept of a concrete coin described in [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2). This gives us two nice properties:
   - It makes the algorithm truly "Signature-Free"
   - It makes handling of churn much simpler than would be if we used a distributed key generation scheme to keep each voting member of each section in a position to participate in a traditional common coin generation scheme for any network event
@@ -237,7 +237,7 @@ In this section, we show that the proofs from [ABA](https://hal.inria.fr/hal-009
 
 If `>= N/3` correct nodes BV-gossip the same value `v`, `v` is eventually added to the set of binary values (`bin_values`) of each correct node.
 
-By virtue of gossip, if a correct node gossips a value `v`, `v` is guarenteed to eventually be seen by all other correct nodes. Given `>= N/3` correct nodes gossiping the same value for a given variable, every correct node will eventually see that value for this variable, coming from `>= N/3` nodes. Because of Step 2, all correct nodes will then be gossiping the same estimate for this variable. Since all correct nodes are now gossiping that value, and there are at least `2N/3` of them; each node will eventually see `> 2N/3` instances of that value coming from different node. After each correct node exercises Step 3 of the algorithm, v will eventually be added to the `bin_values` of each correct node.
+By virtue of gossip, if a correct node gossips a value `v`, `v` is guarenteed to eventually be seen by all other correct nodes. Given `>= N/3` correct nodes gossiping the same value for a given variable, every correct node will eventually see that value for this variable, coming from `>= N/3` nodes. Because of Step 2, all correct nodes will then be gossiping the same estimate for this variable. Since all correct nodes are now gossiping that value, and there are at least `2N/3` of them; each node will eventually see `> 2N/3` instances of that value coming from different node. After each correct node exercises Step 3 of the algorithm, `v` will eventually be added to the `bin_values` of each correct node.
 
 #### Justification
 
@@ -260,7 +260,7 @@ As there are at least `N − t` correct nodes, each of them BV_gossips some valu
 
 ### Our take on ABA's Randomized Byzantine consensus algorithm
 
-Please, read section 4.2 of [Signature-Free Asynchronous Byzantine Consensus with t<n/3 and O(n^2) Messages](https://hal.inria.fr/hal-00944019/document) for background.
+Please, read section 4.2 of [Signature-Free Asynchronous Byzantine Consensus with `t<n/3` and `O(n^2)` Messages](https://hal.inria.fr/hal-00944019/document) for background.
 
 In our world, all broadcast operations are replaced by normal gossip. BV-Broadcast is replaced by binary value gossip as described above.
 
@@ -297,48 +297,48 @@ Now a common coin is pretty difficult to obtain in an asynchronous setting with 
 
 Taking inspiration from Section 3.1.1 of [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2), we follow the following 3 step routine at each round:
 
-- Step 0: The concrete coin is forced to be true
-- Step 1: The concrete coin is forced to be false
+- Step 0: The concrete coin is forced to be `true`
+- Step 1: The concrete coin is forced to be `false`
 - Step 2: A genuinely flipped concrete coin
 
 ##### Step 0:
 
 Starting with each observer carrying its meta votes as estimates, after an instance of binary value gossip, as soon as we strongly see a supermajority of valid auxiliary values,
 
-- If we strongly see a supermajority of true auxiliary values, we decide true
-  - Any node observing our current `GossipEvent` will accept it as a true auxiliary value for any subsequent step and round of this particular binary agrement
-- If we strongly see a supermajority of false auxiliary values, we change our estimate to false
-- If we don't strongly see any supermajority, we update our estimate to true
+- If we strongly see a supermajority of `true` auxiliary values, we decide `true`
+  - Any node observing our current `GossipEvent` will accept it as a `true` auxiliary value for any subsequent step and round of this particular binary agrement
+- If we strongly see a supermajority of `false` auxiliary values, we change our estimate to `false`
+- If we don't strongly see any supermajority, we update our estimate to `true`
 - A new instance of binary value gossip starts
 
 ##### Step 1:
 
 Starting with the estimates from Step 0, after an instance of binary value gossip, as soon as we strongly see a supermajority of valid auxiliary values
 
-- If we strongly see a supermajority of false auxiliary values, we decide false
-  - Any node observing our current `GossipEvent` will accept it as a false auxiliary value for any subsequent step and round of this particular binary agrement
-- If we strongly see a supermajority of true auxiliary values, we change our estimate to true
-- If we don't strongly see any supermajority, we update our estimate to false
+- If we strongly see a supermajority of `false` auxiliary values, we decide `false`
+  - Any node observing our current `GossipEvent` will accept it as a `false` auxiliary value for any subsequent step and round of this particular binary agrement
+- If we strongly see a supermajority of `true` auxiliary values, we change our estimate to `true`
+- If we don't strongly see any supermajority, we update our estimate to `false`
 - A new instance of binary value gossip starts
 
 ##### Step 2:
 
 Starting with the estimates from Step 1, after an instance of binary value gossip, as soon as we strongly see a supermajority of valid auxiliary values,
 
-- If we strongly see a supermajority of true auxiliary values, we change our estimate to true
-- If we strongly see a supermajority of false auxiliary values, we change our estimate to false
+- If we strongly see a supermajority of `true` auxiliary values, we change our estimate to `true`
+- If we strongly see a supermajority of `false` auxiliary values, we change our estimate to `false`
 - If we don't strongly see any supermajority, we update our estimate to the outcome of a "genuinely flipped concrete coin" (see description below)
 
 #### Genuinely flipped concrete coin
 
-We are looking for a way to generate a binary value which, at least 2/3 of the times will be common and unpredictable.
+We are looking for a way to generate a binary value which, at least `2/3` of the times will be common and unpredictable.
 
 The general idea is akin to picking a different leader every time, but we use a gradient of leadership to overcome the issue of an unresponsive leader. To mitigate some of the risks of malicious actors DDOS-ing the most leader node, we observe that many of these protocols are running concurrently which would make it impractical to always DDOS all the concurrent leaders.
 
 Here is a preliminary overview of the genuine flip algorithm:
 
 - For any given decision, establish a current gradient of leadership
-- Based on that gradient of leadership, decide on a `GossipEvent` to be used as the source of coin flip. This `GossipEvent` has the property of not being predictable at the begining of the consensus protocol. It will also be common whenever the most leader node is responsive and honest, so in > 2/3 of instances
+- Based on that gradient of leadership, decide on a `GossipEvent` to be used as the source of coin flip. This `GossipEvent` has the property of not being predictable at the begining of the consensus protocol. It will also be common whenever the most leader node is responsive and honest, so in `> 2/3` of instances
 - Deduce a binary value for the coin from properties of this `GossipEvent`
 
 #### Establishing the current gradient of leadership
@@ -421,7 +421,7 @@ Thanks to Claim B, agreement persists.
 
 ###### Validity. A decided value was proposed by a correct node
 
-The only values considered as input to Step 0 of the concrete coin protocol are values that were present in a node's `bin_values` after binary value gossip. Due to the Justification property of binary value gossip, they must have been proposed by a correct node. In each step, if we strongly see a supermajority of agreeing value `v`, `v` must have been propagated by a correct node, so changing our estimate to that value won't break this invariant. Else, both values true and false must have been sent by a correct node, so changing our estimate to anything won't break the invariant either.
+The only values considered as input to Step 0 of the concrete coin protocol are values that were present in a node's `bin_values` after binary value gossip. Due to the Justification property of binary value gossip, they must have been proposed by a correct node. In each step, if we strongly see a supermajority of agreeing value `v`, `v` must have been propagated by a correct node, so changing our estimate to that value won't break this invariant. Else, both values `true` and `false` must have been sent by a correct node, so changing our estimate to anything won't break the invariant either.
 
 ###### Agreement. No two correct node decide different values
 
