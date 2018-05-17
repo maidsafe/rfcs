@@ -243,7 +243,7 @@ In this section, we show that the proofs from [ABA](https://hal.inria.fr/hal-009
 
 If `>= N/3` correct nodes BV-gossip the same value `v`, `v` is eventually added to the set of binary values (`bin_values`) of each correct node.
 
-By virtue of gossip, if a correct node gossips a value `v`, `v` is guarenteed to eventually be seen by all other correct nodes. Given `>= N/3` correct nodes gossiping the same value for a given variable, every correct node will eventually see that value for this variable, coming from `>= N/3` nodes. Because of Step 2, all correct nodes will then be gossiping the same estimate for this variable. Since all correct nodes are now gossiping that value, and there are more than `2N/3` of them; each node will eventually see `> 2N/3` instances of that value coming from different node. After each correct node exercises Step 3 of the algorithm, `v` will eventually be added to the `bin_values` of each correct node.
+By virtue of gossip, if a correct node gossips a value `v`, `v` is guarenteed to eventually be seen by all other correct nodes. Given `>= N/3` correct nodes gossiping the same value for a given variable, every correct node will eventually see that value for this variable, coming from `>= N/3` nodes. Because of Step 2, all correct nodes will then be gossiping the same estimate for this variable. Since all correct nodes are now gossiping that value, and there are more than `2N/3` of them; each node will eventually see `> 2N/3` instances of that value coming from different nodes. After each correct node exercises Step 3 of the algorithm, `v` will eventually be added to the `bin_values` of each correct node.
 
 #### Justification
 
