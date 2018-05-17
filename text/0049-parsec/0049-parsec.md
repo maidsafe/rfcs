@@ -164,7 +164,7 @@ gossip_graph: HashMap<Hash, GossipEvent>
 
 The problem of obtaining consensus on a binary value already has an elegant solution described in this paper: [Signature-Free Asynchronous Byzantine Consensus with `t<n/3` and `O(n^2)`](https://hal.inria.fr/hal-00944019/document) Messages (henceforth referred to as [ABA](https://hal.inria.fr/hal-00944019/document)).
 
-In our approach, we firstly reduce the general problem of obtaining consensus on a generic Network Event to a Binary Byzantine problem, after which we adapt the algorithm described above to exhibit performance characteristics that are better suited to our problem space.
+In our approach, we firstly reduce the general problem of obtaining consensus on a generic network event to a Binary Byzantine problem, after which we adapt the algorithm mentioned above to exhibit performance characteristics that are better suited to our problem space.
 
 Our adaptation of [ABA](https://hal.inria.fr/hal-00944019/document) has two major differentiating features:
 
