@@ -447,6 +447,7 @@ From [ABA](https://hal.inria.fr/hal-00944019/document)'s proof, the number of ro
 
 Here is an illustration of the concept of `GossipEvent`s "seeing" eachother:
 
+<!---
 ```graphviz
 digraph GossipGraph { 
 splines=false 
@@ -496,11 +497,12 @@ labelloc="t"
 label="b_0 is strongly seen by d_4:\nThere is at least one directed path from d_4 to b_0" 
 }
 ```
-
+-->
 ### Strongly seen
 
 Here, we try to convey visually the concept of "strongly seen":
 
+<!---
 ```graphviz
 digraph GossipGraph { 
 splines=false 
@@ -549,6 +551,7 @@ labelloc="t"
 label="b_0 is strongly seen by a_1:\nIt is seen via multiple directed paths passing\nthrough a supermajority (3 out of 4) of the nodes" 
 }
 ```
+-->
 
 #### Abbreviations:
 
@@ -561,6 +564,7 @@ In the following two examples, we show the different data that each nodes sees a
 
 ### Here is a simple example that reaches consensus at the first step of the first round.
 
+<!---
 ```graphviz
 digraph GossipGraph {
 splines=false
@@ -721,8 +725,10 @@ b_11 -> c_6 [color=purple]
 c_6 -> b_13 [color=green3]
 }
 ```
+-->
 
 ### Here is a slightly more complex example that lasts two rounds for most nodes:
+<!---
 ```graphviz
 digraph GossipGraph {
 splines=false
@@ -897,6 +903,7 @@ b_11 -> c_7 [color=purple]
 c_7 -> b_13 [color=green3]
 }
 ```
+-->
 
 # Drawbacks
 
