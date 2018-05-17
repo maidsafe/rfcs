@@ -40,7 +40,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **gossip graph**: the directed acyclic graph (DAG) formed by `GossipEvent`s which holds information about the order any given node voted for network events, and which votes a given node knows about
 - **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused `Dead` in our `gossip_graph` will ever be considered again as a voting member in this definition
 - **seen**: a `GossipEvent` is seen by a later one if there is a directed path going from the latter to the former in the gossip graph
-- **strongly seen**: a `GossipEvent` is - strongly seen by another one if it is seen via multiple directed paths passing through a supermajority of the nodes
+- **strongly seen**: a `GossipEvent` is strongly seen by another one if it is seen via multiple directed paths passing through a supermajority of the nodes
 - **valid `Block`**: `Block` formed via a strongly seen supermajority of `Vote`s
 - **stable `Block`**: a valid `Block` that has also had its order decided via order consensus
 - **observer**: the first gossip event created by a node X at which node X can see that a supermajority of nodes can see a valid `Block` which is not yet stable. The `Block` that's seen as valid may be different for different nodes
