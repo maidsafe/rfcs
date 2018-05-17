@@ -123,6 +123,7 @@ struct GossipEvent<T> {
 - As part of the gossip protocol, a node communicates all `GossipEvent`s they think another node doesn't know by sending them one of the two following types: 
   - They use a `GossipRequestRpc` if their timer indicates that it is time to send gossip to a randomly picked network node
   - They use a `GossipResponseRpc` if they just received gossip from another node. The response is sent to the sender of the received gossip
+
 ```rust
 struct GossipRequestRpc {
 	events: Vec<GossipEvent>
