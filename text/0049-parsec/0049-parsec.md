@@ -447,6 +447,8 @@ From [ABA](https://hal.inria.fr/hal-00944019/document)'s proof, the number of ro
 
 Here is an illustration of the concept of `GossipEvent`s "seeing" eachother:
 
+![Alt text](./seen.dot.svg)
+<img src="./seen.dot.svg">
 <!---
 ```graphviz
 digraph GossipGraph { 
@@ -502,6 +504,8 @@ label="b_0 is strongly seen by d_4:\nThere is at least one directed path from d_
 
 Here, we try to convey visually the concept of "strongly seen":
 
+![Alt text](./strongly_seen.dot.svg)
+<img src="./strongly_seen.dot.svg">
 <!---
 ```graphviz
 digraph GossipGraph { 
