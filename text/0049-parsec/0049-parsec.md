@@ -227,7 +227,7 @@ This is how we define the binary value gossip algorithm.
 
 1. Given a binary variable for which each node knows a value, each node is said to propose this value for the variable. In other words, this value is this node's first estimate of this variable
 1. If any node receives gossip containing a value they haven't already proposed for this variable originating from `>= N/3` nodes, they also propose that value for the variable. This new binary value is another estimate of the same variable by the same node
-1. If any node receives (i.e: can see in past gossip) `> 2N/3` of the same estimate for a variable, it is considered to be part of their `bin_values`
+1. If any node receives (i.e: can see in past gossip) `GossipEvent`s originating from `> 2N/3` of the nodes in their section that carry the same estimate for a variable, it is considered to be part of their `bin_values`
 
 The outcome of this algorithm is one of the 3 following sets: `{true}`, `{false}` or `{true, false}`
 
