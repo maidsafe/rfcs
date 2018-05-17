@@ -368,7 +368,8 @@ The closest nodes will be said to have more leadership than the ones further awa
 ##### Responsiveness threshold
 
 Let's define `responsiveness_threshold` as a period after which it is likely that we would have received gossip from a live and correct node.
-It will be of the form `C_0*log(N)`.
+Because time is not a property that can be known by looking solely at a `gossip_graph`, and because our asynchronous setting gives no guarentee about time; we use a certain gossip pattern as a proxy for time. The way we perform gossip, any honest node will send a `GossipRequestRpc` periodically (every fixed length of time), and every honest node will answer with a `GossipResponseRpc` as soon as they receive the `GossipRequestRpc`. This means that with the simple assumption that no correct node will be **significantly** slower than any other honest node, we can define a "reasonable" period of time after which we would expect to hear back from a honest node. This measure does not need to be perfectly accurate, as any estimate that is correct most of the time will be enough for our general algorithm to function as designed.
+Because of the performance properties of the gossip protocol: any given message from a honest node will reach every other honest node with high probability in ~log(N) `GossipEvent`s, it will be of the form `C_0*log(N)`.
 Let's arbitrarily pick: `log2(N)` for now. This can be tuned after testing.
 
 ##### From `GossipEvent` to coin flip
