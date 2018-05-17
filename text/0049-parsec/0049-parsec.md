@@ -297,7 +297,7 @@ Here is the short description:
 
 > A common coin can be seen as a global entity that delivers the very same sequence of random bits b~1~ , b~2~ , . . . , b~r~ , . . . to processes, each bit b~r~ has the value 0 or 1 with probability 1/2.
 
-Now a common coin is pretty difficult to obtain in an asynchronous setting with dynamic section membership. We use the proofs in [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2) to substitute the "common coin" step of ABA with a "gradient leadership based concrete coin". 
+Now a common coin is pretty difficult to obtain in an asynchronous setting with dynamic section membership. This difficulty lead the authors of [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2) to mockingly refer to such a coin as a "magic coin". We use the reasoning in that paper to substitute the "common coin" step of ABA with a "gradient leadership based concrete coin", which is our take on an asynchronous concrete coin.
 
 #### Full concrete coin protocol
 
