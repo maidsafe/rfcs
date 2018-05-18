@@ -405,12 +405,22 @@ We start by proving that the claims from [Byzantine Agreement, Made Trivial](htt
 
 Note that the wording below assumes that we are looking at the `gossip_graph` after a sufficient number of `GossipEvent`s have been communicated. If the `GossipEvent`s we are trying to order are too recent, we may not be able to decide on consensus yet. In that case, we the next stable block would be `None`, until such a time at which our `gossip_graph` would contain enough events to decide on a next stable `Block`. Claiming that consensus will be reached eventually means that as gossip progresses, there will be a point at which the next stable `Block` returned shall not be `None`.
 
-###### If, at the start of an execution of Step 2, no player has yet halted and agreement has not yet been reached, then, with probability 1/3, the players will be in agreement at the end of the step (Claim A)
+###### If, at the start of an execution of Step 2, no player has yet halted and agreement has not yet been reached, then, with probability near `> 1/3`, the players will be in agreement at the end of the step (Claim A)
 
-Leadership based concrete coin is `2/3` common and honest (see previous proofs).
-If some strongly see a supermajority for true, then all others will flip the coin. If `2/3` common and honest, then `1/2` chance `true` so all good.
-Conversely, some strongly see a supermajority for `false`, then all others will flip a coin and `1/3` to converge.
-If none of above situations, `2/3` to converge.
+As showed above, a leadership based concrete coin has around `> 2/3` probability of being common and random.
+Because each node casts exactly one implicit auxiliary value for any possible outcome, five situations are possible:
+- All nodes' first `GossipEvent` to see a supermajority of auxiliary values sees a supermajority of `true` values
+  - Agreement is reached with probability 1.
+- All nodes' first `GossipEvent` to see a supermajority of auxiliary values sees a supermajority of `false` values
+  - Agreement is reached with probability 1.
+- Some such `GossipEvent`s see a supermajority of `true` auxiliary values, while some don't
+  - If any node creates an event that strongly see a supermajority of `auxiliary votes` for `true`, then any node that doesn't have such an event will genuinely flip a concrete coin. In the `~ > 2/3` likely scenario that the coin is common and random, the outcome has `50%` chance of being `true`, in which case agreement would be reached at the end of this round. The overall probability of agreement occuring is near `> 1/3`.
+- Some such `GossipEvent`s see a supermajority of `false` auxiliary values, while some don't
+  - Conversely, if any node creates a `GossipEvent` that strongly sees a supermajority of `false` `auxiliary` values, then any other node that hasn't created such a `GossipEvent` will flip a coin and have near `> 1/3` chances to converge.
+- No such `GossipEvent` sees an agreeing supermajority of auxiliary values
+  - If no node's latest gossip strongly sees a supermajority, the probability of agreeing by the end of this round is simply the same as the probability of getting a truly common concrete coin, which is near `> 2/3`.
+
+Without diving deeper in the exact probability of each specific scenario, it is easy to give a lower bound for the likelihood of agreeing at the end of this step: near `1/3`.
 
 ###### If, at some step, agreement holds on some bit b, then it continues to hold on the same bit b (Claim B)
 
