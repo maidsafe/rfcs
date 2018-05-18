@@ -272,22 +272,41 @@ In our world, all broadcast operations are replaced by normal gossip. BV-broadca
 
 So for a given node to observe consensus on a given meta vote that happened in the past, the algorithm becomes:
 
-- We start at round zero, step zero
-- Start binary value gossip on the meta votes carried by the oldest observer for each node:
-  - For each node, if the estimate isn't yet set, consider its meta vote to be the value of its estimate for this round
-  - If we can see `>=N/3` estimates for `!v`, where `v` was the value of our estimate, we will be considered to be echoing the value `!v` as a secondary estimate for this round
-  - If at any point within this round we can see `> 2N/3` estimates for the same binary value, then consider this to be a member of the `bin_values` set for this round
-  - As soon as `bin_values` is non-empty, if its cardinality is `1`, consider its first value as its auxiliary value. Else, pick the arbitrary binary value: `true`.
-    - Note: at this point, `bin_values` could be any of `{true, false}`, `{true}`, and `{false}`. If it contains exactly one value, the other value may or may not be appended to it later in this round
-  - Each node considers any auxiliary value as valid if it belongs to their `bin_values`
-    - Note: validity could happen as a result of `bin_values` being appended to
-- Once we can strongly see valid auxiliary values coming from  `> 2N/3` nodes (where `N` is the number of valid voters of this section)
-  - Note: if we call values the set of unique values carried by all valid auxiliary values we see
-    - This set could be `{true, false}`, `{true}`, or `{false}`, but if any node observes `{true}`, no other node may observe `{false}` and vice versa
-    - This is proved in 4.3 Lemma 2 of [ABA](https://hal.inria.fr/hal-00944019/document)
-  - Follow the gradient leadership based concrete coin protocol (described below) to possibly promote one of the strongly seen valid auxiliary values to the rank of decided value (only if step is 0 or 1) or to update the estimate to the output of a genuinely flipped common coin (if step is 2)
-  - If a binary value is decided, terminate
-  - Else, if `step < 2`, increment step and repeat from "Start binary value gossip"; else, increment round and repeat from "Start binary value gossip"
+This algorithm considers a section of a `gossip_graph` starting with the oldest observer `GossipEvent` for each node and ending with the most recent `GossipEvent` created by each node. We consider the oldest observer's meta votes as the initial binary values we desire to obtain consensus on. This is in view of deriving full consensus from this binary consensus, but the algorithm described here would work considering any binary property of a `GossipEvent`. To each `GossipEvent` starting with the oldest ones, we assign additional meaning (such as estimates, auxiliary values and so on). Eventually given a large enough section of the `gossip_graph`, each node will have created one `GossipEvent` that is assigned the meaning of a "decided" binary value. This terminates the algorithm.
+
+To each `GossipEvent`, we associate the following meaning (when trying to determine binary consensus on one voter's right to vote in the current ordering decision):
+- a round number starting at zero for the oldest observer
+- a step number starting at zero for the oldest observer
+- a set of estimates, comprised of one or two boolean values starting with the set containing one value: the observer's meta vote for the voter under consideration
+- a set of binary values `bin_values` starting with the empty set
+- an optional auxiliary value, starting with `None`
+- an optional decided value, starting with `None`
+
+Starting from the oldest `GossipEvent`, we perform the algorithm by always considering the next `GossipEvent` (the older `GossipEvent` is the `self_parent` of the "next" `GossipEvent`) and calculating its values until the decided value is not `None` for one of the considered `GossipEvent`s.
+
+The set of estimates of a `GossipEvent` is the set of estimates of its `self_parent`, except if
+- this `GossipEvent` can see `>= N/3` `GossipEvent`s carrying estimate of a value that is not present in its `self_parent`'s estimate, in which case the estimate is the set: `{true, false}`
+- the step number is different from the `self_parent`'s step number, in which case the estimate is updated according to the rules defined in the "concrete coin protocol"
+
+The set `bin_values` of a `GossipEvent` is the set `bin_values` of its `self_parent, except if
+- this `GossipEvent` can see `> 2N/3` `GossipEvent`s carrying estimate of a value that is not present in its `self_parent`'s estimate, in which case this event's `bin_values` is the union of its `self_parent`'s `bin_vales` and the set of norm 1 containing that new value.
+- the step number is different from its `self_parent`'s step number, in which case `bin_values` is the empty set
+
+The auxiliary value of a `GossipEvent` is the same as its `self_parent`'s, except if
+- its auxiliary value is `None`, its `self_parent`'s set of `bin_values` is empty and its set of `bin_values` is non-empty
+  - if its set of `bin_values` is of cardinality one, the auxiliary value is `Some(v)` where v is the only value contained in `bin_value`
+  - if its set of `bin_values` is the set: `{true, false}`, the auxiliary value is `Some(true)` (as decided arbitrarily by the authors)
+- its step nunmber is different from its `self_parent`'s step number, in which case its auxiliary value is `None`
+
+The decided value of a `GossipEvent` is `None`, except if
+- its step number is `0` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(true)`
+- its step number is `1` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(false)`
+
+A `GossipEvent`'s step number is its `self_parent` step number, except if
+- this `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values that are not `None`, in which case the step number is its `self_parent`'s step number plus one, or zero if it's `self_parent`'s step number is two
+
+A `GossipEvent`'s round number is its `self_parent`'s round number, except if
+- its `self_parent`'s step number is `2` and its step number is `0`, in wihch case its round number is its `self_parent`'s round number plus one
 
 ### Gradient leadership based concrete coin
 
