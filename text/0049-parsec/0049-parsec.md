@@ -285,14 +285,17 @@ To each `GossipEvent`, we associate the following meaning (when trying to determ
 Starting from the oldest `GossipEvent`, we perform the algorithm by always considering the next `GossipEvent` (the older `GossipEvent` is the `self_parent` of the "next" `GossipEvent`) and calculating its values until the decided value is not `None` for one of the considered `GossipEvent`s.
 
 The set of estimates of a `GossipEvent` is the set of estimates of its `self_parent`, except if
+- this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
 - this `GossipEvent` can see `>= N/3` `GossipEvent`s carrying estimate of a value that is not present in its `self_parent`'s estimate, in which case the estimate is the set: `{true, false}`
 - the step number is different from the `self_parent`'s step number, in which case the estimate is updated according to the rules defined in the "concrete coin protocol"
 
 The set `bin_values` of a `GossipEvent` is the set `bin_values` of its `self_parent, except if
+- this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
 - this `GossipEvent` can see `> 2N/3` `GossipEvent`s carrying estimate of a value that is not present in its `self_parent`'s estimate, in which case this event's `bin_values` is the union of its `self_parent`'s `bin_vales` and the set of norm 1 containing that new value.
 - the step number is different from its `self_parent`'s step number, in which case `bin_values` is the empty set
 
 The auxiliary value of a `GossipEvent` is the same as its `self_parent`'s, except if
+- this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
 - its auxiliary value is `None`, its `self_parent`'s set of `bin_values` is empty and its set of `bin_values` is non-empty
   - if its set of `bin_values` is of cardinality one, the auxiliary value is `Some(v)` where v is the only value contained in `bin_value`
   - if its set of `bin_values` is the set: `{true, false}`, the auxiliary value is `Some(true)` (as decided arbitrarily by the authors)
@@ -328,31 +331,34 @@ Taking inspiration from Section 3.1.1 of [Byzantine Agreement, Made Trivial](htt
 
 ##### Step 0:
 
-Starting with each observer carrying its meta votes as estimates, after an instance of binary value gossip, as soon as we strongly see a supermajority of valid auxiliary values,
+When a `GossipEvent`'s `self_parent` carries the step number: `0` and that `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values for step `0` that are not `None`, this `GossipEvent`'s step number becomes `1`.
 
-- If we strongly see a supermajority of `true` auxiliary values, we decide `true`
-  - Any node observing our current `GossipEvent` will accept it as a `true` auxiliary value for any subsequent step and round of this particular binary agrement
-- If we strongly see a supermajority of `false` auxiliary values, we change our estimate to `false`
-- If we don't strongly see any supermajority, we update our estimate to `true`
-- A new instance of binary value gossip starts
+- When a `GossipEvent`'s step number is `1`, but their `self_parent`'s step number is `0`,
+  - if they strongly see a supermajority of auxiliary values: `Some(true)` for step `0` of their current round, their decided value becomes `Some(true)`
+  - if they strongly see a supermajority of auxiliary values: `Some(false)` for step `0` of their current round, their estimate becomes the set: `{false}`
+  - if they strongly see no agreeing supermajority of auxiliary values for step `0` of their current round, their estimates become the set: `{true}`
+
+- These new estimates participate in a new instance of binary value gossip for step `1` of this round
 
 ##### Step 1:
 
-Starting with the estimates from Step 0, after an instance of binary value gossip, as soon as we strongly see a supermajority of valid auxiliary values
+When a `GossipEvent`'s `self_parent` carries the step number: `1` and that `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values for step `1` that are not `None`, this `GossipEvent`'s step number becomes `2`.
 
-- If we strongly see a supermajority of `false` auxiliary values, we decide `false`
-  - Any node observing our current `GossipEvent` will accept it as a `false` auxiliary value for any subsequent step and round of this particular binary agrement
-- If we strongly see a supermajority of `true` auxiliary values, we change our estimate to `true`
-- If we don't strongly see any supermajority, we update our estimate to `false`
-- A new instance of binary value gossip starts
+- When a `GossipEvent`'s step number is `2`, but their `self_parent`'s step number is `1`,
+  - if they strongly see a supermajority of auxiliary values: `Some(false)` for step `1` of their current round, their decided value becomes `Some(false)`
+  - if they strongly see a supermajority of auxiliary values: `Some(true)` for step `1` of their current round, their estimates become the set: `{true}`
+  - if they strongly see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{false}`
+
+- These new estimates participate in a new instance of binary value gossip for step `2` of this round
 
 ##### Step 2:
 
-Starting with the estimates from Step 1, after an instance of binary value gossip, as soon as we strongly see a supermajority of valid auxiliary values,
+When a `GossipEvent`'s `self_parent` carries the step number: `2` and that `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values for step `2` that are not `None`, this `GossipEvent`'s step number becomes `0` and its round number becomes its `self_parent`'s round number plus one.
 
-- If we strongly see a supermajority of `true` auxiliary values, we change our estimate to `true`
-- If we strongly see a supermajority of `false` auxiliary values, we change our estimate to `false`
-- If we don't strongly see any supermajority, we update our estimate to the outcome of a "genuinely flipped concrete coin" (see description below)
+- When a `GossipEvent`'s step number is `0`, but their `self_parent`'s step number is `2`,
+  - if they strongly see a supermajority of auxiliary values: `Some(true)` for step `2` of their current round, their estimates become the set: `{true}`
+  - if they strongly see a supermajority of auxiliary values: `Some(false)` for step `2` of their current round, their estimate becomes the set: `{false}`
+  - if they strongly see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{v}`, where `v` is the outcome of a "genuinely flipped concrete coin" (see description below) 
 
 #### Genuinely flipped concrete coin
 
