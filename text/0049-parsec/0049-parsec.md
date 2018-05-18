@@ -22,7 +22,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 In the SAFE Network, we expect continual churn of nodes, i.e. nodes joining and leaving sections.  We also require a quorum of valid voters (elder nodes) in a given section to reach agreement on the validity of any given set of votes. To allow this, the elders vote on which nodes are joining or leaving their section, and pass these votes between themselves.
 
-This voting is asynchronous, but we must be able to reach a consensus within the elders about which votes are valid, and furthermore about which order a valid set of votes should be applied to their shared knowledge of their section's membership, even in the face of faulty nodes disseminating invalid information or otherwise misbehaving.  This proposal provides a solution to this problem.
+This voting is asynchronous, but we must be able to reach a consensus within the elders about which votes are valid. Less trivially, all nodes need to agree on which order a valid set of votes should be applied to their shared knowledge of their section's membership, even in the face of faulty nodes disseminating invalid information or otherwise misbehaving. This proposal provides a solution to this problem, by first reaching agreement on a subset of the valid voters to be considered for any decision, before deferring to them for the actual ordering decisions.
 
 # Detailed design
 
