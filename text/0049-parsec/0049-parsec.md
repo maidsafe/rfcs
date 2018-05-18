@@ -455,7 +455,7 @@ By the end of any step, only malicious nodes could possibly manipulate their gos
 ###### If at some step, a honest player halts, then agreement will hold at the end of that step (Claim C)
 
 A honest player only halts at step 0 or 1.
-If they halt at step 0, it means they have seen `> 2N/3` votes for `true`. It means that any majority seen by a node must be for `true`. Any tie will also be broken in favour of `true`. Agreement holds on `true`.
+If they halt at step 0, it means they have seen `> 2N/3` votes for `true`. It means that any supermajority seen by a node must be for `true`. Any tie will also be broken in favour of `true`. Agreement holds on `true`.
 Conversely, if they halt at step 1, agreement holds on `false`.
 Thanks to Claim B, agreement persists.
 
