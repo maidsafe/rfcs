@@ -424,8 +424,8 @@ Without diving deeper in the exact probability of each specific scenario, it is 
 
 ###### If, at some step, agreement holds on some bit b, then it continues to hold on the same bit b (Claim B)
 
-Assume that the players agree at the begining of a round.
-After any step, the best the malicious nodes can do is have `< n/3` incorrect votes. After [ABA](https://hal.inria.fr/hal-00944019/document), and before the next step, honest nodes will only be aware of binary values that come from correct nodes, so they must see a supermajority of correct auxiliary value, so they will keep it.
+Assume that all honest nodes agree at the begining of a round.
+By the end of any step, only malicious nodes could possibly manipulate their gossip to appear to be casting the incorrect value for that estimate. After [ABA](https://hal.inria.fr/hal-00944019/document) over gossip, and before the next step, honest nodes will only be aware of binary values that come from correct nodes (as proved by the Justification property of ABA over gossip), so all honest nodes must create a `GossipEvent` that sees a supermajority of correct auxiliary value. Agreement holds.
 
 ###### If at some step, a honest player halts, then agreement will hold at the end of that step (Claim C)
 
