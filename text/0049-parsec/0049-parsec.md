@@ -403,7 +403,7 @@ If the leader is responsive and honest, which has `> 2/3` probability, if every 
 
 We start by proving that the claims from [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2), still hold with our modifications. The demonstration for the theorems should still hold from there.
 
-Note that the wording sounds synchronous, but we are simply refering to rounds and steps as can be deduced from gossip, looking back at it.
+Note that the wording below assumes that we are looking at the `gossip_graph` after a sufficient number of `GossipEvent`s have been communicated. If the `GossipEvent`s we are trying to order are too recent, we may not be able to decide on consensus yet. In that case, we the next stable block would be `None`, until such a time at which our `gossip_graph` would contain enough events to decide on a next stable `Block`. Claiming that consensus will be reached eventually means that as gossip progresses, there will be a point at which the next stable `Block` returned shall not be `None`.
 
 ###### If, at the start of an execution of Step 2, no player has yet halted and agreement has not yet been reached, then, with probability 1/3, the players will be in agreement at the end of the step (Claim A)
 
