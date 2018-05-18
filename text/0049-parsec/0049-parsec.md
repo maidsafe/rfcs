@@ -389,7 +389,7 @@ The algorithm used to obtain a genuine concrete coin is as follows:
 
 ###### It is not always possible for malicious nodes to predict the outcome ahead of time
 
-Since the first `GossipEvent` we consider is the one that carries the leader's auxiliary value, it can't have be predicted by the malicious nodes ahead of time except if the leader himself is malicious and has reordered events on purpose. That's OK because the bad guys won't always be able to place themsemves in a leadership position.
+Since the first `GossipEvent` we consider is the one that carries the leader's auxiliary value, it can't have been predicted by the malicious nodes ahead of time except if the leader himself is malicious and has reordered events on purpose. That's OK because the bad guys won't always be able to place themsemves in a leadership position.
 
 ###### It always terminates
 
