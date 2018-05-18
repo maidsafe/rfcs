@@ -380,7 +380,7 @@ Assuming we agreed on a `GossipEvent` to be used as the source of coin flip, we 
 
 The algorithm used to obtain a genuine concrete coin is as follows:
 
-- Once a node strongly sees a supermajority of `GossipEvent`s carrying the auxiliary value for a given estimate at step 2 of a given round of the full concrete coin protocol,
+- Once a node creates an event that strongly sees a supermajority of `GossipEvent`s carrying the auxiliary value for a given estimate at step 2 of a given round of the full concrete coin protocol,
   - Each node uses the `GossipEvent` that carries the auxiliary value of the most  leader node as candidate for coin flip, if they can see it
   - If they can't see it, they wait until they received `responsiveness_threshold` `GossipResponseRpc` since their own auxiliary value. If at that point, they haven't yet seen that `GossipEvent`, they select the `GossipEvent` that carries an auxiliary value that they see with the highest leadership rank
     - Note: This use of `GossipResponseRpc` allows to embed a measure of time in the gossip graph, so any node analysing our decision to consider the coin flipped a certain way can understand why we picked a given `GossipEvent` as our source of coin flip, looking at the gossip graph only
