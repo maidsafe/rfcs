@@ -302,8 +302,8 @@ The auxiliary value of a `GossipEvent` is the same as its `self_parent`'s, excep
 - its step nunmber is different from its `self_parent`'s step number, in which case its auxiliary value is `None`
 
 The decided value of a `GossipEvent` is `None`, except if
-- its step number is `0` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(true)`
-- its step number is `1` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(false)`
+- its step number is `0`, its `bin_values` contain `true` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(true)`
+- its step number is `1`, its `bin_values` contain `false` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(false)`
 
 A `GossipEvent`'s step number is its `self_parent` step number, except if
 - this `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values that are not `None`, in which case the step number is its `self_parent`'s step number plus one, or zero if it's `self_parent`'s step number is two
