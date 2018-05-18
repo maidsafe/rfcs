@@ -289,7 +289,7 @@ The set of estimates of a `GossipEvent` is the set of estimates of its `self_par
 - this `GossipEvent` can see `GossipEvent`s carrying estimate of a value that is not present in its `self_parent`'s estimate, originating from `>= N/3` different nodes, in which case the estimate becomes the set: `{true, false}`
 - the step number is different from the `self_parent`'s step number, in which case the estimate is updated according to the rules defined in the "concrete coin protocol"
 
-The set `bin_values` of a `GossipEvent` is the set `bin_values` of its `self_parent, except if
+The set `bin_values` of a `GossipEvent` is the set `bin_values` of its `self_parent`, except if
 - this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
 - this `GossipEvent` can see `GossipEvent`s originating from `> 2N/3` different nodes carrying estimates of a value that is not present in its `self_parent`'s estimate, in which case this event's `bin_values` is the union of its `self_parent`'s `bin_vales` and the set of containing only that new value.
 - the step number is different from its `self_parent`'s step number, in which case `bin_values` is the empty set
