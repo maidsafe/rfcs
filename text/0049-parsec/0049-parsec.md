@@ -395,9 +395,9 @@ Since the first `GossipEvent` we consider is the one that carries the leader's a
 
 This process won't stall forever: if the most leader node is dead, their opinion won't be necessary to reach consensus. Each node will eventually have an opinion on the source of coin flip, even if they ignore the most leader node.
 
-###### Split consensus is unlikely
+###### The coin will be common and random with around `> 2/3` probability
 
-If the leader is responsive and honest, which is `> 2/3` probability, consensus will be reached on the outcome of their auxiliary value.
+If the leader is responsive and honest, which has `> 2/3` probability, if every other honest node can see their `GossipEvent` carrying the auxiliary value for that round before they can create `responsiveness_threshold` `GossipEvent`s with cause: `GossipEvent::Response`, the coin will be common and random. Since we picked `responsiveness_threshold` so that honest nodes would hear from a honest leader first with high probability, we can deduce that the coin shall be common and random approximately `> 2/3` of the times. Note that we don't need to be more exact here as any probability with a lower-bound would be sufficient to prove the correctness of our algorithm.
 
 ##### Proofs for the concrete coin protocol, overall
 
