@@ -438,9 +438,9 @@ Thanks to Claim B, agreement persists.
 
 ###### Validity. A decided value was proposed by a correct node
 
-The only values considered as input to Step 0 of the concrete coin protocol are values that were present in a node's `bin_values` after binary value gossip. Due to the Justification property of binary value gossip, they must have been proposed by a correct node. In each step, if we strongly see a supermajority of agreeing value `v`, `v` must have been propagated by a correct node, so changing our estimate to that value won't break this invariant. Else, both values `true` and `false` must have been sent by a correct node, so changing our estimate to anything won't break the invariant either.
+The only values considered as input to Step 0 of the concrete coin protocol are values that were present in a node's `bin_values` after binary value gossip. Due to the Justification property of binary value gossip, they must have been proposed by a correct node. In each step, if we strongly see a supermajority of agreeing value `v`, `v` must have been propagated by a correct node, so changing our estimate to that value won't break this invariant. Else, both values `true` and `false` must have been sent by a correct node, so changing our estimate to any value will maintain the invariant.
 
-###### Agreement. No two correct node decide different values
+###### Agreement. No two correct nodes decide different values
 
 We know from Claim C of the concrete coin protocol that, if at some step, a honest player halts, then agreement will hold at the end of that step. Since, from Claim B, agreement will then continue to hold on the same bit, it will never be possible for a different node to decide a different value (as that would require to see a supermajority of different values at Step 0 or Step 1 which is impossible)
 
@@ -450,7 +450,7 @@ Once a correct node decides a value, binary consensus is considered to be reache
 
 ###### Termination. Each correct process decides
 
-From Claim A, the probability of not deciding after a given round `r` is `1/(3^r)`, which tends to zero as the number of rounds increases. Hence, each correct process decides eventually.
+From Claim A of the concrete coin protocol, the probability of not deciding after a given round `r` is `1/(3^r)`, which tends to zero as the number of rounds increases. Hence, each correct process decides eventually.
 
 ### From binary consensus to full consensus
 
