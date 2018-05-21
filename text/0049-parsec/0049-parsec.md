@@ -154,7 +154,7 @@ gossip_graph: HashMap<Hash, GossipEvent>
   - Run the current gossip graph through the order consensus algorithm until it returns None. The output of this algorithm is an `Option` of newly-stable `Block`
 - On receipt of a `GossipResponseRpc`, a node will
   - Insert the contained `GossipEvent`s into its gossip graph
-  - Create a new `GossipEvent` that records receipt of the latest gossip. The `self_parent` is the hash of the latest event in its own gossip history and `other_parent` is the hash of the sender's latest event in the `GossipRequestRpc`. The cause for this `GossipEvent` is `GossipCause::Response`
+  - Create a new `GossipEvent` that records receipt of the latest gossip. The `self_parent` is the hash of the latest event in its own gossip history and `other_parent` is the hash of the sender's latest event in the `GossipResponseRpc`. The cause for this `GossipEvent` is `GossipCause::Response`
   - Run the current gossip graph through the order consensus algorithm until it returns None. The output of this algorithm is an `Option` of newly-stable `Block`
 - On observation of a change in the network structure, a node will
   - Create a new `GossipEvent` that records observation of said network event. The `self_parent` is the hash of the latest event in its own gossip history and `other_parent` is `None`. The cause for this `GossipEvent` is `GossipCause::Observation`
