@@ -44,7 +44,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section
 - **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused `Dead` in our `gossip_graph` will ever be considered again as a voting member in this definition
 - **seen**: a `GossipEvent` is seen by a later one if there is a directed path going from the latter to the former in the gossip graph
-- **strongly seen**: a `GossipEvent` is strongly seen by another one if it is seen via multiple directed paths passing through a supermajority of the nodes
+- **strongly seen**: a `GossipEvent` is strongly seen by another `GossipEvent` if it is seen via multiple directed paths passing through a supermajority of the nodes
 - **valid `Block`**: `Block` formed via a strongly seen supermajority of `Vote`s
 - **stable `Block`**: a valid `Block` that has also had its order decided via order consensus
 - **observer**: the first gossip event created by a node X which can see that `GossipEvent`s created by a supermajority of nodes can see a valid `Block` which is not yet stable. The `Block` that's seen as valid may be different for different nodes
@@ -64,7 +64,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 
 ## Assumptions and deductions
 
-1. Less than one third of the voting members in a section are faulty or dishonest. Subsequently, we use "faulty" to mean: either faulty or dishonest. We call `t` the number of faulty processes, which always satisfies `t < N/3`
+1. Less than one third of the voting members in a section are faulty or dishonest. Subsequently, we use "faulty" to mean: either faulty or dishonest. We call `t` the number of faulty nodes, which always satisfies `t < N/3`
 1. Any `GossipEvent` that has been seen by at least one correct node will eventually be seen by every other node with probability one due to the properties of the gossip protocol
 1. From the previous statement, we deduce that every correct node will be able to build the exact same gossip graph as each other eventually
 
@@ -122,7 +122,7 @@ struct GossipEvent<T> {
 
 - As part of the gossip protocol, a node communicates all `GossipEvent`s they think another node doesn't know by sending them one of the two following types:
   - They use a `GossipRequestRpc` if their timer indicates that it is time to send gossip to a randomly picked network node
-  - They use a `GossipResponseRpc` if they just received gossip from another node. The response is sent to the sender of the received gossip
+  - They use a `GossipResponseRpc` if they just received gossip from another node. The response is sent to the sender of the latest received `GossipRequestRpc`
 
 ```rust
 struct GossipRequestRpc {
