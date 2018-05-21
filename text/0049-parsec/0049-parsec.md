@@ -38,18 +38,20 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **`GossipEvent`**: message being communicated through gossip over the network. Its `payload` represents a `Vote`. It also contains two optional hashes: `self_parent` and `other_parent` and a `GossipCause`
 - **`GossipRequestRpc`/`GossipResponseRpc`**: the data structures used to communicate `GossipEvent`s between nodes
 - **section**: partition of the network constituted of a number of nodes, satisfying the description in the [Disjoint Section RFC](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md)
-- **sync event**: the `GossipEvent` created by a node, when receiving gossip to record receipt of that latest gossip 
+- **sync event**: the `GossipEvent` created by a node, when receiving gossip to record receipt of that latest gossip
 - **gossip graph**: the directed acyclic graph (DAG) formed by `GossipEvent`s which holds information about the order any given node voted for network events, and which votes a given node knows about
+- **N**: number of valid voters of a section
+- **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section
 - **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused `Dead` in our `gossip_graph` will ever be considered again as a voting member in this definition
 - **seen**: a `GossipEvent` is seen by a later one if there is a directed path going from the latter to the former in the gossip graph
 - **strongly seen**: a `GossipEvent` is strongly seen by another one if it is seen via multiple directed paths passing through a supermajority of the nodes
 - **valid `Block`**: `Block` formed via a strongly seen supermajority of `Vote`s
 - **stable `Block`**: a valid `Block` that has also had its order decided via order consensus
 - **observer**: the first gossip event created by a node X which can see that `GossipEvent`s created by a supermajority of nodes can see a valid `Block` which is not yet stable. The `Block` that's seen as valid may be different for different nodes
-- **meta vote**: the meta vote of a given observer for a given node X is the binary answer to this question: "does this observer strongly see any vote for a valid `Block` which is not yet stable by node X?" By definition, each observer carries `N` meta votes where `N` is the number of valid voters of this section, of which `> 2N/3` are `true`. Note that a meta vote is virtual: no node ever explicitly casts a meta vote, but it is instead an after the fact interpretation of ordinary gossip
-- **binary value gossip**: our adaptation of "binary value broadcast". It is an algorithm used to communicate (virtual) binary values over gossip with the following properties:
+- **meta vote**: the meta vote of a given observer for a given node X is the binary answer to this question: "does this observer strongly see any vote for a valid `Block` which is not yet stable by node X?" By definition, each observer carries `N` meta votes of which `> 2N/3` are `true`. Note that a meta vote is virtual: no node ever explicitly casts a meta vote, but it is instead an after the fact interpretation of ordinary gossip
+- **binary value gossip**: also known as "BV-gossip", it is our adaptation of "binary value broadcast". It is an algorithm used to communicate (virtual) binary values over gossip with the following properties:
   - **Obligation**: If `>= N/3` correct nodes BV-gossip the same value `v`, `v` is eventually added to the set of binary values (`bin_values`) of each correct node
-  - **Justification**: If `bin_values` contains `v`, it has been BV-gossiped by a correct node
+  - **Justification**: If `bin_values` (see below for definition) contains `v`, it has been BV-gossiped by a correct node
   - **Uniformity**: If `v` is added to the set `bin_values` of a correct node, it will eventually be added to all correct nodes' `bin_values`
   - **Termination**: Eventually the set `bin_values` of each correct node is not empty
 - **estimate**: in the context of binary value gossip, a value proposed by a node for a given variable
@@ -57,14 +59,12 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **auxiliary value**: the first value to make it to a node's `bin_values` or true if a same `GossipEvent` carried both values `true` and `false` for a same binary variable
 - **valid auxiliary value**: an auxiliary value emitted by any node that is also part of the `bin_values` of the node assessing its validity
 - **decided value**: a binary value which has reached Binary Byzantine consensus from a node's point of view
-- **`responsiveness_threshold`**: a number chosen so that in the time it takes for a honest node to create `responsiveness_threshold` `GossipEvent`s of type `GossipCause::Response` after a given instant `T_0`, this node is likely to have been informed of any `GossipEvent` sent by a honest node at, or before `T_0`. Provisionally, `log2(N)`. Exact value will depend on testing results
+- **`responsiveness_threshold`**: a number chosen so that in the time it takes for an honest node to create `responsiveness_threshold` `GossipEvent`s of type `GossipCause::Response` after a given instant `T_0`, this node is likely to have been informed of any `GossipEvent` sent by an honest node at, or before `T_0`. Provisionally, `log2(N)`. Exact value will depend on testing results
 - **order consensus**: method to determine a total order for `Block`s from a gossip graph
-- **N**: number of valid voters of a section
-- **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section
 
 ## Assumptions and deductions
 
-1. Less than one third of the voting members in a section are faulty or dishonest. Subsequently, we use "faulty" to mean: either faulty or dishonests. We call t the number of faulty processes, which always satisfies t < N/3 
+1. Less than one third of the voting members in a section are faulty or dishonest. Subsequently, we use "faulty" to mean: either faulty or dishonest. We call `t` the number of faulty processes, which always satisfies `t < N/3`
 1. Any `GossipEvent` that has been seen by at least one correct node will eventually be seen by every other node with probability one due to the properties of the gossip protocol
 1. From the previous statement, we deduce that every correct node will be able to build the exact same gossip graph as each other eventually
 
@@ -90,21 +90,22 @@ struct GossipProof {
 }
 ```
 
-- The cause for creating a `GossipEvent` is desribed by a `GossipCause` enum:
+- The cause for creating a `GossipEvent` is described by a `GossipCause` enum:
 ```rust
-enum GossipCause {
+enum GossipCause<T> {
     Request,
     Response,
-    Observation,
+    Observation(Vote<T>),
 }
 ```
 
 - We define a gossip event as such:
 ```rust
 struct GossipEvent<T> {
-    // T normally represents some NodeState.
-    // The payload can be None if we have nothing new to gossip.
-    payload: Option<Vote<T>>,
+    // why was this GossipEvent created? Was it due to an observation of a network change?
+    // Was it initiated by the sender (Request)? Was it a Response to previous gossip?
+    // (T normally represents some NodeState).
+    payload: GossipCause<T>,
     // hash of the latest GossipEvent the node which created this event has seen
     self_parent: Option<Hash>,
     // hash of the latest GossipEvent of the node from which we learnt of this
@@ -112,28 +113,24 @@ struct GossipEvent<T> {
     other_parent: Option<Hash>,
     // signature and identifier of the node that created this GossipEvent
     proof: GossipProof,
-    // why was this GossipEvent created? Was it due to an observation of a network change? Was it initiated by the sender (Request)? Was it a Response to previous gossip?
-    cause: Option<GossipCause>,
 }
 ```
 
 - A gossip event may be created for one of the following reasons:
-  - Another node gossiped to us and we record this fact by creating a `GossipEvent` with a `None` `payload`
-    - If we received a `GossipRequestRpc`, we set pattern to `GossipCause::Request`. If we received a `GossipResponseRpc`, we set cause to `GossipCause::Response`
-    - If we received a `GossipRequestRpc`, we are required to immediately gossip back to the sender, bundling the NetworkEvents we think they aren't aware of in a `GossipResponseRpc`
-  - We witness a network event and would like to share that. We create a `GossipEvent` containing our `Vote` on that `NodeState`. We set cause to `GossipCause::Observation`
+  - Another node gossiped to us and we record this fact by creating a `GossipEvent` with a `GossipCause::Request` or `GossipCause::Response` `payload` depending on whether we received a `GossipRequestRpc` or `GossipResponseRpc`. If we received a `GossipRequestRpc`, we are required to immediately gossip back to the sender, bundling the NetworkEvents we think they aren't aware of in a `GossipResponseRpc`
+  - We witness a network event and would like to share that. We create a `GossipEvent` with a `GossipCause::Observation` `payload` containing our `Vote` on that `NodeState`
 
-- As part of the gossip protocol, a node communicates all `GossipEvent`s they think another node doesn't know by sending them one of the two following types: 
+- As part of the gossip protocol, a node communicates all `GossipEvent`s they think another node doesn't know by sending them one of the two following types:
   - They use a `GossipRequestRpc` if their timer indicates that it is time to send gossip to a randomly picked network node
   - They use a `GossipResponseRpc` if they just received gossip from another node. The response is sent to the sender of the received gossip
 
 ```rust
 struct GossipRequestRpc {
-	events: Vec<GossipEvent>
+	  events: Vec<GossipEvent>
 }
 
 struct GossipResponseRpc {
-	events: Vec<GossipEvent>
+	  events: Vec<GossipEvent>
 }
 ```
 
@@ -177,29 +174,29 @@ Our adaptation of [ABA](https://hal.inria.fr/hal-00944019/document) has two majo
 
 ### Reducing general Byzantine problem to a binary Byzantine problem
 
-When a `GossipEvent` strongly sees a non-yet stable `Block` formed via a strongly seen supermajority of `Vote`s, this `GossipEvent` is said to carry a valid `Block`.
+When a `GossipEvent` strongly sees a not-yet stable `Block` formed via a strongly seen supermajority of `Vote`s, this `GossipEvent` is said to carry a valid `Block`.
 
-For any node, the first `GossipEvent` they  create that sees `GossipEvent`s created by `> 2N/3` of the nodes carrying valid `Block`s, is defined to be that node's observer.
+For any node, the first `GossipEvent` they create that sees `GossipEvent`s created by `> 2N/3` of the nodes carrying valid `Block`s, is defined to be that node's observer.
 
 We need to ensure that all nodes decide upon the same order of stable `Block`s. These are `Block`s which have become valid, but the order in which they became valid can vary from each node's perspective. When a node receives gossip and creates a sync event, this could cause one or more valid `Block`s to form. The general Byzantine problem is deciding which of these `Block`s should be considered the next stable `Block`.
 
-To make a decision, we turn this single problem into a number of binary Byzantine problems. Each binary problem is effectively asking "Should this voter's opinion be considered when choosing the next stable block?" . To be more specific, for each current valid voter, we ask the question "Can our latest sync event strongly see any vote for a valid, not-yet-stable block by this voter?". The answer to that question is a virtual binary value that we define as our meta vote for this voter's right to participate in the decision.
-- Note: by "virtual", we mean that there is no actual explicit "meta vote" initiated by any node. These meta votes are implicit properties of gossip. The meaning of "meta vote" is assigned to a `GossipEvent` in retrospect by an actor interpreting the `gossip_graph`. This definition of "virtual" also applies to estimates, auxiliary values, `bin_values` and decided values. 
+To make a decision, we turn this single problem into a number of binary Byzantine problems. Each binary problem is effectively asking "Should this voter's opinion be considered when choosing the next stable block?". To be more specific, for each current valid voter, we ask the question "Can our latest sync event strongly see any vote for a valid, not-yet-stable block by this voter?". The answer to that question is a virtual binary value that we define as our meta vote for this voter's right to participate in the decision.
+- Note: by "virtual", we mean that there is no actual explicit "meta vote" initiated by any node. These meta votes are implicit properties of gossip. The meaning of "meta vote" is assigned to a `GossipEvent` in retrospect by an actor interpreting the gossip graph. This definition of "virtual" also applies to estimates, auxiliary values, `bin_values` and decided values.
 
 We use this specific question since when the answer is "yes" we know two things: the voter's vote will eventually be seen by all correct nodes, and after binary consensus the set of voters seen by all nodes will not be empty^1^.
 
 After achieving Binary consensus on all voters, deciding the next stable `Block` is trivial: for instance, one can simply consider which `NodeState` is carried by the most nodes as content for the next stable `Block`. If that leads to a tie, a simple rule such as Lex-Order of the `NodeState`s can be used to break the tie.
 
-#### Note 1: Proof that the consensus-ed set of voters will never be empty
+#### Note 1: Proof that the consensused set of voters will never be empty
 For a given network event, consensus on the voters for that event will never result in an empty set of voters.
 
-Proof: By definition of an observer, each voter casts at least `> 2/3 N` meta votes of `true` per network event. It follows that the maximum number of false votes for any event is `< 1/3 N^2`. For a false meta vote to be consensus-ed, it must have been voted for by `>= 1/3 N` nodes (from binary value gossip algorithm). For all meta votes to be false, there would need to be `>= 1/3 N^2`. This is incompatible with the previous statement, so it can't happen.
+Proof: By definition of an observer, each voter casts at least `> 2/3 N` meta votes of `true` per network event. It follows that the maximum number of false votes for any event is `< 1/3 N^2`. For a false meta vote to be consensused, it must have been voted for by `>= 1/3 N` nodes (from binary value gossip algorithm). For all meta votes to be false, there would need to be `>= 1/3 N^2`. This is incompatible with the previous statement, so it can't happen.
 
 ### Solving the Binary Byzantine problem using gossip
 
 We now adapt the algorithms described in [ABA](https://hal.inria.fr/hal-00944019/document) to suit our use of gossip.
 
-To paraphrase the paper, here are the guarantees provided by binary byzantine consensus:
+To paraphrase the paper, here are the guarantees provided by binary Byzantine consensus:
 
 - **Validity**. A decided value was proposed by a correct node
 - **Agreement**. No two correct nodes decide different values
@@ -235,7 +232,7 @@ The outcome of this algorithm is one of the 3 following sets: `{true}`, `{false}
 
 Depending on the timing, different nodes could have different sets of `bin_values`. Consensus will only be achieved eventually.
 
-Note that we haven't reached byzantine consensus yet. For that, we will need to adapt the rest of [ABA](https://hal.inria.fr/hal-00944019/document).
+Note that we haven't reached Byzantine consensus yet. For that, we will need to adapt the rest of [ABA](https://hal.inria.fr/hal-00944019/document).
 
 ### Proof of binary value gossip properties
 
@@ -301,7 +298,7 @@ The auxiliary value of a `GossipEvent` is the same as its `self_parent`'s, excep
 - its auxiliary value is `None`, its `self_parent`'s set of `bin_values` is empty and its set of `bin_values` is non-empty
   - if its set of `bin_values` is of cardinality one, the auxiliary value is `Some(v)` where v is the only value contained in `bin_value`
   - if its set of `bin_values` is the set: `{true, false}`, the auxiliary value is `Some(true)` (as decided arbitrarily by the authors)
-- its step nunmber is different from its `self_parent`'s step number, in which case its auxiliary value is `None`
+- its step number is different from its `self_parent`'s step number, in which case its auxiliary value is `None`
 
 The decided value of a `GossipEvent` is `None`, except if
 - its step number is `0`, its `bin_values` contain `true` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(true)`
@@ -311,11 +308,11 @@ A `GossipEvent`'s step number is its `self_parent` step number, except if
 - this `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values that are not `None`, in which case the step number is its `self_parent`'s step number plus one, or zero if it's `self_parent`'s step number is two
 
 A `GossipEvent`'s round number is its `self_parent`'s round number, except if
-- its `self_parent`'s step number is `2` and its step number is `0`, in wihch case its round number is its `self_parent`'s round number plus one
+- its `self_parent`'s step number is `2` and its step number is `0`, in which case its round number is its `self_parent`'s round number plus one
 
 ### Gradient leadership based concrete coin
 
-Before reaching byzantine consensus, we need some non-determinism. Please refer to this section of [ABA](https://hal.inria.fr/hal-00944019/document) **Enriching the basic asynchronous model: Rabin’s common coin for more details**.
+Before reaching Byzantine consensus, we need some non-determinism. Please refer to this section of [ABA](https://hal.inria.fr/hal-00944019/document) **Enriching the basic asynchronous model: Rabin's common coin for more details**.
 
 Here is the short description:
 
@@ -360,7 +357,7 @@ When a `GossipEvent`'s `self_parent` carries the step number: `2` and that `Goss
 - When a `GossipEvent`'s step number is `0`, but their `self_parent`'s step number is `2`,
   - if they strongly see a supermajority of auxiliary values: `Some(true)` for step `2` of their current round, their estimates become the set: `{true}`
   - if they strongly see a supermajority of auxiliary values: `Some(false)` for step `2` of their current round, their estimate becomes the set: `{false}`
-  - if they strongly see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{v}`, where `v` is the outcome of a "genuinely flipped concrete coin" (see description below) 
+  - if they strongly see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{v}`, where `v` is the outcome of a "genuinely flipped concrete coin" (see description below)
 
 #### Genuinely flipped concrete coin
 
@@ -371,7 +368,7 @@ The general idea is akin to picking a different leader every time, but we use a 
 Here is a preliminary overview of the genuine flip algorithm:
 
 - For any given decision, establish a current gradient of leadership
-- Based on that gradient of leadership, decide on a `GossipEvent` to be used as the source of coin flip. This `GossipEvent` has the property of not being predictable at the begining of the consensus protocol. It will also be common whenever the most leader node is responsive and honest, so in `> 2/3` of instances
+- Based on that gradient of leadership, decide on a `GossipEvent` to be used as the source of coin flip. This `GossipEvent` has the property of not being predictable at the beginning of the consensus protocol. It will also be common whenever the most leader node is responsive and honest, so in `> 2/3` of instances
 - Deduce a binary value for the coin from properties of this `GossipEvent`
 
 #### Establishing the current gradient of leadership
@@ -441,7 +438,7 @@ Because each node casts exactly one implicit auxiliary value for any possible ou
 - All nodes' first `GossipEvent` to see a supermajority of auxiliary values sees a supermajority of `false` values
   - Agreement is reached with probability 1.
 - Some such `GossipEvent`s see a supermajority of `true` auxiliary values, while some don't
-  - If any node creates an event that strongly see a supermajority of `auxiliary votes` for `true`, then any node that doesn't have such an event will genuinely flip a concrete coin. In the `~ > 2/3` likely scenario that the coin is common and random, the outcome has `50%` chance of being `true`, in which case agreement would be reached at the end of this round. The overall probability of agreement occuring is near `> 1/3`.
+  - If any node creates an event that strongly see a supermajority of `auxiliary votes` for `true`, then any node that doesn't have such an event will genuinely flip a concrete coin. In the `~ > 2/3` likely scenario that the coin is common and random, the outcome has `50%` chance of being `true`, in which case agreement would be reached at the end of this round. The overall probability of agreement occurring is near `> 1/3`.
 - Some such `GossipEvent`s see a supermajority of `false` auxiliary values, while some don't
   - Conversely, if any node creates a `GossipEvent` that strongly sees a supermajority of `false` `auxiliary` values, then any other node that hasn't created such a `GossipEvent` will flip a coin and have near `> 1/3` chances to converge.
 - No such `GossipEvent` sees an agreeing supermajority of auxiliary values
@@ -451,7 +448,7 @@ Without diving deeper in the exact probability of each specific scenario, it is 
 
 ###### If, at some step, agreement holds on some bit b, then it continues to hold on the same bit b (Claim B)
 
-Assume that all honest nodes agree at the begining of a round.
+Assume that all honest nodes agree at the beginning of a round.
 By the end of any step, only malicious nodes could possibly manipulate their gossip to appear to be casting the incorrect value for that estimate. After [ABA](https://hal.inria.fr/hal-00944019/document) over gossip, and before the next step, honest nodes will only be aware of binary values that come from correct nodes (as proved by the Justification property of ABA over gossip), so all honest nodes must create a `GossipEvent` that sees a supermajority of correct auxiliary value. Agreement holds.
 
 ###### If at some step, a honest player halts, then agreement will hold at the end of that step (Claim C)
@@ -461,7 +458,7 @@ If they halt at step 0, it means they have seen `> 2N/3` votes for `true`. It me
 Conversely, if they halt at step 1, agreement holds on `false`.
 Thanks to Claim B, agreement persists.
 
-##### Proofs for our gossip based byzantine consensus algorithm
+##### Proofs for our gossip based Byzantine consensus algorithm
 
 ###### Validity. A decided value was proposed by a correct node
 
@@ -481,7 +478,7 @@ From Claim A of the concrete coin protocol, the probability of not deciding afte
 
 ### From binary consensus to full consensus
 
-Once binary consensus is reached on all meta votes for the next gossip event containing a valid vote for a network event that wasn't yet consensus-ed, pick the most represented network event among the decided voters. In case of a tie, use the lex-order on events.
+Once binary consensus is reached on all meta votes for the next gossip event containing a valid vote for a network event that wasn't yet consensused, pick the most represented network event among the decided voters. In case of a tie, use the lex-order on events.
 
 ## Complexity
 From [ABA](https://hal.inria.fr/hal-00944019/document)'s proof, the number of rounds is `O(1)`.  The complexity of propagating information via this gossip protocol is `O(log(N))` time units.  Hence consensus will be reached in `O(log(N))` time units.  Because of gossip properties, `O(N * log(N))` messages will be communicated in that period.
@@ -490,58 +487,58 @@ From [ABA](https://hal.inria.fr/hal-00944019/document)'s proof, the number of ro
 
 ### Seen
 
-Here is an illustration of the concept of `GossipEvent`s "seeing" eachother:
+Here is an illustration of the concept of `GossipEvent`s "seeing" each other:
 
 ![Alt text](./seen.dot.svg)
 <img src="./seen.dot.svg">
 <!---
 ```graphviz
-digraph GossipGraph { 
-splines=false 
-rankdir=BT 
-subgraph cluster_alice { 
-style=invis 
-alice -> a_0 [style=invis] 
-a_0 -> a_1 [minlen=3] 
-a_1 -> a_2 [minlen=3] 
-} 
-subgraph cluster_bob { 
-style=invis 
-bob -> b_0 [style=invis] 
-b_0 -> b_1 [minlen=2, color=blue, penwidth=2.] 
-b_1 -> b_2 [color=blue, penwidth=2.] 
-} 
-subgraph cluster_carol { 
-style=invis 
-carol -> c_0 [style=invis] 
-c_0 
-} 
-subgraph cluster_dave { 
-style=invis 
-dave -> d_0 [style=invis] 
-d_0 -> d_1 
-d_1 -> d_2 [minlen=2] 
-d_2 -> d_3 
-d_3 -> d_4 [color=blue, penwidth=2.] 
-} 
-{ 
-rank=same 
-alice, bob, carol, dave [style=filled, color=white] 
-} 
-alice -> bob -> carol -> dave [style=invis] 
-bob, dave [style=filled, color=white, fillcolor=lightblue, shape=rectangle] 
-b_0, b_1, b_2, d_3, d_4 [style=filled, fillcolor=lightblue] 
-edge [constraint=false] 
-a_1 -> d_4 
-b_0 -> d_1  
-b_1 -> a_1  
-b_1 -> d_2 
-b_2 -> d_3 [color=blue, penwidth=2.] 
-c_0 -> b_2 
-d_1 -> b_1  
-d_4 -> a_2  
-labelloc="t" 
-label="b_0 is strongly seen by d_4:\nThere is at least one directed path from d_4 to b_0" 
+digraph GossipGraph {
+splines=false
+rankdir=BT
+subgraph cluster_alice {
+style=invis
+alice -> a_0 [style=invis]
+a_0 -> a_1 [minlen=3]
+a_1 -> a_2 [minlen=3]
+}
+subgraph cluster_bob {
+style=invis
+bob -> b_0 [style=invis]
+b_0 -> b_1 [minlen=2, color=blue, penwidth=2.]
+b_1 -> b_2 [color=blue, penwidth=2.]
+}
+subgraph cluster_carol {
+style=invis
+carol -> c_0 [style=invis]
+c_0
+}
+subgraph cluster_dave {
+style=invis
+dave -> d_0 [style=invis]
+d_0 -> d_1
+d_1 -> d_2 [minlen=2]
+d_2 -> d_3
+d_3 -> d_4 [color=blue, penwidth=2.]
+}
+{
+rank=same
+alice, bob, carol, dave [style=filled, color=white]
+}
+alice -> bob -> carol -> dave [style=invis]
+bob, dave [style=filled, color=white, fillcolor=lightblue, shape=rectangle]
+b_0, b_1, b_2, d_3, d_4 [style=filled, fillcolor=lightblue]
+edge [constraint=false]
+a_1 -> d_4
+b_0 -> d_1
+b_1 -> a_1
+b_1 -> d_2
+b_2 -> d_3 [color=blue, penwidth=2.]
+c_0 -> b_2
+d_1 -> b_1
+d_4 -> a_2
+labelloc="t"
+label="b_0 is strongly seen by d_4:\nThere is at least one directed path from d_4 to b_0"
 }
 ```
 -->
@@ -553,51 +550,51 @@ Here, we try to convey visually the concept of "strongly seen":
 <img src="./strongly_seen.dot.svg">
 <!---
 ```graphviz
-digraph GossipGraph { 
-splines=false 
-rankdir=BT 
-subgraph cluster_alice { 
-style=invis 
-alice -> a_0 [style=invis] 
-a_0 -> a_1 [minlen=3] 
-a_1 -> a_2 [minlen=3] 
-} 
-subgraph cluster_bob { 
-style=invis 
-bob -> b_0 [style=invis] 
-b_0 -> b_1 [minlen=2, color=blue, penwidth=2.] 
-b_1 -> b_2 
-} 
-subgraph cluster_carol { 
-style=invis 
-carol -> c_0 [style=invis] 
-c_0 
-} 
-subgraph cluster_dave { 
-style=invis 
-dave -> d_0 [style=invis] 
-d_0 -> d_1 
-d_1 -> d_2 [minlen=2] 
-d_2 -> d_3 -> d_4 
-} 
-{ 
-rank=same 
-alice, bob, carol, dave [style=filled, color=white] 
-} 
-alice -> bob -> carol -> dave [style=invis] 
-alice, bob, dave [style=filled, color=white, fillcolor=lightblue, shape=rectangle] 
-a_1, b_0, b_1, d_1 [style=filled, fillcolor=lightblue] 
-edge [constraint=false] 
-a_1 -> d_4 
-b_0 -> d_1 [color=blue, penwidth=2.] 
-b_1 -> a_1 [color=blue, penwidth=2.] 
-b_1 -> d_2 
-b_2 -> d_3 
-c_0 -> b_2 
-d_1 -> b_1 [color=blue, penwidth=2.] 
-d_4 -> a_2 
-labelloc="t" 
-label="b_0 is strongly seen by a_1:\nIt is seen via multiple directed paths passing\nthrough a supermajority (3 out of 4) of the nodes" 
+digraph GossipGraph {
+splines=false
+rankdir=BT
+subgraph cluster_alice {
+style=invis
+alice -> a_0 [style=invis]
+a_0 -> a_1 [minlen=3]
+a_1 -> a_2 [minlen=3]
+}
+subgraph cluster_bob {
+style=invis
+bob -> b_0 [style=invis]
+b_0 -> b_1 [minlen=2, color=blue, penwidth=2.]
+b_1 -> b_2
+}
+subgraph cluster_carol {
+style=invis
+carol -> c_0 [style=invis]
+c_0
+}
+subgraph cluster_dave {
+style=invis
+dave -> d_0 [style=invis]
+d_0 -> d_1
+d_1 -> d_2 [minlen=2]
+d_2 -> d_3 -> d_4
+}
+{
+rank=same
+alice, bob, carol, dave [style=filled, color=white]
+}
+alice -> bob -> carol -> dave [style=invis]
+alice, bob, dave [style=filled, color=white, fillcolor=lightblue, shape=rectangle]
+a_1, b_0, b_1, d_1 [style=filled, fillcolor=lightblue]
+edge [constraint=false]
+a_1 -> d_4
+b_0 -> d_1 [color=blue, penwidth=2.]
+b_1 -> a_1 [color=blue, penwidth=2.]
+b_1 -> d_2
+b_2 -> d_3
+c_0 -> b_2
+d_1 -> b_1 [color=blue, penwidth=2.]
+d_4 -> a_2
+labelloc="t"
+label="b_0 is strongly seen by a_1:\nIt is seen via multiple directed paths passing\nthrough a supermajority (3 out of 4) of the nodes"
 }
 ```
 -->
@@ -609,7 +606,7 @@ label="b_0 is strongly seen by a_1:\nIt is seen via multiple directed paths pass
 - Aux: auxiliary values
 - Dec: decided values
 
-In the following two examples, we show the different data that each nodes sees as the consensus process progresses. For Bob, we adiitionally explain in english why the values are what they are. The exercise is left to the reader to make sense of the values for all other nodes following an analogous reasoning as the one taken by Bob.
+In the following two examples, we show the different data that each nodes sees as the consensus process progresses. For Bob, we additionally explain in English why the values are what they are. The exercise is left to the reader to make sense of the values for all other nodes following an analogous reasoning as the one taken by Bob.
 
 ### Here is a simple example that reaches consensus at the first step of the first round.
 
