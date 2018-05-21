@@ -29,6 +29,8 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 ## Definitions
 
 - **node**: member of the network that takes part in the consensus algorithm
+- **faulty node**: node that exhibits faulty, or Byzantine behaviour. Faulty behaviour can range from being unresponsive to being actively trying to attack the network while synchronising the attack with other faulty nodes
+- **correct node**: non-faulty node
 - **network event**: change of membership in a node's section of the network
 - **`NodeState`**: representation of a unit of change to the status of the network. Example: ElderLive(A). These will be unique, e.g. if ElderLive(A) appears as a valid `Block`, it will never re-appear as a valid `Block`. A `NodeState` is the code manifestation of a network event
 - **`Vote`**: `NodeState` plus node's signature of said `NodeState`
