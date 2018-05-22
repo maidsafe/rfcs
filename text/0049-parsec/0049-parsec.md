@@ -41,7 +41,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **sync event**: the `GossipEvent` created by a node, when receiving gossip to record receipt of that latest gossip
 - **gossip graph**: the directed acyclic graph (DAG) formed by `GossipEvent`s which holds information about the order any given node voted for network events, and which votes a given node knows about
 - **N**: number of valid voters of a section
-- **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section
+- **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section. `t` always satisfies the equation `t < N/3`
 - **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused `Dead` in our `gossip_graph` will ever be considered again as a voting member in this definition
 - **seen**: a `GossipEvent` is seen by a later one if there is a directed path going from the latter to the former in the gossip graph
 - **strongly seen**: a `GossipEvent` is strongly seen by another `GossipEvent` if it is seen via multiple directed paths passing through a supermajority of the nodes
