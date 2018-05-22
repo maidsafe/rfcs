@@ -195,7 +195,7 @@ After achieving Binary consensus on all voters, deciding the next stable `Block`
 #### Note 1: Proof that the consensused set of voters will never be empty
 For a given network event, consensus on the voters for that event will never result in an empty set of voters.
 
-Proof: By definition of an observer, each voter casts at least `> 2N/3` meta votes of `true` per network event. It follows that the maximum number of `false` meta votes for any event is `< (N^2)/3`. For a `false` meta vote to be consensused, it must have been voted for by `>= N/3` nodes (from binary value gossip algorithm). For all meta votes to be `false`, there would need to be `>= (N^2)/3`. This is incompatible with the previous statement, so it can't happen.
+Proof: By definition of an observer, each observer casts at least `> 2N/3` meta votes of `true` each time consensus is needed. It follows that the maximum number of `false` meta votes for any event is `< (N^2)/3`. For a `false` meta vote to be consensused, it must have been voted for by `>= N/3` nodes (from binary value gossip algorithm). For all meta votes to be `false`, there would need to be `>= (N^2)/3`. This is incompatible with the previous statement, so it can't happen.
 
 ### Solving the Binary Byzantine problem using gossip
 
