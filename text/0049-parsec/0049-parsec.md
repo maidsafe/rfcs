@@ -31,7 +31,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **node**: member of the network that takes part in the consensus algorithm
 - **valid voter**: a node that is a current member of a given section and that satisfies the additional requirement of taking part in the decisions for this section. In the current state of our proposals, such a node must be a member of the quorum of elders for this section
 - **gossip**: a protocol used to establish asynchronous communication between nodes. Gossip requires significantly less connections between nodes than all-to-all communication schemes. It is one of the fundamental building blocks of our protocol
-- **faulty node**: node that exhibits faulty, or Byzantine behaviour. Faulty behaviour can range from being unresponsive to being actively trying to attack the network while synchronising the attack with other faulty nodes
+- **faulty node**: node that exhibits faulty, or Byzantine behaviour. Faulty behaviour can range from being unresponsive to actively trying to attack the network while synchronising the attack with other faulty nodes
 - **correct node**: non-faulty node
 - **network event**: change of membership in a node's section of the network
 - **`NodeState`**: representation of a unit of change to the status of the network. Example: ElderLive(A). These will be unique, e.g. if ElderLive(A) appears as a valid `Block`, it will never re-appear as a valid `Block`. A `NodeState` is the code manifestation of a network event
@@ -41,7 +41,6 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **`GossipEvent`**: message being communicated through gossip over the network. Its `payload` represents a `Vote`. It also contains two optional hashes: `self_parent` and `other_parent` and a proof of type `GossipProof`
 - **`self_parent`**: the `self_parent` of a `GossipEvent` `X` is the hash of the latest `GossipEvent` created by this node that is seen by `X`, if it exists
 - **`other_parent`**: the `other_parent` of a `GossipEvent` `X` is the hash of the latest `GossipEvent` created by the sender of the `GossipRequestRpc` or `GossipResponseRpc` which prompted is to create `GossipEvent` `X`, if any 
-- **`other_parent`**: 
 - **`GossipRequestRpc`/`GossipResponseRpc`**: the data structures used to communicate `GossipEvent`s between nodes
 - **section**: partition of the network constituted of a number of nodes, satisfying the description in the [Disjoint Section RFC](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md)
 - **sync event**: the `GossipEvent` created by a node, when receiving gossip to record receipt of that latest gossip
@@ -187,7 +186,7 @@ For any node, the first `GossipEvent` they create that sees `GossipEvent`s creat
 We need to ensure that all nodes decide upon the same order of stable `Block`s. These are `Block`s which have become valid, but the order in which they became valid can vary from each node's perspective. When a node receives gossip and creates a sync event, this could cause one or more valid `Block`s to form. The general Byzantine problem is deciding which of these `Block`s should be considered the next stable `Block`.
 
 To make a decision, we turn this single problem into a number of binary Byzantine problems. Each binary problem is effectively asking "Should this voter's opinion be considered when choosing the next stable block?". To be more specific, for each current valid voter, we ask the question "Can our latest sync event strongly see any vote for a valid, not-yet-stable block by this voter?". The answer to that question is a virtual binary value that we define as our meta vote for this voter's right to participate in the decision.
-- Note: by "virtual", we mean that there is no actual explicit "meta vote" initiated by any node. These meta votes are implicit properties of gossip. The meaning of "meta vote" is assigned to a `GossipEvent` in retrospect by an actor interpreting the gossip graph. This definition of "virtual" also applies to estimates, auxiliary values, `bin_values` and decided values.
+- Note: by "virtual", we mean that there is no actual explicit "meta vote" initiated by any node. These meta votes are implicit properties of gossip. The meaning of "meta vote" is assigned to a `GossipEvent` in retrospect by a node interpreting the gossip graph. This definition of "virtual" also applies to estimates, auxiliary values, `bin_values` and decided values.
 
 We use this specific question since when the answer is "yes" we know two things: the voter's vote will eventually be seen by all correct nodes, and after binary consensus the set of voters seen by all nodes will not be empty^1^.
 
