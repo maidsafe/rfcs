@@ -307,11 +307,11 @@ The auxiliary value of a `GossipEvent` is the same as its `self_parent`'s, excep
 - its step number is different from its `self_parent`'s step number, in which case its auxiliary value is `None`
 
 The decided value of a `GossipEvent` is `None`, except if
-- its step number is `0`, its `bin_values` contain `true` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(true)`
-- its step number is `1`, its `bin_values` contain `false` and it can strongly see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(false)`
+- its step number is `0`, its `bin_values` contain `true` and it can see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(true)`
+- its step number is `1`, its `bin_values` contain `false` and it can see a supermajority of `GossipEvent`s carrying the auxiliary value: `Some(false)`
 
 A `GossipEvent`'s step number is its `self_parent` step number, except if
-- this `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values that are not `None`, in which case the step number is its `self_parent`'s step number plus one, or zero if it's `self_parent`'s step number is two
+- this `GossipEvent` can see a supermajority of `GossipEvent`s carrying auxiliary values that are not `None`, in which case the step number is its `self_parent`'s step number plus one, or zero if it's `self_parent`'s step number is two
 
 A `GossipEvent`'s round number is its `self_parent`'s round number, except if
 - its `self_parent`'s step number is `2` and its step number is `0`, in which case its round number is its `self_parent`'s round number plus one
@@ -336,34 +336,34 @@ Taking inspiration from Section 3.1.1 of [Byzantine Agreement, Made Trivial](htt
 
 ##### Step 0:
 
-When a `GossipEvent`'s `self_parent` carries the step number: `0` and that `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values for step `0` that are not `None`, this `GossipEvent`'s step number becomes `1`.
+When a `GossipEvent`'s `self_parent` carries the step number: `0` and that `GossipEvent` can see a supermajority of `GossipEvent`s carrying auxiliary values for step `0` that are not `None`, this `GossipEvent`'s step number becomes `1`.
 
 - When a `GossipEvent`'s step number is `1`, but their `self_parent`'s step number is `0`,
-  - if they strongly see a supermajority of auxiliary values: `Some(true)` for step `0` of their current round, their decided value becomes `Some(true)`
-  - if they strongly see a supermajority of auxiliary values: `Some(false)` for step `0` of their current round, their estimate becomes the set: `{false}`
-  - if they strongly see no agreeing supermajority of auxiliary values for step `0` of their current round, their estimates become the set: `{true}`
+  - if they see a supermajority of auxiliary values: `Some(true)` for step `0` of their current round, their decided value becomes `Some(true)`
+  - if they see a supermajority of auxiliary values: `Some(false)` for step `0` of their current round, their estimate becomes the set: `{false}`
+  - if they see no agreeing supermajority of auxiliary values for step `0` of their current round, their estimates become the set: `{true}`
 
 - These new estimates participate in a new instance of binary value gossip for step `1` of this round
 
 ##### Step 1:
 
-When a `GossipEvent`'s `self_parent` carries the step number: `1` and that `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values for step `1` that are not `None`, this `GossipEvent`'s step number becomes `2`.
+When a `GossipEvent`'s `self_parent` carries the step number: `1` and that `GossipEvent` can see a supermajority of `GossipEvent`s carrying auxiliary values for step `1` that are not `None`, this `GossipEvent`'s step number becomes `2`.
 
 - When a `GossipEvent`'s step number is `2`, but their `self_parent`'s step number is `1`,
-  - if they strongly see a supermajority of auxiliary values: `Some(false)` for step `1` of their current round, their decided value becomes `Some(false)`
-  - if they strongly see a supermajority of auxiliary values: `Some(true)` for step `1` of their current round, their estimates become the set: `{true}`
-  - if they strongly see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{false}`
+  - if they see a supermajority of auxiliary values: `Some(false)` for step `1` of their current round, their decided value becomes `Some(false)`
+  - if they see a supermajority of auxiliary values: `Some(true)` for step `1` of their current round, their estimates become the set: `{true}`
+  - if they see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{false}`
 
 - These new estimates participate in a new instance of binary value gossip for step `2` of this round
 
 ##### Step 2:
 
-When a `GossipEvent`'s `self_parent` carries the step number: `2` and that `GossipEvent` can strongly see a supermajority of `GossipEvent`s carrying auxiliary values for step `2` that are not `None`, this `GossipEvent`'s step number becomes `0` and its round number becomes its `self_parent`'s round number plus one.
+When a `GossipEvent`'s `self_parent` carries the step number: `2` and that `GossipEvent` can see a supermajority of `GossipEvent`s carrying auxiliary values for step `2` that are not `None`, this `GossipEvent`'s step number becomes `0` and its round number becomes its `self_parent`'s round number plus one.
 
 - When a `GossipEvent`'s step number is `0`, but their `self_parent`'s step number is `2`,
-  - if they strongly see a supermajority of auxiliary values: `Some(true)` for step `2` of their current round, their estimates become the set: `{true}`
-  - if they strongly see a supermajority of auxiliary values: `Some(false)` for step `2` of their current round, their estimate becomes the set: `{false}`
-  - if they strongly see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{v}`, where `v` is the outcome of a "genuinely flipped concrete coin" (see description below)
+  - if they see a supermajority of auxiliary values: `Some(true)` for step `2` of their current round, their estimates become the set: `{true}`
+  - if they see a supermajority of auxiliary values: `Some(false)` for step `2` of their current round, their estimate becomes the set: `{false}`
+  - if they see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{v}`, where `v` is the outcome of a "genuinely flipped concrete coin" (see description below)
 
 #### Genuinely flipped concrete coin
 
@@ -410,7 +410,7 @@ Assuming we agreed on a `GossipEvent` to be used as the source of coin flip, we 
 
 The algorithm used to obtain a genuine concrete coin is as follows:
 
-- Once a node creates an event that strongly sees a supermajority of `GossipEvent`s carrying the auxiliary value for a given estimate at step 2 of a given round of the full concrete coin protocol,
+- Once a node creates an event that sees a supermajority of `GossipEvent`s carrying the auxiliary value for a given estimate at step 2 of a given round of the full concrete coin protocol,
   - Each node uses the `GossipEvent` that carries the auxiliary value of the most  leader node as candidate for coin flip, if they can see it
   - If they can't see it, they wait until they received `responsiveness_threshold` `GossipResponseRpc` since their own auxiliary value. If at that point, they haven't yet seen that `GossipEvent`, they select the `GossipEvent` that carries an auxiliary value that they see with the highest leadership rank
     - Note: This use of `GossipResponseRpc` allows to embed a measure of time in the gossip graph, so any node analysing our decision to consider the coin flipped a certain way can understand why we picked a given `GossipEvent` as our source of coin flip, looking at the gossip graph only
@@ -444,11 +444,11 @@ Because each node casts exactly one implicit auxiliary value for any possible ou
 - All nodes' first `GossipEvent` to see a supermajority of auxiliary values sees a supermajority of `false` values
   - Agreement is reached with probability 1.
 - Some such `GossipEvent`s see a supermajority of `true` auxiliary values, while some don't
-  - If any node creates an event that strongly see a supermajority of `auxiliary values` for `true`, then any node that doesn't have such an event will genuinely flip a concrete coin. In the `~ > 2/3` likely scenario that the coin is common and random, the outcome has `50%` chance of being `true`, in which case agreement would be reached at the end of this round. The overall probability of agreement occurring is near `> 1/3`.
+  - If any node creates an event that sees a supermajority of `auxiliary values` for `true`, then any node that doesn't have such an event will genuinely flip a concrete coin. In the `~ > 2/3` likely scenario that the coin is common and random, the outcome has `50%` chance of being `true`, in which case agreement would be reached at the end of this round. The overall probability of agreement occurring is near `> 1/3`.
 - Some such `GossipEvent`s see a supermajority of `false` auxiliary values, while some don't
-  - Conversely, if any node creates a `GossipEvent` that strongly sees a supermajority of `false` `auxiliary` values, then any other node that hasn't created such a `GossipEvent` will flip a coin and have near `> 1/3` chances to converge.
+  - Conversely, if any node creates a `GossipEvent` that sees a supermajority of `false` `auxiliary` values, then any other node that hasn't created such a `GossipEvent` will flip a coin and have near `> 1/3` chances to converge.
 - No such `GossipEvent` sees an agreeing supermajority of auxiliary values
-  - If no node's latest gossip strongly sees a supermajority, the probability of agreeing by the end of this round is simply the same as the probability of getting a truly common concrete coin, which is near `> 2/3`.
+  - If no node's latest gossip sees a supermajority, the probability of agreeing by the end of this round is simply the same as the probability of getting a truly common concrete coin, which is near `> 2/3`.
 
 Without diving deeper in the exact probability of each specific scenario, it is easy to give a lower bound for the likelihood of agreeing at the end of this step: near `1/3`.
 
@@ -468,7 +468,7 @@ Thanks to Claim B, agreement persists.
 
 ###### Validity. A decided value was proposed by a correct node
 
-The only values considered as input to Step 0 of the concrete coin protocol are values that were present in a node's `bin_values` after binary value gossip. Due to the Justification property of binary value gossip, they must have been proposed by a correct node. In each step, if we strongly see a supermajority of agreeing value `v`, `v` must have been propagated by a correct node, so changing our estimate to that value won't break this invariant. Else, both values `true` and `false` must have been sent by a correct node, so changing our estimate to any value will maintain the invariant.
+The only values considered as input to Step 0 of the concrete coin protocol are values that were present in a node's `bin_values` after binary value gossip. Due to the Justification property of binary value gossip, they must have been proposed by a correct node. In each step, if we see a supermajority of agreeing value `v`, `v` must have been propagated by a correct node, so changing our estimate to that value won't break this invariant. Else, both values `true` and `false` must have been sent by a correct node, so changing our estimate to any value will maintain the invariant.
 
 ###### Agreement. No two correct nodes decide different values
 
