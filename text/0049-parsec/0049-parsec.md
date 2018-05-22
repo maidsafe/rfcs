@@ -40,7 +40,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **`GossipProof`**: signature of the content of a `GossipEvent` (see definition below) being gossiped (payload + self_parent + other_parent) plus public ID of node which signed the content
 - **`GossipEvent`**: message being communicated through gossip over the network. Its `payload` represents a `Vote`. It also contains two optional hashes: `self_parent` and `other_parent` and a proof of type `GossipProof`
 - **`self_parent`**: the `self_parent` of a `GossipEvent` `X` is the hash of the latest `GossipEvent` created by this node that is seen by `X`, if it exists
-- **`other_parent`**: the `other_parent` of a `GossipEvent` `X` is the hash of the latest `GossipEvent` created by the sender of the `GossipRequestRpc` or `GossipResponseRpc` which prompted is to create `GossipEvent` `X`, if any 
+- **`other_parent`**: the `other_parent` of a `GossipEvent` `X` is the hash of the latest `GossipEvent` created by the sender of the `GossipRequestRpc` or `GossipResponseRpc` which prompted is to create `GossipEvent` `X`, if any
 - **`GossipRequestRpc`/`GossipResponseRpc`**: the data structures used to communicate `GossipEvent`s between nodes
 - **section**: partition of the network constituted of a number of nodes, satisfying the description in the [Disjoint Section RFC](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md)
 - **sync event**: the `GossipEvent` created by a node, when receiving gossip to record receipt of that latest gossip
@@ -131,11 +131,11 @@ struct GossipEvent<T> {
 
 ```rust
 struct GossipRequestRpc {
-	  events: Vec<GossipEvent>
+    events: Vec<GossipEvent>
 }
 
 struct GossipResponseRpc {
-	  events: Vec<GossipEvent>
+    events: Vec<GossipEvent>
 }
 ```
 
@@ -195,7 +195,7 @@ After achieving Binary consensus on all voters, deciding the next stable `Block`
 #### Note 1: Proof that the consensused set of voters will never be empty
 For a given network event, consensus on the voters for that event will never result in an empty set of voters.
 
-Proof: By definition of an observer, each voter casts at least `> 2/3 N` meta votes of `true` per network event. It follows that the maximum number of false votes for any event is `< 1/3 N^2`. For a false meta vote to be consensused, it must have been voted for by `>= 1/3 N` nodes (from binary value gossip algorithm). For all meta votes to be false, there would need to be `>= 1/3 N^2`. This is incompatible with the previous statement, so it can't happen.
+Proof: By definition of an observer, each voter casts at least `> 2N/3` meta votes of `true` per network event. It follows that the maximum number of `false` meta votes for any event is `< (N^2)/3`. For a `false` meta vote to be consensused, it must have been voted for by `>= N/3` nodes (from binary value gossip algorithm). For all meta votes to be `false`, there would need to be `>= (N^2)/3`. This is incompatible with the previous statement, so it can't happen.
 
 ### Solving the Binary Byzantine problem using gossip
 
@@ -321,7 +321,7 @@ Before reaching Byzantine consensus, we need some non-determinism. Please refer 
 
 Here is the short description:
 
-> A common coin can be seen as a global entity that delivers the very same sequence of random bits b~1~ , b~2~ , . . . , b~r~ , . . . to processes, each bit b~r~ has the value 0 or 1 with probability 1/2.
+> A common coin can be seen as a global entity that delivers the very same sequence of random bits <code>b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>r</sub>, ...</code> to processes, each bit <code>b<sub>r</sub></code> has the value 0 or 1 with probability 1/2.
 
 Now a common coin is pretty difficult to obtain in an asynchronous setting with dynamic section membership. This difficulty lead the authors of [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2) to mockingly refer to such a coin as a "magic coin". We use the reasoning in that paper to substitute the "common coin" step of ABA with a "gradient leadership based concrete coin", which is our take on an asynchronous concrete coin.
 
@@ -362,13 +362,13 @@ When a `GossipEvent`'s `self_parent` carries the step number: `2` and that `Goss
 - When a `GossipEvent`'s step number is `0`, but their `self_parent`'s step number is `2`,
   - if they see a supermajority of auxiliary values: `Some(true)` for step `2` of their current round, their estimates become the set: `{true}`
   - if they see a supermajority of auxiliary values: `Some(false)` for step `2` of their current round, their estimate becomes the set: `{false}`
-  - if they see no agreeing supermajority of auxiliary values for step `1` of their current round, their estimate becomes the set: `{v}`, where `v` is the outcome of a "genuinely flipped concrete coin" (see description below)
+  - if they see no agreeing supermajority of auxiliary values for step `2` of their current round, their estimate becomes the set: `{v}`, where `v` is the outcome of a "genuinely flipped concrete coin" (see description below)
 
 #### Genuinely flipped concrete coin
 
-We are looking for a way to generate a binary value which, at least `2/3` of the times will be common and unpredictable.
+We are looking for a way to generate a binary value which, at least 2/3 of the times will be common and unpredictable.
 
-The general idea is akin to picking a different leader every time, but we use a gradient of leadership to overcome the issue of an unresponsive leader. To mitigate some of the risks of malicious actors DDOS-ing the most leader node, we observe that many of these protocols are running concurrently which would make it impractical to always DDOS all the concurrent leaders.
+The general idea is akin to picking a different leader every time, but we use a gradient of leadership to overcome the issue of an unresponsive leader. To mitigate some of the risks of malicious actors DDoS-ing the most leader node, we observe that many of these protocols are running concurrently which would make it impractical to always DDoS all the concurrent leaders.
 
 Here is a preliminary overview of the genuine flip algorithm:
 
@@ -382,15 +382,15 @@ We start by attributing a gradient of leadership to each node, for a specific de
 
 Consider the following hash (call it: `round_hash`):
 
-```
+```rust
 hash(
-  hash(public ID of node that's subject of this meta vote),
-  hash(latest consensused event),
-  hash(round number)
+    hash(public ID of node that's subject of this meta vote),
+    hash(latest consensused event),
+    hash(round number)
 )
 ```
 
-Sort the nodes by the xor distance of the hash of their public ID to the `round_hash` (so different order every time).
+Sort the nodes by the xor distance of the hash of their public ID to the `round_hash` (so likely a different order every time).
 
 The closest nodes will be said to have more leadership than the ones further away.
 
@@ -403,7 +403,7 @@ Let's arbitrarily pick: `log2(N)` for now. This can be tuned after testing.
 
 ##### From `GossipEvent` to coin flip
 
-Assuming we agreed on a `GossipEvent` to be used as the source of coin flip, we can obtain a binary value from the Hash of that `GossipEvent` by simply using the least significant bit of that hash.
+Assuming we agreed on a `GossipEvent` to be used as the source of coin flip, we can obtain a binary value from the hash of that `GossipEvent` by simply using the least significant bit of that hash.
 
 ##### Genuinely flipped concrete coin
 
@@ -479,7 +479,7 @@ Once a correct node decides a value, binary consensus is considered to be reache
 
 ###### Termination. Each correct process decides
 
-From Claim A of the concrete coin protocol, the probability of not deciding after a given round `r` is `1/(3^r)`, which tends to zero as the number of rounds increases. Hence, each correct process decides eventually.
+From Claim A of the concrete coin protocol, the probability of not deciding after a given round `r` is near `< (2/3)^r`, which tends to zero as the number of rounds increases. Hence, each correct process decides eventually.
 
 ### From binary consensus to full consensus
 
