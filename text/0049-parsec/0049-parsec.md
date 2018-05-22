@@ -56,7 +56,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
   - **Termination**: Eventually the set `bin_values` of each correct node is not empty
 - **estimate**: in the context of binary value gossip, a value proposed by a node for a given variable
 - **`bin_values`**: the array of binary values resulting from applying binary value gossip to a binary value in the gossip graph
-- **auxiliary value**: the first value to make it to a node's `bin_values` or true if a same `GossipEvent` carried both values `true` and `false` for a same binary variable
+- **auxiliary value**: the first value to make it to a node's `bin_values`, if it is unique. If the same `GossipEvent` carried the values true and false to the node's `bin_values`, the arbitrary value: `true`
 - **valid auxiliary value**: an auxiliary value emitted by any node that is also part of the `bin_values` of the node assessing its validity
 - **decided value**: a binary value which has reached Binary Byzantine consensus from a node's point of view
 - **`responsiveness_threshold`**: a number chosen so that in the time it takes for an honest node to create `responsiveness_threshold` `GossipEvent`s of type `GossipCause::Response` after a given instant `T_0`, this node is likely to have been informed of any `GossipEvent` sent by an honest node at, or before `T_0`. Provisionally, `log2(N)`. Exact value will depend on testing results
@@ -284,13 +284,13 @@ To each `GossipEvent`, we associate the following meaning (when trying to determ
 Starting from the oldest `GossipEvent`, we perform the algorithm by always considering the next `GossipEvent` (the older `GossipEvent` is the `self_parent` of the "next" `GossipEvent`) and calculating its values until the decided value is not `None` for one of the considered `GossipEvent`s.
 
 The set of estimates of a `GossipEvent` is the set of estimates of its `self_parent`, except if
-- this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
-- this `GossipEvent` can see `GossipEvent`s carrying estimate of a value that is not present in its `self_parent`'s estimate, originating from `>= N/3` different nodes, in which case the estimate becomes the set: `{true, false}`
+- this `GossipEvent`'s decided value is not `None`, in which case the set of estimates is the set containing only that value
+- this `GossipEvent` can see `GossipEvent`s carrying estimates of a value that is not present in its `self_parent`'s estimate, originating from `>= N/3` different nodes, in which case the estimate becomes the set: `{true, false}`
 - the step number is different from the `self_parent`'s step number, in which case the estimate is updated according to the rules defined in the "concrete coin protocol"
 
 The set `bin_values` of a `GossipEvent` is the set `bin_values` of its `self_parent`, except if
 - this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
-- this `GossipEvent` can see `GossipEvent`s originating from `> 2N/3` different nodes carrying estimates of a value that is not present in its `self_parent`'s estimate, in which case this event's `bin_values` is the union of its `self_parent`'s `bin_vales` and the set of containing only that new value.
+- this `GossipEvent` can see `GossipEvent`s originating from `> 2N/3` different nodes carrying estimates of a value that is not present in its `self_parent`'s estimate, in which case this event's `bin_values` is the union of its `self_parent`'s `bin_vales` and the set of estimates containing only that new value.
 - the step number is different from its `self_parent`'s step number, in which case `bin_values` is the empty set
 
 The auxiliary value of a `GossipEvent` is the same as its `self_parent`'s, except if
