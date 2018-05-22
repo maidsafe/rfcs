@@ -29,20 +29,26 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 ## Definitions
 
 - **node**: member of the network that takes part in the consensus algorithm
+- **valid voter**: a node that is a current member of a given section and that satisfies the additional requirement of taking part in the decisions for this section. In the current state of our proposals, such a node must be a member of the quorum of elders for this section
+- **gossip**: a protocol used to establish asynchronous communication between nodes. Gossip requires significantly less connections between nodes than all-to-all communication schemes. It is one of the fundamental building blocks of our protocol
 - **faulty node**: node that exhibits faulty, or Byzantine behaviour. Faulty behaviour can range from being unresponsive to being actively trying to attack the network while synchronising the attack with other faulty nodes
 - **correct node**: non-faulty node
 - **network event**: change of membership in a node's section of the network
 - **`NodeState`**: representation of a unit of change to the status of the network. Example: ElderLive(A). These will be unique, e.g. if ElderLive(A) appears as a valid `Block`, it will never re-appear as a valid `Block`. A `NodeState` is the code manifestation of a network event
 - **`Vote`**: `NodeState` plus node's signature of said `NodeState`
 - **`GossipCause`**: enum used to indicate why a particular `GossipEvent` was formed
-- **`GossipEvent`**: message being communicated through gossip over the network. Its `payload` represents a `Vote`. It also contains two optional hashes: `self_parent` and `other_parent` and a `GossipCause`
+- **`GossipProof`**: signature of the content of a `GossipEvent` (see definition below) being gossiped (payload + self_parent + other_parent) plus public ID of node which signed the content
+- **`GossipEvent`**: message being communicated through gossip over the network. Its `payload` represents a `Vote`. It also contains two optional hashes: `self_parent` and `other_parent` and a proof of type `GossipProof`
+- **`self_parent`**: the `self_parent` of a `GossipEvent` `X` is the hash of the latest `GossipEvent` created by this node that is seen by `X`, if it exists
+- **`other_parent`**: the `other_parent` of a `GossipEvent` `X` is the hash of the latest `GossipEvent` created by the sender of the `GossipRequestRpc` or `GossipResponseRpc` which prompted is to create `GossipEvent` `X`, if any 
+- **`other_parent`**: 
 - **`GossipRequestRpc`/`GossipResponseRpc`**: the data structures used to communicate `GossipEvent`s between nodes
 - **section**: partition of the network constituted of a number of nodes, satisfying the description in the [Disjoint Section RFC](https://github.com/maidsafe/rfcs/blob/master/text/0037-disjoint-groups/0037-disjoint-groups.md)
 - **sync event**: the `GossipEvent` created by a node, when receiving gossip to record receipt of that latest gossip
 - **gossip graph**: the directed acyclic graph (DAG) formed by `GossipEvent`s which holds information about the order any given node voted for network events, and which votes a given node knows about
 - **N**: number of valid voters of a section
 - **t**: number of faulty (malicious, dead or otherwise misbehaving) nodes in a section. `t` always satisfies the equation `t < N/3`
-- **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused `Dead` in our `gossip_graph` will ever be considered again as a voting member in this definition
+- **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused to have left our section in our `gossip_graph` will ever be considered again as a voting member in this definition
 - **seen**: a `GossipEvent` is seen by a later one if there is a directed path going from the latter to the former in the gossip graph
 - **strongly seen**: a `GossipEvent` is strongly seen by another `GossipEvent` if it is seen via multiple directed paths passing through a supermajority of the nodes
 - **valid `Block`**: `Block` formed via a strongly seen supermajority of `Vote`s
@@ -478,7 +484,7 @@ From Claim A of the concrete coin protocol, the probability of not deciding afte
 
 ### From binary consensus to full consensus
 
-Once binary consensus is reached on all meta votes for the next gossip event containing a valid vote for a network event that wasn't yet consensused, pick the most represented network event among the decided voters. In case of a tie, use the lex-order on events.
+Once binary consensus is reached on all meta votes for the next gossip event containing a valid vote for a network event that wasn't yet consensused, pick the most represented network event among the decided voters. In case of a tie, sort the `NodeState`s by their lexical order.
 
 ## Complexity
 From [ABA](https://hal.inria.fr/hal-00944019/document)'s proof, the number of rounds is `O(1)`.  The complexity of propagating information via this gossip protocol is `O(log(N))` time units.  Hence consensus will be reached in `O(log(N))` time units.  Because of gossip properties, `O(N * log(N))` messages will be communicated in that period.
