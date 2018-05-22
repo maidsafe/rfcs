@@ -322,7 +322,7 @@ Now a common coin is pretty difficult to obtain in an asynchronous setting with 
 
 #### Full concrete coin protocol
 
-Taking inspiration from Section 3.1.1 of [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2), we follow this three steps routine at each round:
+Taking inspiration from Section 3.1.1 of [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2), we follow this three step routine at each round:
 
 - Step 0: The concrete coin is forced to be `true`
 - Step 1: The concrete coin is forced to be `false`
@@ -392,8 +392,8 @@ The closest nodes will be said to have more leadership than the ones further awa
 ##### Responsiveness threshold
 
 Let's define `responsiveness_threshold` as a period after which it is likely that we would have received gossip from a live and correct node.
-Because time is not a property that can be known by looking solely at a `gossip_graph`, and because our asynchronous setting gives no guarantee about time; we use a certain gossip pattern as a proxy for time. The way we perform gossip, any honest node will send a `GossipRequestRpc` periodically (every fixed length of time), and every honest node will answer with a `GossipResponseRpc` as soon as they receive the `GossipRequestRpc`. This means that with the simple assumption that no correct node will be **significantly** slower than any other honest node, we can define a "reasonable" period of time after which we would expect to hear back from a honest node. This measure does not need to be perfectly accurate, as any estimate that is correct most of the time will be enough for our general algorithm to function as designed.
-Because of the performance properties of the gossip protocol: any given message from a honest node will reach every other honest node with high probability in ~log(N) `GossipEvent`s, it will be of the form `C_0*log(N)`.
+Because time is not a property that can be known by looking solely at a `gossip_graph`, and because our asynchronous setting gives no guarantee about time; we use a certain gossip pattern as a proxy for time. The way we perform gossip, any honest node will send a `GossipRequestRpc` periodically (every fixed length of time), and every honest node will answer with a `GossipResponseRpc` as soon as they receive the `GossipRequestRpc`. This means that with the simple assumption that no correct node will be **significantly** slower than any other honest node, we can define a "reasonable" period of time after which we would expect to hear back from an honest node. This measure does not need to be perfectly accurate, as any estimate that is correct most of the time will be enough for our general algorithm to function as designed.
+Because of the performance properties of the gossip protocol: any given message from an honest node will reach every other honest node with high probability in ~log(N) `GossipEvent`s, it will be of the form `C_0*log(N)`.
 Let's arbitrarily pick: `log2(N)` for now. This can be tuned after testing.
 
 ##### From `GossipEvent` to coin flip
@@ -421,13 +421,13 @@ This process won't stall forever: if the most leader node is dead, their opinion
 
 ###### The coin will be common and random with around `> 2/3` probability
 
-If the leader is responsive and honest, which has `> 2/3` probability, if every other honest node can see their `GossipEvent` carrying the auxiliary value for that round before they can create `responsiveness_threshold` `GossipEvent`s with cause: `GossipEvent::Response`, the coin will be common and random. Since we picked `responsiveness_threshold` so that honest nodes would hear from a honest leader first with high probability, we can deduce that the coin shall be common and random approximately `> 2/3` of the times. Note that we don't need to be more exact here as any probability with a lower-bound would be sufficient to prove the correctness of our algorithm.
+If the leader is responsive and honest, which has `> 2/3` probability, if every other honest node can see their `GossipEvent` carrying the auxiliary value for that round before they can create `responsiveness_threshold` `GossipEvent`s with cause: `GossipEvent::Response`, the coin will be common and random. Since we picked `responsiveness_threshold` so that honest nodes would hear from an honest leader first with high probability, we can deduce that the coin shall be common and random approximately `> 2/3` of the times. Note that we don't need to be more exact here as any probability with a lower-bound would be sufficient to prove the correctness of our algorithm.
 
 ##### Proofs for the concrete coin protocol, overall
 
 We start by proving that the claims from [Byzantine Agreement, Made Trivial](https://maidsafe.atlassian.net/wiki/download/attachments/58064907/BYZANTYNE%20AGREEMENT%20MADE%20TRIVIAL.pdf?version=1&modificationDate=1525431902936&cacheVersion=1&api=v2), still hold with our modifications. The demonstration for the theorems should still hold from there.
 
-Note that the wording below assumes that we are looking at the `gossip_graph` after a sufficient number of `GossipEvent`s have been communicated. If the `GossipEvent`s we are trying to order are too recent, we may not be able to decide on consensus yet. In that case, we the next stable block would be `None`, until such a time at which our `gossip_graph` would contain enough events to decide on a next stable `Block`. Claiming that consensus will be reached eventually means that as gossip progresses, there will be a point at which the next stable `Block` returned shall not be `None`.
+Note that the wording below assumes that we are looking at the `gossip_graph` after a sufficient number of `GossipEvent`s have been communicated. If the `GossipEvent`s we are trying to order are too recent, we may not be able to decide on consensus yet. In that case, the next stable block would be `None`, until such a time our `gossip_graph` would contain enough events to decide on the next stable `Block`. Claiming that consensus will be reached eventually means that as gossip progresses, there will be a point at which the next stable `Block` returned shall not be `None`.
 
 ###### If, at the start of an execution of Step 2, no player has yet halted and agreement has not yet been reached, then, with probability near `> 1/3`, the players will be in agreement at the end of the step (Claim A)
 
@@ -438,7 +438,7 @@ Because each node casts exactly one implicit auxiliary value for any possible ou
 - All nodes' first `GossipEvent` to see a supermajority of auxiliary values sees a supermajority of `false` values
   - Agreement is reached with probability 1.
 - Some such `GossipEvent`s see a supermajority of `true` auxiliary values, while some don't
-  - If any node creates an event that strongly see a supermajority of `auxiliary votes` for `true`, then any node that doesn't have such an event will genuinely flip a concrete coin. In the `~ > 2/3` likely scenario that the coin is common and random, the outcome has `50%` chance of being `true`, in which case agreement would be reached at the end of this round. The overall probability of agreement occurring is near `> 1/3`.
+  - If any node creates an event that strongly see a supermajority of `auxiliary values` for `true`, then any node that doesn't have such an event will genuinely flip a concrete coin. In the `~ > 2/3` likely scenario that the coin is common and random, the outcome has `50%` chance of being `true`, in which case agreement would be reached at the end of this round. The overall probability of agreement occurring is near `> 1/3`.
 - Some such `GossipEvent`s see a supermajority of `false` auxiliary values, while some don't
   - Conversely, if any node creates a `GossipEvent` that strongly sees a supermajority of `false` `auxiliary` values, then any other node that hasn't created such a `GossipEvent` will flip a coin and have near `> 1/3` chances to converge.
 - No such `GossipEvent` sees an agreeing supermajority of auxiliary values
@@ -451,7 +451,7 @@ Without diving deeper in the exact probability of each specific scenario, it is 
 Assume that all honest nodes agree at the beginning of a round.
 By the end of any step, only malicious nodes could possibly manipulate their gossip to appear to be casting the incorrect value for that estimate. After [ABA](https://hal.inria.fr/hal-00944019/document) over gossip, and before the next step, honest nodes will only be aware of binary values that come from correct nodes (as proved by the Justification property of ABA over gossip), so all honest nodes must create a `GossipEvent` that sees a supermajority of correct auxiliary value. Agreement holds.
 
-###### If at some step, a honest player halts, then agreement will hold at the end of that step (Claim C)
+###### If at some step, an honest player halts, then agreement will hold at the end of that step (Claim C)
 
 A honest player only halts at step 0 or 1.
 If they halt at step 0, it means they have seen `> 2N/3` votes for `true`. It means that any supermajority seen by a node must be for `true`. Any tie will also be broken in favour of `true`. Agreement holds on `true`.
@@ -466,7 +466,7 @@ The only values considered as input to Step 0 of the concrete coin protocol are 
 
 ###### Agreement. No two correct nodes decide different values
 
-We know from Claim C of the concrete coin protocol that, if at some step, a honest player halts, then agreement will hold at the end of that step. Since, from Claim B, agreement will then continue to hold on the same bit, it will never be possible for a different node to decide a different value (as that would require to see a supermajority of different values at Step 0 or Step 1 which is impossible)
+We know from Claim C of the concrete coin protocol that, if at some step, an honest player halts, then agreement will hold at the end of that step. Since, from Claim B, agreement will then continue to hold on the same bit, it will never be possible for a different node to decide a different value (as that would require to see a supermajority of different values at Step 0 or Step 1 which is impossible)
 
 ###### One-shot. A correct node decides at most once
 
