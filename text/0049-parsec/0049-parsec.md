@@ -52,7 +52,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **strongly seen**: a `GossipEvent` is strongly seen by another `GossipEvent` if it is seen via multiple directed paths passing through a supermajority of the nodes
 - **valid `Block`**: `Block` formed via a supermajority of `Vote`s
 - **stable `Block`**: a valid `Block` that has also had its order decided via order consensus
-- **observer**: the first gossip event created by a node X which can see that `GossipEvent`s created by a supermajority of nodes can see a valid `Block` which is not yet stable. The `Block` that's seen as valid may be different for different nodes
+- **observer**: the first gossip event created by a node X which can strongly see that `GossipEvent`s created by a supermajority of nodes can see a valid `Block` which is not yet stable. The `Block` that's seen as valid may be different for different nodes
 - **meta vote**: the meta vote of a given observer for a given node X is the binary answer to this question: "does this observer strongly see any vote for a valid `Block` which is not yet stable by node X?" By definition, each observer carries `N` meta votes of which `> 2N/3` are `true`. Note that a meta vote is virtual: no node ever explicitly casts a meta vote, but it is instead an after the fact interpretation of ordinary gossip
 - **binary value gossip**: also known as "BV-gossip", it is our adaptation of "binary value broadcast". It is an algorithm used to communicate (virtual) binary values over gossip with the following properties:
   - **Obligation**: If `>= N/3` correct nodes BV-gossip the same value `v`, `v` is eventually added to the set of binary values (`bin_values`) of each correct node
