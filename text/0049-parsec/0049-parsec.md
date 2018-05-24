@@ -543,7 +543,7 @@ c_0 -> b_2
 d_1 -> b_1
 d_4 -> a_2
 labelloc="t"
-label="b_0 is strongly seen by d_4:\nThere is at least one directed path from d_4 to b_0"
+label="b_0 is seen by d_4:\nThere is at least one directed path from b_0 to d_4"
 }
 ```
 -->
