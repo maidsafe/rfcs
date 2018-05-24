@@ -197,8 +197,9 @@ As mentioned above, the gossip events may contain votes for network events. A go
 sees events created by a supermajority of nodes that contain votes for a given network event is
 said to \emph{see a valid block}, and we will call such gossip events \emph{block-votes}. The first
 gossip event which strongly sees block-votes created by a supermajority of nodes is said to be an
-\emph{observer}. (The block-votes don't need to see the same valid block - in fact, it is the case
-when they see different valid blocks that is the most interesting).
+\emph{observer}. The block-votes don't need to see the same valid block - in fact, it is the case
+when they see different valid blocks that is the most interesting. However, they do have to only
+refer to blocks that haven't been appended to the ordered set yet.
 
 An observer implicitly carries a list of $N$ \emph{meta-votes}. Every meta-vote is just a binary
 value denoting whether a corresponding node's block-vote is to be taken into account when
