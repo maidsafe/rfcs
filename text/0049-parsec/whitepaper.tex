@@ -6,6 +6,8 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amsthm}
+\usepackage{floatrow}
+\usepackage{subcaption}
 
 \begin{document}
 
@@ -127,14 +129,31 @@ Following Swirlds\cite{hg}, we also define additional two useful notions:
 \begin{defn}
 	An event $A$ is said to \emph{see} an event $B$ iff $B$ is an ancestor of $A$, and there
 	doesn't exist any pair of events by $B$'s creator $B_1$, $B_2$, such that $B_1$ and $B_2$ are
-	ancestors of $A$, but $B_1$ is neither an ancestor nor a descendant of $B_2$. We call a
-	situation in which such a pair exists a \emph{fork}.
+	ancestors of $A$, but $B_1$ is neither an ancestor nor a descendant of $B_2$ (see fig.
+	\ref{fig-seen}). We call a situation in which such a pair exists a \emph{fork}.
 \end{defn}
 
 \begin{defn}
 	An event $A$ is said to \emph{strongly see} an event $B$ iff $A$ sees a set of events created
-	by a supermajority of nodes in the system that all see $B$.
+	by a supermajority of nodes in the system that all see $B$ (see fig. \ref{fig-stronglyseen}).
 \end{defn}
+
+\begin{figure}[!ht]
+	\centering
+	\begin{floatrow}
+		\ffigbox[\FBwidth]{%
+			\caption{d\_4 sees b\_0: b\_0 is its ancestor and there are no forks}
+			\label{fig-seen}}{%
+			\includegraphics[width=.4\textwidth]{seen.png}
+		}
+		\ffigbox[\FBwidth]{%
+			\caption{a\_1 strongly sees b\_0: it sees itself, b\_1 and d\_1, which are a
+			supermajority and all see b\_0}
+			\label{fig-stronglyseen}}{%
+			\includegraphics[width=.4\textwidth]{strongly_seen.png}
+		}
+	\end{floatrow}
+\end{figure}
 
 \subsection{General overview of the algorithm}
 
