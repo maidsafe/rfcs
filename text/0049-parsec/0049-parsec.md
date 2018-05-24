@@ -604,6 +604,10 @@ label="b_0 is strongly seen by a_1:\nIt is seen via multiple directed paths pass
 ```
 -->
 
+## Full consensus
+
+TODO: a precise illustration will be added shortly
+
 # Drawbacks
 
 Despite optimal complexity, it could in reality be sub-optimal due to the constants involved.
