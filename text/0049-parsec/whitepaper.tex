@@ -35,9 +35,9 @@ Spandan Sharma
 
 
 \begin{abstract}
-	In this paper we present an asynchronous algorithm for reaching consensus in the presence of
-	Byzantine faults. We prove the algorithm's correctness provided that less than a third of
-	participating nodes are faulty.
+	In this paper we present an algorithm for reaching consensus in the presence of Byzantine
+	faults in an intermittently synchronous network. We prove the algorithm's correctness provided
+	that less than a third of participating nodes are faulty.
 
 	\textbf{Keywords:} asynchronous, byzantine, consensus, distributed
 \end{abstract}
@@ -45,16 +45,16 @@ Spandan Sharma
 
 \section{Introduction}
 
-This paper presents a new byzantine fault tolerant, asynchronous consensus algorithm. Like
-\cite{hg}, it has complete asynchrony, no leaders, no round robin, no proof-of-work and reaches
-eventual consensus with probability one. However unlike \cite {hg}, it does not only provide high
-speed in the absence of faults, but also in their presence. It is also fully open, and a GPLv3
-implementation written in Rust will be made available in the near future.
+This paper presents a new byzantine fault tolerant consensus algorithm with very weak synchrony
+assumptions. Like Hashgraph \cite{hg}, it has no leaders, no round robin, no proof-of-work and
+reaches eventual consensus with probability one. However, unlike Hashgraph, it does not only
+provide high speed in the absence of faults, but also in their presence. It is also fully open, and
+a GPLv3 implementation written in Rust will be made available in the near future.
 
-Like \cite{hbbft}, this algorithm is built by composing a number of good ideas present in the
-literature. The gossip protocol is used to allow efficient communication between nodes, as in
-\cite{hg} and \cite{snowflake}. Propagating a message, and indeed, reaching consensus only
-costs $O(N\log{N})$ communications and $O(\log{N})$ stages.
+Like HoneyBadger BFT \cite{hbbft}, this algorithm is built by composing a number of good ideas
+present in the literature. A gossip protocol is used to allow efficient communication between
+nodes, as in Hashgraph and \cite{snowflake}.  Propagating a message, and indeed, reaching consensus
+only costs $O(N\log{N})$ communications and $O(\log{N})$ stages.
 
 The general problem of reaching Byzantine agreement on any value is reduced to the simpler problem
 of reaching binary Byzantine agreement on the nodes participating in each decision. This allows us
@@ -74,12 +74,16 @@ applications providing Secure Access For Everyone.
 \subsection{The network model}
 
 We assume the network to be a set $\mathcal{N}$ of $N$ instances of the algorithm communicating via
-asynchronous connections. By "asynchronous" we mean that messages are delivered eventually,
-but can be arbitrarily delayed, so that it is impossible to tell whether an instance has failed
-by completely stopping, or there is just a delay in message delivery. We allow a possibility of
-up to $t$ Byzantine (arbitrary) failures, where $3t < N$. We will call the instances that haven't
-failed \emph{correct} or \emph{honest}, and the failing instances \emph{faulty} or \emph{malicious}
-- as Byzantine failure model allows for malicious behaviour and collaboration.
+intermittently synchronous connections. By "intermittently synchronous" we mean that messages are
+delivered with a finite average delay, but there may be periods of arbitrarily long delays. This is
+a weaker assumption than weak synchrony, and only a bit stronger than full asynchrony, where the
+only guarantee is that messages are delivered eventually.
+With intermittent synchrony, just like with full asynchrony, it is impossible to tell whether an
+instance has failed by completely stopping, or there is just a delay in message delivery.
+We allow a possibility of up to $t$ Byzantine (arbitrary) failures, where $3t < N$. We will call
+the instances that haven't failed \emph{correct} or \emph{honest}, and the failing instances
+\emph{faulty} or \emph{malicious} - as Byzantine failure model allows for malicious behaviour and 
+collaboration.
 
 We will refer to any set of instances containing more than $\frac{2}{3}N$ of them as a
 \emph{supermajority}.
@@ -428,7 +432,7 @@ simply $Y \oplus \mathsf{round\_hash}(e)$).
 In order to get the result of the coin flip, we will look for the first gossip event by the node
 with the leader index 0 that has an $\mathsf{aux}$ value in the current step, and take the least
 significant bit of its hash. There is one caveat, though - the first leader might be dead and never
-gossip such an event. We can never know for sure because of the asynchronicity assumption.
+gossip such an event. We can never know for sure because of our synchronicity assumptions.
 
 To get past that hurdle, we use the $\mathsf{responsiveness\_threshold}$, which is just an integer
 function of $N$. This threshold will denote the number of gossip events caused by responses we will
@@ -527,8 +531,8 @@ one with the most votes. Any ties can be broken again by lexicographic ordering,
 method.
 
 This completes the description of the algorithm. The next section will prove that it is correct,
-that is, that it provides robust consensus in an asynchronous setting, and in the presence of
-Byzantine faults.
+that is, that it provides robust consensus in an intermittently synchronous setting, and in the
+presence of Byzantine faults.
 
 \section{Proof of correctness}
 
@@ -847,11 +851,12 @@ presented below.
 \section{Conclusions}
 
 A new consensus algorithm has been presented, building upon some previous achievements in this
-field (\cite{hg}, \cite{aba}, \cite{trivial}), but combining their features in a novel way. It is
-asynchronous (as in \cite{hg} and \cite{aba}), uses a gossip graph (as in \cite{hg} and
-\cite{snowflake}), and generates randomness, which is necessary for asynchronous consensus
-\cite{flp}, using a concrete coin (as in \cite{trivial}). We believe this approach will be useful
-in numerous applications, one of which is the SAFE Network.
+field (\cite{hg}, \cite{aba}, \cite{trivial}), but combining their features in a novel way. It
+makes very weak synchrony assumptions, uses a gossip graph (as in \cite{hg} and \cite{snowflake}),
+and a concrete coin (as in \cite{trivial}). We believe this approach will be useful in numerous
+applications, one of which is the SAFE Network.
+We also intend to conduct further research in search of possibilities for making this algorithm
+fully asynchronous.
 
 \label{references}
 
@@ -870,9 +875,6 @@ in numerous applications, one of which is the SAFE Network.
 
 \bibitem{snowflake} Team Rocket \textit{Snowflake to Avalanche: A Novel Metastable Consensus
 	Protocol Family for Cryptocurrencies}, (2018)
-
-\bibitem{flp} Fischer M. J., Lynch N. A., Paterson M. S. \textit{Impossibility of Distributed
-	Consensus with One Faulty Process}, JACM Vol. 32 Issue 2 (April 1985)
 
 \end{thebibliography}
 
