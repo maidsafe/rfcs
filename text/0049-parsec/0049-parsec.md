@@ -4,7 +4,7 @@
 - Type: new feature
 - Related components: Routing
 - Start Date: 20-04-2018
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
+- Discussion: https://forum.safedev.org/t/rfc-49-parsec/1707
 - Supersedes: N/A
 - Superseded by: N/A
 
