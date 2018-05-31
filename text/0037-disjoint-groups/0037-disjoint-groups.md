@@ -41,7 +41,7 @@ If section `A` is connected to section `B`, every node in `B` will know every me
 
 ### Data chains
 
-The current group concept would considerably complicate [data chains](https://github.com/dirvine/data_chain): With disjoint sections, all members of a section can sign the same link block - consising of all the section members -, and are responsible for exactly the same set of data chunks, so they can sign the same data blocks.
+The current group concept would considerably complicate [data chains](https://github.com/dirvine/data_chain): With disjoint sections, all members of a section can sign the same link block - consisting of all the section members -, and are responsible for exactly the same set of data chunks, so they can sign the same data blocks.
 
 
 ## Detailed design
