@@ -495,7 +495,6 @@ From [ABA](https://hal.inria.fr/hal-00944019/document)'s proof, the number of ro
 Here is an illustration of the concept of `GossipEvent`s "seeing" each other:
 
 ![Alt text](./seen.dot.svg)
-<img src="./seen.dot.svg">
 <!---
 ```graphviz
 digraph GossipGraph {
@@ -552,7 +551,6 @@ label="b_0 is seen by d_4:\nThere is at least one directed path from b_0 to d_4"
 Here, we try to convey visually the concept of "strongly seen":
 
 ![Alt text](./strongly_seen.dot.svg)
-<img src="./strongly_seen.dot.svg">
 <!---
 ```graphviz
 digraph GossipGraph {
@@ -606,7 +604,667 @@ label="b_0 is strongly seen by a_1:\nIt is seen via multiple directed paths pass
 
 ## Full consensus
 
-TODO: a precise illustration will be added shortly
+Here, we show how PARSEC can be applied by a node Bob to reach consensus on the
+next network event.
+
+We present a gossip graph where Bob's gossip events are heavily annotated in order to understand
+how Bob is able to interpret the graph until he decides of the next network event.
+
+We stop at b_19, when Bob takes his decision. At this stage, he doesn't know
+whether Carol has reached agreement, but he knows that if she continues gossiping, she will
+eventually reach agreement on the same value.
+
+![Alt text](./gossip_graph.dot.svg)
+<!---
+```graphviz
+digraph GossipGraph {
+  splines=false
+  rankdir=BT
+  subgraph cluster_Alice {
+    style=invis
+    label="Alice"
+    "Alice"
+    "Alice" -> "a_0_0" [style=invis]
+    "a_0_0" -> "a_0_1"
+    "a_0_1" -> "a_1" [minlen=2]
+    "a_1" -> "a_2" [minlen=3]
+    "a_2" -> "a_3"
+    "a_3" -> "a_4"
+    "a_4" -> "a_5"
+    "a_5" -> "a_6"
+    "a_6" -> "a_7"
+    "a_7" -> "a_8"
+    "a_8" -> "a_9"
+    "a_9" -> "a_10" [minlen=2]
+    "a_10" -> "a_11"
+    "a_11" -> "a_12"
+    "a_12" -> "a_13"
+    "a_13" -> "a_14" [minlen=2]
+    "a_14" -> "a_15" [minlen=2]
+    "a_15" -> "a_16" [minlen=2]
+    "a_16" -> "a_17" [minlen=3]
+    "a_17" -> "a_18" [minlen=3]
+    "a_18" -> "a_19"
+  }
+  "b_1" -> "a_1" [constraint=false]
+  "b_3" -> "a_2" [constraint=false]
+  "d_3" -> "a_3" [constraint=false]
+  "c_3" -> "a_4" [constraint=false]
+  "d_5" -> "a_6" [constraint=false]
+  "b_5" -> "a_7" [constraint=false]
+  "b_6" -> "a_8" [constraint=false]
+  "d_7" -> "a_9" [constraint=false]
+  "d_8" -> "a_10" [constraint=false]
+  "b_7" -> "a_11" [constraint=false]
+  "b_8" -> "a_12" [constraint=false]
+  "c_5" -> "a_14" [constraint=false]
+  "d_12" -> "a_15" [constraint=false]
+  "b_11" -> "a_16" [constraint=false]
+  "b_13" -> "a_17" [constraint=false]
+  "d_15" -> "a_18" [constraint=false]
+  subgraph cluster_Bob {
+    style=invis
+    label="Bob"
+    "Bob"
+    "Bob" -> "b_0_0" [style=invis]
+    "b_0_0" -> "b_0_1"
+    "b_0_1" -> "b_1"
+    "b_1" -> "b_2"
+    "b_2" -> "b_3" [minlen=2]
+    "b_3" -> "b_4" [minlen=2]
+    "b_4" -> "b_4_0" [minlen=2]
+    "b_4_0" -> "b_5"
+    "b_5" -> "b_6"
+    "b_6" -> "b_7"
+    "b_7" -> "b_8"
+    "b_8" -> "b_9" [minlen=3]
+    "b_9" -> "b_9_0"
+    "b_9_0" -> "b_10"
+    "b_10" -> "b_11" [minlen=5]
+    "b_11" -> "b_12"
+    "b_12" -> "b_13" [minlen=2]
+    "b_13" -> "b_13_0" [minlen=2]
+    "b_13_0" -> "b_14" [minlen=4]
+    "b_14" -> "b_15" [minlen=2]
+  }
+  "a_0_1" -> "b_1" [constraint=false]
+  "d_1" -> "b_2" [constraint=false]
+  "c_2" -> "b_3" [constraint=false]
+  "a_2" -> "b_4" [constraint=false]
+  "c_4" -> "b_4_0" [constraint=false]
+  "d_6" -> "b_5" [constraint=false]
+  "a_5" -> "b_6" [constraint=false]
+  "a_7" -> "b_7" [constraint=false]
+  "a_8" -> "b_8" [constraint=false]
+  "d_9" -> "b_9" [constraint=false]
+  "c_4_1" -> "b_9_0" [constraint=false]
+  "a_11" -> "b_10" [constraint=false]
+  "a_15" -> "b_11" [constraint=false]
+  "d_13" -> "b_12" [constraint=false]
+  "d_14" -> "b_13" [constraint=false]
+  "a_17" -> "b_13_0" [constraint=false]
+  "a_19" -> "b_14" [constraint=false]
+  "d_16" -> "b_15" [constraint=false]
+  subgraph cluster_Carol {
+    style=invis
+    label="Carol"
+    "Carol"
+    "Carol" -> "c_0_0" [style=invis]
+    "c_0_0" -> "c_0_1"
+    "c_0_1" -> "c_1" [minlen=2]
+    "c_1" -> "c_2"
+    "c_2" -> "c_3" [minlen=2]
+    "c_3" -> "c_4" [minlen=2]
+    "c_4" -> "c_4_0" [minlen=3]
+    "c_4_0" -> "c_4_1" [minlen=2]
+    "c_4_1" -> "c_5" [minlen=6]
+  }
+  "d_1" -> "c_1" [constraint=false]
+  "b_1" -> "c_2" [constraint=false]
+  "b_3" -> "c_3" [constraint=false]
+  "d_4" -> "c_4" [constraint=false]
+  "d_6_0" -> "c_4_0" [constraint=false]
+  "d_7_0" -> "c_4_1" [constraint=false]
+  "a_13" -> "c_5" [constraint=false]
+  subgraph cluster_Dave {
+    style=invis
+    label="Dave"
+    "Dave"
+    "Dave" -> "d_0_0" [style=invis]
+    "d_0_0" -> "d_0_1"
+    "d_0_1" -> "d_1"
+    "d_1" -> "d_2" [minlen=2]
+    "d_2" -> "d_3"
+    "d_3" -> "d_4" [minlen=2]
+    "d_4" -> "d_5"
+    "d_5" -> "d_6"
+    "d_6" -> "d_6_0"
+    "d_6_0" -> "d_7"
+    "d_7" -> "d_7_0"
+    "d_7_0" -> "d_8" [minlen=2]
+    "d_8" -> "d_9"
+    "d_9" -> "d_10"
+    "d_10" -> "d_11"
+    "d_11" -> "d_12" [minlen=4]
+    "d_12" -> "d_13"
+    "d_13" -> "d_14" [minlen=3]
+    "d_14" -> "d_15" [minlen=4]
+    "d_15" -> "d_16" [minlen=4]
+  }
+  "c_0_1" -> "d_1" [constraint=false]
+  "b_2" -> "d_2" [constraint=false]
+  "a_1" -> "d_3" [constraint=false]
+  "c_3" -> "d_4" [constraint=false]
+  "b_4" -> "d_6" [constraint=false]
+  "b_4_0" -> "d_6_0" [constraint=false]
+  "a_6" -> "d_7" [constraint=false]
+  "c_4_0" -> "d_7_0" [constraint=false]
+  "b_8" -> "d_8" [constraint=false]
+  "b_8" -> "d_9" [constraint=false]
+  "a_9" -> "d_10" [constraint=false]
+  "a_10" -> "d_11" [constraint=false]
+  "a_14" -> "d_12" [constraint=false]
+  "c_5" -> "d_13" [constraint=false]
+  "b_12" -> "d_14" [constraint=false]
+  "b_13_0" -> "d_15" [constraint=false]
+  "b_14" -> "d_16" [constraint=false]
+ a_0_0 [label="a_0"]
+ a_0_1 [label="a_1"]
+ a_1 [label="a_2"]
+ a_10 [label="a_11"]
+ a_11 [label="a_12"]
+ a_12 [label="a_13"]
+ a_13 [label="a_14"]
+ a_14 [label="a_15"]
+ a_15 [label="a_16"]
+ a_16 [shape=rectangle]
+ a_16  [label="a_17
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:2  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{t} ]
+Aux: [ a:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ a_17 [shape=rectangle]
+ a_17  [label="a_18
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:2  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ a_18 [label="a_19"]
+ a_19 [shape=rectangle]
+ a_19  [label="a_20
+Round: [ a:0  b:1  c:0  d:0 ]
+Step: [ a:1  b:0  c:1  d:1 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  b:{t}  c:{t}  d:{t} ]"]
+ a_2 [shape=rectangle]
+ a_2  [label="a_3
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{}  b:{}  c:{}  d:{} ]
+Aux: []"]
+ a_3 [shape=rectangle]
+ a_3  [label="a_4
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{} ]
+Aux: [ a:{t}  c:{t} ]"]
+ a_4 [shape=rectangle]
+ a_4  [label="a_5
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{f}  c:{t}  d:{t} ]"]
+ a_5 [label="a_6"]
+ a_6 [label="a_7"]
+ a_7 [shape=rectangle]
+ a_7  [label="a_8
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ a_8 [shape=rectangle]
+ a_8  [label="a_9
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{t} ]
+Aux: [ a:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ a_9 [shape=rectangle]
+ a_9  [label="a_10
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ b_0_0 [label="b_0"]
+ b_0_1 [label="b_1"]
+ b_1 [label="b_2"]
+ b_10 [label="b_13"]
+ b_11 [label="b_14"]
+ b_12 [shape=rectangle]
+ b_12  [label="b_15
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:2  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{t} ]
+Aux: [ a:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]
+
+b_15 can see a_10, b_12, c_8 and d_13
+which all carry a true auxiliary value
+for b.
+
+This is a supermajority of true
+auxiliary values during step 1: a
+forced false step.
+
+This means that the next step begins
+and the estimate remains true.
+
+We are now entering step 2: the
+genuine coin flip step.
+
+Let binary value gossip begin again.
+"]
+ b_13 [label="b_16"]
+ b_13_0 [shape=rectangle]
+ b_13_0  [label="b_17
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:2  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]
+
+b_17 can see a_18, b_17 and d_16 which
+all carry an estimate for b true at
+step 2.
+
+This promotes b true to one of b_17's
+bin_values. Since it's the first such
+promotion, true is b_17's auxiliary value
+for step 2.
+
+b_17 can only see 2 such auxiliary
+values, so more gossip is needed to make
+it a supermajority, and possibly trigger
+a genuine coin flip.
+"]
+ b_14 [label="b_18"]
+ b_15 [shape=rectangle]
+ b_15  [label="b_19
+Round: [ a:0  b:1  c:0  d:0 ]
+Step: [ a:1  b:0  c:1  d:1 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+
+b_19 can see a supermajority of auxiliary
+values for b at step 2, coming from a_18,
+b_17 and d_18.
+
+It is a supermajority of true values, so
+instead of doing a genuine coin flip, the
+next round starts with b's estimate set
+to true.
+
+This is step 0 of round 1: a forced true
+step.
+
+At this stage, b_19 can see a_20 and d_19
+which both carry an estimate of false for
+b at round 1, step 0. This makes b false
+another of b_19's estimates.
+
+b_19 can see a_20, b_19 and d_19 which
+all carry both estimates true and false.
+
+This makes both values true and false
+members of b_19's bin_values.
+
+By convention, true becomes b_19's
+auxiliary value.
+
+At this stage, b_19 can see a_20, b_19
+and d_19 which all carry a true auxiliary
+value for round 1, step 0.
+
+Because this is a forced true step, this
+supermajority of true auxiliary values is
+enough to make true the decided value for
+b's meta-election.
+
+Now, all meta-elections for the oldest
+observers: a_3, b_4, c_4 and d_4 are over.
+
+Because all decided values happen to be
+true, Bob knows to consider Alice, Bob,
+Carol and Dave's opinion when reaching
+agreement on the next interesting event.
+
+Looking back at their history, he can see
+no majority for any specific interesting event.
+The situation is tied, with two pink
+events and two turquoise events.
+
+Bob has to sort the events: pink and
+turquoise by some order that all nodes
+agree upon.
+
+Turquoise comes on top, so turquoise
+becomes the next consensus-ed event.
+
+Now, a_1, b_0, c_1 and d_0 become
+uninteresting and the next consensus
+decision may start from Bob's perspective.
+
+Bob knows that all other nodes, if they
+haven't decided yet will decide in
+agreement with him, eventually.
+"]
+ b_2 [label="b_3"]
+ b_3 [shape=rectangle]
+ b_3  [label="b_4
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t} b:{f} c:{t} d:{t} ]
+Bin: [ a:{} b:{} c:{} d:{} ]
+Aux: []
+
+Interesting gossip events are
+coloured pink or turquoise.
+
+For instance, they could be the
+events that make a block of
+votes valid.
+
+The pink ones could make a block
+of votes for Live(eric) valid,
+while the turquoise ones could
+make Live(fred) valid.
+
+b_4 strongly sees a_0, c_0 and
+d_0.
+
+This is a supermajority of
+interesting gossip events.
+
+This makes b_4 an observer.
+Observers are coloured beige.
+
+b_4's estimates at this stage
+contain only his meta votes.
+
+Meta votes are the answer to
+the question:
+Do I strongly see an
+interesting gossip event from
+this node?
+
+The sets of bin_values are
+still empty as binary value
+gossip is only starting now.
+"
+]
+ b_4  [label="b_5"]
+ b_4_0 [shape=rectangle]
+ b_4_0  [label="b_6
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]
+
+b_6 can see a_3, b_4, c_4 and d_4,
+which together carry a supermajority
+of estimates for a, c and d true.
+
+This means that these values can be
+promoted to the set of bin_values.
+Since they are the first ones, they
+also become the auxiliary values for
+each of these meta-elections at
+round 0, step 0.
+
+b_6 can see a_3 and d_4 which both
+carry an estimate for b true, which is
+not yet in b_6's estimates.
+This makes b true one more of b's
+estimates.
+
+b_6 can now see 3 estimates for b true
+and 3 estimates for b false, so both
+estimates are promoted to b's
+bin_values.
+
+Because both binary values entered
+bin_values in the same gossip event, 
+the auxiliary value for b is true by
+convention.
+
+At this stage, b_6 can see c_5, d_5
+and b_6 itself which together carry a
+supermajority of auxiliary values for true.
+
+Because this is still step 0: a forced
+true step, seeing a supermajority of
+auxiliary values for true means that
+these values are decided.
+
+For the meta-vote on b, b_6 can see a
+supermajority of auxiliary values, but
+no agreeing supermajority.
+This means that the next step will start
+with the true estimate as this is a
+forced true step.
+"]
+ b_5 [shape=rectangle]
+ b_5  [label="b_7
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{t} ]
+Aux: [ a:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]
+
+Being decided, a, c and d continue to
+virtually carry true in their Est, Bin
+and Aux sets forever for any subsequent
+step. That is to help other nodes
+converge if they are still lagging
+behind.
+
+A new step begins for b's meta-election:
+step 1, a forced false step.
+
+b_7's estimate is true since there was no
+decisive supermajority at the issue of the
+last forced true step.
+
+b_7 cannot see any other estimate for
+step 1, so we will need to wait for more
+gossip events.
+
+A new sequence of binary value gossip
+starts.
+"]
+ b_6 [label="b_8"]
+ b_7 [label="b_9"]
+ b_8 [label="b_10"]
+ b_9 [label="b_11"]
+ b_9_0 [shape=rectangle]
+ b_9_0  [label="b_12
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]
+
+b_12 can see b_12, c_7 and d_9 which
+all carry an estimate for b true at
+step 1.
+This promotes b true to b_12's
+bin_values.
+
+Being the only value in b_12's
+bin_values, true also becomes b_12's
+auxiliary value.
+
+So far, b_12 can only see two
+auxiliary values for b for step 1:
+the one a_10 carries and his own.
+That's not a supermajority, so more
+gossip is neeeded to make progress.
+"]
+ c_0_0 [label="c_0"]
+ c_0_1 [label="c_1"]
+ c_1 [label="c_2"]
+ c_2 [label="c_3"]
+ c_3 [shape=rectangle]
+ c_3  [label="c_4
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Bin: [ a:{}  b:{}  c:{}  d:{} ]
+Aux: []
+"]
+ c_4 [shape=rectangle]
+ c_4  [label="c_5
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{f}  c:{t}  d:{t} ]"]
+ c_4_0 [shape=rectangle]
+ c_4_0  [label="c_6
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ c_4_1 [shape=rectangle]
+ c_4_1  [label="c_7
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{t} ]
+Aux: [ a:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ c_5 [shape=rectangle]
+ c_5  [label="c_8
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ d_0_0 [label="d_0"]
+ d_0_1 [label="d_1"]
+ d_1 [label="d_2"]
+ d_10 [shape=rectangle]
+ d_10  [label="d_13
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ d_11 [label="d_14"]
+ d_12 [label="d_15"]
+ d_13 [shape=rectangle]
+ d_13  [label="d_16
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:2  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{t} ]
+Aux: [ a:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ d_14 [label="d_17"]
+ d_15 [shape=rectangle]
+ d_15  [label="d_18
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:2  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ d_16 [shape=rectangle]
+ d_16  [label="d_19
+Round: [ a:0  b:1  c:0  d:0 ]
+Step: [ a:1  b:0  c:1  d:1 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  b:{t}  c:{t}  d:{t} ]"]
+ d_2 [label="d_3"]
+ d_3 [shape=rectangle]
+ d_3  [label="d_4
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{f} ]
+Bin: [ a:{}  b:{}  c:{}  d:{} ]
+Aux: []"]
+ d_4 [shape=rectangle]
+ d_4  [label="d_5
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{f,t} ]
+Bin: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{f}  c:{t}  d:{t} ]"]
+ d_5 [label="d_6"]
+ d_6 [label="d_7"]
+ d_6_0 [shape=rectangle]
+ d_6_0  [label="d_8
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:0  b:0  c:0  d:0 ]
+Est: [ a:{t}  b:{f,t}  c:{t}  d:{f,t} ]
+Bin: [ a:{t}  b:{f,t}  c:{t}  d:{t} ]
+Aux: [ a:{t}  b:{f}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ d_7 [shape=rectangle]
+ d_7  [label="d_9
+Round: [ a:0  b:0  c:0  d:0 ]
+Step: [ a:1  b:1  c:1  d:1 ]
+Est: [ a:{t}  b:{t}  c:{t}  d:{t} ]
+Bin: [ a:{t}  b:{}  c:{t}  d:{t} ]
+Aux: [ a:{t}  c:{t}  d:{t} ]
+Dec: [ a:{t}  c:{t}  d:{t} ]"]
+ d_7_0 [label="d_10"]
+ d_8 [label="d_11"]
+ d_9 [label="d_12"]
+
+a_0_0, b_0_1, c_0_0, d_0_1 [style=filled, fillcolor=pink]
+a_0_1, b_0_0, c_0_1, d_0_0, a_19, b_15, d_16 [style=filled, fillcolor=darkturquoise]
+a_2, b_3, c_3, d_3 [style=filled, fillcolor=beige]
+
+  {
+    rank=same
+    "Alice" [color=white]
+    "Bob" [color=white]
+    "Carol" [color=white]
+    "Dave" [color=white]
+  }
+  "Carol" -> "Dave" [style=invis, minlen=10]
+}
+```
+-->
 
 # Drawbacks
 
