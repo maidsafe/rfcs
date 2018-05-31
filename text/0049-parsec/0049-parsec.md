@@ -621,8 +621,9 @@ digraph GossipGraph {
   splines=false
   rankdir=BT
   subgraph cluster_Alice {
+    style=invis
     label="Alice"
-    "Alice" [style=invis]
+    "Alice"
     "Alice" -> "a_0_0" [style=invis]
     "a_0_0" -> "a_0_1"
     "a_0_1" -> "a_1" [minlen=2]
@@ -662,8 +663,9 @@ digraph GossipGraph {
   "b_13" -> "a_17" [constraint=false]
   "d_15" -> "a_18" [constraint=false]
   subgraph cluster_Bob {
+    style=invis
     label="Bob"
-    "Bob" [style=invis]
+    "Bob"
     "Bob" -> "b_0_0" [style=invis]
     "b_0_0" -> "b_0_1"
     "b_0_1" -> "b_1"
@@ -704,8 +706,9 @@ digraph GossipGraph {
   "a_19" -> "b_14" [constraint=false]
   "d_16" -> "b_15" [constraint=false]
   subgraph cluster_Carol {
+    style=invis
     label="Carol"
-    "Carol" [style=invis]
+    "Carol"
     "Carol" -> "c_0_0" [style=invis]
     "c_0_0" -> "c_0_1"
     "c_0_1" -> "c_1" [minlen=2]
@@ -724,8 +727,9 @@ digraph GossipGraph {
   "d_7_0" -> "c_4_1" [constraint=false]
   "a_13" -> "c_5" [constraint=false]
   subgraph cluster_Dave {
+    style=invis
     label="Dave"
-    "Dave" [style=invis]
+    "Dave"
     "Dave" -> "d_0_0" [style=invis]
     "d_0_0" -> "d_0_1"
     "d_0_1" -> "d_1"
@@ -867,7 +871,7 @@ This is a supermajority of true
 auxiliary values during step 1: a
 forced false step.
 
-This means that the next step begin
+This means that the next step begins
 and the estimate remains true.
 
 We are now entering step 2: the
@@ -945,7 +949,7 @@ enough to make true the decided value for
 b's meta-election.
 
 Now, all meta-elections for the oldest
-observers: a_3. b_4, c_4 and d_4 are over.
+observers: a_3, b_4, c_4 and d_4 are over.
 
 Because all decided values happen to be
 true, Bob knows to consider Alice, Bob,
@@ -953,9 +957,9 @@ Carol and Dave's opinion when reaching
 agreement on the next interesting event.
 
 Looking back at their history, he can see
-that that population is tied, with two
-pink interesting events and two turquoise
-interesting events.
+no majority for any specific interesting event.
+The situation is tied, with two pink
+events and two turquoise events.
 
 Bob has to sort the events: pink and
 turquoise by some order that all knows
@@ -1089,7 +1093,7 @@ behind.
 A new step begins for b's meta-election:
 step 1, a forced false step.
 
-b_7's estimate is true since their was no
+b_7's estimate is true since there was no
 decisive supermajority at the issue of the
 last forced true step.
 
@@ -1114,7 +1118,7 @@ Aux: [ a:{t}  b:{t}  c:{t}  d:{t} ]
 Dec: [ a:{t}  c:{t}  d:{t} ]
 
 b_12 can see b_12, c_7 and d_9 which
-all carry an estimate for be true at
+all carry an estimate for b true at
 step 1.
 This promotes b true to b_12's
 bin_values.
@@ -1253,14 +1257,13 @@ a_2, b_3, c_3, d_3 [style=filled, fillcolor=beige]
 
   {
     rank=same
-    "Alice" [style=invis, color=white]
-    "Bob" [style=invis, color=white]
-    "Carol" [style=invis, color=white]
-    "Dave" [style=invis, color=white]
+    "Alice" [color=white]
+    "Bob" [color=white]
+    "Carol" [color=white]
+    "Dave" [color=white]
   }
   "Carol" -> "Dave" [style=invis, minlen=10]
 }
-
 ```
 -->
 
