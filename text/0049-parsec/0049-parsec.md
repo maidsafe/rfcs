@@ -944,7 +944,7 @@ and d_19 which all carry a true auxiliary
 value for round 1, step 0.
 
 Because this is a forced true step, this
-supermajority of true auxililay values is
+supermajority of true auxiliary values is
 enough to make true the decided value for
 b's meta-election.
 
@@ -962,7 +962,7 @@ The situation is tied, with two pink
 events and two turquoise events.
 
 Bob has to sort the events: pink and
-turquoise by some order that all knows
+turquoise by some order that all nodes
 agree upon.
 
 Turquoise comes on top, so turquoise
@@ -1032,8 +1032,7 @@ Dec: [ a:{t}  c:{t}  d:{t} ]
 
 b_6 can see a_3, b_4, c_4 and d_4,
 which together carry a supermajority
-of estimates for a and c true and d
-true.
+of estimates for a, c and d true.
 
 This means that these values can be
 promoted to the set of bin_values.
