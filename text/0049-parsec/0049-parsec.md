@@ -611,7 +611,7 @@ We present a gossip graph where Bob's gossip events are heavily annotated in ord
 how Bob is able to interpret the graph until he decides of the next network event.
 
 We stop at b_19, when Bob takes his decision. At this stage, he doesn't know
-wether Carol has reached agreement, but he knows that if she continues gossiping, she will
+whether Carol has reached agreement, but he knows that if she continues gossiping, she will
 eventually reach agreement on the same value.
 
 ![Alt text](./gossip_graph.dot.svg)
