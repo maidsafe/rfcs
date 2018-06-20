@@ -278,6 +278,8 @@ So for a given node to observe consensus on a given meta vote that happened in t
 
 This algorithm considers a section of a `gossip_graph` starting with the oldest observer `GossipEvent` for each node and ending with the most recent `GossipEvent` created by each node. We consider the oldest observer's meta votes as the initial binary values we desire to obtain consensus on. This is in view of deriving full consensus from this binary consensus, but the algorithm described here would work considering any binary property of a `GossipEvent`. To each `GossipEvent` starting with the oldest ones, we assign additional meaning (such as estimates, auxiliary values and so on). Eventually given a large enough section of the `gossip_graph`, each node will have created one `GossipEvent` that is assigned the meaning of a "decided" binary value. This terminates the algorithm.
 
+Note also that in the following description of the details of meta voting, the values: "estimates, bin_values and auxiliary values" are each associated to a round and step. Each `GossipEvent` may carry multiple sets of each of these values (one for each step/round combination) until a decision is reached. The decided values apply for any subsequent step and round.
+
 To each `GossipEvent`, we associate the following meaning (when trying to determine binary consensus on one voter's right to vote in the current ordering decision):
 - a round number starting at zero for the oldest observer
 - a step number starting at zero for the oldest observer
@@ -294,12 +296,12 @@ The set of estimates of a `GossipEvent` is the set of estimates of its `self_par
 - the step number is different from the `self_parent`'s step number, in which case the estimate is updated according to the rules defined in the "concrete coin protocol"
 
 The set `bin_values` of a `GossipEvent` is the set `bin_values` of its `self_parent`, except if
-- this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
+- this `GossipEvent`'s decided value is not `None`, in which case the set `bin_values` is the set containing only that value
 - this `GossipEvent` can see `GossipEvent`s originating from `> 2N/3` different nodes carrying estimates of a value that is not present in its `self_parent`'s estimate, in which case this event's `bin_values` is the union of its `self_parent`'s `bin_values` and the set of estimates containing only that new value.
 - the step number is different from its `self_parent`'s step number, in which case `bin_values` is the empty set
 
 The auxiliary value of a `GossipEvent` is the same as its `self_parent`'s, except if
-- this `GossipEvent`'s decided value is not `None`, in which case the set of estimate is the set containing only that value
+- this `GossipEvent`'s decided value is not `None`, in which case the auxiliary value is that value
 - its auxiliary value is `None`, its `self_parent`'s set of `bin_values` is empty and its set of `bin_values` is non-empty
   - if its set of `bin_values` is of cardinality one, the auxiliary value is `Some(v)` where v is the only value contained in `bin_value`
   - if its set of `bin_values` is the set: `{true, false}`, the auxiliary value is `Some(true)` (as decided arbitrarily by the authors)
@@ -1053,7 +1055,7 @@ estimates are promoted to b's
 bin_values.
 
 Because both binary values entered
-bin_values in the same gossip event, 
+bin_values in the same gossip event,
 the auxiliary value for b is true by
 convention.
 
