@@ -1268,6 +1268,25 @@ a_2, b_3, c_3, d_3 [style=filled, fillcolor=beige]
 ```
 -->
 
+## Appendix: network mutability
+
+The main algorithm is formulated in terms of a network in which all the members are known a priori 
+(a permissioned network). This is enough in some settings, but sometimes it is necessary to allow
+the set of members to be modified, so that members of the network can join and leave at will.
+
+In order to accommodate mutability in the network, every node has to keep a record of who are the
+current members. We will call this record the \emph{network members list}. This list is initialised
+with the so called \emph{genesis group} and can only be modified as a result of a block becoming
+stable.
+
+The gossip graph is being processed with the assumption that the set of valid members of the
+network is exactly the network members list. Whenever a decision about a block is reached, the
+members list is updated (if the block contained information about a member leaving or a new member
+joining), and the calculation for the next block is started according to the updated list.
+
+This method ensures that every meta-election uses a constant list of members from start to finish.
+Thanks to this approach, the proofs of correctness apply without modifications.
+
 # Drawbacks
 
 Despite optimal complexity, it could in reality be sub-optimal due to the constants involved.
