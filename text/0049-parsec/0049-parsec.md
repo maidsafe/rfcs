@@ -1275,8 +1275,8 @@ The main algorithm is formulated in terms of a network in which all the members 
 the set of members to be modified, so that members of the network can join and leave at will.
 
 In order to accommodate mutability in the network, every node has to keep a record of who are the
-current members. We will call this record the \emph{network members list}. This list is initialised
-with the so called \emph{genesis group} and can only be modified as a result of a block becoming
+current members. We will call this record the _network members list_. This list is initialised
+with the so called _genesis group_ and can only be modified as a result of a block becoming
 stable.
 
 The gossip graph is being processed with the assumption that the set of valid members of the
