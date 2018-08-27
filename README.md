@@ -1,4 +1,4 @@
-# SAFE Network RFCs
+﻿# SAFE Network RFCs
 
 _This process attempts to emulate the success of the Rust programming language
 and as such has almost mirrored the [RFC process the Rust developers
@@ -219,3 +219,11 @@ necessary.
 
 [issues]: https://github.com/maidsafe/rfcs/issues
 [rfcs category]: https://forum.safedev.org/c/rfcs
+
+## License
+
+This SAFE Network library is dual-licensed under the Modified BSD ([LICENSE-BSD](LICENSE-BSD) https://opensource.org/licenses/BSD-3-Clause) or the MIT license ([LICENSE-MIT](LICENSE-MIT) https://opensource.org/licenses/MIT) at your option.
+
+## Contribution
+
+Copyrights in the SAFE Network are retained by their contributors. No copyright assignment is required to contribute to this project.
