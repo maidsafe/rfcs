@@ -4,6 +4,7 @@ A list of all RFCs by their current status.
 
 ## Active RFCs
 
+ - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0037 Disjoint Sections](./text/0037-disjoint-groups/0037-disjoint-groups.md)
  - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
@@ -17,7 +18,6 @@ A list of all RFCs by their current status.
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
  - [#0022 Messaging Example in `safe_core`](./text/0022-messaging-example-in-safe_core/0022-messaging-example-in-safe_core.md)
  - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
- - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
@@ -65,4 +65,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Thu 17 May 13:09:55 BST 2018_ at REV [7cd377a](https://github.com/maidsafe/rfcs/commit/7cd377ab5bb81986eb18969c7bd19ff1322f63d6))
+(Last updated _Thu 17 Sep 13:09:55 BST 2018_ at REV [7cd377a](https://github.com/maidsafe/rfcs/commit/7cd377ab5bb81986eb18969c7bd19ff1322f63d6))
