@@ -10,6 +10,7 @@ A list of all RFCs by their current status.
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
+ - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
 
 ## Proposed RFCs
 
@@ -20,7 +21,6 @@ A list of all RFCs by their current status.
  - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
 
 ## Agreed RFCs
 
@@ -65,4 +65,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Thu 17 Sep 13:09:55 BST 2018_ at REV [7cd377a](https://github.com/maidsafe/rfcs/commit/7cd377ab5bb81986eb18969c7bd19ff1322f63d6))
+(Last updated _Thu 17 Sep 14:40:33 BST 2018_ at REV [c7ecc1e](https://github.com/maidsafe/rfcs/commit/c7ecc1e9f0dc167ec24b891832a6306c5b21cdcb))
