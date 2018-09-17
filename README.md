@@ -99,7 +99,7 @@ into SAFE, at which point it becomes "active".
 - Submit a pull request. As a pull request the RFC will receive design
   feedback from the larger community, and the author should be prepared to
   revise it in response.
-- Each pull request will be labeled with the most relevant [sub-team], which
+- Each pull request will be labelled with the most relevant sub-team, which
   will lead to its being triaged by that team in a future meeting and assigned
   to a member of the sub-team.
 - Build consensus and integrate feedback. RFCs that have broad support are
@@ -124,7 +124,7 @@ into SAFE, at which point it becomes "active".
     impossible). However, the argument supporting the disposition on the RFC
     needs to have already been clearly articulated, and there should not be a
     strong consensus *against* that position outside of the sub-team. Sub-team
-    members use their best judgment in taking this step, and the FCP itself
+    members use their best judgement in taking this step, and the FCP itself
     ensures there is ample time and notification for stakeholders to push back
     if it is made prematurely.
   - For RFCs with lengthy discussion, the motion to FCP is usually preceded by
@@ -203,8 +203,6 @@ implementation for review after the RFC has been accepted.
 If you are interested in working on the implementation for an "active"
 RFC, but cannot determine if someone else is already working on it,
 feel free to ask (e.g. by leaving a comment on the associated issue).
-Any issues assigned to a sprint will be clearly marked as such in the
-library issue tracker.
 
 ## RFC Postponement
 [RFC Postponement]: #rfc-postponement
@@ -227,4 +225,4 @@ is "no", then the appropriate response is to close the RFC, not postpone it.)
 [Help this is all too informal!]: #help-this-is-all-too-informal
 The process is intended to be as lightweight as reasonable for the
 present circumstances. As usual, we are trying to let the process be
-driven by consensus and community norms, not impose more structure than
+driven by consensus and community norms, not impose more structure than necessary.
