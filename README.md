@@ -90,7 +90,7 @@ RFC merged into the RFC repo as a markdown file. At that point, the RFC
 is "proposed" and may be implemented with the goal of eventual inclusion
 into SAFE, at which point it becomes "active".
 
-- Fork the RFC repo [RFC repository](https://github.com/maidsafe/rfcs)
+- Fork the [RFC repository](https://github.com/maidsafe/rfcs)
 - Decide on a clear and brief title for the new rfc, make it descriptive and unique. Copy `0000-template.md` to `text/0000-my-new-rfc/0000-my-new-rfc.md`, where 'my-new-rfc' is the [kebab-cased version](https://en.wikipedia.org/wiki/Letter_case#Case_styles) of the RFC title, any non-letters removed. Don't assign an RFC number yet!
 - Fill in the RFC. Put care into the details: RFCs that do not present
   convincing motivation, demonstrate understanding of the impact of the
