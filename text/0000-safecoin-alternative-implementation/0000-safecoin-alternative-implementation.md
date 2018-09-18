@@ -64,7 +64,7 @@ struct CoinAccount {
 
 As with other network addressable entities, the `id` will represent the account's address on the network.  It will be managed by the close group of Vaults for that address, using a new persona: CoinManager.  The ID is also an asymmetric public signing key.
 
-A single client can create many `CoinAccount`s if desired, and there is no need to associate any of these with its main MAID account.  For example, a user may want to run multiple farmer Vaults and allocate a different `CoinAccount` for each to receive the farming rewards.
+A single client can create many `CoinAccount`s if desired, and there is no need to associate any of these with its main MAID account.  (In this context, MAID stands for MaidSafe Anonymous ID, and any user wishing to send requests to the network which require payment must first create a MAID account.  This is not a `CoinAccount`, but rather a record held by the network used to hold e.g. the MAID public key and the public keys of authorised apps).  For example, a user may want to run multiple farmer Vaults and allocate a different `CoinAccount` for each to receive the farming rewards.
 
 When a client creates a new `CoinAccount` on the network, the request need only specify the `id`, since the initial balance will always be 0.  It is up to the client to create and manage the key pairs of all `CoinAccount`s it owns.  These could be stored on the network as part of its encrypted MAID account, or managed by a standalone wallet application.
 
@@ -90,7 +90,7 @@ The details of the `PaymentAccount` will be explained below at "[Paying for Netw
 
 ### Farming
 
-Each section of the network will be responsible for a proportion of the total issuable safecoin equal to the proportion of the network address space it manages.  For instance, at the start when the network has a single section covering the full address space, that section will be responsible for all `2^32` safecoin.  When the section splits, each half will be responsible for `2^31` safecoin.
+Each section of the network will be responsible for a proportion of the total issuable safecoin equal to the proportion of the network address space it manages.  By "responsible for", we mean responsible for managing the amount of farmed coin from that address space by ensuring it doesn't exceed the allotted amount or drop below zero.  For instance, at the start when the network has a single section covering the full address space, that section will be responsible for all `2^32` safecoin.  When the section splits, each half will be responsible for `2^31` safecoin.
 
 This means that for a section with Prefix length `n`, it will be responsible for `2^(32-n)` safecoin.
 
@@ -100,7 +100,7 @@ The section's `farmed` value will never be allowed to exceed the amount of coins
 
 The actual algorithm defining the farming rate is somewhat orthogonal to this RFC and worthy of its own RFC, so the details will be omitted, but it would seem fairly critical that it ensures sections don't become fully farmed or fully unfarmed.
 
-One benefit of providing coin divisibility is that on a successful farming attempt, it is trivial to pay all farmers in that section rather than the lottery approach taken in the alternative proposal whereby only one farmer is paid at a time, and only if the chosen coin is unfarmed.  Indeed, they could be paid proportional to the value they have provided to the network (this could be measured initially by node age at the moment of payment).  They could also be paid smaller amounts more frequently to encourage new Vault owners to continue to run their Vaults.
+One benefit of providing coin divisibility is that on a successful farming attempt, it is trivial to pay all farmers in that section rather than the lottery approach taken in the alternative proposal whereby only one farmer is paid at a time, and only if the chosen coin is unfarmed.  Indeed, they could be paid proportional to the value they have provided to the network.  They could also be paid smaller amounts more frequently to encourage new Vault owners to continue to run their Vaults.
 
 To send a payment, the CoinManagers will send a `Credit` message to the destination `CoinAccount`'s section (the destination address defining the particular `CoinAccount::id`):
 
@@ -209,7 +209,7 @@ This has the benefit of requiring neither the sender nor the receiver to stay co
 
 ## Drawbacks
 
-A potential drawback of this proposal is that coins which are recycled aren't replaced back to the section where they were initially farmed.
+None noted at the moment, although some may be added as they are identified during the RFC review process.
 
 
 
