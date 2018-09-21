@@ -51,7 +51,7 @@ struct Coin {
 
 The `units` field will represent whole safecoins, and since the defined upper limit of issuable safecoin is `2^32`, this need be no bigger than a `u32`.
 
-The `parts` field represents the number of `2^-32`-th parts of a single safecoin.  Since the maximum value of a `u32` is `(2^32)-1`, `parts` will always represent less than a single safecoin.
+The `parts` field represents a multiple of "250 pico-safecoins", ie the number of `250 * 10^-12`-th parts of a single safecoin.  The total value of the `parts` field will be required to be less than a single safecoin, i.e. it will always be less than 4 billion.
 
 To represent client-owned accounts for holding safecoin, the following will be used:
 
@@ -148,6 +148,8 @@ As per the existing Vault implementation, once approved, the MaidManagers will f
 
 When handling these requests from MaidManagers, the DataManager Vaults decide whether the request can be actioned or not.  If it can, these Vaults will have their CoinManager personas deduct the paid amount from their section's `farmed` total, effectively recycling the coin and making it farmable again.  If the request can't be actioned, the DataManagers send a failure response back to the MaidManagers (as per the existing implementation).  On receipt of such a failure message, the client's CoinManagers will refund the amount to its `PaymentAccount`.
 
+When recycling the coin, the `farmed` total will not be allowed to drop below zero.  If the amount to be deducted exceeds the `farmed` value, then the excess coin will be sent by this section to a randomly-chosen neighbouring section for recycling there.  As with farming, we should ensure that the farming rate algorithm makes such a case of having a section which is fully unfarmed exceptionally unlikely.  Nonetheless, having a `farmed` value of zero isn't reason for DataManagers to reject client requests to pay for network resources at that section.
+
 The MaidManagers currently already handle a single MAID account being associated with multiple "app authentication keys", allowing different applications different rights with regards to data mutation.  This notion will be extended to include spend limits on the Client's `PaymentAccount` from which it will make payments.
 
 When an app makes a payable request, the client's `PaymentAccount` will be checked to see if the app has the required balance available to it.  If there is an entry corresponding to that app's keys in `PaymentAccount::app_rules` then:
@@ -180,7 +182,7 @@ On receipt of a `CoinTransfer` request (after passing out of Parsec), the CoinMa
 
 These source CoinManagers will then send the `Credit` to the destination CoinManagers, where it will be run through Parsec to cover the case where that owner is concurrently trying to spend coin from that `CoinAccount`.
 
-If the account to be credited doesn't exist, the destination CoinManagers will recycle the coin by deducting the value from their section's `farmed` value.  The client will receive no notification that the transaction failed.  (We could look to refund the source `CoinAccount` in such cases, but this would require more effort by the network.  Well-designed client applications should be able to reduce the risk of accidental loss of coins in this way to zero.)
+If the account to be credited doesn't exist, the destination CoinManagers will refund the coin to the sender by sending another `CoinTransfer` with the same `credit` value as the original.  The client will receive no notification that the refund happened.  Well-designed client applications should be able to reduce the risk of accidentally transferring coins to invalid addresses to zero, so multiple refunds to an individual account should be seen as malicious behaviour.
 
 Each `CoinAccount` will have an associated fixed-length FIFO queue for holding the most recent `transaction_id`s and `amount`s of `Credit`s made to that account.  When crediting the destination `CoinAccount`, the CoinManagers will push the `transaction_id` and `amount` onto that queue if the `transaction_id` is not `None`.  At this stage, the transaction is complete.
 
@@ -209,7 +211,7 @@ This has the benefit of requiring neither the sender nor the receiver to stay co
 
 ## Drawbacks
 
-None noted at the moment, although some may be added as they are identified during the RFC review process.
+* Loses marketing difference of "physical" coins vs adjusting a number in a record
 
 
 
@@ -223,11 +225,11 @@ The original proposal for a safecoin implementation is detailed in [RFC #0012].
 
 * We may need to handle the case where a section is receiving payment (e.g. for a Put request), but its `farmed` amount is less than the payment, meaning the coins can't all be recycled by that section.  This would seem to imply a failure of the farming rate, but potentially we'd need to cover that situation, e.g. by having that section forward a specific new type of message to a neighbour section which _can_ handle recycling that amount of coins.
 
-* If payment rates weren't variable from section to section, we could omit the `Coin` field from the requests which MaidManagers send to DataManagers.
+* If charges for consuming network resources weren't variable from section to section, we could omit the `Coin` field from the requests which MaidManagers send to DataManagers.  (For example, if we have a fixed, constant rate of `x` safecoin per TB for `Put`, then the amount of safecoin could be calculated independently at the MaidManagers and the DataManagers.)
 
 * Instead of `GetTransaction` and `Transaction`, we could possibly use push notifications to notify the sending and receiving clients of a completed transaction.
 
-* It's unclear at the moment how to discourage spamming the network with `CoinTransfer` requests for tiny amounts without doing something like charging a minimal amount for handling transfers.  It's also similarly unclear how to discourage the creation of excessive numbers `CoinAccount`s by a malicious client.  This could potentially be handled by the proxy nodes.
+* It's unclear at the moment how to discourage spamming the network with `CoinTransfer` requests for tiny amounts without doing something like charging a minimal amount for handling transfers.  It's also similarly unclear how to discourage the creation of excessive numbers `CoinAccount`s by a malicious client.  This could potentially be handled by the proxy nodes.  A further spam scenario (possibly less likely to be detectable by the proxies unless they're also the MaidManagers) is sending many `CoinTransfer` requests to non-existent addresses in order to get refunds.
 
 * The original proposal suggested allowing new MAID accounts to be given a small amount of safecoin for free to be used exclusively for paying for network resources.  This may still be required, and would probably require special handling of such `CoinAccount`s.  However, with the approach described in this RFC, pre-farming may be enough to obviate the need for such special handling.
 
