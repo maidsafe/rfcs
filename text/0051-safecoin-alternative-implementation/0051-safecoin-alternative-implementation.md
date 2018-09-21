@@ -1,6 +1,6 @@
 # Safecoin Alternative Implementation
 
-- Status: proposed
+- Status: postponed
 - Type: new feature
 - Related components: SAFE Vault, SAFE Client Libs
 - Start Date: 15-09-2018
