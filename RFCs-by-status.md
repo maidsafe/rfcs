@@ -27,6 +27,7 @@ A list of all RFCs by their current status.
  - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
  - [#0005 Balance Network Resources](./text/0005-balance-network-resources/0005-balance-network-resources.md)
  - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
+ - [#0050 Transparent Malice Handling within PARSEC](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
 
 ## Implemented RFCs
 
