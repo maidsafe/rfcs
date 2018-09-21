@@ -2,8 +2,8 @@
 - Status: proposed 
 - Type: new feature 
 - Related components: PARSEC, Routing 
-- Start Date: 10-09-2018 
-- Discussion: tbc 
+- Start Date: 21-09-2018 
+- Discussion: [SafeDev Forum Topic](https://forum.safedev.org/t/rfc-50-transparent-malice-handling-within-parsec/2047)
 - Supersedes: N/A 
 - Superseded by: N/A 
 
