@@ -3,7 +3,7 @@
 - Type: new feature 
 - Related components: PARSEC, Routing 
 - Start Date: 21-09-2018 
-- Discussion: [SafeDev Forum Topic](https://forum.safedev.org/t/rfc-50-transparent-malice-handling-within-parsec/2047)
+- Discussion: [SAFE Network Forum Topic](https://safenetforum.org/t/rfc-50-transparent-malice-handling-within-parsec/25487)
 - Supersedes: N/A 
 - Superseded by: N/A 
 
