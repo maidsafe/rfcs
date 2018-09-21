@@ -47,6 +47,9 @@ A list of all RFCs by their current status.
  - [#0040 Unify Structured Data](./text/0040-unified-structured-data/0040-unified-structured-data.md)
  - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
  - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
+ 
+## Postponed RFCs
+ - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md) 
 
 ## Rejected RFCs
 
@@ -66,4 +69,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Thu 17 Sep 14:40:33 BST 2018_ at REV [c7ecc1e](https://github.com/maidsafe/rfcs/commit/c7ecc1e9f0dc167ec24b891832a6306c5b21cdcb))
+(Last updated _Fri 21 Sep 11:53:55 BST 2018_)
