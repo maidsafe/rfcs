@@ -69,4 +69,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Fri 21 Sep 11:53:55 BST 2018_)
+(Last updated _Fri 21 Sep 11:53:55 BST 2018_ commit: [a9557da79a534eb40c20999b716ea471d7e918f5](https://github.com/maidsafe/rfcs/commit/a9557da79a534eb40c20999b716ea471d7e918f5))
