@@ -39,7 +39,7 @@ be either chosen by the end user application, or default to specific data.
 	- What is called `subdomains` on the clearnet are referred to as `Sub Names`.
 - Introduce `Resolvable Map` schema to describe RDF data on the network that can be resolved a `key` to a XOR-URL. This is described below and can be used by:
 	- `Public Name` MDs.
-	- A `Files Container`: an alternative to the NFS style container, with similar functionality but described using RDF (and the `Resolvable Map` schema)
+	- A `Files Map`: an alternative to the NFS style container, with similar functionality but described using RDF (and the `Resolvable Map` schema)
 
 
 ### URL resolution
@@ -50,7 +50,7 @@ Before diving into data structures, I wanted to described how URL resolution wil
 
 Any resolver should first attempt to parse a URL for being a valid [XOR-URLs](https://forum.safedev.org/t/xor-address-urls-xor-urls/1952). This is handled via the `webFetch` API (of `safe_node-app` or similar)
 
-If so, it is resolved via XOR-URL and if pointing to a ResolvableMap MD, resolution continues thereafter as described in the `Resolvable Map` or `Files Container` as appropriate (if the url has a `path` or `url fragments` eg.).
+If so, it is resolved via XOR-URL and if pointing to a ResolvableMap MD, resolution continues thereafter as described in the `Resolvable Map` or `Files Map` as appropriate (if the url has a `path` or `url fragments` eg.).
 
 
 #### 2. PublicNameSystem.
@@ -62,7 +62,7 @@ Here the URL terminology for `host` is equivalent to a SAFE `Public Name`. What 
 `safe://<subName>.<publicName>`
 
 - GET the Mutable Data for a given `Public Name`.
-- GET the `Resolvable Map` for this Mutable Data entry.
+- Parse the retrieved `Resolvable Map`.
 - Resolve the `Sub Name` graph from this `Resolvable Map`.
 
 Unavailability of any data being dereferenced will throw an error.
@@ -70,7 +70,7 @@ Unavailability of any data being dereferenced will throw an error.
 ##### 2.1 No `SubName` aka Default Services.
 
 - GET the Mutable Data for a given `Public Name`.
-- GET the `Resolvable Map` for this container
+- Parse the retrieved `Resolvable Map`.
 - Resolve the `:default` XOR-URL if available.
 
 Unavailability of any data being dereferenced will throw an error.
@@ -81,16 +81,16 @@ Unavailability of any data being dereferenced will throw an error.
 `safe://<subName>.<subName>.<subName>.<subName>.<publicName>`
 
 - As above, resolving each additional substring, up to a defined maximum of redirects (implemented in the resolver.)
-	- I propose a Safe Browser redirect limit of 20 redirects per url resolution. Any more than this would throw an error.
+	- Safe Browser will implement redirect limit of 10 redirects per url resolution. Any more than this would throw an error.
 
 Unavailability of any data being dereferenced will throw an error.
 
 
 #### 3. Path resolution
 
-`safe://<subName>.<publicName><path>`, eg `safe://pns.rf/resolution`
+`safe://<subName>.<publicName><path>`, eg `safe://pns.rfc/resolution`
 
-Once the final data has been resolved in a browser, if a `FilesContainer` type of `Resolvable Map` has been located, then the trailing url path would be resolved, too.
+Once the final data has been resolved in a browser, if a `Files Map` type of `Resolvable Map` has been located, then the trailing url path would be resolved, too.
 
 
 #### Data Structures
@@ -98,8 +98,8 @@ Once the final data has been resolved in a browser, if a `FilesContainer` type o
 
 ##### PublicName Structure
 
-- The PublicName is an RDF MD w/specific type tag (`1500`) stored at the shahash3 of the `Public Name` string `shahash3('Public Name')`.
-- The PublicName MD must be a `Resolvable Map`, with the hashed MD location XOR-URL as the value to the `Public Name` key.
+- The Public Name Map is an RDF MD w/specific type tag (`1500`) stored at the sha3 hash of the `Public Name` string `shahash3('Public Name')`.
+- A Public Name must point to a `Resolvable Map` RDF schema. With the target MD location XOR-URL as the value to the key.
 - A user's `Public Names` are saved/managed in the user's `_publicNames` container.
 - A user's `_publicNames` container must be encrypted.
 
@@ -153,23 +153,23 @@ Provides data to be shown at the public name.
 
  `safe://www.happyurl` is the same as `<safe://asdadfiojf3289ry9uy329ryfhusdhfdsfsdsd#www>`
 
-Providing different `@type` info or other details in the RDF can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `:default` value is an NFS container, could search remaining keys for something of `type: inbox` and resolve this data automatically.
+Providing different `@type` info or other details in the RDF can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `:default` value is a `Files Map`, should search remaining keys for something of `type: inbox` and resolve this data automatically.
 
 
-#### Files Container
+#### Files Map
 
-A `Files Container` (essentially mappings of `path`s to XOR-URLs ) is another type of resolver.
+A `Files Map` (essentially mappings of `path`s to XOR-URLs ) is another type of resolver.
 
-Currently we have NFS containers which have their own structure which is effectively similar to the proposed `Resolvable Map`.
+Currently we have 'NFS containers' which have their own structure which is effectively similar to the proposed `Resolvable Map`.
 
-I would propose that we create a `Files Container` RDF type, which follows the same data structure and resolution patterns as `Resolvable Map` (indeed, it should probably be a subType). Which offers the advantage that the map could also contain more information related to NFS info:
+I would propose that we create a `Files Map` RDF type, which follows the same data structure and resolution patterns as `Resolvable Map` (indeed, it should probably be a subType). Which offers the advantage that the map could also contain more information related to NFS info:
 
 
 ```js
 {
   "@context": "safe/ResolvableMap",
   "@type": "safe/ResolvableMap",
-  "subtype": "FilesContainer",
+  "subtype": "FilesMap",
   "url": "<xor url of this>",
   "numberOfItems": "315",
   "default" : 3,
@@ -215,5 +215,5 @@ Though there are disadvantages here in needed to parse the array to retrieve the
 
 ## Unresolved questions
 
-- Fully flesh out the schemas for `Resolvable Map` / `Files Container` (if anything need be added for that.)
+- Fully flesh out the schemas for `Resolvable Map` / `Files Map` (if anything need be added for that.)
 - Define error messages and codes
