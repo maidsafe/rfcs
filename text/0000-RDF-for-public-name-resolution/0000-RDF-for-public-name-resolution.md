@@ -14,7 +14,7 @@ This proposal looks to enhance the domain name system by using a resource descri
 
 ## Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
-- CAS refers to a content addressable system for accessing `xorname` urls in the safe_browser. As described here: https://forum.safedev.org/t/xor-address-urls-xor-urls/1952
+- XOR-URL refers to a url generated as part of the content addressable system for accessing `xorname` urls in the safe_browser. As described here: https://forum.safedev.org/t/xor-address-urls-xor-urls/1952
 - Data is presented in a json, as RDF , as described over here: <ADD URL>
 - I'm using MutableData ( `MD` ) and ImmutableData ( `ID` ) as shorthands.
 
@@ -37,7 +37,7 @@ be either chosen by the end user application, or default to specific data.
 - Use `Public Name System` (PNS) instead of `DNS` to avoid confusion and clarify this is a SAFE network term, and that it relates to `Public Names`.
 	- Here the URL terminology for `host` is equivalent to a SAFE `Public Name`.
 	- What is called `subdomains` on the clearnet are referred to as `Sub Names`.
-- Introduce `Resolvable Map` schema to describe RDF data on the network that can be resolved a `key` to a CAS url. This is described below and can be used by:
+- Introduce `Resolvable Map` schema to describe RDF data on the network that can be resolved a `key` to a XOR-URL. This is described below and can be used by:
 	- `Public Name` MDs.
 	- A `Files Container`: an alternative to the NFS style container, with similar functionality but described using RDF (and the `Resolvable Map` schema)
 
@@ -46,16 +46,16 @@ be either chosen by the end user application, or default to specific data.
 
 Before diving into data structures, I wanted to described how URL resolution will work in a browser (such as the safe_browser).
 
-#### 1. CAS.
+#### 1. XOR-URLs.
 
-Any resolver should first attempt to parse a URL for being a valid [CAS URLs](https://forum.safedev.org/t/xor-address-urls-xor-urls/1952). This is handled via the `webFetch` API (of `safe_node-app` or similar)
+Any resolver should first attempt to parse a URL for being a valid [XOR-URLs](https://forum.safedev.org/t/xor-address-urls-xor-urls/1952). This is handled via the `webFetch` API (of `safe_node-app` or similar)
 
-If so, it is resolved via CAS and if pointing to a ResolvableMap MD, resolution continues thereafter as described in the `Resolvable Map` or `Files Container` as appropriate (if the url has a `path` or `url fragments` eg.).
+If so, it is resolved via XOR-URL and if pointing to a ResolvableMap MD, resolution continues thereafter as described in the `Resolvable Map` or `Files Container` as appropriate (if the url has a `path` or `url fragments` eg.).
 
 
 #### 2. PublicNameSystem.
 
-Failing to be detected as a CAS url, we then parse the url and use the Public Name System to resolve for data.
+Failing to be detected as a XOR-URL, we then parse the url and use the Public Name System to resolve for data.
 
 Here the URL terminology for `host` is equivalent to a SAFE `Public Name`. What are known as `subdomains` on the clearnet are referred to as `SubNames`.
 
@@ -71,7 +71,7 @@ Unavailability of any data being dereferenced will throw an error.
 
 - GET the Mutable Data for a given `Public Name`.
 - GET the `Resolvable Map` for this container
-- Resolve the `:default` CAS url if available.
+- Resolve the `:default` XOR-URL if available.
 
 Unavailability of any data being dereferenced will throw an error.
 
@@ -99,7 +99,8 @@ Once the final data has been resolved in a browser, if a `FilesContainer` type o
 ##### PublicName Structure
 
 - The PublicName is an RDF MD w/specific type tag (`1500`) stored at the shahash3 of the `Public Name` string `shahash3('Public Name')`.
-- The PublicName MD must be a `Resolvable Map`, with the hashed MD location CAS url as the value to the `Public Name` key.
+- The PublicName MD must be a `Resolvable Map`, with the hashed MD location XOR-URL as the value to the `Public Name` key.
+- A user's `Public Names` are saved/managed in the user's `_publicNames` container.
 - A user's `_publicNames` container must be encrypted.
 
 
@@ -107,7 +108,7 @@ Once the final data has been resolved in a browser, if a `FilesContainer` type o
 #### Resolvable Map Structure
 
 An RDF Graph stored on the safe network. This will follow a newly defined schema, that represents a list of
-`keys`, which map to (CAS) `urls`. Each entry can contain more information to aid in resolving data, depending on context / application.
+`keys`, which map to XOR-URLs. Each entry can contain more information to aid in resolving data, depending on context / application.
 
 The RDF document will also contain a `:default` graph, which points to the desired resolution if no `key` is provided.
 
@@ -115,7 +116,7 @@ The RDF document will have a version relating to the version of the `Resolvable 
 
 Provides data to be shown at the public name.
  - It must be an RDF data object
- `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a CAS url for data location.
+ `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a XOR-URL for data location.
  - Extra data can be added to the graph for each entry to aid in service discovery for the key.
 
 
@@ -148,7 +149,7 @@ Provides data to be shown at the public name.
  }
  ```
 
- This same structure can be applied to both PNS and CAS:
+ This same structure can be applied to both PNS and XOR-URLs:
 
  `safe://www.happyurl` is the same as `<safe://asdadfiojf3289ry9uy329ryfhusdhfdsfsdsd#www>`
 
@@ -157,7 +158,7 @@ Providing different `@type` info or other details in the RDF can facilitate serv
 
 #### Files Container
 
-A `Files Container` (essentially mappings of `path`s to CAS urls ) is another type of resolver.
+A `Files Container` (essentially mappings of `path`s to XOR-URLs ) is another type of resolver.
 
 Currently we have NFS containers which have their own structure which is effectively similar to the proposed `Resolvable Map`.
 
