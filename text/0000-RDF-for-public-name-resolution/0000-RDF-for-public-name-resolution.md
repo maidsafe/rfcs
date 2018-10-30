@@ -38,8 +38,8 @@ be either chosen by the end user application, or default to specific data.
 	- Here the URL terminology for `host` is equivalent to a SAFE `Public Name`.
 	- What is called `subdomains` on the clearnet are referred to as `Sub Names`.
 - Introduce `Resolvable Map` schema to describe RDF data on the network that can be resolved a `key` to a CAS url. This is described below and can be used by:
-	- `Public Names` containers.
-	- `Files Container` an alternative to the NFS style container, with similar functionality but described using RDF (and the `Resolvable Map` schema)
+	- `Public Name` MDs.
+	- A `Files Container`: an alternative to the NFS style container, with similar functionality but described using RDF (and the `Resolvable Map` schema)
 
 
 ### URL resolution
@@ -59,17 +59,17 @@ Failing to be detected as a CAS url, we then parse the url and use the Public Na
 
 Here the URL terminology for `host` is equivalent to a SAFE `Public Name`. What are known as `subdomains` on the clearnet are referred to as `SubNames`.
 
-`safe://<subName>.<host>`
+`safe://<subName>.<publicName>`
 
-- GET the `Public Name` container for `host`.
-- GET the `Resolvable Map` for this container
+- GET the Mutable Data for a given `Public Name`.
+- GET the `Resolvable Map` for this Mutable Data entry.
 - Resolve the `Sub Name` graph from this `Resolvable Map`.
 
 Unavailability of any data being dereferenced will throw an error.
 
 ##### 2.1 No `SubName` aka Default Services.
 
-- GET the `Public Name` container for `host`.
+- GET the Mutable Data for a given `Public Name`.
 - GET the `Resolvable Map` for this container
 - Resolve the `:default` CAS url if available.
 
@@ -78,7 +78,7 @@ Unavailability of any data being dereferenced will throw an error.
 
 ##### 2.2 Many `SubName`s
 
-`safe://<subName>.<subName>.<subName>.<subName>.<host>`
+`safe://<subName>.<subName>.<subName>.<subName>.<publicName>`
 
 - As above, resolving each additional substring, up to a defined maximum of redirects (implemented in the resolver.)
 	- I propose a Safe Browser redirect limit of 20 redirects per url resolution. Any more than this would throw an error.
@@ -88,7 +88,7 @@ Unavailability of any data being dereferenced will throw an error.
 
 #### 3. Path resolution
 
-`safe://<subName>.<host><path>`, eg `safe://pns.rf/resolution`
+`safe://<subName>.<publicName><path>`, eg `safe://pns.rf/resolution`
 
 Once the final data has been resolved in a browser, if a `FilesContainer` type of `Resolvable Map` has been located, then the trailing url path would be resolved, too.
 
