@@ -93,16 +93,7 @@ Unavailability of any data being dereferenced will throw an error.
 Once the final data has been resolved in a browser, if a `Files Map` type of `Resolvable Map` has been located, then the trailing url path would be resolved, too.
 
 
-#### Data Structures
-
-
-##### PublicName Structure
-
-- The Public Name Map is an RDF MD w/specific type tag (`1500`) stored at the sha3 hash of the `Public Name` string `shahash3('Public Name')`.
-- A Public Name must point to a `Resolvable Map` RDF schema. With the target MD location XOR-URL as the value to the key.
-- A user's `Public Names` are saved/managed in the user's `_publicNames` container.
-- A user's `_publicNames` container must be encrypted.
-
+### Data Structures fo Resolution
 
 
 #### Resolvable Map Structure
@@ -193,6 +184,16 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
 }
 
 ```
+
+
+### PublicName Container Structure
+
+The structure of a user's `_publicNames` container (for managing their `Public Names`) must be:
+
+- The Public Name Map is an RDF MD w/specific type tag (`1500`) stored at the sha3 hash of the `Public Name` string `shahash3('Public Name')`.
+- A Public Name must point to a `Resolvable Map` RDF schema. With the target MD location XOR-URL as the value to the key.
+- A user's `Public Names` are saved/managed in the user's `_publicNames` container.
+- A user's `_publicNames` container must be encrypted.
 
 
 
