@@ -116,8 +116,9 @@ The RDF document will have a version relating to the version of the `Resolvable 
 
 Provides data to be shown at the public name.
  - It must be an RDF data object
- `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a XOR-URL for data location.
+ `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a SAFE Url for data location (could be xor or using a subName).
  - Extra data can be added to the graph for each entry to aid in service discovery for the key.
+ - `@id` entires _must_ point to a XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
 
 
  For `safe://<subName>.<myPublicName>`
@@ -130,20 +131,21 @@ Provides data to be shown at the public name.
      @type : 'safe/ResolvableMap',
      subtype : 'safe/ResolvableMap',
 	 version : 1,
+	 @id: '<this xor url>',
      // this is what 'www' was doing previously in our DNS setup.
      :default :  {
          @id: '<this xor url>',
-		 uri: '<target xor>',
+		 uri: '<target safe url (xor or pubName)>',
          @type: 'NFS',
      },
      somewhere : {
          @id: '<this xor url>',
-		 uri: '<target xor>',
+		 uri: '<target safe url (xor or pubName)>',
          @type: 'NFS'
      },
      email : {
          @id: 'xor url#name'
-         uri: '<target xor>'
+         uri: '<target safe url (xor or pubName)>'
          @type: 'inbox'
      }
  }
@@ -170,13 +172,12 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
   "@context": "safe/ResolvableMap",
   "@type": "safe/ResolvableMap",
   "subtype": "FilesMap",
-  "url": "<xor url of this>",
-  "numberOfItems": "315",
-  "default" : 3,
+  "@id": "<xor url of this map>",
+  "default" : "/some/website/index.html",
   "/some/website/index.html" : {
       filename: 'index.html'
       @type: 'html',
-      @id: "<XORURL location>",
+      @id: "<XOR-URL location>",
       size: '22',
       creationDate: '<UTC>',
       updateDate: '<UTC>',
@@ -184,12 +185,11 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
   "/some/website/amazing.js" : {
       filename: 'amazing.js'
       @type: 'text/javascript',
-      @id: "<XORURL location>",
+      @id: "<XOR-URL location>",
       size: '22',
       creationDate: '<UTC>',
       updateDate: '<UTC>',
   }
-}
 }
 
 ```
