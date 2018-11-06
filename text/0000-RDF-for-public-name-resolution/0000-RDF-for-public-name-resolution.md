@@ -125,18 +125,15 @@ Provides data to be shown at the public name.
 	 @id: '<this xor url>',
      // this is what 'www' was doing previously in our DNS setup.
      :default :  {
-         @id: '<this xor url>',
-		 uri: '<target safe url (xor or pubName)>',
+         @id: '<target safe url (xor or pubName)>',
          @type: 'NFS',
      },
      somewhere : {
-         @id: '<this xor url>',
-		 uri: '<target safe url (xor or pubName)>',
+		 @id: '<target safe url (xor or pubName)>',
          @type: 'NFS'
      },
      email : {
-         @id: 'xor url#name'
-         uri: '<target safe url (xor or pubName)>'
+		 @id: '<target safe url (xor or pubName)>#name',
          @type: 'inbox'
      }
  }
@@ -167,7 +164,7 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
   "default" : "/some/website/index.html",
   "/some/website/index.html" : {
       filename: 'index.html'
-      @type: 'html',
+      @type: 'html', // optional. Required only if `@id` is a PNS link
       @id: "<XOR-URL location>",
       size: '22',
       creationDate: '<UTC>',
@@ -175,7 +172,7 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
   },
   "/some/website/amazing.js" : {
       filename: 'amazing.js'
-      @type: 'text/javascript',
+      @type: 'text/javascript', // optional. Required only if `@id` is a PNS link
       @id: "<XOR-URL location>",
       size: '22',
       creationDate: '<UTC>',
@@ -185,7 +182,6 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
 
 ```
 
-
 ### PublicName Container Structure
 
 The structure of a user's `_publicNames` container (for managing their `Public Names`) must be:
@@ -194,7 +190,6 @@ The structure of a user's `_publicNames` container (for managing their `Public N
 - A Public Name must point to a `Resolvable Map` RDF schema. With the target MD location XOR-URL as the value to the key.
 - A user's `Public Names` are saved/managed in the user's `_publicNames` container.
 - A user's `_publicNames` container must be encrypted.
-
 
 
 ## Drawbacks
