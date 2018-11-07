@@ -37,7 +37,7 @@ be either chosen by the end user application, or default to specific data.
 - Use `Public Name System` (PNS) instead of `DNS` to avoid confusion and clarify this is a SAFE network term, and that it relates to `Public Names`.
 	- Here the URL terminology for `host` is equivalent to a SAFE `Public Name`.
 	- What is called `subdomains` on the clearnet are referred to as `Sub Names`.
-- Introduce `Resolvable Map` schema to describe RDF data on the network that can be resolved a `key` to a XOR-URL. This is described below and can be used by:
+- Introduce `Resolvable Map` schema to describe RDF data on the network that can resolve a `key` to a XOR-URL. This is described below and can be used by:
 	- `Public Name` MDs.
 	- A `Files Map`: an alternative to the NFS style container, with similar functionality but described using RDF (and the `Resolvable Map` schema)
 
