@@ -95,6 +95,7 @@ Once the final data has been resolved in a browser, if a `Files Map` type of `Re
 
 ### Data Structures fo Resolution
 
+![Image of PNS Resolution Data Structures](https://raw.githubusercontent.com/joshuef/rfcs/PnsAndResolveableMap/text/0000-RDF-for-public-name-resolution/PNS_data_representation.png)
 
 #### Resolvable Map Structure
 
