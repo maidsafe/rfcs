@@ -99,12 +99,11 @@ Once the final data has been resolved in a browser, if a `Files Map` type of `Re
 
 #### Resolvable Map Structure
 
-The ideal for this is an RDF Data Set stored on the safe network. This will follow a newly defined schema, that represents a list of
-`keys`, which map to XOR-URLs. Each entry can contain more information to aid in resolving data, depending on context / application.
+The idea for this is an RDF Data Set stored on the safe network. This will follow a newly defined schema, that represents a list of `keys`, which map to XOR-URLs. Each entry can contain more information to aid in resolving data, depending on context / application.
 
+Sample RDF schema can be found: https://github.com/joshuef/sschema/tree/master/src
 
-
-The RDF document should also contain a `:default` graph (`:` is intentionally chosen as it is not a valid subdomain portion of a URI), which points to the desired resolution if no `key` is provided. `:default` can either point to a SAFE URL (xor or pubName), or alternatively, can point to another graph (such as another `Resolvable Map`). The resolver will determine that it is URL to resolve via the presence of `safe://` protocol.
+The RDF document should also contain a `default` graph (`:` is intentionally chosen as it is not a valid subdomain portion of a URI), which points to the desired resolution if no `key` is provided. `default` can either point to a SAFE URL (xor or pubName), or alternatively, can point to another graph (such as another `Resolvable Map`). The resolver will determine that it is URL to resolve via the presence of `safe://` protocol.
 
 The RDF document will have a version relating to the version of the `Resolvable Map` data structure in use. (starting at `v1`.)
 
@@ -135,8 +134,8 @@ Provides data to be shown at the public name.
 		  },
 		"@type": "ResolvableItem",
 		"@id": "safe://thisxorurl#somewhere",
-		"resolvesTo": "<target graph or safe url (xor or pubName); eg: 'somewhere'>",
-		"targetName" : "somewhere"
+		"target": "<target graph or safe url (xor or pubName); eg: 'somewhere'>",
+        "targetType": "FilesMap"
 	},
 	{
 		"@context": {
@@ -144,11 +143,9 @@ Provides data to be shown at the public name.
 		  },
 		"@type": "ResolvableItem",
 		"@id": "safe://thisxorurl#email",
-		"resolvesTo": "<target graph or safe url (xor or pubName); eg: 'email'>",
-		"targetName" : "email",
+		"target": "<target graph or safe url (xor or pubName); eg: 'email'>",
 		"targetType": "http://activitystream/#inbox"
 	}
-
  ]
  ```
 
@@ -169,28 +166,40 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
 
 
 ```js
-{
-  "@context": "<safe://ResolvableMap/FilesMap-SchemaLocation>",
-  "@type": "FilesMap",
-  "@id": "<xor url of this map>",
-  "default" : "/some/website/index.html",
-  "/some/website/index.html" : {
-      "filename": 'index.html',
-      "@type": 'html', // optional. Required only if `@id` is a PNS link
-      "@id": "<XOR-URL location>",
-      "size": '22',
-      "creationDate": '<UTC>',
-      "updateDate": '<UTC>',
-  },
-  "/some/website/amazing.js" : {
-      "filename": 'amazing.js',
-      "@type": 'text/javascript', // optional. Required only if `@id` is a PNS link
-      "@id": "<XOR-URL location>",
-      "size": '22',
-      "creationDate": '<UTC>',
-      "updateDate": '<UTC>',
-  }
-}
+[
+   {
+	   "@context": {
+		   "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
+		 },
+		"@type": "FilesMap",
+		"@id": "safe://thisxorurl",
+		"default" : "index.html"
+   },
+   {
+	   "@context": {
+		   "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
+		 },
+	   "@type": "FileItem",
+	   "@id": "safe://thisxorurl/#/index.html",
+       "targetType": 'html',
+       "target": "<XOR-URL location>",
+       "size": '22',
+       "creationDate": '<UTC>',
+       "updateDate": '<UTC>'
+   },
+   {
+	   "@context": {
+		   "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
+		 },
+	   "@type": "FileItem",
+	   "@id": "safe://thisxorurl/#/some/deep/path/amazing.js",
+       "targetType": 'test/javascript',
+       "target": "<XOR-URL location>",
+       "size": '22',
+       "creationDate": '<UTC>',
+       "updateDate": '<UTC>'
+   }
+]
 
 ```
 
