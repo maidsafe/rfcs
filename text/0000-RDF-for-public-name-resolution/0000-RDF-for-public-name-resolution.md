@@ -99,10 +99,12 @@ Once the final data has been resolved in a browser, if a `Files Map` type of `Re
 
 #### Resolvable Map Structure
 
-An RDF Graph stored on the safe network. This will follow a newly defined schema, that represents a list of
+The ideal for this is an RDF Data Set stored on the safe network. This will follow a newly defined schema, that represents a list of
 `keys`, which map to XOR-URLs. Each entry can contain more information to aid in resolving data, depending on context / application.
 
-The RDF document will also contain a `:default` graph (`:` is intentionally chosen as it is not a valid subdomain portion of a URI), which points to the desired resolution if no `key` is provided. `:default` can either point to a SAFE URL (xor or pubName), or alternatively, can point to another graph (such as another `Resolvable Map`). The resolver will determine that it is URL to resolve via the presence of `safe://` protocol.
+
+
+The RDF document should also contain a `:default` graph (`:` is intentionally chosen as it is not a valid subdomain portion of a URI), which points to the desired resolution if no `key` is provided. `:default` can either point to a SAFE URL (xor or pubName), or alternatively, can point to another graph (such as another `Resolvable Map`). The resolver will determine that it is URL to resolve via the presence of `safe://` protocol.
 
 The RDF document will have a version relating to the version of the `Resolvable Map` data structure in use. (starting at `v1`.)
 
@@ -118,26 +120,36 @@ Provides data to be shown at the public name.
 
  With the following, `safe://happyurl` would resolve to the `name` graph's entry.
  ```js
- {
-     // context+info
-     "@context": "<safe://ResolvableMap-SchemaLocation>",
-     @type : "ResolvableMap",
-	 version : 1,
-	 @id: "<this xor url>",
-     // this is what "www" was doing previously in our DNS setup.
-     :default :  {
-         @id: "<target graph or safe url (xor or pubName); eg: 'somewhere'>",
-         @type: "NFS",
-     },
-     somewhere : {
-		 @id: "<target safe url (xor or pubName)>",
-         @type: "NFS"
-     },
-     email : {
-		 @id: "<target safe url (xor or pubName)>#name",
-         @type: "inbox"
-     }
- }
+ [
+	{
+		"@context": {
+		    "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
+		  },
+	     "@type": "ResolvableMap",
+		 "@id": "safe://thisxorurl",
+		 "default" : "safe://thisxorurl#somewhere"
+	},
+	{
+		"@context": {
+		    "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
+		  },
+		"@type": "ResolvableItem",
+		"@id": "safe://thisxorurl#somewhere",
+		"resolvesTo": "<target graph or safe url (xor or pubName); eg: 'somewhere'>",
+		"targetName" : "somewhere"
+	},
+	{
+		"@context": {
+		    "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
+		  },
+		"@type": "ResolvableItem",
+		"@id": "safe://thisxorurl#email",
+		"resolvesTo": "<target graph or safe url (xor or pubName); eg: 'email'>",
+		"targetName" : "email",
+		"targetType": "http://activitystream/#inbox"
+	}
+
+ ]
  ```
 
  This same structure can be applied to both PNS and XOR-URLs:
@@ -163,20 +175,20 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
   "@id": "<xor url of this map>",
   "default" : "/some/website/index.html",
   "/some/website/index.html" : {
-      filename: 'index.html'
-      @type: 'html', // optional. Required only if `@id` is a PNS link
-      @id: "<XOR-URL location>",
-      size: '22',
-      creationDate: '<UTC>',
-      updateDate: '<UTC>',
+      "filename": 'index.html',
+      "@type": 'html', // optional. Required only if `@id` is a PNS link
+      "@id": "<XOR-URL location>",
+      "size": '22',
+      "creationDate": '<UTC>',
+      "updateDate": '<UTC>',
   },
   "/some/website/amazing.js" : {
-      filename: 'amazing.js'
-      @type: 'text/javascript', // optional. Required only if `@id` is a PNS link
-      @id: "<XOR-URL location>",
-      size: '22',
-      creationDate: '<UTC>',
-      updateDate: '<UTC>',
+      "filename": 'amazing.js',
+      "@type": 'text/javascript', // optional. Required only if `@id` is a PNS link
+      "@id": "<XOR-URL location>",
+      "size": '22',
+      "creationDate": '<UTC>',
+      "updateDate": '<UTC>',
   }
 }
 
@@ -194,7 +206,7 @@ The structure of a user's `_publicNames` container (for managing their `Public N
 
 ## Drawbacks
 
-It changes the current DNS implementation, which will require updates to our libs and applications.
+It changes the current DNS implementation, which will require updates to our libraries.
 
 ## Alternatives
 
