@@ -15,7 +15,7 @@ This proposal looks to enhance the domain name system by using a resource descri
 ## Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 - XOR-URL refers to a url generated as part of the content addressable system for accessing `xorname` urls in the safe_browser. As described here: https://forum.safedev.org/t/xor-address-urls-xor-urls/1952
-- Data is presented in a json, as RDF , as described over here: <ADD URL>
+- Data is presented as RDF, serialised in [JSON-LD](https://json-ld.org/) in the examples.
 - I'm using MutableData ( `MD` ) and ImmutableData ( `ID` ) as shorthands.
 
 
@@ -71,7 +71,7 @@ Unavailability of any data being dereferenced will throw an error.
 
 - GET the Mutable Data for a given `Public Name`.
 - Parse the retrieved `Resolvable Map`.
-- Resolve the `:default` XOR-URL if available.
+- Resolve the `default` graph / XOR-URL if available.
 
 Unavailability of any data being dereferenced will throw an error.
 
@@ -103,7 +103,7 @@ The idea for this is an RDF Data Set stored on the safe network. This will follo
 
 Sample RDF schema can be found: https://github.com/joshuef/sschema/tree/master/src
 
-The RDF document should also contain a `default` graph (`:` is intentionally chosen as it is not a valid subdomain portion of a URI), which points to the desired resolution if no `key` is provided. `default` can either point to a SAFE URL (xor or pubName), or alternatively, can point to another graph (such as another `Resolvable Map`). The resolver will determine that it is URL to resolve via the presence of `safe://` protocol.
+The RDF document should also contain a `default` entry, which can either point to a SAFE URL (xor or pubName) or alternatively can point to another graph (such as another `Resolvable Map`). The resolver will determine that it is URL to resolve via the presence of `safe://` protocol.
 
 The RDF document will have a version relating to the version of the `Resolvable Map` data structure in use. (starting at `v1`.)
 
@@ -111,7 +111,7 @@ Provides data to be shown at the public name.
  - It must be an RDF data object
  `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a SAFE Url for data location (could be xor or using a subName).
  - Extra data can be added to the graph for each entry to aid in service discovery for the key.
- - `@id` entires _must_ point to a XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
+ - `@id` entries _must_ point to a XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
 
 
  For `safe://<subName>.<myPublicName>`
@@ -153,7 +153,7 @@ Provides data to be shown at the public name.
 
  `safe://www.happyurl` is the same as `<safe://asdadfiojf3289ry9uy329ryfhusdhfdsfsdsd#www>`
 
-Providing different `@type` info or other details in the RDF can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `:default` value is a `Files Map`, should search remaining keys for something of `type: inbox` and resolve this data automatically.
+Providing different `@type` info or other details in the RDF can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `default` value is a `Files Map` (which is does not want), could search remaining keys for something of `type: inbox` and resolve this data automatically.
 
 
 #### Files Map
