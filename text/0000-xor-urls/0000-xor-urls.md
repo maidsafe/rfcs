@@ -21,6 +21,8 @@ Currently the SAFE app client API, and our SAFE browser, support fetching safesi
 
 This represents not only a restriction in some trivial use cases, like sharing a file by sharing its location and without publishing it under a public-name, but it also prevents users from being able to store linked-data on the network as these type of data cannot be linked unless it's all published at a public-name.
 
+For an overview of the proposal, and foresight about its potential, [this screencast video](https://www.youtube.com/watch?v=BikfxRNARnM) explores some ideas around it with a working proof of concept.
+
 ## Detailed design
 
 ### XOR address encoding
@@ -34,20 +36,18 @@ As already mentioned above, a string based on the XOR address along with a type 
 
 When a MutableData is fetched, if it’s not an NFS/Files container with an `index.html` file, the resolver (e.g. the `webFetch` function) can return the MutableData’s raw data so the browser (or any client application) can render it in a specific way (see below for more details of what’s being proposed here in this regard).
 
-### MutableData versions
+#### MutableData versions
 MutableData’s are versioned and therefore this shall be also accountable in the XOR-URL format to allow any MD URL to (optionally) reference a specific version. This will be also necessary in the future when append-only type of data is made available on the network.
 
 The version value can be used to enforce a specific version to be retrieved, and otherwise fail if that specific version is not found. On the other hand, the latest version will be retrieved if the version value is omitted from the XOR-URL.
 
-### Paths
+#### Paths
 Given that a referenced MutableData can effectively be the root NFS/Files container of the files of a safesite, any MD XOR-URL can also specify a path which needs to be resolved, just like when using the DNS/public-names system to resolve the path in a URL.
 
-### Browsable content
+#### Browsable content
 Currently, when a public-name URL is resolved to an NFS/Files container which doesn’t have an `index.html` file, the browser simply shows an error stating that the safesite content was not found.
 
-For a MD XOR-URL that doesn’t have a path and there is no `index.html` file, the resolver can return the raw content of the MD (i.e. its key-value entries), and the browser can automatically generate an HTML page which makes the content browsable, generating links to other data when an entry’s key/value is a `safe://` string, in an analogous/similar way to how web servers on the current internet allow browsing on folders/directories.
-
-An specific MD entry key could be also supported (e.g. `__non_browsable`), that the owner of the MD can insert in the MD if the “browsable” feature should not be enabled. Although this cannot be really enforced but offered as a feature to be optionally supported by some clients like our SAFE browser.
+For a MD XOR-URL that doesn’t have a path, and there is no `index.html` file or a `default` file defined (for more details about this please see refer to [this other RFC](https://github.com/joshuef/rfcs/blob/PnsAndResolveableMap/text/0000-RDF-for-public-name-resolution/0000-RDF-for-public-name-resolution.md)), the resolver can return the raw content of the MD (i.e. its key-value entries), and the browser can automatically generate an HTML page which makes the content browsable, generating links to other data when an entry’s key/value is a `safe://` string, in an analogous/similar way to how web servers on the current internet allow browsing on folders/directories.
 
 ### XOR-URLs specification
 The following are the main requirements for the encoding to be used to generate the XOR-URLs:
@@ -91,6 +91,8 @@ Where:
 
 The resolver function shall first attempt to decode the URL assuming it contains a `<cid>` part. If that step fails (either because it couldn’t decode the CID, or because there was no data at the decoded XOR address), it will do a fallback to assume it’s a public-name URL and it shall try to find the pulic-name MD (with the `sha3` hash of the string), just like any public-name URLs are resolved now by the resolver function.
 
+Note that it's proposed that the resolver should try to decode the CID and attempt to fetch the content before falling back to assume it's a public-name URL, rather than only decoding. The reason behind this is to not eclipse a public-name which happens to be a valid CID string. In such cases it could still be eclipsed if there exist content at the location encoded by the CID string, but at least not do it up front when there is no content stored at such location.
+
 The following are examples of what would become valid XOR-URLs as per this proposal:
 
 ImmutableData XOR-URL:
@@ -108,7 +110,9 @@ None identified as of yet.
 
 ## Alternatives
 
-The alternative of not supporting this type of URLs implies there is a lack of standard URLs for referencing any content stored on the SAFE Network that can be resolved and fetched without the need to be published with the DNS/public-names system, this prevents the network from supporting the semantic web since linked-data is defined to make use of URIs for the links (see http://linkeddata.org/home for some definitions).
+The alternative of not supporting this type of URLs implies there is a lack of standard URLs for referencing any content stored on the SAFE Network that can be resolved and fetched without the need to be published with the DNS/public-names system. This prevents the network from supporting the Semantic Web since linked-data is defined to make use of URIs for the links (see http://linkeddata.org/home for some definitions).
+
+Another alternative specifically to the proposed XOR-URL format/encoding is to have a separate protocol, e.g. `safe-xor://`, for identifying these URIs. However there doesn't seem to be much benefits from doing this, and the only only evident one is to avoid the scenario described above where a public-name happens to be a valid CID, and it's eclipsed by a XOR-URL, which it should be an unlikely scenario. On the other hand, having a single protocol as the standard for all type of URLs that resolve to content on the SAFE Network should be seen as a more homogeneous design.
 
 ## Unresolved questions
 
