@@ -106,13 +106,13 @@ NFS/Files container MutableData XOR-URL:
 
 ## Drawbacks
 
-None identified as of yet.
+There is a possibility that a public-name happens to be a valid CID, and it's eclipsed by a XOR-URL with the same CID. Even that this is a drawback it should be an unlikely scenario since a public-name is meant to be for human readable URLs so having a public-name which collides with a valid CID doesn't seem to be something that can intentionally happen. Although it should be considered the case that someone may want to generate such a public-name to cheat users making them believe it's linking to an ImmutableData content when it's effectively not, or at least not until it gets eclipsed by an immutable content stored a the same location that is decoded from the CID. To prevent this possible malice events, perhaps it should be consider to have the resolver to restrict public-names in certain way, e.g. they cannot be of the exact same length as the XOR-URLs length (or length range).
 
 ## Alternatives
 
 The alternative of not supporting this type of URLs implies there is a lack of standard URLs for referencing any content stored on the SAFE Network that can be resolved and fetched without the need to be published with the DNS/public-names system. This prevents the network from supporting the Semantic Web since linked-data is defined to make use of URIs for the links (see http://linkeddata.org/home for some definitions).
 
-Another alternative specifically to the proposed XOR-URL format/encoding is to have a separate protocol, e.g. `safe-xor://`, for identifying these URIs. However there doesn't seem to be much benefits from doing this, and the only only evident one is to avoid the scenario described above where a public-name happens to be a valid CID, and it's eclipsed by a XOR-URL, which it should be an unlikely scenario. On the other hand, having a single protocol as the standard for all type of URLs that resolve to content on the SAFE Network should be seen as a more homogeneous design.
+Another alternative specifically to the proposed XOR-URL format/encoding is to have a separate protocol, e.g. `safe-xor://`, for identifying these URIs. However there doesn't seem to be much benefits from doing this, and the only evident one is to avoid the scenario described above in drawback section when a public-name can be eclipsed by a XOR-URL, which it should be an unlikely scenario. On the other hand, having a single protocol as the standard for all type of URLs that resolve to content on the SAFE Network should be seen as a more homogeneous design.
 
 ## Unresolved questions
 
