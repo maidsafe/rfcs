@@ -12,7 +12,7 @@
 
 In this RFC, we propose an algorithm which will allow a section of network nodes to reach consensus on the validity and order of network events by voting on events and using a gossip protocol to disseminate these votes amongst themselves.  The main claim of this RFC is:
 
-All honest participating nodes will reach eventual Byzantine agreement with probability one on a total order of valid blocks, where the valid blocks are comprised of a supermajority of valid votes by the nodes on `NodeState`s.
+All honest participating nodes will reach eventual Byzantine agreement with probability one on a total order of valid blocks, where the valid blocks are comprised of a supermajority of valid votes by the nodes on `NetworkEvent`s.
 
 # Conventions
 
@@ -34,8 +34,8 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **faulty node**: node that exhibits faulty, or Byzantine behaviour. Faulty behaviour can range from being unresponsive to actively trying to attack the network while synchronising the attack with other faulty nodes
 - **correct node**: non-faulty node
 - **network event**: change of membership in a node's section of the network
-- **`NodeState`**: representation of a unit of change to the status of the network. Example: ElderLive(A). These will be unique, e.g. if ElderLive(A) appears as a valid `Block`, it will never re-appear as a valid `Block`. A `NodeState` is the code manifestation of a network event
-- **`Vote`**: `NodeState` plus node's signature of said `NodeState`
+- **`NetworkEvent`**: representation of a unit of change to the status of the network. Example: ElderLive(A). These will be unique, e.g. if ElderLive(A) appears as a valid `Block`, it will never re-appear as a valid `Block`.
+- **`Vote`**: `NetworkEvent` plus node's signature of said `NetworkEvent`
 - **`GossipCause`**: enum used to indicate why a particular `GossipEvent` was formed
 - **`GossipProof`**: signature of the content of a `GossipEvent` (see definition below) being gossiped (payload + self_parent + other_parent) plus public ID of node which signed the content
 - **`GossipEvent`**: message being communicated through gossip over the network. Its `payload` represents a `Vote`. It also contains two optional hashes: `self_parent` and `other_parent` and a proof of type `GossipProof`
@@ -50,6 +50,7 @@ This voting is asynchronous, but we must be able to reach a consensus within the
 - **supermajority**: strictly more than `2/3` of the voting members of a section. No member that was consensused to have left our section in our `gossip_graph` will ever be considered again as a voting member in this definition
 - **seen**: a `GossipEvent` is seen by a later one if there is a directed path going from the latter to the former in the gossip graph
 - **strongly seen**: a `GossipEvent` is strongly seen by another `GossipEvent` if it is seen via multiple directed paths passing through a supermajority of the nodes
+- **`Block`**: A collection of `Vote`s by peers for a network event `NetworkEvent`
 - **valid `Block`**: `Block` formed via a supermajority of `Vote`s
 - **stable `Block`**: a valid `Block` that has also had its order decided via order consensus
 - **observer**: the first gossip event created by a node X which can strongly see that `GossipEvent`s created by a supermajority of nodes can see a valid `Block` which is not yet stable. The `Block` that's seen as valid may be different for different nodes
@@ -79,7 +80,7 @@ See the [dev branch of the routing repository](https://github.com/maidsafe/routi
 
 ```rust
 enum State;
-struct NodeState;
+struct NetworkEvent;
 struct PublicInfo;
 struct Proof;
 struct Vote<T>;
@@ -109,7 +110,7 @@ enum GossipCause<T> {
 struct GossipEvent<T> {
     // why was this GossipEvent created? Was it due to an observation of a network change?
     // Was it initiated by the sender (Request)? Was it a Response to previous gossip?
-    // (T normally represents some NodeState).
+    // (T normally represents some NetworkEvent).
     payload: GossipCause<T>,
     // hash of the latest GossipEvent the node which created this event has seen
     self_parent: Option<Hash>,
@@ -123,7 +124,7 @@ struct GossipEvent<T> {
 
 - A gossip event may be created for one of the following reasons:
   - Another node gossiped to us and we record this fact by creating a `GossipEvent` with a `GossipCause::Request` or `GossipCause::Response` `payload` depending on whether we received a `GossipRequestRpc` or `GossipResponseRpc`. If we received a `GossipRequestRpc`, we are required to immediately gossip back to the sender, bundling the NetworkEvents we think they aren't aware of in a `GossipResponseRpc`
-  - We witness a network event and would like to share that. We create a `GossipEvent` with a `GossipCause::Observation` `payload` containing our `Vote` on that `NodeState`
+  - We witness a network event and would like to share that. We create a `GossipEvent` with a `GossipCause::Observation` `payload` containing our `Vote` on that `NetworkEvent`
 
 - As part of the gossip protocol, a node communicates all `GossipEvent`s they think another node doesn't know by sending them one of the two following types:
   - They use a `GossipRequestRpc` if their timer indicates that it is time to send gossip to a randomly picked network node
@@ -147,7 +148,7 @@ gossip_graph: HashMap<Hash, GossipEvent>
 
 ## High level algorithm
 
-- When a node needs to vote on a new `NodeState`, it creates a `GossipEvent` for this with `self_parent` as the hash of the latest event in its own gossip history and `other_parent` as `None`
+- When a node needs to vote on a new `NetworkEvent`, it creates a `GossipEvent` for this with `self_parent` as the hash of the latest event in its own gossip history and `other_parent` as `None`
 - Periodically, a node gossips to another node
   - Pick a recipient
   - Send a `GossipRequestRpc` containing all the `GossipEvent`s that it thinks the recipient hasn't seen according to its gossip graph
@@ -190,7 +191,7 @@ To make a decision, we turn this single problem into a number of binary Byzantin
 
 We use this specific question since when the answer is "yes" we know two things: the voter's vote will eventually be seen by all correct nodes, and after binary consensus the set of voters seen by all nodes will not be empty^1^.
 
-After achieving Binary consensus on all voters, deciding the next stable `Block` is trivial: for instance, one can simply consider which `NodeState` is carried by the most nodes as content for the next stable `Block`. If that leads to a tie, a simple rule such as Lex-Order of the `NodeState`s can be used to break the tie.
+After achieving Binary consensus on all voters, deciding the next stable `Block` is trivial: for instance, one can simply consider which `NetworkEvent` is carried by the most nodes as content for the next stable `Block`. If that leads to a tie, a simple rule such as Lex-Order of the `NetworkEvent`s can be used to break the tie.
 
 #### Note 1: Proof that the consensused set of voters will never be empty
 For a given network event, consensus on the voters for that event will never result in an empty set of voters.
@@ -485,7 +486,7 @@ From Claim A of the concrete coin protocol, the probability of not deciding afte
 
 ### From binary consensus to full consensus
 
-Once binary consensus is reached on all meta votes for the next gossip event containing a valid vote for a network event that wasn't yet consensused, pick the most represented network event among the decided voters. In case of a tie, sort the `NodeState`s by their lexical order.
+Once binary consensus is reached on all meta votes for the next gossip event containing a valid vote for a network event that wasn't yet consensused, pick the most represented network event among the decided voters. In case of a tie, sort the `NetworkEvent`s by their lexical order.
 
 ## Complexity
 From [ABA](https://hal.inria.fr/hal-00944019/document)'s proof, the number of rounds is `O(1)`.  The complexity of propagating information via this gossip protocol is `O(log(N))` time units.  Hence consensus will be reached in `O(log(N))` time units.  Because of gossip properties, `O(N * log(N))` messages will be communicated in that period.

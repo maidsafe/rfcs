@@ -1,9 +1,9 @@
 # Transparent Malice Handling within PARSEC 
-- Status: proposed 
+- Status: agreed 
 - Type: new feature 
 - Related components: PARSEC, Routing 
-- Start Date: 10-09-2018 
-- Discussion: tbc 
+- Start Date: 21-09-2018 
+- Discussion: [SAFE Network Forum Topic](https://safenetforum.org/t/rfc-50-transparent-malice-handling-within-parsec/25487)
 - Supersedes: N/A 
 - Superseded by: N/A 
 
