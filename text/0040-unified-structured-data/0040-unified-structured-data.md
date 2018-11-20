@@ -125,7 +125,7 @@ Status quo is an option and realistic.
 
 ## Summary
 
-[RFC Unified Structured Data](https://github.com/dirvine/rfcs/blob/unified-structured-data/proposed/0000-Unified-structured-data.md) introduces `StructuredData` as a fundamental type for the network.
+[RFC Unified Structured Data](https://github.com/maidsafe/rfcs/tree/master/text/0040-unified-structured-data) introduces `StructuredData` as a fundamental type for the network.
 This RFC explores in more detail the implications for applying this change for routing and sentinel library.  This is not the exact implementation as completed after Rust-3, but appended for reference.
 
 ## Motivation
