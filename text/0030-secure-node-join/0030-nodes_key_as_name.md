@@ -1,6 +1,6 @@
 # Nodes key as name
 
-- Status: proposed
+- Status: active
 - Type: enhancement
 - Related components: routing
 - Start Date: 08-03-2013

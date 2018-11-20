@@ -13,8 +13,8 @@
 ## Summary
 
 Full implementation of safecoin v1.0. This RFC brings together the following RFCs
-[Farm Attempt](https://github.com/maidsafe/rfcs/blob/master/agreed/0004-Farm-attempt/0004-Farm-attempt.md)
-[Balance Resources](https://github.com/maidsafe/rfcs/blob/master/agreed/0005-balance_network_resources/0005-balance_network_resources.md)
+[Farm Attempt](https://github.com/maidsafe/rfcs/blob/master/text/0004-farm-attempt/0004-farm-attempt.md)
+[Balance Resources](https://github.com/maidsafe/rfcs/blob/master/text/0005-balance-network-resources/0005-balance-network-resources.md)
 In addition this RFC will attempt to calculate the existing magic numbers used in previous implementations.
 
 ## Motivation
@@ -106,7 +106,7 @@ further RFC and should allow farming rates to have a natural minimum.
 
 ### Establishing StoreCost
 
-This is an upgrade to RFC [0005](https://github.com/dirvine/rfcs/blob/safecoin_implementation/agreed/0005-balance_network_resources.md) the initial StoreCost
+This is an upgrade to RFC [0005](https://github.com/maidsafe/rfcs/blob/master/text/0005-balance-network-resources/0005-balance-network-resources.md) the initial StoreCost
 
 and consequent farming reward is 1 safecoin for the first Get and exponentially decreases from that point.
 
