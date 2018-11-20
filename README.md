@@ -225,4 +225,16 @@ is "no", then the appropriate response is to close the RFC, not postpone it.)
 [Help this is all too informal!]: #help-this-is-all-too-informal
 The process is intended to be as lightweight as reasonable for the
 present circumstances. As usual, we are trying to let the process be
-driven by consensus and community norms, not impose more structure than necessary.
+driven by consensus and community norms, not impose more structure than
+necessary.
+
+[issues]: https://github.com/maidsafe/rfcs/issues
+[rfcs category]: https://forum.safedev.org/c/rfcs
+
+## License
+
+This SAFE Network library is dual-licensed under the Modified BSD ([LICENSE-BSD](LICENSE-BSD) https://opensource.org/licenses/BSD-3-Clause) or the MIT license ([LICENSE-MIT](LICENSE-MIT) https://opensource.org/licenses/MIT) at your option.
+
+## Contribution
+
+Copyrights in the SAFE Network are retained by their contributors. No copyright assignment is required to contribute to this project.
