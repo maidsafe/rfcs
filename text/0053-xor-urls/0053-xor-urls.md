@@ -93,6 +93,12 @@ The resolver function shall first attempt to decode the URL assuming it contains
 
 Note that it's proposed that the resolver should try to decode the CID and attempt to fetch the content before falling back to assume it's a public-name URL, rather than only decoding. The reason behind this is to not eclipse a public-name which happens to be a valid CID string. In such cases it could still be eclipsed if there exist content at the location encoded by the CID string, but at least not do it up front when there is no content stored at such location.
 
+The reason why the `<type-tag>` is exposed in the URL has to do with the fact that it matches quite well if you think of an analogy with ports in the clearnet, i.e. the location where the content is stored/found is the same for several MutableData's each with a different type tag (just like different services listening at different ports at the same IP address on the clearnet).
+
+Having the `<content-version>` available to the user, allowing it to be changed in a URL to get a different version of the same content, enables the user to be explicitly aware of the version of the content it's being fetched. As mentioned above, if the user is willing to get the latest version of the targeted content then the `<content-version>` part can simply be omitted from the URL.
+
+Since the main goal is to have a standard way of referencing and linking any piece of data stored on the SAFE Network with a URL (as required for supporting [linked-data](http://linkeddata.org/home)), thus the `<query>` and `<fragment>` parts are reserved to be used by the application consuming the content rather than used by the resolver itself. Once the resolver has located the content and fetched it, the values provided in the `<query>` and `<fragment>` parts shall be passed back to the application which requested the content. The application can then define what it's the way of referring to a specific part of the document you are targeting with the URL. E.g. the [WebID spec](https://dvcs.w3.org/hg/WebID/raw-file/tip/spec/identity-respec.html#overview) makes use of the `#fragment` to refer to one of the subgraphs, i.e. one of the persons/agents described in the WebID Profile document. As another example, the `#fragment` and `query` values are used by the web page that is being referenced by a URL and not used by the DNS to locate the file/s of the web page. In the case of the SAFE Network, the `<fragment>` could be used to refer to a specific entry of a MutableData, or the `<query>` can also be used to provide a filter to be applied to the entries that need to be considered on a referenced MutableData. This all would be defined/determined by the convention followed by the application that is fetching the content from a XOR-URL.
+
 The following are examples of what would become valid XOR-URLs as per this proposal:
 
 ImmutableData XOR-URL:
@@ -103,6 +109,17 @@ MutableData XOR-URL:
 
 NFS/Files container MutableData XOR-URL:
 `safe://hyfktcenm57js4bm3owhez9td9pi3t8bzk1crqp7mr5865c15ih3yxpz68w:15008/some/folder/index.html`
+
+Just as an example, given `safe://hyfktcenm57js4bm3owhez9td9pi3t8bzk1crqp7mr5865c15ih3yxpz68w:15008/some/folder/index.html#somesection?somekey=5` XOR-URL, which is referencing a MutableData which follows the convention to store hierarchy of files, the resolver will decode/decompose it in the following way to locate the content:
+- `hyfktcenm57js4bm3owhez9td9pi3t8bzk1crqp7mr5865c15ih3yxpz68w` is the `<cid>` part which can be decoded by the CID spec as follows:
+  - `z-base32` base encoding for the whole CID string
+  - `v1` of the CID protocol/format
+  - `MutableData` content type
+  - `sha3-256` hash function was used to generate the XOR name/address
+  - `4bdf536d057985388bfe23fb6b989c3754984737ab26cfedb25baf3207b6fe3d` XOR name/address to locate the content
+- `15008` is the `<type-tag>` part, the resolver will try to fetch a MutableData with this type tag and the decoded XOR name/address
+- `/some/folder/index.html` is the path which will be used by the resolver to fetch the specified file from the MutableData retrieved. This MutableData shall be a 'Files container' otherwise the resolution will fail for this case.
+- `#somesection?somekey=5` is the `<fragment>` and `<query>` parts which will be ignored by the resoler and simply returned back to the application for it to use it.
 
 ## Drawbacks
 
