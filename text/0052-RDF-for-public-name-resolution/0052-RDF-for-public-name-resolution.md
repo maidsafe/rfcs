@@ -4,9 +4,9 @@
 - Type: enhancement
 - Related components: Safe Browser. Safe App Nodejs / Client FFI libs.
 - Start Date: 23/09/2018
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
-- Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
-- Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
+- Discussion: https://github.com/maidsafe/rfcs/issues/283
+- Supersedes: -
+- Superseded by: -
 
 ## Summary
 
