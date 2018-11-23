@@ -97,6 +97,8 @@ Once the final MD has been resolved, if a `Files Map` type of `Resolvable Map` h
 
 ![Image of PNS Resolution Data Structures](https://raw.githubusercontent.com/joshuef/rfcs/PnsAndResolveableMap/text/0000-RDF-for-public-name-resolution/PNS_data_representation.png)
 
+It is worth nothing, that while we describe RDF data here as discrete MDs, as graphs these could be stored in one file with all sub-graphs included to save fetches. The exact storage of the data / when to use new data objects / XOR-ULs is at the discretion of those saving the data.
+
 #### Resolvable Map Structure
 
 The idea for this is an RDF Data Set stored on the safe network. This will follow a newly defined schema, that represents a list of `keys`, which map to XOR-URLs. Each entry can contain more information to aid in resolving data, depending on context / application.
