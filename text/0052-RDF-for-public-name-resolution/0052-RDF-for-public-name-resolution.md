@@ -111,7 +111,6 @@ Provides data to be shown at the public name.
  - It must be an RDF data object
  `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a SAFE Url for data location (could be xor or using a subName).
  - Extra data can be added to the graph for each entry to aid in service discovery for the key.
- - A graph's base URI _must_ point to a XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
 
 
  For `safe://<subName>.<myPublicName>`
