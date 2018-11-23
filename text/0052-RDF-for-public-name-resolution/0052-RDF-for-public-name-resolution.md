@@ -80,8 +80,8 @@ Unavailability of any data being dereferenced will throw an error.
 
 `safe://<subName>.<subName>.<subName>.<subName>.<publicName>`
 
-- As above, resolving each additional substring, up to a defined maximum of redirects (implemented in the resolver.)
-	- Safe Browser will implement redirect limit of 10 redirects per url resolution. Any more than this would throw an error.
+- As above, resolving each additional `subName` will lead to another `Resolvable Map`... on and on up to a defined maximum of redirects (implemented by the resolver.)
+	- eg. Safe Browser will implement redirect limit of 10 redirects per url resolution. Any more than this would throw an error.
 
 Unavailability of any data being dereferenced will throw an error.
 
@@ -90,7 +90,7 @@ Unavailability of any data being dereferenced will throw an error.
 
 `safe://<subName>.<publicName><path>`, eg `safe://pns.rfc/resolution`
 
-Once the final data has been resolved in a browser, if a `Files Map` type of `Resolvable Map` has been located, then the trailing url path would be resolved, too.
+Once the final MD has been resolved, if a `Files Map` type of `Resolvable Map` has been located, then the trailing `path` of the url would be resolved as part of that `Map`, too.
 
 
 ### Data Structures fo Resolution
@@ -111,7 +111,7 @@ Provides data to be shown at the public name.
  - It must be an RDF data object
  `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a SAFE Url for data location (could be xor or using a subName).
  - Extra data can be added to the graph for each entry to aid in service discovery for the key.
- - `@id` entries _must_ point to a XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
+ - A graph's base URI _must_ point to a XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
 
 
  For `safe://<subName>.<myPublicName>`
@@ -153,7 +153,7 @@ Provides data to be shown at the public name.
 
  `safe://www.happyurl` is the same as `<safe://asdadfiojf3289ry9uy329ryfhusdhfdsfsdsd#www>`
 
-Providing different `@type` info or other details in the RDF can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `default` value is a `Files Map` (which is does not want), could search remaining keys for something of `type: inbox` and resolve this data automatically.
+Providing different type of graph can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `default` value is a `Files Map` (which is does not want), could search remaining keys for something of `type: inbox` and resolve this data automatically.
 
 
 #### Files Map
