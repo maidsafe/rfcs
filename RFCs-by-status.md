@@ -6,9 +6,7 @@ A list of all RFCs by their current status.
 
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0037 Disjoint Sections](./text/0037-disjoint-groups/0037-disjoint-groups.md)
- - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
- - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
 
 ## Proposed RFCs
@@ -49,6 +47,8 @@ A list of all RFCs by their current status.
  - [#0040 Unify Structured Data](./text/0040-unified-structured-data/0040-unified-structured-data.md)
  - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
  - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
+ - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
+ - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
 
 ## Rejected RFCs
 
@@ -68,4 +68,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Thu  4 Apr 10:04:32 BST 2019_ at REV [942ce39](https://github.com/maidsafe/rfcs/commit/942ce399b6a4d20a385026f4b308dd0c775e3faa))
+(Last updated _Thu  4 Apr 2019 14:13:55 BST_ at REV [b665e23](https://github.com/maidsafe/rfcs/commit/b665e23add833e0486b4817e260a6df4272f8524))
