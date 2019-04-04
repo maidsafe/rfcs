@@ -1,6 +1,6 @@
 # MutableData
 
-- Status: Implemented
+- Status: implemented
 - Type: feature
 - Related components: `safe_core`, `safe_launcher`, `safe_vault`, `routing`
 - Start Date: 09-November-2016
