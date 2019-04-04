@@ -10,7 +10,6 @@ A list of all RFCs by their current status.
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
- - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
 
 ## Proposed RFCs
 
@@ -21,13 +20,16 @@ A list of all RFCs by their current status.
  - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
+ - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
+ - [#0052 RDF for PublicName Resolution](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
+ - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
 
 ## Agreed RFCs
 
  - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
  - [#0005 Balance Network Resources](./text/0005-balance-network-resources/0005-balance-network-resources.md)
  - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
- - [#0050 Transparent Malice Handling within PARSEC](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
+ - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
 
 ## Implemented RFCs
 
@@ -47,9 +49,6 @@ A list of all RFCs by their current status.
  - [#0040 Unify Structured Data](./text/0040-unified-structured-data/0040-unified-structured-data.md)
  - [#0041 Low Level API](./text/0041-low-level-api/0041-low-level-api.md)
  - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
- 
-## Postponed RFCs
- - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md) 
 
 ## Rejected RFCs
 
@@ -69,4 +68,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Fri 21 Sep 11:53:55 BST 2018_ commit: [a9557da79a534eb40c20999b716ea471d7e918f5](https://github.com/maidsafe/rfcs/commit/a9557da79a534eb40c20999b716ea471d7e918f5))
+(Last updated _Thu  4 Apr 10:04:32 BST 2019_ at REV [942ce39](https://github.com/maidsafe/rfcs/commit/942ce399b6a4d20a385026f4b308dd0c775e3faa))
