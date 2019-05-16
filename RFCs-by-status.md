@@ -21,6 +21,9 @@ A list of all RFCs by their current status.
  - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
  - [#0052 RDF for PublicName Resolution](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
  - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
+ - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-mutable-data/0054-published-and-unpublished-mutable-data.md)
+ - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
+ - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
 
 ## Agreed RFCs
 
@@ -68,4 +71,4 @@ A list of all RFCs by their current status.
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
 
 
-(Last updated _Thu  4 Apr 2019 14:13:55 BST_ at REV [b665e23](https://github.com/maidsafe/rfcs/commit/b665e23add833e0486b4817e260a6df4272f8524))
+(Last updated _Thu 16 May 2019 12:39:36 EDT_ at REV [601e8ee](https://github.com/maidsafe/rfcs/commit/601e8ee923eb279d85e6b3ca602701aa3c238972))
