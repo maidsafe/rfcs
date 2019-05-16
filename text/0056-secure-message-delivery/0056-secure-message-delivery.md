@@ -1,10 +1,10 @@
 # Secure Message Delivery
 
-Status: proposed
-Type: enhancement
-Related components: DHT, Routing, Vault
-Start Date: 16-05-2019
-Discussion: https://safenetforum.org/t/rfc-56-secure-message-delivery/28622
+- Status: proposed
+- Type: enhancement
+- Related components: DHT, Routing, Vault
+- Start Date: 16-05-2019
+- Discussion: https://safenetforum.org/t/rfc-56-secure-message-delivery/28622
 
 ## Summary
 
