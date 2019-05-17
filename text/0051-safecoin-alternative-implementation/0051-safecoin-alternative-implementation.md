@@ -4,7 +4,7 @@
 - Type: new feature
 - Related components: SAFE Vault, SAFE Client Libs
 - Start Date: 15-09-2018
-- Discussion:
+- Discussion: https://safenetforum.org/t/frasers-safecoin-alternative-design/25442
 - Supersedes: N.A.
 - Superseded by: N.A.
 
