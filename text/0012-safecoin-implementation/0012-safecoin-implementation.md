@@ -1,6 +1,6 @@
 # Safecoin Implementation
 
-- Status: proposed
+- Status: rejected
 - Type: new feature
 - Related Components: safe_vault, safe_client
 - Start Date: 12-10-2015
@@ -8,7 +8,7 @@
 - Issue Number: Proposed - #61
 - Discussion: https://github.com/maidsafe/rfcs/issues/61
 - Supersedes:
-- Superseded by:
+- Superseded by: [RFC 0057: Safecoin Revised](https://github.com/maidsafe/rfcs/blob/master/text/0057-safecoin-revised/0057-safecoin-revised.md "RFC 0057: Safecoin Revised")
 
 ## Summary
 

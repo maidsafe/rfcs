@@ -12,7 +12,6 @@ A list of all RFCs by their current status.
 ## Proposed RFCs
 
  - [#0009 MPID Messaging System](./text/0009-mpid-messaging/0009-mpid-messaging.md)
- - [#0012 Safecoin Implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
  - [#0021 MPID Message Delete](./text/0021-mpid-messaging-delete/0021-mpid-messaging-delete.md)
  - [#0022 Messaging Example in `safe_core`](./text/0022-messaging-example-in-safe_core/0022-messaging-example-in-safe_core.md)
  - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
@@ -24,11 +23,11 @@ A list of all RFCs by their current status.
  - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-mutable-data/0054-published-and-unpublished-mutable-data.md)
  - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
+ - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
 
 ## Agreed RFCs
 
  - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
- - [#0005 Balance Network Resources](./text/0005-balance-network-resources/0005-balance-network-resources.md)
  - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
  - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
 
@@ -55,10 +54,12 @@ A list of all RFCs by their current status.
 
 ## Rejected RFCs
 
+ - [#0005 Balance Network Resources](./text/0005-balance-network-resources/0005-balance-network-resources.md)
  - [#0006 Address Relocation](./text/0006-address-relocation/0006-address-relocation.md)
  - [#0007 Launcher Not as a Service](./text/0007-launcher-not-as-service/0007-launcher-not-as-a-service.md)
  - [#0008 UDP Hole Punching](./text/0008-udp-hole-punching/0008-udp-hole-punching.md)
  - [#0010 Launcher as a Service](./text/0010-launcher-as-a-service/0010-launcher-as-a-service.md)
+ - [#0012 Safecoin Implementation](./text/0012-safecoin-implementation/0012-safecoin-implementation.md)
  - [#0013 Immutable Data Naming](./text/0013-immutable-data-naming/0013-immutable-data-naming.md)
  - [#0014 Unregistered Client Support in Launcher](./text/0014-unregistered-client-support-in-launcher/0014-unregistered-client-support-in-launcher.md)
  - [#0016 Launcher Data Types API](./text/0016-launcher-data-types-api/0016-launcher-data-types-api.md)
@@ -69,6 +70,7 @@ A list of all RFCs by their current status.
  - [#0028 Launcher Low Level API](./text/0028-launcher-low-level-api/0028-launcher-low-level-api.md)
  - [#0039 Sentinel](./text/0039-sentinel/0039-sentinel.md)
  - [#0044 Relay Nodes](./text/0044-relay-nodes/0044-relay-nodes.md)
+ - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Thu 16 May 2019 12:39:36 EDT_ at REV [601e8ee](https://github.com/maidsafe/rfcs/commit/601e8ee923eb279d85e6b3ca602701aa3c238972))
+(Last updated _20 May 2019 10:57:28_ at REV [accbafe](https://github.com/maidsafe/rfcs/commit/accbafeab56b4e6f8ec5b7ff548cde596b30d166))
