@@ -1,10 +1,12 @@
 # Balance Network Resources
 
-- Status: agreed
+- Status: rejected
 - Type new feature
 - Related components maidsafe_vault
 - Start Date: 25-06-2015
 - Issue number: #26
+- Supersedes:
+- Superseded by: [RFC 0057: Safecoin Revised](https://github.com/maidsafe/rfcs/blob/master/text/0057-safecoin-revised/0057-safecoin-revised.md "RFC 0057: Safecoin Revised")
 
 ## Summary
 

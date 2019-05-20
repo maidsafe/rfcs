@@ -1,12 +1,12 @@
 # Safecoin Alternative Implementation
 
-- Status: postponed
+- Status: rejected
 - Type: new feature
 - Related components: SAFE Vault, SAFE Client Libs
 - Start Date: 15-09-2018
 - Discussion:
 - Supersedes: N.A.
-- Superseded by: N.A.
+- Superseded by: [RFC 0057: Safecoin Revised](https://github.com/maidsafe/rfcs/blob/master/text/0057-safecoin-revised/0057-safecoin-revised.md "RFC 0057: Safecoin Revised")
 
 ## Summary
 
