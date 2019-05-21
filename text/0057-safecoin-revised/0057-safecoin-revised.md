@@ -4,7 +4,7 @@
 - Type: new feature
 - Related components: SAFE Vault, Routing, SAFE Client Libs
 - Start Date: 01-05-2019
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
+- Discussion: https://safenetforum.org/t/rfc-57-safecoin-revised/28660
 - Supersedes:
     - [RFC 0005: Balance Network Resources][rfc05]
     - [RFC 0012: Safecoin Implementation][rfc12]
