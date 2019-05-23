@@ -24,6 +24,7 @@ A list of all RFCs by their current status.
  - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
  - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
+ - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
 
 ## Agreed RFCs
 
@@ -73,4 +74,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _20 May 2019 10:57:28_ at REV [accbafe](https://github.com/maidsafe/rfcs/commit/accbafeab56b4e6f8ec5b7ff548cde596b30d166))
+(Last updated _23 May 2019 17:08:01 CEST_ at REV [82778d3](https://github.com/maidsafe/rfcs/commit/82778d3231012af22a55f5be2ca6c227cad635c8))
