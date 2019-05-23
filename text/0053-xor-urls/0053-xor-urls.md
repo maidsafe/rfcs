@@ -4,7 +4,7 @@
 - Type: new feature
 - Related components: Safe Browser. Safe App Nodejs / SAFE Client libs.
 - Start Date: (13-11-2018)
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this)
+- Discussion: https://forum.safedev.org/t/rfc-discussion-xor-urls/2365
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
 - Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
 
