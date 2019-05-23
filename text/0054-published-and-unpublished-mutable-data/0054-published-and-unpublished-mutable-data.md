@@ -8,7 +8,7 @@
 
 ## Summary
 
-This document describes how to enhance the data types to allow the network to store Published and Unpublished data via `AppendOnlyData` or `MutableData` types, and when these data types shall be used.
+This document describes how to enhance the data types to allow the network to store Unpublished data via the `MutableData` type, or Unpublished or Published data via the `AppendOnlyData` type, and when these data types shall be used.
 
 ## Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
@@ -41,7 +41,7 @@ Users should be able to store `UnpublishedData` on the network and share it with
 
 ## Detailed design
 
-Mutable data SHALL enforce that the published content MUST be Append only, while the private/shared data can be of editable type.  Following are the considerations to enhance the mutable data:
+Mutable data SHALL enforce that, once published, the published content MUST be Append only, while the private/shared data can be of editable type. Following are the considerations to enhance the mutable data:
 - `Unpublished` data MUST allow either complete mutability—overwrite of existing data (`MutableData`)—OR append only operations (`AppendOnlyData`).
 - We don't need the version for preventing replay attacks, however explicitly sequencing all mutations is still an option provided for clients to allow them to avoid dealing with conflicting mutations.
 - We shall sub-divide the existing `MutableData` data as follows:
@@ -70,11 +70,11 @@ Mutable data SHALL enforce that the published content MUST be Append only, while
             - E.g., If the ownership change happened from `Owner-0` to `Owner-1` it might be of interest what the data was like when `Owner-0` owned it. So we can say that data index during the change was `n`. This means that in future after multiple owner changes we SHALL still have all the history preserved and can precisely show how the histories of data are related to the histories of metadata. So `[0-n]` would be all the data that was published when the owner was `Owner-0` and `[(n+1)..]` is the data when the owner was `Owner-1`, in our example. Similarly the permissions and the indices used there.
         - Appending new permission or ownership SHALL require the last index of the corresponding vector to be specified as part of the API call to prevent conflict, irrespective of whether the `AppendOnlyData` is `Sequenced` or `Unsequenced`.
 - ABFT ordered consensus algorithm - `PARSEC` MUST be used for concurrency handling while catering to update requests.
-- `AppendOnlyData` and `MutableData` use different XOR namespaces, but within sub-categories they are the same. I.e., if some user stored a `PublishedSequencedAppendOnlyData` object at a XOR address X and type tag Y, and another user wants to store `UnpublishedUnsequencedAppendOnlyData` at the same XOR address X and type tag Y, there will be a conflict and an error will be returned. The same rule applies for `SequencedMutableData` and `UnsequencedMutableData`: it SHALL NOT be possible to store them under the same XOR address and type tag. However, it SHALL be possible to store e.g. `UnpublishedSequencedAppendableData` and `UnpublishedSequencedMutableData` under the same XOR address and type tag.
+- `AppendOnlyData` and `MutableData` use different XOR namespaces, but within sub-categories they are the same. I.e., if some user stored a `PublishedSequencedAppendOnlyData` object at a XOR address X and type tag Y, and another user wants to store `UnpublishedUnsequencedAppendOnlyData` at the same XOR address X and type tag Y, there will be a conflict and an error will be returned. The same rule applies for `SequencedMutableData` and `UnsequencedMutableData`: it SHALL NOT be possible to store them under the same XOR address and type tag. However, it SHALL be possible to store e.g. `UnpublishedSequencedAppendableData` and `SequencedMutableData` under the same XOR address and type tag.
 
 ```rust
 /// In this type, data mutations must be explicitly sequenced by providing a version.
-pub struct UnpublishedSequencedMutableData {
+pub struct SequencedMutableData {
     /// Network address
     name: XorName,
     /// Type tag
@@ -93,7 +93,7 @@ pub struct UnpublishedSequencedMutableData {
 
 /// Data mutations don't have to be explicitly sequenced and can go without a version.
 /// All other mutations (permissions, owners, etc.) still MUST be sequenced.
-pub struct UnpublishedUnsequencedMutableData {
+pub struct UnsequencedMutableData {
     /// Network address
     name: XorName,
     /// Type tag
