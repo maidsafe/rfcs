@@ -4,7 +4,7 @@
 - Type: enhancement
 - Related components: DHT, CRUST
 - Start Date: 23-05-2019
-- Discussion:
+- Discussion: https://safenetforum.org/t/rfc-58-reliable-message-delivery/28689
 - Supersedes: None
 - Superseded by: None
 
