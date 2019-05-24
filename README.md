@@ -21,7 +21,7 @@ the direction in which the network is evolving.
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
-- [Active RFCs](#list-of-active-rfcs)
+- [RFCs by status](./RFCs-by-status.md#active-rfcs)
 - [When you need to follow this process](#when-you-need-to-follow-this-process)
 - [Before creating an RFC](#before-creating-an-rfc)
 - [What the process is](#what-the-process-is)
@@ -31,8 +31,6 @@ the direction in which the network is evolving.
 - [RFC Postponement](#rfc-postponement)
 - [Help! This is all too informal](#help-this-is-all-too-informal)
 
-## List of active RFCs
-All currently-active RFCs can be found on the [status page](./RFCs-by-status.md#active-rfcs).
 
 ## When you need to follow this process
 [When you need to follow this process]: #when-you-need-to-follow-this-process
