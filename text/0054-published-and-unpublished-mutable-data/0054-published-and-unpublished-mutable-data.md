@@ -41,7 +41,7 @@ Users should be able to store `UnpublishedData` on the network and share it with
 
 ## Detailed design
 
-Mutable data SHALL enforce that, once published, the published content MUST be Append only, while the private/shared data can be of editable type. Following are the considerations to enhance the mutable data:
+Data types allowing mutations SHALL enforce that, once published, only appending new entries MUST be allowed, while entries in the private/shared data can be rewritten. Following are the considerations to enhance the mutable data types:
 - `Unpublished` data MUST allow either complete mutability—overwrite of existing data (`MutableData`)—OR append only operations (`AppendOnlyData`).
 - We don't need the version for preventing replay attacks, however explicitly sequencing all mutations is still an option provided for clients to allow them to avoid dealing with conflicting mutations.
 - We shall sub-divide the existing `MutableData` data as follows:
