@@ -82,7 +82,7 @@ pub struct UnpublishedSequencedMutableData {
     /// Key-Value semantics
     data: BTreeMap<Vec<u8>, Value>,
     /// Maps an application key to a list of allowed or forbidden actions
-    permissions: BTreeMap<User, BTreeSet<Permission>>,
+    permissions: BTreeMap<BLS-PublicKey, BTreeSet<Permission>>,
     /// Version should be increased for any changes to MutableData fields except for data
     version: u64,
     /// Contains a set of owners of this data. DataManagers enforce that a mutation request is
@@ -101,7 +101,7 @@ pub struct UnpublishedUnsequencedMutableData {
     /// Key-Value semantics
     data: BTreeMap<Vec<u8>, Vec<u8>>,
     /// Maps an application key to a list of allowed or forbidden actions
-    permissions: BTreeMap<User, BTreeSet<Permission>>,
+    permissions: BTreeMap<BLS-PublicKey, BTreeSet<Permission>>,
     /// Version should be increased for any changes to MutableData fields except for data
     version: u64,
     /// Contains a set of owners of this data. DataManagers enforce that a mutation request is
@@ -597,7 +597,7 @@ pub enum Request {
     ListMDataUserPermissions {
         address: MutableDataRef,
         kind: MutableDataKind,
-        user: User,
+        user: BLS-PublicKey,
         requester: BLS-PublicKey,
     },
     // Updates or inserts a list of permissions for a particular User in the given MutableData.
@@ -607,7 +607,7 @@ pub enum Request {
         // Kind of Mutable Data
         kind: MutableDataKind,
         // A user identifier used to set permissions
-        user: User,
+        user: BLS-PublicKey,
         // Permissions to be set for a user
         permissions: MDataPermissionSet,
         // Incremented version of MutableData
@@ -622,7 +622,7 @@ pub enum Request {
         // Kind of Mutable Data
         kind: MutableDataKind,
         // A user identifier used to delete permissions
-        user: User,
+        user: BLS-PublicKey,
         // Incremented version of MutableData
         version: u64,
         // Requester public key
@@ -693,7 +693,7 @@ pub enum Response {
     GetUnseqMDataValue(Result<Vec<u8>, ClientError>),
     GetSeqMDataValue(Result<Value, ClientError>),
     MutateMDataEntries(Result<(), ClientError>),
-    ListMDataPermissions(Result<BTreeMap<User, BTreeSet<MDataPermission>>>),
+    ListMDataPermissions(Result<BTreeMap<BLS-PublicKey, BTreeSet<MDataPermission>>>),
     ListMDataUserPermissions(Result<BTreeSet<MDataPermission>>),
     SetMDataUserPermissions(Result<(), ClientError>),
     DelMDataUserPermissions(Result<(), ClientError>),
