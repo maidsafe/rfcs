@@ -87,7 +87,6 @@ pub struct SequencedMutableData {
     version: u64,
     /// Contains a set of owners of this data. DataManagers enforce that a mutation request is
     /// coming from the MaidManager Authority of the Owner.
-    /// Currently limited to one owner to disallow multisig
     owners: BLS-PublicKey,
 }
 
@@ -106,7 +105,6 @@ pub struct UnsequencedMutableData {
     version: u64,
     /// Contains a set of owners of this data. DataManagers enforce that a mutation request is
     /// coming from the MaidManager Authority of the Owner.
-    /// Currently limited to one owner to disallow multisig
     owners: BLS-PublicKey,
 }
 
