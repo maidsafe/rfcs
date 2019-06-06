@@ -4,7 +4,7 @@
 - Type: enhancement
 - Related components: routing, PARSEC
 - Start Date: 06-06-2019
-- Discussion:
+- Discussion: https://safenetforum.org/t/rfc-59-boneh-lynn-shacham-scheme-in-routing/28858
 - Supersedes: None
 - Superseded by: None
 
