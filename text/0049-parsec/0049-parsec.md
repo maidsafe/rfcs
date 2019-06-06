@@ -1,6 +1,6 @@
 # PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus
 
-- Status: proposed
+- Status: implemented
 - Type: new feature
 - Related components: Routing
 - Start Date: 20-04-2018
