@@ -17,7 +17,6 @@ A list of all RFCs by their current status.
  - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
  - [#0052 RDF for PublicName Resolution](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
  - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
  - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-mutable-data/0054-published-and-unpublished-mutable-data.md)
@@ -30,7 +29,6 @@ A list of all RFCs by their current status.
 
  - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
  - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
- - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
 
 ## Implemented RFCs
 
@@ -52,6 +50,8 @@ A list of all RFCs by their current status.
  - [#0042 SAFE Launcher API v0.6](./text/0042-launcher-api-v0.6/0042-launcher-api-v0.6.md)
  - [#0043 Async safe_core](./text/0043-async-safe-core/0043-async-safe-core.md)
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
+ - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
+ - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
 
 ## Rejected RFCs
 

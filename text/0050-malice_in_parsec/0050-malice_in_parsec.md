@@ -1,5 +1,5 @@
 # Transparent Malice Handling within PARSEC 
-- Status: agreed 
+- Status: implemented
 - Type: new feature 
 - Related components: PARSEC, Routing 
 - Start Date: 21-09-2018 
