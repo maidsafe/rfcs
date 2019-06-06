@@ -25,6 +25,7 @@ A list of all RFCs by their current status.
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
  - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
  - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
+ - [#0059 Boneh-Lynn-Shacham scheme in Routing](./text/0059-bls-scheme-in-routing/0059-bls-scheme-in-routing.md)
 
 ## Agreed RFCs
 
@@ -74,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _23 May 2019 17:08:01 CEST_ at REV [82778d3](https://github.com/maidsafe/rfcs/commit/82778d3231012af22a55f5be2ca6c227cad635c8))
+(Last updated _6 Jun 2019 14:16:48 CEST_ at REV [89c702e](https://github.com/maidsafe/rfcs/commit/89c702efb62240f65f6990c649e2cbe531b3ddcb))
