@@ -19,7 +19,7 @@ A list of all RFCs by their current status.
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0052 RDF for PublicName Resolution](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
  - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
- - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-mutable-data/0054-published-and-unpublished-mutable-data.md)
+ - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
  - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
  - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
