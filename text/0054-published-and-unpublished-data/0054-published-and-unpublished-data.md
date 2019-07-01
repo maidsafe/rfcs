@@ -82,12 +82,12 @@ pub struct SequencedMutableData {
     /// Key-Value semantics
     data: BTreeMap<Vec<u8>, Value>,
     /// Maps an application key to a list of allowed or forbidden actions
-    permissions: BTreeMap<BLS-PublicKey, BTreeSet<Permission>>,
+    permissions: BTreeMap<PublicKey, BTreeSet<Permission>>,
     /// Version should be increased for any changes to MutableData fields except for data
     version: u64,
     /// Contains a set of owners of this data. DataManagers enforce that a mutation request is
     /// coming from the MaidManager Authority of the Owner.
-    owners: BLS-PublicKey,
+    owners: PublicKey,
 }
 
 /// Data mutations don't have to be explicitly sequenced and can go without a version.
@@ -100,12 +100,12 @@ pub struct UnsequencedMutableData {
     /// Key-Value semantics
     data: BTreeMap<Vec<u8>, Vec<u8>>,
     /// Maps an application key to a list of allowed or forbidden actions
-    permissions: BTreeMap<BLS-PublicKey, BTreeSet<Permission>>,
+    permissions: BTreeMap<PublicKey, BTreeSet<Permission>>,
     /// Version should be increased for any changes to MutableData fields except for data
     version: u64,
     /// Contains a set of owners of this data. DataManagers enforce that a mutation request is
     /// coming from the MaidManager Authority of the Owner.
-    owners: BLS-PublicKey,
+    owners: PublicKey,
 }
 
 pub struct Value {
@@ -192,11 +192,17 @@ struct Permissions {
 }
 
 struct Owners {
-    owners: BLS-PublicKey,
+    owners: PublicKey,
     /// The current index of the data when this ownership change happened
     data_index: u64,
     /// The current index of the permissions when this ownership change happened
     permission_entry_index: u64,
+}
+
+pub enum PublicKey {
+    // To be defined by the implementation.
+    // Can be a BLS public key, for example.
+
 }
 ```
 
@@ -236,9 +242,9 @@ We have 6 different data types in total, but most of them share the same set of 
 1. **Get current indexes**. Fetch the current data index, permissions index, and owners index of this AppendOnlyData object.
 1. **List permissions at index**. Fetch permissions at the provided index. The index in this operation refers to the index of the `permissions` list.
 1. **List owners at index**. Fetch owners at the provided index. The index in this operation refers to the index of the `owners` list.
-1. **List user permissions at index**. Get permissions for a provided user's/users' BLS public key at the specified index. The index in this operation refers to the index of the `permissions` list.
+1. **List user permissions at index**. Get permissions for a provided user's/users' public key at the specified index. The index in this operation refers to the index of the `permissions` list.
 1. **Append permissions**. Append a new list of permissions to the `AppendOnlyData` object. MUST include current indexes of data and permissions list. See the `Permissions` structure for reference. This operation can be performed only by the owner(s).
-1. **Append owners**. Appends a new BLS key to the owners list. MUST include current indexes of data and owners list. This operation can be performed only by the owner(s).
+1. **Append owners**. Appends a new key to the owners list. MUST include current indexes of data and owners list. This operation can be performed only by the owner(s).
 1. **Get shell at index**. Must include a version. If version is `Range::FromEnd(0)`, then the last shell version is going to be returned.
 1. **Delete unpublished `AppendOnlyData`**. Completely removes an `AppendOnlyData` instance from the network. Does not apply to published `AppendOnlyData` which can not be unpublished or removed. This operation can be performed only by the owner(s).
 
@@ -253,10 +259,10 @@ We have 6 different data types in total, but most of them share the same set of 
 1. **List keys**. Get all keys of a Mutable Data object.
 1. **List values**. Get all values of a Mutable Data Object.
 1. **List permissions**. Get all permissions for a Mutable Data Object.
-1. **List user permissions**. Get all permissions for a certain user (referenced by a BLS public key).
-1. **Set user permissions**. Set permissions for a certain user (referenced by a BLS public key).
-1. **Delete user permissions**. Deletes permissions for a certain user (referenced by a BLS public key).
-1. **Change ownership**. Sets a new owner or a set of owners (referenced by a BLS public key) for a Mutable Data object on the network. This operation can be performed only by the owner(s).
+1. **List user permissions**. Get all permissions for a certain user (referenced by a public key).
+1. **Set user permissions**. Set permissions for a certain user (referenced by a public key).
+1. **Delete user permissions**. Deletes permissions for a certain user (referenced by a public key).
+1. **Change ownership**. Sets a new owner or a set of owners (referenced by a public key) for a Mutable Data object on the network. This operation can be performed only by the owner(s).
 
 ## Detailed design
 
@@ -351,13 +357,11 @@ pub struct AppendOperation {
     // Address of an AppendOnlyData object on the network.
     address: AppendOnlyDataRef,
     // A list of entries to append.
-    values: Vec<(Vec<u8>, Vec<u8>)>,
-    // Requester public key
-    requester: BLS-PublicKey,
+    values: Vec<(Vec<u8>, Vec<u8>)>
 }
 
 pub enum User {
-    Key(BLS-PublicKey),
+    Key(PublicKey),
     Anyone
 }
 
@@ -383,24 +387,18 @@ pub enum Request {
         // range: (Range::Index(0), Range::Index(5))
         range: (Range, Range),
 
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // Get current indexes: data, owners, permissions.
     GetADataIndexes {
         kind: AppendOnlyKind,
         address: AppendOnlyDataRef,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // Get an entry with the current index.
     GetADataLastEntry {
         kind: AppendOnlyKind,
         address: AppendOnlyDataRef,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // Get permissions at the provided index.
@@ -408,8 +406,6 @@ pub enum Request {
         kind: AppendOnlyKind,
         address: AppendOnlyDataRef,
         permissions_index: Range,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // Get permissions for a specified user(s).
@@ -418,8 +414,6 @@ pub enum Request {
         address: AppendOnlyDataRef,
         permissions_index: Range,
         user: User,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // Get owners at the provided index.
@@ -427,8 +421,6 @@ pub enum Request {
         address: AppendOnlyDataRef,
         kind: AppendOnlyKind,
         owners_index: Range,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // Add a new `permissions` entry.
@@ -438,8 +430,7 @@ pub enum Request {
         kind: AppendOnlyKind,
         // New permission set
         permissions: Permissions,
-        // Requester public key
-        requester: BLS-PublicKey,
+        permissions_index: u64,
     },
 
     // Add a new `owners` entry.
@@ -449,6 +440,15 @@ pub enum Request {
         kind: AppendOnlyKind,
         address: AppendOnlyDataRef,
         owners: Owners,
+        owners_index: u64,
+    },
+
+    // Get a specified key from AppendOnlyData.
+    GetADataValue {
+        kind: AppendOnlyKind,
+        address: AppendOnlyDataRef,
+        // Key to look up.
+        key: Vec<u8>,
     },
 
     // Append operations
@@ -467,8 +467,6 @@ pub enum Request {
     PutAData {
         // AppendOnlyData to be stored
         data: AppendOnlyData,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // Get `AppendOnlyData` shell at a certain point
@@ -477,7 +475,6 @@ pub enum Request {
         kind: AppendOnlyKind,
         address: AppendOnlyDataRef,
         data_index: Range,
-        requester: BLS-PublicKey,
     },
 
     // Delete an unpublished unsequenced `AppendOnlyData`.
@@ -493,39 +490,29 @@ pub enum Request {
     // Note: responses to this request are unlikely to accumulate during churn.
     GetUnseqMData {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
     },
     GetSeqMData {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
-    },
     /// Creates a new MutableData in the network.
     PutUnseqMData {
         // Mutable Data to be stored
         data: UnsequencedMutableData,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
     PutSeqMData {
         // Mutable Data to be stored
         data: SequencedMutableData,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
     // Fetches a latest version number.
     GetMDataVersion {
         address: MutableDataRef,
         kind: MutableDataKind,
-        requester: BLS-PublicKey,
     },
     // Fetches the shell (everything except the entries).
     GetUnseqMDataShell {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
     },
     GetSeqMDataShell {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
     },
 
     // -- Data Actions --
@@ -533,28 +520,23 @@ pub enum Request {
     // Note: responses to this request are unlikely to accumulate during churn.
     ListUnseqMDataEntries {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
     },
     ListSeqMDataEntries {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
     },
     // Fetches a list of keys in MutableData.
     // Note: responses to this request are unlikely to accumulate during churn.
     ListMDataKeys {
         address: MutableDataRef,
         kind: MutableDataKind,
-        requester: BLS-PublicKey,
     },
     // Fetches a list of values in MutableData.
     // Note: responses to this request are unlikely to accumulate during churn.
     ListUnseqMDataValues {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
     },
     ListSeqMDataValues {
         address: MutableDataRef,
-        requester: BLS-PublicKey,
     },
     // Fetches a single value from MutableData
     GetUnseqMDataValue {
@@ -562,16 +544,12 @@ pub enum Request {
         address: MutableDataRef,
         // Key of an entry to be fetched
         key: Vec<u8>,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
     GetSeqMDataValue {
         // Network identifier of MutableData
         address: MutableDataRef,
         // Key of an entry to be fetched
         key: Vec<u8>,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
     // Updates MutableData entries in bulk.
     MutateMDataEntries {
@@ -580,8 +558,6 @@ pub enum Request {
         // A list of mutations (inserts, updates, or deletes) to be performed
         // on MutableData in bulk.
         actions: BTreeMap<Vec<u8>, EntryAction>,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
 
     // -- Permission Actions --
@@ -589,14 +565,12 @@ pub enum Request {
     ListMDataPermissions {
         address: MutableDataRef,
         kind: MutableDataKind,
-        requester: BLS-PublicKey,
     },
     // Fetches a list of permissions for a particular User.
     ListMDataUserPermissions {
         address: MutableDataRef,
         kind: MutableDataKind,
-        user: BLS-PublicKey,
-        requester: BLS-PublicKey,
+        user: PublicKey,
     },
     // Updates or inserts a list of permissions for a particular User in the given MutableData.
     SetMDataUserPermissions {
@@ -605,13 +579,11 @@ pub enum Request {
         // Kind of Mutable Data
         kind: MutableDataKind,
         // A user identifier used to set permissions
-        user: BLS-PublicKey,
+        user: PublicKey,
         // Permissions to be set for a user
         permissions: MDataPermissionSet,
         // Incremented version of MutableData
         version: u64,
-        // Requester public key
-        requester: BLS-PublicKey,
     },
     // Deletes a list of permissions for a particular User in the given MutableData.
     DelMDataUserPermissions {
@@ -620,11 +592,9 @@ pub enum Request {
         // Kind of Mutable Data
         kind: MutableDataKind,
         // A user identifier used to delete permissions
-        user: BLS-PublicKey,
+        user: PublicKey,
         // Incremented version of MutableData
         version: u64,
-        // Requester public key
-        requester: sign::PublicKey,
     },
     // -- Ownership Actions --
     // Changes an owner of the given MutableData. Only the current owner(s) can perform this action.
@@ -634,7 +604,7 @@ pub enum Request {
         // Kind of Mutable Data
         kind: MutableDataKind,
         // A list of new owners
-        new_owners: BLS-PublicKey,
+        new_owners: PublicKey,
         // Incremented version of MutableData
         version: u64,
     },
@@ -663,6 +633,7 @@ pub enum Response {
     GetADataUserPermissions(Result<BTreeSet<Permission>, ClientError>),
     GetADataOwners(Result<Owners, ClientError>),
     AddADataPermissions(Result<(), ClientError>),
+    GetADataValue(Result<Vec<u8>, ClientError>),
     SetADataOwners(Result<(), ClientError>) {
     AppendPublishedSeq(Result<(), ClientError>),
     AppendUnpublishedSeq(Result<(), ClientError>),
@@ -691,7 +662,7 @@ pub enum Response {
     GetUnseqMDataValue(Result<Vec<u8>, ClientError>),
     GetSeqMDataValue(Result<Value, ClientError>),
     MutateMDataEntries(Result<(), ClientError>),
-    ListMDataPermissions(Result<BTreeMap<BLS-PublicKey, BTreeSet<MDataPermission>>>),
+    ListMDataPermissions(Result<BTreeMap<PublicKey, BTreeSet<MDataPermission>>>),
     ListMDataUserPermissions(Result<BTreeSet<MDataPermission>>),
     SetMDataUserPermissions(Result<(), ClientError>),
     DelMDataUserPermissions(Result<(), ClientError>),
@@ -708,7 +679,7 @@ To simplify the burden of working with multiple different data types, it is RECO
 ```rust
 AppendOnly::unseq()
     .published()
-    .owned_by(my_bls_key)
+    .owned_by(my_public_key)
     .with_permissions(perm_set)
     .build();
 ```
@@ -717,7 +688,7 @@ Similarly for `MutableData`:
 
 ```rust
 MutableData::seq()
-    .owned_by(my_bls_key)
+    .owned_by(my_public_key)
     .build();
 ```
 
