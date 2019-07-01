@@ -19,7 +19,7 @@ This document describes how to enhance `ImmutableData` to make it an unpublished
 There are many a times when we create `ImmutableData` to store private content. Sometimes these contents might have been pre-encrypted so that any chances of having de-duplication due to self-encryption is very minimal. Also the users might not choose to utilise self-encryption and just use custom algorithms. In such cases it makes sense if the Network allowed deletion of `ImmutableData` instead of it storing many of them which might no longer be required even by the original uploader. However all such data will be regarded as unpublished as opposed to current `ImmutableData` which will be categorised as published and cannot be taken out once put.
 
 ## Assumptions
-- As mentioned in the [RFC on MutableData enhancements](https://github.com/maidsafe/pre-rfc/blob/master/vault/mutable-data-enhancement.md), the `GETs` go through `ManidManagers` - so `clients <-> MaidManagers <-> DataManagers`
+- As mentioned in the [RFC on MutableData enhancements](https://github.com/maidsafe/pre-rfc/blob/master/vault/mutable-data-enhancement.md), the `GETs` go through `MaidManagers` - so `clients <-> MaidManagers <-> DataManagers`
 - The replay attacks are circumvented by the (currently upcoming) safe-coin RFC.
 
 ## Detailed design
@@ -38,7 +38,7 @@ pub struct UnpublishedImmutableData {
     /// Contains a set of owners of this data. DataManagers enforce that a
     /// DELETE or OWNED-GET type of request is coming from the
     /// MaidManager Authority of the owners.
-    owners: BLS-PublicKey,
+    owners: PublicKey,
 }
 
 impl UnpublishedImmutableData {
@@ -47,6 +47,12 @@ impl UnpublishedImmutableData {
         let c = CONCAT(HASH(self.data), self.owner);
         HASH(c)
     }
+}
+
+pub enum PublicKey {
+    // To be defined by the implementation.
+    // Can be a BLS public key, for example.
+
 }
 ```
 - In summary, the only RPCs allowed for such a data type SHALL be `PUT` (to create), `OWNED-GET` (to retrieve) and `DELETE`, all done by the owner(s).
