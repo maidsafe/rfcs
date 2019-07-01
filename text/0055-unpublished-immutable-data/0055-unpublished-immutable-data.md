@@ -52,7 +52,6 @@ impl UnpublishedImmutableData {
 pub enum PublicKey {
     // To be defined by the implementation.
     // Can be a BLS public key, for example.
-
 }
 ```
 - In summary, the only RPCs allowed for such a data type SHALL be `PUT` (to create), `OWNED-GET` (to retrieve) and `DELETE`, all done by the owner(s).

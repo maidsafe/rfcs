@@ -202,7 +202,6 @@ struct Owners {
 pub enum PublicKey {
     // To be defined by the implementation.
     // Can be a BLS public key, for example.
-
 }
 ```
 
@@ -386,7 +385,6 @@ pub enum Request {
         // Get first 5 entries:
         // range: (Range::Index(0), Range::Index(5))
         range: (Range, Range),
-
     },
 
     // Get current indexes: data, owners, permissions.
@@ -632,25 +630,16 @@ pub enum Response {
     GetADataPermissions(Result<Permissions, ClientError>),
     GetADataUserPermissions(Result<BTreeSet<Permission>, ClientError>),
     GetADataOwners(Result<Owners, ClientError>),
-    AddADataPermissions(Result<(), ClientError>),
     GetADataValue(Result<Vec<u8>, ClientError>),
-    SetADataOwners(Result<(), ClientError>) {
-    AppendPublishedSeq(Result<(), ClientError>),
-    AppendUnpublishedSeq(Result<(), ClientError>),
     // Returns a last data index.
     AppendPublishedUnsequenced(Result<u64, ClientError>),
     // Returns a last data index.
     AppendUnpublishedUnsequenced(Result<u64, ClientError>),
-    PutAData(Result<(), ClientError>),
     GetADataShell(Result<AppendOnlyData, ClientError>),
-    DeleteUnseqAData(Result<(), ClientError>),
-    DeleteSeqAData(Result<(), ClientError>),
 
     // ===== Mutable Data =====
     GetUnseqMData(Result<UnsequencedMutableData, ClientError>),
     GetSeqMData(Result<SequencedMutableData, ClientError>),
-    PutUnseqMData(Result<(), ClientError>),
-    PutSeqMData(Result<(), ClientError>),
     GetMDataVersion(Result<u64, ClientError>),
     GetUnseqMDataShell(Result<UnsequencedMutableData, ClientError>),
     GetSeqMDataShell(Result<SequencedMutableData, ClientError>),
@@ -661,12 +650,10 @@ pub enum Response {
     ListSeqMDataValues(Result<Vec<Value>, ClientError>),
     GetUnseqMDataValue(Result<Vec<u8>, ClientError>),
     GetSeqMDataValue(Result<Value, ClientError>),
-    MutateMDataEntries(Result<(), ClientError>),
     ListMDataPermissions(Result<BTreeMap<PublicKey, BTreeSet<MDataPermission>>>),
     ListMDataUserPermissions(Result<BTreeSet<MDataPermission>>),
-    SetMDataUserPermissions(Result<(), ClientError>),
-    DelMDataUserPermissions(Result<(), ClientError>),
-    ChangeMDataOwner(Result<(), ClientError>),
+    // Common to all mutation operations
+    Mutation(Result<(), ClientError>),
 }
 ```
 
