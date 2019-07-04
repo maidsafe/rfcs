@@ -30,6 +30,7 @@ There are many a times when we create `ImmutableData` to store private content. 
 - The Network SHALL enforce that the `GETs` are only allowed by the owner(s). For this we SHALL use the special `OwnerGet` RPC
 - Since replay attacks are thwarted by safecoin payments and transaction history, the Network SHALL allow complete deletion of this data by `DELETE` operation. This `DELETE` should be directed in the same way mutable-data deletes are directed.
 - There SHALL only be one time update of owner(s), which happens during the creation, and this type is non-transferable. Changing the owners would mean new keys which would result in change of the location where the data is, which would be meaningless. Hence no changes to the owner field is allowed once the data is created.
+- Published and unpublished immutable data MUST use the same XOR namespace. I.e., if a user stores an `UnpublishedImmutableData` at a XOR address X and another user tries to store a `PublishedImmutableData` at the same XOR address there will be a conflict and an error will be returned. When trying to fetch an `UnpublishedImmutableData` at an address X, if a `PublishedImmutableData` is found an `UnexpectedData` error is thrown.
 
 ```rust
 pub struct UnpublishedImmutableData {
