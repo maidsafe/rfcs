@@ -1,6 +1,6 @@
 # Secure Message Delivery
 
-- Status: proposed
+- Status: active
 - Type: enhancement
 - Related components: DHT, Routing, Vault
 - Start Date: 16-05-2019

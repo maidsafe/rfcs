@@ -1,6 +1,6 @@
 # Reliable Message Delivery
 
-- Status: proposed
+- Status: implemented
 - Type: enhancement
 - Related components: DHT, CRUST
 - Start Date: 23-05-2019

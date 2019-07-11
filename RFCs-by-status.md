@@ -8,6 +8,8 @@ A list of all RFCs by their current status.
  - [#0037 Disjoint Sections](./text/0037-disjoint-groups/0037-disjoint-groups.md)
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
  - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
+ - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
+ - [#0059 Boneh-Lynn-Shacham scheme in Routing](./text/0059-bls-scheme-in-routing/0059-bls-scheme-in-routing.md)
 
 ## Proposed RFCs
 
@@ -21,10 +23,7 @@ A list of all RFCs by their current status.
  - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
  - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
  - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
- - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
  - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
- - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
- - [#0059 Boneh-Lynn-Shacham scheme in Routing](./text/0059-bls-scheme-in-routing/0059-bls-scheme-in-routing.md)
 
 ## Agreed RFCs
 
@@ -53,6 +52,7 @@ A list of all RFCs by their current status.
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
  - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
+ - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
 
 ## Rejected RFCs
 
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _6 Jun 2019 14:16:48 CEST_ at REV [89c702e](https://github.com/maidsafe/rfcs/commit/89c702efb62240f65f6990c649e2cbe531b3ddcb))
+(Last updated _Thu 11 Jul 2019 16:52:01 BST_ at REV [e1577d5](https://github.com/maidsafe/rfcs/commit/e1577d58cd8d7915c943ca2efdd284c8ac691bf8))

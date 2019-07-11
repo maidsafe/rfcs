@@ -1,6 +1,6 @@
 # Boneh-Lynn-Shacham scheme in Routing
 
-- Status: proposed
+- Status: active
 - Type: enhancement
 - Related components: routing, PARSEC
 - Start Date: 06-06-2019
