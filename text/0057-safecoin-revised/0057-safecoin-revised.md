@@ -1,6 +1,6 @@
 # Safecoin Revised
 
-- Status: proposed
+- Status: implemented
 - Type: new feature
 - Related components: SAFE Vault, Routing, SAFE Client Libs
 - Start Date: 01-05-2019
@@ -36,22 +36,17 @@ SAFE cannot operate without data and data cannot be maintained without incentivi
 As in [RFC 0051][rfc51], this proposal is that safecoin doesn't exist as units of data representing individual coins (or parts of coins), but rather only balances of safecoin exist on the network. These balances will be in the form of values in `CoinBalance`s and as section-wide values representing the sections' farmed totals.
 
 ```rust
-struct Coin {
-    units: u32,
-    parts: u32,
-}
+struct Coins(u64);
 ```
 
-The `units` field will represent whole safecoins, and since the defined upper limit of issuable safecoin is `2^32`, this needs to be no bigger than a `u32`.
-
-The `parts` field represents a multiple of "250 pico-safecoins", i.e. the number of `250 * 10^-12`-th parts of a single safecoin. The total value of the `parts` field will be required to be less than a single safecoin, i.e. it will always be less than 4 billion.
+The inner value will represent a count of nano-safecoins, and will never exceed the upper limit of issuable safecoin (i.e. 2^32 safecoin, or equivalently 2^32 * 10^9 nano-safecoins).
 
 To associate a (client-owned) public key with its safecoin balance, the following will be used:
 
 ```rust
 struct CoinBalance {
     owner: BLS::PublicKey,
-    value: Coin,
+    value: Coins,
 }
 ```
 
@@ -66,7 +61,7 @@ When a vote for a payment is valid, and funds are available, all Elders reduce t
 
 ```rust
 struct Credit {
-    amount: Coin,
+    amount: Coins,
     transaction_id: Uuid,
 }
 
@@ -154,7 +149,7 @@ Each section of the network will be responsible for a proportion of the total is
 
 This means that for a section with Prefix length `n`, it will be responsible for `2^(32-n)` safecoin.
 
-Each section's Elders will maintain a record `farmed` (of type `Coin`) of the amount of safecoin farmed at that section. Any changes to this total will come as a result of an action having passed through PARSEC in order to ensure that all managers maintain an eventually consistent record.
+Each section's Elders will maintain a record `farmed` (of type `Coins`) of the amount of safecoin farmed at that section. Any changes to this total will come as a result of an action having passed through PARSEC in order to ensure that all managers maintain an eventually consistent record.
 
 The section's `farmed` value will never be allowed to exceed the amount of coins for which that section is responsible. In the case that a section has farmed all of its coins, it will stop issuing any more until the `farmed` value reduces again.
 
