@@ -23,7 +23,6 @@ A list of all RFCs by their current status.
  - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
  - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
  - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
- - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
 
 ## Agreed RFCs
 
@@ -52,6 +51,7 @@ A list of all RFCs by their current status.
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
  - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
+ - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
  - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
 
 ## Rejected RFCs
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Thu 11 Jul 2019 16:52:01 BST_ at REV [e1577d5](https://github.com/maidsafe/rfcs/commit/e1577d58cd8d7915c943ca2efdd284c8ac691bf8))
+(Last updated _29 Jul 2019 17:08:57_ at REV [67da754](https://github.com/maidsafe/rfcs/commit/67da7546eeab1e38caf1e454629283be46ef9940))
