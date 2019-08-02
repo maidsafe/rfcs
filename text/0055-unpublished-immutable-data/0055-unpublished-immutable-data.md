@@ -1,6 +1,6 @@
 # Unpublished ImmutableData
 
-- Status: proposed
+- Status: active
 - Type: enhancement
 - Related components: safe_client_libs, safe_vault
 - Start Date: 16-05-2019

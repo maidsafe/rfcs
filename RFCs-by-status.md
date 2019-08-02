@@ -8,6 +8,8 @@ A list of all RFCs by their current status.
  - [#0037 Disjoint Sections](./text/0037-disjoint-groups/0037-disjoint-groups.md)
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
  - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
+ - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
+ - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
  - [#0059 Boneh-Lynn-Shacham scheme in Routing](./text/0059-bls-scheme-in-routing/0059-bls-scheme-in-routing.md)
 
@@ -21,8 +23,6 @@ A list of all RFCs by their current status.
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0052 RDF for PublicName Resolution](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
  - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
- - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
- - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
 
 ## Agreed RFCs
 
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _29 Jul 2019 17:08:57_ at REV [67da754](https://github.com/maidsafe/rfcs/commit/67da7546eeab1e38caf1e454629283be46ef9940))
+ (Last updated _Fri  2 Aug 2019 11:41:49 BST_ at REV [8358030](https://github.com/maidsafe/rfcs/commit/8358030c4a1e6b5d4fb34e6414db9bd073e8602b))
