@@ -44,6 +44,8 @@ This RFC proposes that url schemes such as `safe://somewhere` can have sub-domai
 
 NRS data on the network, is by its very nature, public. Which means that it cannot be deleted. This concept forms the basis of the Perpetual Web, where data can only be appended to (using AppendOnlyData). As a consequence RDF data described here is a type of 'versioned' data, with the `key` of an AOD being a `UTC timestamp`, and the `value` of an entry being a string representation of the RDF data. This means that _all versions of the data_ can be accessed (via `?v=1` url params, [see xorurl rfc for more info](https://forum.safedev.org/t/xor-address-urls-xor-urls/1952), as well as the order of this data, and the timestamp changes were made. (Although these timestamps are applied client side, and therefore are optional so should not be treated with any reverence.)
 
+It's important to note that while XOR-URLs enable accessing versions of the data, NRS urls allow accessing versions of the NRS Container itself. And so in order to facilitate the Perpetual Web and canonical URLs, NRS containers will require that linked data MUST specify a version for the target data.
+
 ### Reference Implementation 
 
 The [SAFE-CLI fetch API](https://github.com/maidsafe/safe-cli/blob/master/src/api/fetch.rs) can be considered the reference implementation. Although, _at this point_ it is implementing pseudo RDF as the SAFE RDF APIs are not yet finalised. This implementation does follow the same structure and nesting as this proposal, just without a fully fledged RDF document. Logic should remain the same however.
@@ -68,9 +70,9 @@ Failing to be detected as a XOR-URL, we then parse the url and use the Public Na
 
 Here the URL terminology for `host` is equivalent to a SAFE `Public Name`. What are known as `subdomains` on the clearnet are referred to as `SubNames`.
 
-`safe://<subName>.<publicName>`
+`safe://<subName>.<publicName>?v=<version>`
 
-- GET the Mutable Data for a given `Public Name`.
+- GET the AppendOnlyData for a given `Public Name`, at the specified `version`.
 - Parse the retrieved `Resolvable Map`.
 - Resolve the `Sub Name` graph from this `Resolvable Map`.
 
@@ -78,7 +80,7 @@ Unavailability of any data being dereferenced will throw an error.
 
 ##### 2.1 No `SubName` aka Default Services.
 
-- GET the Mutable Data for a given `Public Name`.
+- GET the AppendOnlyData for a given `Public Name`.
 - Parse the retrieved `Resolvable Map`.
 - Resolve the `default` graph / XOR-URL if available.
 
@@ -120,7 +122,7 @@ Provides data to be shown at the public name.
  - It must be an RDF data object
  `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a SAFE Url for data location (could be xor or using a subName).
  - Extra data can be added to the graph for each entry to aid in service discovery for the key.
- - `@id` entries _must_ point to a versioned XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
+ - `@id` entries _MUST_ point to a versioned XOR-URL for consistency (while pubNames may change, _this_ data will not move location), if a non-versioned link is provided for versioned data the ResolvableMap is considered invalid.
 
 
  For `safe://<subName>.<myPublicName>`
@@ -134,7 +136,7 @@ Provides data to be shown at the public name.
 		    "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
 		  },
 	     "@type": "ResolvableMap",
-		 "@id": "safe://thisxorurl",
+		 "@id": "safe://thisxorurl?v=0",
 		 "default" : "safe://thisxorurl#somewhere"
 	},
 	{
