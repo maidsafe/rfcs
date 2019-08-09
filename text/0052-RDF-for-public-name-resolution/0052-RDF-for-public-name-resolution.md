@@ -16,7 +16,7 @@ This proposal looks to enhance the public name resolution system by using a reso
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
 - XOR-URL refers to a url generated as part of the content addressable system for accessing `xorname` urls in the safe_browser. As described here: https://forum.safedev.org/t/xor-address-urls-xor-urls/1952
 - Data is presented as RDF, serialised in [JSON-LD](https://json-ld.org/) in the examples.
-- I'm using MutableData ( `AOD` ) and ImmutableData ( `ID` ) as shorthands.
+- I'm using AppendOnlyData, `AOD`, and ImmutableData `ID` as shorthand.
 
 
 ## Motivation
