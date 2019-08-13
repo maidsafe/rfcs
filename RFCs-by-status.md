@@ -11,6 +11,7 @@ A list of all RFCs by their current status.
  - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
  - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
+ - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
  - [#0059 Boneh-Lynn-Shacham scheme in Routing](./text/0059-bls-scheme-in-routing/0059-bls-scheme-in-routing.md)
 
 ## Proposed RFCs
@@ -51,7 +52,6 @@ A list of all RFCs by their current status.
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
  - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
- - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
  - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
 
 ## Rejected RFCs
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
- (Last updated _Fri  2 Aug 2019 11:41:49 BST_ at REV [8358030](https://github.com/maidsafe/rfcs/commit/8358030c4a1e6b5d4fb34e6414db9bd073e8602b))
+(Last updated _Tue 13 Aug 2019 11:00:11 BST_ at REV [7b56346](https://github.com/maidsafe/rfcs/commit/7b56346c159468f34a39183e1b3faed146074c76))

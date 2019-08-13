@@ -1,6 +1,6 @@
 # Safecoin Revised
 
-- Status: implemented
+- Status: active
 - Type: new feature
 - Related components: SAFE Vault, Routing, SAFE Client Libs
 - Start Date: 01-05-2019
