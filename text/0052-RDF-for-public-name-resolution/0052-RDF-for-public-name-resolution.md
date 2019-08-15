@@ -144,7 +144,7 @@ Provides data to be shown at the public name.
 		    "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
 		  },
 		"@type": "ResolvableItem",
-		"@id": "safe://thisxorurl#somewhere?v=1",
+		"@id": "safe://thisxorurl?v=1#somewhere",
 		"target": "<target graph or safe url (xor or pubName); eg: 'somewhere'>",
         "targetType": "FilesMap"
 	},
@@ -153,7 +153,7 @@ Provides data to be shown at the public name.
 		    "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
 		  },
 		"@type": "ResolvableItem",
-		"@id": "safe://thisxorurl#email?v=2",
+		"@id": "safe://thisxorurl?v=2#email",
 		"target": "<target graph or safe url (xor or pubName); eg: 'email'>",
 		"targetType": "http://activitystream/#inbox"
 	}
@@ -191,7 +191,7 @@ I would propose that we create a `Files Container` RDF type, which follows the s
 		   "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
 		 },
 	   "@type": "FileItem",
-	   "@id": "safe://thisxorurl/#/index.html?v=1",
+	   "@id": "safe://thisxorurl/?v=1#/index.html",
        "targetType": 'html',
        "target": "<XOR-URL location>",
        "size": '22',
@@ -203,7 +203,7 @@ I would propose that we create a `Files Container` RDF type, which follows the s
 		   "@vocab": "https://raw.githubusercontent.com/joshuef/sschema/master/src/"
 		 },
 	   "@type": "FileItem",
-	   "@id": "safe://thisxorurl/#/some/deep/path/amazing.js?v=1",
+	   "@id": "safe://thisxorurl/?v=1#/some/deep/path/amazing.js",
        "targetType": 'test/javascript',
        "target": "<XOR-URL location>",
        "size": '22',
