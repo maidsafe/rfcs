@@ -14,7 +14,7 @@ then
   #fail
   echo "This has failed because it appears that there has been a change to a"
   echo "RFC document status, which has not been reflected in your PR."
-  echo "Please run the generate_by_status.sh script and commit the updates"
+  echo "Please run the \"./generate_by_status.sh > RFCs-by-status.md\" and commit the updates"
   echo "as part of your PR"
   exit 1
 fi
