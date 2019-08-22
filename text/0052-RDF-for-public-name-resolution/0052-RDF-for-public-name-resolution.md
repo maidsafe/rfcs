@@ -80,8 +80,8 @@ Unavailability of any data being dereferenced will throw an error.
 
 `safe://<subName>.<subName>.<subName>.<subName>.<publicName>`
 
-- As above, resolving each additional substring, up to a defined maximum of redirects (implemented in the resolver.)
-	- Safe Browser will implement redirect limit of 10 redirects per url resolution. Any more than this would throw an error.
+- As above, resolving each additional `subName` will lead to another `Resolvable Map`... on and on up to a defined maximum of redirects (implemented by the resolver.)
+	- eg. Safe Browser will implement redirect limit of 10 redirects per url resolution. Any more than this would throw an error.
 
 Unavailability of any data being dereferenced will throw an error.
 
@@ -90,12 +90,14 @@ Unavailability of any data being dereferenced will throw an error.
 
 `safe://<subName>.<publicName><path>`, eg `safe://pns.rfc/resolution`
 
-Once the final data has been resolved in a browser, if a `Files Map` type of `Resolvable Map` has been located, then the trailing url path would be resolved, too.
+Once the final MD has been resolved, if a `Files Map` type of `Resolvable Map` has been located, then the trailing `path` of the url would be resolved as part of that `Map`, too.
 
 
 ### Data Structures fo Resolution
 
 ![Image of PNS Resolution Data Structures](https://raw.githubusercontent.com/joshuef/rfcs/PnsAndResolveableMap/text/0000-RDF-for-public-name-resolution/PNS_data_representation.png)
+
+It is worth nothing, that while we describe RDF data here as discrete MDs, as graphs these could be stored in one file with all sub-graphs included to save fetches. The exact storage of the data / when to use new data objects / XOR-ULs is at the discretion of those saving the data.
 
 #### Resolvable Map Structure
 
@@ -111,7 +113,6 @@ Provides data to be shown at the public name.
  - It must be an RDF data object
  `<safe/ResolvableMap>`, `Sub Name` graphs will pointing to a SAFE Url for data location (could be xor or using a subName).
  - Extra data can be added to the graph for each entry to aid in service discovery for the key.
- - `@id` entries _must_ point to a XOR-URL for consistency (while pubNames may change, _this_ data will not move location);
 
 
  For `safe://<subName>.<myPublicName>`
@@ -153,7 +154,7 @@ Provides data to be shown at the public name.
 
  `safe://www.happyurl` is the same as `<safe://asdadfiojf3289ry9uy329ryfhusdhfdsfsdsd#www>`
 
-Providing different `@type` info or other details in the RDF can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `default` value is a `Files Map` (which is does not want), could search remaining keys for something of `type: inbox` and resolve this data automatically.
+Providing different type of graph can facilitate service discovery. In the example above, an email application could resolve `safe://happyurl`, and as the `default` value is a `Files Map` (which is does not want), could search remaining keys for something of `type: inbox` and resolve this data automatically.
 
 
 #### Files Map
@@ -202,16 +203,6 @@ I would propose that we create a `Files Map` RDF type, which follows the same da
 ]
 
 ```
-
-### PublicName Container Structure
-
-The structure of a user's `_publicNames` container (for managing their `Public Names`) must be:
-
-- The Public Name Map is an RDF MD w/specific type tag (`1500`) stored at the sha3 hash of the `Public Name` string `shahash3('Public Name')`.
-- A Public Name must point to a `Resolvable Map` RDF schema. With the target MD location XOR-URL as the value to the key.
-- A user's `Public Names` are saved/managed in the user's `_publicNames` container.
-- A user's `_publicNames` container must be encrypted.
-
 
 ## Drawbacks
 
