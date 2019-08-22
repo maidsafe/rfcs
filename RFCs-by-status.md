@@ -22,7 +22,7 @@ A list of all RFCs by their current status.
  - [#0029 Data Chains](./text/0029-data-chains.md/0029-data-chains.md)
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
- - [#0052 RDF for PublicName Resolution](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
+ - [#0052 RDF for the Public Name Resolution System](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
  - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
 
 ## Agreed RFCs
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Tue 13 Aug 2019 11:00:11 BST_ at REV [7b56346](https://github.com/maidsafe/rfcs/commit/7b56346c159468f34a39183e1b3faed146074c76))
+(Last updated _Thu Aug 22 17:00:45 CEST 2019_ at REV [58c5fd14dee3](https://github.com/maidsafe/rfcs/commit/58c5fd14dee3c066e6b5b42b4c39cc6d785408af))
