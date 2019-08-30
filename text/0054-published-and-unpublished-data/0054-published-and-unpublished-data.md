@@ -1,6 +1,6 @@
 # Published and Unpublished DataType
 
-- Status: active
+- Status: implemented
 - Type: enhancement
 - Related components: safe_client_libs, safe_vault
 - Start Date: 16-05-2019
