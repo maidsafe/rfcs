@@ -8,8 +8,6 @@ A list of all RFCs by their current status.
  - [#0037 Disjoint Sections](./text/0037-disjoint-groups/0037-disjoint-groups.md)
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
  - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
- - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
- - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
  - [#0057 Safecoin Revised](./text/0057-safecoin-revised/0057-safecoin-revised.md)
  - [#0059 Boneh-Lynn-Shacham scheme in Routing](./text/0059-bls-scheme-in-routing/0059-bls-scheme-in-routing.md)
@@ -52,6 +50,8 @@ A list of all RFCs by their current status.
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
  - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
+ - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
+ - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
 
 ## Rejected RFCs
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Thu Aug 22 17:00:45 CEST 2019_ at REV [58c5fd14dee3](https://github.com/maidsafe/rfcs/commit/58c5fd14dee3c066e6b5b42b4c39cc6d785408af))
+(Last updated _Fri 30 Aug 2019 16:23:21 BST_ at REV [d42c24d](https://github.com/maidsafe/rfcs/commit/d42c24db6ddfe58f14b347a5664710e493262ce9))
