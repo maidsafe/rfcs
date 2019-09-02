@@ -21,7 +21,6 @@ A list of all RFCs by their current status.
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0052 RDF for the Public Name Resolution System](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
- - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
 
 ## Agreed RFCs
 
@@ -50,6 +49,7 @@ A list of all RFCs by their current status.
  - [#0047 MutableData](./text/0047-mutable-data/0047-mutable-data.md)
  - [#0049 PARSEC - Protocol for Asynchronous, Reliable, Secure and Efficient Consensus](./text/0049-parsec/0049-parsec.md)
  - [#0050 Transparent Malice Handling within PARSEC ](./text/0050-malice_in_parsec/0050-malice_in_parsec.md)
+ - [#0053 XOR-URLs (XOR-name based URLs)](./text/0053-xor-urls/0053-xor-urls.md)
  - [#0054 Published and Unpublished DataType](./text/0054-published-and-unpublished-data/0054-published-and-unpublished-data.md)
  - [#0055 Unpublished ImmutableData](./text/0055-unpublished-immutable-data/0055-unpublished-immutable-data.md)
  - [#0058 Reliable Message Delivery](./text/0058-reliable-message-delivery/0058-reliable-message-delivery.md)
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Fri 30 Aug 2019 16:23:21 BST_ at REV [d42c24d](https://github.com/maidsafe/rfcs/commit/d42c24db6ddfe58f14b347a5664710e493262ce9))
+(Last updated _Mon  2 Sep 2019 15:43:53 BST_ at REV [e9ad57b](https://github.com/maidsafe/rfcs/commit/e9ad57bae735e0b146a50b79069cacc7d75b1139))
