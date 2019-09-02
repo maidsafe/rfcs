@@ -1,6 +1,6 @@
 # XOR-URLs (XOR-name based URLs)
 
-- Status: proposed
+- Status: implemented
 - Type: new feature
 - Related components: Safe Browser. Safe App Nodejs / SAFE Client libs.
 - Start Date: (13-11-2018)
