@@ -1,6 +1,6 @@
 # Node Ageing
 
-- Status: agreed
+- Status: active
 - Type: new feature
 - Related components: routing
 - Start Date: 25-09-2016

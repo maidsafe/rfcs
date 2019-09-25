@@ -6,6 +6,7 @@ A list of all RFCs by their current status.
 
  - [#0030 Nodes key as name](./text/0030-secure-node-join/0030-nodes_key_as_name.md)
  - [#0037 Disjoint Sections](./text/0037-disjoint-groups/0037-disjoint-groups.md)
+ - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
  - [#0046 New Auth Flow](./text/0046-new-auth-flow/0046-new-auth-flow.md)
  - [#0048 Authorise apps on behalf of the owner to mutate data](./text/0048-authorise-apps/0048-authorise-apps.md)
  - [#0056 Secure Message Delivery](./text/0056-secure-message-delivery/0056-secure-message-delivery.md)
@@ -25,7 +26,6 @@ A list of all RFCs by their current status.
 ## Agreed RFCs
 
  - [#0004 Farm attempt](./text/0004-farm-attempt/0004-farm-attempt.md)
- - [#0045 Node Ageing](./text/0045-node-ageing/0045-node-ageing.md)
 
 ## Implemented RFCs
 
@@ -75,4 +75,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Mon  2 Sep 2019 15:43:53 BST_ at REV [e9ad57b](https://github.com/maidsafe/rfcs/commit/e9ad57bae735e0b146a50b79069cacc7d75b1139))
+(Last updated _Wed 25 Sep 2019 16:16:39 BST_ at REV [5bbb719](https://github.com/maidsafe/rfcs/commit/5bbb719434b92170651549b607e0032c092b13fa))
