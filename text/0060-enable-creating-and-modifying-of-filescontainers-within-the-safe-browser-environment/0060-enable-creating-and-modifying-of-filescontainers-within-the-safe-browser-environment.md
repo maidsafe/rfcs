@@ -29,12 +29,11 @@ At the moment, the following API calls are available (and implemented in the [No
 * `files_container_add`
 * `files_container_add_from_raw`
 
-Logic would dictate that the browser would call `files_container_create` to create the files container, however first argument to this method `location: &str` requires a path to a directory or file which will be uploaded to the FilesContainer. The same issues also exist for `files_container_sync` and `files_container_add`. `files_container_add_from_raw` is usable, and it is possible to create a fixed size `ArrayBuffer` in the browser, but the user experience isn't great.
+Logic would dictate that the browser would call `files_container_create` to create the files container, however first argument to this method `location: &str` requires a path to a directory or file which will be uploaded to the FilesContainer. The same issues also exist for `files_container_sync` and `files_container_add`. `files_container_add_from_raw` is usable.
 
-I propose the addition of 2 new APIs to be added to the NodeJS library (and thereby allowed for use via the SAFE Browser):
+I propose the addition of 1 new API to be added to the NodeJS library (and thereby allowed for use via the SAFE Browser):
 
 * `files_container_create_empty`
-* `files_container_add_from_string`
 
 #### files_container_create_empty
 
@@ -50,28 +49,10 @@ function files_container_create_empty(
 ) : string;
 ```
 
-#### files_container_add_from_string
-
-To simplify the creation of files from within the browser, I propose this method to do away with needing to mess around with fixed size ArrayBuffers.
-
-This method will upload the specified file contents and return the XORURL of the updated file.
-
-In NodeJS pseudocode, the interface would be:
-
-```js
-function files_container_add_from_string(
-    string content,
-    string url,
-    bool force,
-    ?bool update_nrs,
-    ?bool dry_run
-) : string;
-```
-
 
 ## Drawbacks
 
-It will mean extra functions to maintain.
+N/A
 
 ## Alternatives
 
