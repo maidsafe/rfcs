@@ -4,7 +4,7 @@
 - Type: new feature / enhancement
 - Related components: safe-browser, safe-api, safe-nodejs
 - Start Date: 2019-02-11
-- Discussion: (fill me in with link to RFC discussion - shepherd will complete this) 
+- Discussion: https://safenetforum.org/t/enable-creating-and-modifying-of-filescontainers-within-the-safe-browser-environment/31088
 - Supersedes: (fill me in with a link to RFC this supersedes - if applicable)
 - Superseded by: (fill me in with a link to RFC this is superseded by - if applicable)
 
@@ -31,7 +31,7 @@ At the moment, the following API calls are available (and implemented in the [No
 
 Logic would dictate that the browser would call `files_container_create` to create the files container, however first argument to this method `location: &str` requires a path to a directory or file which will be uploaded to the FilesContainer. The same issues also exist for `files_container_sync` and `files_container_add`. `files_container_add_from_raw` is usable, and it is possible to create a fixed size `ArrayBuffer` in the browser, but the user experience isn't great.
 
-I propose the addition of {x} new APIs to be added to the NodeJS library (and thereby allowed for use via the SAFE Browser):
+I propose the addition of 2 new APIs to be added to the NodeJS library (and thereby allowed for use via the SAFE Browser):
 
 * `files_container_create_empty`
 * `files_container_add_from_string`
