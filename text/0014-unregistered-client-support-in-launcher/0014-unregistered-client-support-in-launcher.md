@@ -13,7 +13,7 @@ Launcher will need to cater to the requests made by unregistered clients to acce
 
 ## Conventions
 - The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](http://tools.ietf.org/html/rfc2119).
-- `{P}` refers to the payload. More details in the (RFC here](https://github.com/maidsafe/rfcs/blob/master/active/0010-Launcher-as-a-service/Launcher-Service-Documentation.md).
+- `{P}` refers to the payload. More details in the (RFC here](https://github.com/maidsafe/rfcs/blob/master/text/0010-launcher-as-a-service/0010-launcher-as-a-service.md).
 
 ## Motivation
 
@@ -33,7 +33,7 @@ Handshake for anonymous access:
 ```
 
 ### dns
-- Addtional requests to those mentioned [here for dns](https://github.com/maidsafe/rfcs/blob/master/active/0010-Launcher-as-a-service/Launcher-Service-Documentation.md)
+- Addtional requests to those mentioned [here for dns](https://github.com/maidsafe/rfcs/blob/master/text/0010-launcher-as-a-service/0010-launcher-as-a-service.md)
 ```
 "get-services"
 "get-service-file-size"

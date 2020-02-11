@@ -17,7 +17,7 @@ All keys handed over with the protocol, let that be the app authentication keys,
 
 ## Format
 
-The protocol is based on strings of valid URIs with a colon (`:`) delimiters, encoding JSON data within base64 packets as follows:
+The protocol is based on strings of valid URIs with a colon (`:`) delimiters, encoding serialised Rust Structs data within base64 packets as follows:
 
 ### Authenticator
 
@@ -25,7 +25,7 @@ The protocol is based on strings of valid URIs with a colon (`:`) delimiters, en
 safeauth:action:appId[:payload][?key=value&key2=value2]
 ```
 
-where `action` is a particular string identifying the action (like `request-access`), appID is the `base64` encoded version of the given appId and `payload` is a `base64`-encoded JSON-string. Lastly the protocol allows for optional query information passed _after the last parameter_ in the `key=value`-convention for control flow and must ONLY be used for that.
+where `action` is a particular string identifying the action (like `request-access`), appID is the `base64` encoded version of the given appId and `payload` is a `base64`-encoded serialised Rust Struct. Lastly the protocol allows for optional query information passed _after the last parameter_ in the `key=value`-convention for control flow and must ONLY be used for that.
 
 
 ### Client
@@ -34,7 +34,7 @@ where `action` is a particular string identifying the action (like `request-acce
 safeURI:action[:payload][?q=1]
 ```
 
-where `action` is a particular string identifying the action (like `access-granted`) and `payload` is a `base64`-encoded JSON-string. As the appID is already used in the schema, it is not required as a separate parameter. Lastly the protocol allows for optional query information passed _after the last parameter_ in the `key=value`-convention for control flow and must ONLY be used for that.
+where `action` is a particular string identifying the action (like `access-granted`) and `payload` is a `base64`-encoded serialised Rust Struct. As the appID is already used in the schema, it is not required as a separate parameter. Lastly the protocol allows for optional query information passed _after the last parameter_ in the `key=value`-convention for control flow and must ONLY be used for that.
 
 
 _Note_: The protocol leaves open whether further colon delimited parameters might be added later (in particular we are thinking of requiring a signature of the given string at the end). An implementation must NOT break because there are more entries, it MAY rely on the order however.
@@ -78,6 +78,45 @@ informing the app that it responds to the request with the unique id `18hae`
 
 If the request can't be understood, but a `riq` is found, the Authenticator must respond with an `error`-action to finish allow that app to finish its `riq` properly and report the problem to the user.
 
+## Basic Structs
+
+
+```rust
+pub enum PermissionAccess {
+  READ,
+  INSERT,
+  UPDATE,
+  DELETE
+}
+
+pub struct ContainerPermission {
+  // a mapping of container key and granted permissions
+  // TODO: shouldn't we do a `dataId` when storing this?
+  pub container_key: String,
+  pub access: Vec<PermissionAccess>
+}
+
+pub struct AppExchangeInfo {
+  // ID of the app. It must be a network wide unique name. If the ID changes, the app will not be able to access its data anymore.
+  pub id: String,
+  // some apps run on multiple devices or different contexts, this allows you to specify which on this is.
+  pub scope: Option<String>,
+  // (human readable) Name of the app requesting authorization with the SAFE Authenticator.
+  pub name: String,
+  // (human readable) Name of the vendor of the app.
+  pub vendor: String,
+}
+
+
+pub struct AppAccessToken {
+  // TODO: can't we make this a little more specific?
+  pub enc_key: [8u; secrectbox::KBYTES],
+  pub sign_key_public: [u8; sign::PUBLICKBYTES],
+  pub sign_key_private: [u8; sign::PRIVATEKBYTES]
+}
+
+
+```
 
 ## Actions
 
@@ -88,42 +127,45 @@ This is more less a direct translation of the former [REST Authorisation API](ht
 **Request**:
 
 * Action: `auth`
-* JSON Payload:
- - `app` _mandatory_: app information
-    * `id` _mandatory_: ID of the app. It must be a network wide unique name. If the ID changes, the app will not be able to access its data anymore.
-    * `scope` _optional_: some apps run on multiple devices or different contexts, this allows you to specify which on this is.
-    * `name` _mandatory_: (human readable) Name of the app requesting authorization with the SAFE Launcher.
-    * `version` _mandatory_: Version of the 
-    * `vendor` _mandatory_: (human readable) Name of the vendor of the app.
- - `appContainer`: _optional_: boolean indicating whether the app wants to store information in a sandboxed app container. Default: `false`
- - `containers` _optional_: a JSON object of containers and requested access rights for them (as defined in the shared container access flow)
+* payload:
+
+```rust
+pub struct AuthRequest {
+    app: AppExchangeInfo,
+    app_container: Bool,
+    containers: Vec<ContainerPermission>
+}
+```
 
 **Success Response**
 
 If the user granted access to the app, it will receive a URI with:
 
 * Action: `auth-granted`
-* JSON Payload:
- - `appSignKey` _mandatory_: a JSON, containing the the apps sign key
-     + `public` _mandatory_: its public key
-     + `private` _mandatory_: its private key
- - `userSignKey` _mandatory_: the public signing key of the user_
- - `accessContainer`: _optional_: Network address where all the apps access information is stored (encrypted with the apps publickey), given if at least one access was granted or the appContainer requested.
- - `accessContainerKey`, _optional_: the key used to decrypt the accessContainer content
- - `containers` _optional_: a JSON object of containers and granted access rights for each them (as defined in the shared container access flow), excluding the `appContainer`
+* payload:
+
+```rust
+pub struct AuthGranted {
+    // the access token to the network
+    access_token: AppAccessToken,
+    bootstrap_config: Vec<u8>,
+    access_container: Option<DataId>,
+    containers: Vec<ContainerPermission>
+}
+```
 
 **Error Response**
 
 If the user denied access, but is redirected to the app, it will be with the `auth-denied` action:
 
-- Action: `auth-granted`
+- Action: `auth-denied`
 - Payload: `None`
 
 #### Revokation
 
 If the user revokes access to an app, the authenticator MAY inform the app about this with the `auth-revoked` action:
 
-- Action: `auth-granted`
+- Action: `auth-revoked`
 - Payload: `None`
 
 
@@ -134,18 +176,7 @@ In order to request access to a specific shared User container, the app can send
 **Request**
 
 * Action: `containers`
-* JSON Payload _mandatory_: where every key value maps to:
- - `containerId` _mandatory_: the container we want access to
- - `permissions` _mandatory_: `1` (for basic permission, see Containers appendix) or a list of permissions requested
-
-e.g. to request `basic` access to `_pictures` and `_movies` and `read` request to `_appData/net.maidsafe.examples.demo`, you'd create a json like this:
-```
-{
- "_pictures": 1,
- "_movies": 1,
- "_appData/net.maidsafe.examples.demo": ["read"]
-}
-```
+* payload: `Vec<ContainerPermission>`
 
 and convert that into base64 for the request.
 
@@ -154,23 +185,23 @@ and convert that into base64 for the request.
 If the user granted access to _at least one_ container the authenticator must send a success response. Because of that the app must check the resulting payload for the keys _and the access level it was granted_ explicitly before continuing. The app should assume that the user knows what it wanted to grant and continue with whatever limited access it was given.
 
 * Action `containers-granted`
-* JSON Payload _mandatory_: where every key is the `containerID` mapping to a list of the permissions granted.
+* payload: `Vec<ContainerPermission>`
 
 From this point on the app can look up the local encryption key and the usage convention in its `AccessContainer`, see the container Appendix for more.
 
 **Error Response**
 
-If the user didn't respond to the request and denied access to all requested container, the App will receive the `container-denied` action:
+If the user didn't respond to the request and denied access to all requested container, the App will receive the `containers-denied` action:
 
 * Action: `containers-denied`
 * Payload: `None`
 
 ### Revokation
 
-If the user revokes access to one or many containers, the authenticator MAY inform the app about this with the `container-revoked` action:
+If the user revokes access to one or many containers, the authenticator MAY inform the app about this with the `containers-revoked` action:
 
 * Action: `containers-revoked`
-* Payload: List of containerIds revoken 
+* payload: `Vec<ContainerPermission>`
 
 When an app receives this message, it should prompt the user asking about whether it should try to retry before starting the process again and not do so, if the user denies. 
 
@@ -179,12 +210,22 @@ When an app receives this message, it should prompt the user asking about whethe
 If an error occurs that isn't covered by specific request-response flow actions as defined here, the catchall `error`-action must be used in order to inform about the problem. It has the following format:
 
 * Action: `error`
-* JSON Payload:
- - `code` _mandatory_: numeric code of this error (for easy checking)
- - `error` _mandatory_: string name of that code (internal)
- - `message` _mandatory_: A message as it can (and should) be displayed to the user
- - `details` _optional_: More details about the error, if it can be provided by the app, allowing for easier debugging.
- - `ref` _optional_: A url with further information for the developer to understand why this error happened and how to fix it.
+* payload:
+
+```rust
+pub struct GenericAuthError {
+  // numeric code of this error (for easy checking)
+  code: uint,
+  // string name of that code (internal)
+  error: String,
+  // A message as it can (and should) be displayed to the user
+  message: String,
+  // More details about the error, if it can be provided by the app, allowing for easier debugging.
+  details: Option<String>,
+  // A url with further information for the developer to understand why this error happened and how to fix it.
+  ref: Option<String>
+}
+```
 
 
 In general client-side errors are in the 4000-4999 range, while authenticator side errors are in the 5000-5999 range (assigned as they will be defined).

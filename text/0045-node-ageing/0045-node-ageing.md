@@ -1,6 +1,6 @@
 # Node Ageing
 
-- Status: agreed
+- Status: active
 - Type: new feature
 - Related components: routing
 - Start Date: 25-09-2016
@@ -66,10 +66,12 @@ A : Age of node
 ### Overview
 
 Without any node relocation an attacker with a single join will enter a group and therefore requires
-(Q - 1) nodes To take over the group completely. An attack will therefore require the attacker try
-(Q - 1) * Z  times. If an attacker could run X% of the network population then this would mean the
-attack would require starting the nodes in parallel X times. Therefore even if nodes had a time to
-wait prior to joining this would only delay the attack by that time.
+(Q - 1) more nodes to take over the group completely. An attack will therefore require the attacker
+try (Q - 1) * Z  times on average. If an attacker could run X% of the network population then this
+would mean they can make N * X% attempts at a time, and need to restart each of their nodes only
+(Q - 1) * Z / (N * X%) = (Q - 1) / (G * X%) times, which is on the order of magnitude of 100 / X.
+Therefore even if nodes had a time to wait prior to joining this would only delay the attack by
+that factor.
 
 A simple way to think of this is that if you start a node it will join a group A. If you then start
 another node it will join a random group (1/number of groups). If this happens quickly then it is
@@ -97,7 +99,7 @@ relocation then the node will be relocated on next churn event.
 
 ### Consensus measurement
 
-A group consensus will require >=50% of nodes and 50% of the age of the whole group.
+A group consensus will require `>50%` of nodes and `>50%` of the age of the whole group.
 
 ### Transmitting age to network
 
@@ -258,10 +260,10 @@ further investigation though (see below).
 
 ### Quorum redefined
 
-A quorum can now be defined as 50% of the groups total age score. In addition a minimum number of
+A quorum can now be defined as more than 50% of the groups total age score. In addition a minimum number of
 participants should take part (the new Quorum). This may be set to a low number such as 25% of the
-group size or similar. It is proposed in this RFC the quorum is set at >= 50% of the group members
-plus 50% of the group total age.
+group size or similar. It is proposed in this RFC the quorum is set at > 50% of the group members
+plus > 50% of the group total age.
 
 
 ## Future considerations

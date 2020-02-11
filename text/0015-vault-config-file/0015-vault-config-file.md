@@ -18,7 +18,7 @@ This RFC outlines the config file that being required by the vault to initialise
 
 ### Rationale
 
-During the disscussion [safecoin implementation](https://github.com/maidsafe/rfcs/issues/61) of [RFC SafeCoin Implementation](https://github.com/maidsafe/rfcs/blob/master/proposed/0012-safecoin-implementation/0012-safecoin-implementation.md), it is being assumed that a pmid_node persona needs to be aware of it's owner's wallet address.
+During the disscussion [safecoin implementation](https://github.com/maidsafe/rfcs/issues/61) of [RFC SafeCoin Implementation](https://github.com/maidsafe/rfcs/blob/master/text/0012-safecoin-implementation/0012-safecoin-implementation.md), it is being assumed that a pmid_node persona needs to be aware of it's owner's wallet address.
 
 In addition to this, when chunk_store being intialized (currently being used by PmidNode and StructruedDataManager personas only), a configurable max usable disk space needs to be specified (currently a fixed value of 1GB is being assumed to be used as default).
 

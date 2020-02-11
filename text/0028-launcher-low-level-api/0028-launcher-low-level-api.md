@@ -165,7 +165,7 @@ If the user tries to update an older version of the Structured Data - based upon
 409 (Conflict) HTTP Status Code will be returned.
 
 In the case of the versioned Structured Data, the `SD-Version` will be a base64 string representing the version id.
-For the Unversioned Structured Data the `SD-Version` will be a u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/implemented/0000-Unified-structured-data/0000-Unified-structured-data.md#structureddata)
+For the Unversioned Structured Data the `SD-Version` will be a u64 number which will refer to the [version field in the Structured Data](https://github.com/maidsafe/rfcs/blob/master/text/0040-unified-structured-data/0040-unified-structured-data.md#structureddata)
 
 The response header will also have a `Owner` field, which will hold the owners public key as a
 base64 string.

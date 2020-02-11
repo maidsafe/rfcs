@@ -4,7 +4,6 @@
 
 This appendix to the New App Authentication describes how the general NFS and DNS will be working and handled in this new launcher-less approach. After talking about the general cases, this document will also outline how these will be used to manage **App Containers**, **Default Containers** (and which ones will be known to the system from the start), the **Root container** and how containers can be shared between apps.
 
-
 ## Containers
 
 In its core, NFS always has been and will continue to be an emulation on top of generic network data types, which are formed following a specific convention: but while that was previously done with StructuredData, it will now use the new MutableData. And rather than having a hierarchy of StructuredData pointing to "subdirectories", we will flatten the structure into a single key-value-store mapping and emulate a file system like access on top of that.
@@ -28,7 +27,7 @@ As containers are just normal MutableData on the network, thus having the same p
 
 ## NFS Convention
 
-Unlike before, NFS convention-following containers are represented in a flat key-value fashion within one container rather than a hierarchy of linked "directories". Where the key is a UTF-8-String encoded full-path filename, mapping to the serialised version of either XOR-Address in the network or a serialised file struct like this:
+Unlike before, NFS convention-following containers are represented in a flat key-value fashion within one container rather than a hierarchy of linked "directories". Where the key is a UTF-8-String encoded full-path filename, mapping to the serialised version of either `DataIdentifier` in the network or a serialised file struct like this:
 
 ```rust
 pub struct File {
@@ -37,7 +36,7 @@ pub struct File {
 }
 ```
 
-The XOR-Address should point to another container following the same convention as its parents or to a serialised file struct as described before.
+The `DataIdentifier` should point to another container following the same convention as its parents or to a serialised file struct as described before.
 
 ### Hierarchy File-System Emulation
 
@@ -49,7 +48,7 @@ However, no party is obliged to organise its data this way, nor have file paths 
 
 The root container is the main entry point for the user and most apps to interact with. It is a locally encrypted container stored at a random location on the network known only to the user, that generally only the authenticator has write access to. It reference will be stored in the users session packet on account creation. Keys starting with an underscore (`_`) are reserved for internal usage by the authenticator, while the authenticator may also allow the creation of other keys later.
 
-Where the value is a serialised tuple of the `DataId` in the network and a string or tuple of conventions the container follows.
+Where the value is a serialised tuple of the `DataIdentifier` in the network and a string or tuple of conventions the container follows.
 
 Secondly, the authenticator has another mapped data container which holds the encryption keys per each container, which is locally encrypted with a separate key that only the authenticator has access to and will never be shared. That is called the `RootKeysContainer`.
 
@@ -75,9 +74,9 @@ When creating a user account the authenticator will create the following minimal
 
 Whenever an app asks for permissions to act in the users name, it may ask for access to any container, and access to a container for the app itself. When this happens the first time, the authenticator creates a container of access information to be shared with the app, encrypted with the randomly created key in which it stores the access - called the `AccessContainer` - and will share its address and decryption key through the authentication protocol. This container is owned by the user and the app will only have `read`-rights on it.
 
-If the app further requested to have its own container, the authenticator must create new an random app-container, grant full access to the container to the app, generate a new random symmetric-key-pair and store all this access information in the apps `AccessContainer`. The authenticator must then add link that address to the root container under `_apps/${appId}/@{scope}`. We call this the `AppContainer`.
+If the app further requested to have its own container, the authenticator must create new an random app-container, grant full access to the container to the app, generate a new random symmetric-key-pair and store all this access information in the app's `AccessContainer`. The authenticator must then add link that address to the root container under `_apps/${appId}/@{scope}`. We call this the `AppContainer`.
 
-If the authenticator knows already of the same app without any scope, it should automatically be granted all rights on that `AppContainer`, too, by putting the access information into that apps `AccessContainer`.
+If the authenticator knows already of the same app without any scope, it should automatically be granted all rights on that `AppContainer`, too, by putting the access information into that app's `AccessContainer`.
 
 The Authenticator must hold a copy of the app key pair to the app container in the `RootKeysContainer`, its `AccessContainer`, the encryption keys as well as the metadata that app asked to gain access with for later reference and to automatise the authentication process should the app ask again.
 
@@ -104,7 +103,7 @@ The new key is then distributed in the `AccessContainers` of all apps that still
 
 ## DNS Containers / publicNames
 
-PublicNames are modelled in a two layer container fashion based on Mapped Data, mostly to allow granular access. For the index the authenticator has a top-level locally encrypted container (the `PublicNamesContainer`), which is just a list of the public names the user owns pointing to the XorAddress of the container for the publicName (as it can be looked up using the DNS-Lookup-Scheme), where each service name points to the Network XOR-Address to access that particular service of that public name - we call that its `ServicesContainer` and it is typically not encrypted.
+PublicNames are modelled in a two layer container fashion based on Mapped Data, mostly to allow granular access. For the index the authenticator has a top-level locally encrypted container (the `PublicNamesContainer`), which is just a list of the public names the user owns pointing to the `DataIdentifier` of the container for the publicName (as it can be looked up using the DNS-Lookup-Scheme), where each service name points to a Network `DataIdentifier` to access that particular service of that public name - we call that its `ServicesContainer` and it is typically not encrypted.
 
 ### Permissions
 
@@ -124,10 +123,10 @@ Now assuming that through the lookup, the browser/any app might find a container
 In this documentation we have defined these public containers following these conventions
 
 * `AppContainer` => `Map<*, *>`, locally encrypted
-* `AccessContainer` => `Map<ContainerName, serialised(DataId, Conventions, SymmetricKey)>`
-* `RootContainer` => `Map<ContainerName, serialised(DataId)>`, locally encrypted
-* `NFSContainer` => `Map<fileName, serialised(DataId || FileStruct)`, locally encrypted
-* `publicNamesContainer` => `Map<publicName, serialised(DataId)>`, locally encrypted
+* `AccessContainer` => `Map<ContainerName, serialised(DataIdentifier, Conventions, SymmetricKey)>`
+* `RootContainer` => `Map<ContainerName, serialised(DataIdentifier)>`, locally encrypted
+* `NFSContainer` => `Map<fileName, serialised(DataIdentifier || FileStruct)`, locally encrypted
+* `publicNamesContainer` => `Map<publicName, serialised(DataIdentifier)>`, locally encrypted
 * `ServicesContainer` => `Map<serviceName, *>`, not encrypted
 
 And the following authenticator, internal containers:
@@ -144,7 +143,6 @@ struct AppAccessInfo {
   revoked:           Option<timestamp>,
     // App Info
   name:              Vec<u8>,
-  version:           Vec<u8>,
   vendor:            Vec<u8>,
     // access info
   access_container:  Option<XorName>

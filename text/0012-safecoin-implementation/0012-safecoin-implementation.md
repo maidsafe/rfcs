@@ -1,6 +1,6 @@
 # Safecoin Implementation
 
-- Status: proposed
+- Status: rejected
 - Type: new feature
 - Related Components: safe_vault, safe_client
 - Start Date: 12-10-2015
@@ -8,13 +8,13 @@
 - Issue Number: Proposed - #61
 - Discussion: https://github.com/maidsafe/rfcs/issues/61
 - Supersedes:
-- Superseded by:
+- Superseded by: [RFC 0057: Safecoin Revised](https://github.com/maidsafe/rfcs/blob/master/text/0057-safecoin-revised/0057-safecoin-revised.md "RFC 0057: Safecoin Revised")
 
 ## Summary
 
 Full implementation of safecoin v1.0. This RFC brings together the following RFCs
-[Farm Attempt](https://github.com/maidsafe/rfcs/blob/master/agreed/0004-Farm-attempt/0004-Farm-attempt.md)
-[Balance Resources](https://github.com/maidsafe/rfcs/blob/master/agreed/0005-balance_network_resources/0005-balance_network_resources.md)
+[Farm Attempt](https://github.com/maidsafe/rfcs/blob/master/text/0004-farm-attempt/0004-farm-attempt.md)
+[Balance Resources](https://github.com/maidsafe/rfcs/blob/master/text/0005-balance-network-resources/0005-balance-network-resources.md)
 In addition this RFC will attempt to calculate the existing magic numbers used in previous implementations.
 
 ## Motivation
@@ -106,7 +106,7 @@ further RFC and should allow farming rates to have a natural minimum.
 
 ### Establishing StoreCost
 
-This is an upgrade to RFC [0005](https://github.com/dirvine/rfcs/blob/safecoin_implementation/agreed/0005-balance_network_resources.md) the initial StoreCost
+This is an upgrade to RFC [0005](https://github.com/maidsafe/rfcs/blob/master/text/0005-balance-network-resources/0005-balance-network-resources.md) the initial StoreCost
 
 and consequent farming reward is 1 safecoin for the first Get and exponentially decreases from that point.
 
@@ -162,23 +162,23 @@ The OWNER of a safecoin is the wallet address provided by the pmid_node as menti
 
 The Safecoin Management group can only approve a farming request when no such targeted safecoin data has been created before.
 
-When being asked to transfer the owevership, the request transcript must provide a valid signature that can be verified by the stored OWNER, which is actually a public-key. And the the owner will be updated to the new owner.
+When being asked to transfer the ownership, the request transcript must provide a valid signature that can be verified by the stored OWNER, which is actually a public-key. And the owner will be updated to the new owner.
 
 When being asked to burn a coin, the request must be signed by the current owner and forwarded through that owner's Client Manager group (which will increase allowed storage space at the same time). The piece of safecoin data will then be removed.
 
 ### Account Management
 
-An Account Management group is a group of nodes closest to a user's wallet address. It is resposible for that user's safecoin relation activities: rewarding, transfering or discarding.
+An Account Management group is a group of nodes closest to a user's wallet address. It is responsible for that user's safecoin relation activities: rewarding, transferring or discarding.
 A user's safecoin account is defined as :
 '''rust
 OWNER: 64 bytes
 COINS: Vec<SAFECOIN_ID>
 '''
 
-1. rewarding : when received notification a safecoin has been sucessfully farmed, record the ID of that coin into the account
+1. rewarding : when received notification a safecoin has been successfully farmed, record the ID of that coin into the account
 2. transfer out : remove certain number of coins from the account record, and notify the receiver's account group and the chosen safecoins' management groups of the ownership transferring.
 3. transfer in : when being notified by the sender's account group and the safecoin management group, the correspondent safecoin's ID will be inserted into the record.
-4. discarding : This is a special case that no receiver has been specified. the safecoin will be removed from the account and the chosen safecoins' management groups will be notified with a burning request.
+4. discarding : This is a special case that no receiver has been specified. The safecoin will be removed from the account and the chosen safecoins' management groups will be notified with a burning request.
 
 ### Bootstrap with clients
 
@@ -268,7 +268,7 @@ if key.is_in_range() { // we are client manager
                 routing.Post(compose_transfer_msg(coin, receiver), coin.id);
             }
         }
-    }    
+    }
 }
 ```
 
@@ -319,6 +319,6 @@ if coin.is_in_range() { // we are the manager of that coin
             // send notification to the requester
             routing.PostResponse(coin, requester);
         }
-    }    
+    }
 }
 ```
