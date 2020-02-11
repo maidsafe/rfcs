@@ -46,7 +46,6 @@ In NodeJS pseudocode, the interface would be:
 
 ```js
 function files_container_create_empty(
-    string location,
     bool dry_run
 ) : string;
 ```
