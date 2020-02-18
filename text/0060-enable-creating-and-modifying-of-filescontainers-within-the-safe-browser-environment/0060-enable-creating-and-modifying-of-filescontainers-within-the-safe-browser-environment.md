@@ -29,11 +29,17 @@ At the moment, the following API calls are available (and implemented in the [No
 * `files_container_add`
 * `files_container_add_from_raw`
 
-Logic would dictate that the browser would call `files_container_create` to create the files container, however first argument to this method `location: &str` requires a path to a directory or file which will be uploaded to the FilesContainer. The same issues also exist for `files_container_sync` and `files_container_add`. `files_container_add_from_raw` is usable.
+Logic would dictate that the browser would call `files_container_create` to create the files container, however first argument to this method `location: &str` requires a path to a directory or file which will be uploaded to the FilesContainer. The same issues also exist for `files_container_sync` and `files_container_add`.
+
+`files_container_add_from_raw` is usable, but it always defaults the `type` parameter (which is used as the HTTP `Content-Type` value in the browser to `Raw` regardless of the filetype uploaded..
 
 I propose the addition of 1 new API to be added to the NodeJS library (and thereby allowed for use via the SAFE Browser):
 
 * `files_container_create_empty`
+
+I propose the modifying of 1 existing API in the NodeJS library:
+
+* `files_container_add_from_raw`
 
 #### files_container_create_empty
 
@@ -46,9 +52,29 @@ In NodeJS pseudocode, the interface would be:
 ```js
 function files_container_create_empty(
     bool dry_run
-) : string;
+) : Array;
 ```
 
+#### files_container_add_from_raw
+
+This method should allow the end user to set the `type` of the uploaded file.
+
+In NodeJS pseudocode, the interface would be:
+
+```js
+function files_container_add_from_raw(
+    ArrayBuffer buffer,
+    string url,
+    bool force,
+    bool update_nrs,
+    ?string type,
+    ?bool dry_run
+) : Array;
+```
+
+Setting a type of `text/html` should result in a downloaded `Content-Type` of `text/html`.
+
+The `Content-Type` can also contain a charset value (and any number of mime related data, separated by semi-colons.). Setting a type of `text/html; charset=utf-8` should result in a downloaded `Content-Type` of `text/html; charset=utf-8`
 
 ## Drawbacks
 
