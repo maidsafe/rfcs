@@ -52,7 +52,7 @@ In NodeJS pseudocode, the interface would be:
 ```js
 function files_container_create_empty(
     bool dry_run
-) : Array;
+) : String;
 ```
 
 #### files_container_add_from_raw
