@@ -22,6 +22,7 @@ A list of all RFCs by their current status.
  - [#0032 Forwarding Nodes](./text/0032-forwarding-nodes/0032-forwarding-nodes.md)
  - [#0033 Fake Account Packet](./text/0033-fake-account-packet/0033-fake-account-packet.md)
  - [#0052 RDF for the Public Name Resolution System](./text/0052-RDF-for-public-name-resolution/0052-RDF-for-public-name-resolution.md)
+ - [#0060 Enable creating and modifying of FilesContainers within the SAFE Browser environment](./text/0060-enable-creating-and-modifying-of-filescontainers-within-the-safe-browser-environment/0060-enable-creating-and-modifying-of-filescontainers-within-the-safe-browser-environment.md)
 
 ## Agreed RFCs
 
@@ -75,4 +76,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Wed 25 Sep 2019 16:16:39 BST_ at REV [5bbb719](https://github.com/maidsafe/rfcs/commit/5bbb719434b92170651549b607e0032c092b13fa))
+(Last updated _Mon Mar  2 09:41:48 GMT 2020_ at REV [f6e194b](https://github.com/maidsafe/rfcs/commit/f6e194b231c25a4c27cebeff955006278772f8b7))
