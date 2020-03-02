@@ -61,8 +61,6 @@ function files_container_add_from_raw(
 
 Setting a type of `text/html` should result in a downloaded `Content-Type` of `text/html`.
 
-The `Content-Type` can also contain a charset value (and any number of mime related data, separated by semi-colons.). Setting a type of `text/html; charset=utf-8` should result in a downloaded `Content-Type` of `text/html; charset=utf-8`
-
 ## Drawbacks
 
 N/A

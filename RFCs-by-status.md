@@ -76,4 +76,4 @@ A list of all RFCs by their current status.
  - [#0051 Safecoin Alternative Implementation](./text/0051-safecoin-alternative-implementation/0051-safecoin-alternative-implementation.md)
 
 
-(Last updated _Mon Mar  2 09:41:48 GMT 2020_ at REV [f6e194b](https://github.com/maidsafe/rfcs/commit/f6e194b231c25a4c27cebeff955006278772f8b7))
+(Last updated _Mon Mar  2 14:56:04 GMT 2020_ at REV [dfac5d5](https://github.com/maidsafe/rfcs/commit/dfac5d5da75970b1cc1032fc75f277096986f644))
