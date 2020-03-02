@@ -29,31 +29,18 @@ At the moment, the following API calls are available (and implemented in the [No
 * `files_container_add`
 * `files_container_add_from_raw`
 
-Logic would dictate that the browser would call `files_container_create` to create the files container, however first argument to this method `location: &str` requires a path to a directory or file which will be uploaded to the FilesContainer. The same issues also exist for `files_container_sync` and `files_container_add`.
+Logic would dictate that the browser would call `files_container_create` to create the files container, however the first argument to this method `location: &str` requires a path to a directory or file which will be uploaded to the FilesContainer. The same issues also exist for `files_container_sync` and `files_container_add`.
 
 `files_container_add_from_raw` is usable, but it always defaults the `type` parameter (which is used as the HTTP `Content-Type` value in the browser to `Raw` regardless of the filetype uploaded..
 
-I propose the addition of 1 new API to be added to the NodeJS library (and thereby allowed for use via the SAFE Browser):
+I propose the modifying of 2 existing APIs in the NodeJS library, and the underlying rust SAFE-API:
 
-* `files_container_create_empty`
-
-I propose the modifying of 1 existing API in the NodeJS library:
-
+* `files_container_create`
 * `files_container_add_from_raw`
 
-#### files_container_create_empty
+#### files_container_create
 
-This method will create an empty FilesContainer and return the XORURL of the created FilesContainer, or throw an Error.
-
-It would make sense to implement this function [here](https://github.com/maidsafe/safe-api/blob/81687e0a57161f2a7203c62b9897511618862242/safe-api/src/api/files.rs#L55) and expose it to the NodeJS libraries.
-
-In NodeJS pseudocode, the interface would be:
-
-```js
-function files_container_create_empty(
-    bool dry_run
-) : String;
-```
+This method will have its first argument (`location: &str`) made optional, with the default being an empty files container.
 
 #### files_container_add_from_raw
 
