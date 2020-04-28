@@ -1,0 +1,18 @@
+# PR workflow
+#
+# Runs a script to check whether there has been a change to a RFC document status, which has not been reflected in the PR
+
+name: PR
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - shell: bash
+      run: ./test_rfc_status.sh
