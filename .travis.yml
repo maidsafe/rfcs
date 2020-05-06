@@ -1,4 +1,0 @@
-language: bash
-
-script:
-  - bash test_rfc_status.sh
