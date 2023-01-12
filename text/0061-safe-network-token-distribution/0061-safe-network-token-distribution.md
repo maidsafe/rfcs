@@ -82,10 +82,10 @@ It is assumed that automatically distributed Network Royalties would be paid by 
 ### Genesis Supply
 At the inception of the Network a Genesis Supply of 1,357,657,236 whole SNT will be issued. This represents 30% of the [Maximum Supply](#maxiumum-supply).
 
-#### Distribution of Genesis Supply
+### Distribution of Genesis Supply
 The [Genesis Supply](#genesis-supply) of SNT will be distributed as follows:
 
-##### MaidSafeCoin Holders
+#### MaidSafeCoin Holders
 MaidSafeCoin is a proxy token issued as part of a crowd-sale in April of 2014 that supported the development of the Network and also allowed buyers to pre-purchase SNT ahead of launch, enabled via a 1:1 swap after the inception of the Network. This applies to both the original coins issued on the Omni layer ([MAID](https://www.omniexplorer.info/asset/3)) and the ERC-20 version ([eMAID](https://etherscan.io/address/0x329c6E459FFa7475718838145e5e85802Db2a303)).
 
 Holders of MaidSafeCoin will collectively be allocated 452,552,412 SNT.
@@ -94,7 +94,7 @@ Holders of MaidSafeCoin will collectively be allocated 452,552,412 SNT.
 
 Tokens will be distributed to MaidSafeCoin holders in the form of an airdrop, with each MaidSafeCoin entitling the bearer to one SNT.
 
-##### MaidSafe Shareholders
+#### MaidSafe Shareholders
 Each company share of Maidsafe.net Limited will entitles the bearer to 111.5028029 SNT, resulting in shareholders being allocated 226,276,206 SNT. 
 
 **This represents 5% of the Maximum Supply.**
@@ -102,7 +102,7 @@ Each company share of Maidsafe.net Limited will entitles the bearer to 111.50280
 Tokens will be paid out to shareholders in three instalments over the period of a year following the launch of the Network. Any unclaimed shareholder funds will be held by the Foundation indefinitely.
 
 
-##### Network Royalties Pool
+#### Network Royalties Pool
 Out of the Genesis Supply, 678,828,618 SNT will be allocated to a Network Royalty Pool and distributed as [Network Royalties](#network-royalties).
 
 **This represents 15% of the Maximum Supply.**
