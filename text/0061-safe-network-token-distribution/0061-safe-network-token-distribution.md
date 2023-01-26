@@ -81,7 +81,7 @@ It is assumed that automatically distributed Network Royalties would be paid by 
 
 
 ### Genesis Supply
-At the inception of the Network a Genesis Supply of 1,311,545,871 SNT will be issued. This represents 30.536806937% of the [Maximum Supply](#maxiumum-supply).
+At the inception of the Network a Genesis Supply of 1,288,490,189 SNT will be issued. This represents 30% of the [Maximum Supply](#maxiumum-supply).
 
 ### Distribution of Genesis Supply
 The [Genesis Supply](#genesis-supply) of SNT will be distributed as follows:
