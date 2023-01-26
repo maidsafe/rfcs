@@ -183,7 +183,7 @@ However, those who purchased MaidSafeCoin directly during the crowdsale—and no
 
 Allocating 452,552,412 tokens to maintain 1:1 parity with SNT, at 10% overall, means that these crowdsale purchasers may realise a relative value of SNT 5.368% lower than those who bought MaidSafeCoins on the open market, all else being equal.
 
-#### Alternative Proposal Alternative — Offset from Remaining Token Emissions
+#### Alternative Proposal — Offset from Remaining Token Emissions
 We can also consider a third proposal, where the over-issued coins are offset via the remaining tokens to be emitted by the Network over time. 
 
 |Pool|%|Allocation|Genesis Proportion|
