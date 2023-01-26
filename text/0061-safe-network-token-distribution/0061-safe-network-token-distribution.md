@@ -5,7 +5,7 @@
 -   Type: White Paper
 -   Related to: Safe Network Tokens, DBCs, Governance, Nodes and Farming, MaidSafeCoin
 -   Start Date: 23 June 2022
--   Discussion: https://safenetforum.org/t/rfc-0061-safe-network-token-distribution/
+-   Discussion: https://safenetforum.org/t/updated-rfc-0061-safe-network-token-distribution/37883
 -   Supersedes: This proposal supersedes, in part, the original [Project Safe White Paper](https://github.com/maidsafe/Whitepapers/blob/master/Project-Safe.md) 
 
 ## Summary
