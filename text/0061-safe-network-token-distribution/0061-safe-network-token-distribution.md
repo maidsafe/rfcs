@@ -214,7 +214,7 @@ Note that the term [Resource Supply Rewards](#resource-supply-rewards) is an alt
 As we are currently finalising the design of the Digital Bearer Certificates (DBC) system, the exact number of sub-units may be increased to provide further divisibility. This is subject to the results performance testing and security analysis.
 
 ### With Regard to MaidSafe Shareholder Payouts
-We are yet to define precisely what event constitutes the "launch" of the Network fro the purpose of triggering the process of Shareholder Payouts.
+We are yet to define precisely what event constitutes the "launch" of the Network for the purpose of triggering the process of Shareholder Payouts.
   
 ### Subject to Forthcoming Papers
 The Foundation is a Swiss non-profit organisation incorporated to support the security, privacy, and sovereignty of personal data and communications, the resilience and global accessibility of public data, the pursuit of a free and open Internet for the public good, and the ability of individuals and businesses to trade goods and services online without the need for middlemen, through the promotion and stewardship of the Safe Network protocol, it’s ecosystem, and related distributed ledger and computing technology
