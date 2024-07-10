@@ -24,8 +24,6 @@ for another document.
 Uncertainties are indicated using a `*` notation. Rather than have a full `Unresolved Questions`
 section at the end, where applicable there is an `Uncertainties` list in each section.
 
-The use of `**` is to denote an idea that came from Shu's diagram/proposal.
-
 ## Motivations
 
 So far, we have failed to arrive at a well-defined process for releasing our code. With launch
@@ -47,38 +45,38 @@ Release and deployment for next wave:
 
 ### Wave 2
 
-Live for users: 2024-07-09 / 825 people / 11 week comp / comp ends: 2024-09-27
+Live for users: 2024-07-09 / 825 people / 11 week competition / competition ends: 2024-09-27
 
 Three week development/release cycle:
-* Development begins 2024-07-08
-* Release candidate branch cut: 2024-07-22
+* Development phase begins: 2024-07-08
+* Release candidate phase begins: 2024-07-22
 * Stable release and production deploy for wave 3: 2024-07-31
 
 ### Wave 3
 
-Live for users: 2024-08-01 / 1000 people / 8 week comp / comp ends: 2024-09-27
+Live for users: 2024-08-01 / 1000 people / 8 week competition / competition ends: 2024-09-27
 
 Three week development/release cycle:
-* Development begins 2024-08-01
-* Release candidate branch cut: 2024-08-15
+* Development phase begins: 2024-08-01
+* Release candidate phase begins: 2024-08-15
 * Stable release and production deploy for wave 4: 2024-08-22
 
 ### Wave 4
 
-Live for users: 2024-08-23 / 1000 people / 5 week comp / comp ends: 2024-09-27
+Live for users: 2024-08-23 / 1000 people / 5 week competition / competition ends: 2024-09-27
 
 Three week development/release cycle:
-* Development begins 2024-08-22
-* Release candidate branch cut: 2024-09-05
+* Development phase begins: 2024-08-22
+* Release candidate phase begins: 2024-09-05
 * Stable release and production deploy for wave 5: 2024-09-12
 
 ### Wave 5
 
-Live for users: 2024-09-13 / 1000 people / 3 week comp / comp ends: 2024-09-27
+Live for users: 2024-09-13 / 1000 people / 3 week competition / competition ends: 2024-09-27
 
 Three week development/release cycle:
-* Development begins 2024-09-12
-* Release candidate branch cut: 2024-09-26
+* Development phase begins: 2024-09-12
+* Release candidate phase begins: 2024-09-26
 * Stable release and production deploy for launch: 2024-10-03
 
 This would perhaps take us to launch. At this point, we could consider setting our crate versions to
@@ -100,9 +98,9 @@ Historically, our team has preferred `git rebase` to `git merge`; however, Gitfl
 supported by using `git merge`. Rebasing is fine before submitting upstream, but Gitflow involves
 merging commits between different branches. Due to the fact that rebasing rewrites the commit
 history, merging between branches can lead to commits that have the same content but different
-hashes. This can make merging more confusing than it needs to be and also cause the commit history
-to be littered with duplicates. The primary option for completing a PR should be to merge it in
-rather than rebase.
+hashes. This can make subsequent, post-rebase merging more confusing than it needs to be and also
+cause the commit history to be littered with duplicates. The primary option for completing a PR
+should be to merge it in rather than rebase.
 
 ## Release Cycle Overview
 
@@ -140,13 +138,6 @@ The cycle has the following phases and steps:
 
 We can accommodate hotfixes at any point during the cycle.
 
-#### Uncertainties
-
-* Not completely sure about the duration of each phase. Any opinions?
-* We could deploy automatically, but do we need to coordinate with an announcement?
-* What does the 'draining' process with two production environments look like? Shu to elaborate on
-the details? Do we need this on an environment that we upgrade?
-
 ## Release Cycle Anatomy
 
 We'll now elaborate the release cycle described in the last section, discussing each type of release
@@ -157,12 +148,14 @@ in more detail.
 All release types will produce a set of binary artifacts, so we'll discuss these first. In Rust,
 crates must use Semantic Versioning. A binary is defined within a crate, and therefore, by default,
 it will also have a Semantic Version; however, it is possible to override the `--version` argument
-on the binary to provide something custom. Our releases currently produce eight binary artifacts. *
+on the binary to provide something custom. Our releases currently produce eight binary artifacts.
 It would be useful if we could refer to these collectively with a single version number and package,
-where the package name would reflect the version number. ** The `--version` argument would identify
+where the package name would reflect the version number. The `--version` argument would identify
 this version number, but also identify the individual component using its Semantic Version. *
 
-The proposal is to use `YYYY.MM.X.Y` as the collective version number. **
+The proposal is to use `YYYY.MM.X.Y` as the collective version number. The `X` is for the release
+cycle and `Y` is a counter from within the release cycle, which will increment if any more RC builds
+are made within that cycle.
 
 We would use the collective version number for a single Github Release. The assets for the release
 would be the combined binary packages for each platform. The changelog can also be nicely applied to
@@ -170,9 +163,7 @@ this combined release.
 
 #### Uncertainties
 
-* Should `faucet` and `sn_auditor` be part of a package targeted at users?
 * Should Semantic Versions be dropped from user-facing elements?
-* What are the `X` and `Y` in the version number?
 
 ### Alpha Releases
 
@@ -198,7 +189,7 @@ coordinate with users.
 * The release workflow will produce a public `pre-release` on Github, but the crates will *not* be
   published.
 * Manually edit the Github Release to provide the description prepared in the first step.
-* Use the `Launch Network` workflow to deploy the `alpha` binaries to an isolated network. *
+* Use the `Launch Network` workflow to deploy the `alpha` binaries to an isolated network.
 * Announce the availability of the binaries to the community. Users can use `safenode-manager`
   and/or `safeup` with `--version` arguments to obtain the alpha binaries.
 * Perform testing
@@ -213,19 +204,15 @@ coordinate with users.
 * The experiment is over and the branch should be deleted.
 
 The branch is discarded because we don't want the alpha version bumps back in `main`. Crates were
-also not published. The Github Release will function as the historical record of the existence of
-the alpha release.
-
-#### Uncertainties
-
-* Would we need to use the `NETWORK_VERSION` compile-time variable for this?
+also not published. A Github Release always creates a tag, so this will function as the historical
+record of the existence of the alpha release.
 
 ### Release Candidates
 
 A release candidate (RC) is the binary that's intended to be released as a stable version. The set
 of features and fixes in the RC is what's included on `main` in the current cycle, i.e., between now
 and the last stable release. After about two weeks of development we should produce the RC for
-testing in the staging environment.
+testing in the staging environment. Community users will be invited to participate in testing.
 
 An owner should be designated to the process, and it would be useful for this to cycle through
 everyone in the team. Once the RC branch is started, we won't accept new features on it, only fixes.
@@ -279,23 +266,17 @@ making a stable release from that branch.
   the commit. Any final additions to the changelog can be part of this commit.
 * Create a PR for merging the release branch into `stable`.
 * Once it's been merged to stable, also merge the release branch into `main`.
-* When ready, kick off a workflow for the stable release*. The workflow will:
+* When ready, kick off a workflow for the stable release. The workflow will:
     - Build the binaries
     - Upload them to S3
     - Public Github Release
     - Publish crates
     - Tag based on combined version
-* Manually edit the Github Release to apply the latest changelog entry to the description*
+* Manually edit the Github Release to apply the latest changelog entry to the description
 * Delete the release branch
 
 We would now be in a position to deploy the stable release to the `PROD-01` (and possibly `PROD-02`)
 environment. The production deployment would be covered in another RFC.
-
-#### Uncertainties
-
-* Obviously this could be done automatically on push, but we may want to coordinate with an
-  announcement?
-* It's probably possible to automate this, but it's a very low-effort manual step.
 
 ## Hotfixes
 
@@ -304,17 +285,19 @@ throughout the release cycle, although they'd probably more likely be near the b
 
 ### Process
 
-* Create and checkout a `hotfix-YYYY.MM.DD` branch from `stable` and push it to `origin`
-* Create an entry in the changelog that describes the fix
-* Use `release-plz update` to get new version numbers for the crates that the fix applies to
+* Create and checkout a `hotfix-YYYY.MM.DD` branch from `stable` and push it to `origin`.
+* Create an entry in the changelog that describes the fix.
+* Use `release-plz update` to get new version numbers for the crates that the fix applies to.
+* Use a script to apply an `rc.1` pre-release specifier to the bumped crates.
 * Create a `chore(release): hotfix-YYYY.MM.DD` commit with the bumped crates and versions in the
   body of the commit.
 * Fetch this branch from `upstream` to a fork and apply the fix.
 * PR the commit with the fix to the `upstream` branch. This will enable someone to review it.
 * If changes are requested, keep going until those are resolved.
-* Use a workflow to deploy 
-* Deploy the fix to some kind of staging environment to be tested.*
-* When the fix is confirmed to be working, create a PR to merge the branch back into `stable`.
+* Use a workflow to deploy the fix to a dev/staging environment to be tested.*
+* When the fix is confirmed to be working:
+    - Remove the `rc` pre-release specifier
+    - Create a PR to merge the branch back into `stable`
 * Also merge it back into `main`.
 * Perform a stable release at the new version number.*
 * If it's a change to the node, deploy it to production using an upgrade process.
