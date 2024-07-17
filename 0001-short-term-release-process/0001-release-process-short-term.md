@@ -47,8 +47,7 @@ Release and deployment for next wave:
 
 Live for users: 2024-07-09 / 825 people / 11 week competition / competition ends: 2024-09-27
 
-Three week development/release cycle:
-* Development phase begins: 2024-07-08
+Three week cycle:
 * Release candidate phase begins: 2024-07-22
 * Stable release and production deploy for wave 3: 2024-07-31
 
@@ -56,8 +55,7 @@ Three week development/release cycle:
 
 Live for users: 2024-08-01 / 1000 people / 8 week competition / competition ends: 2024-09-27
 
-Three week development/release cycle:
-* Development phase begins: 2024-08-01
+Three week cycle:
 * Release candidate phase begins: 2024-08-15
 * Stable release and production deploy for wave 4: 2024-08-22
 
@@ -65,8 +63,7 @@ Three week development/release cycle:
 
 Live for users: 2024-08-23 / 1000 people / 5 week competition / competition ends: 2024-09-27
 
-Three week development/release cycle:
-* Development phase begins: 2024-08-22
+Three week cycle:
 * Release candidate phase begins: 2024-09-05
 * Stable release and production deploy for wave 5: 2024-09-12
 
@@ -74,8 +71,7 @@ Three week development/release cycle:
 
 Live for users: 2024-09-13 / 1000 people / 3 week competition / competition ends: 2024-09-27
 
-Three week development/release cycle:
-* Development phase begins: 2024-09-12
+Three week cycle:
 * Release candidate phase begins: 2024-09-26
 * Stable release and production deploy for launch: 2024-10-03
 
@@ -109,15 +105,13 @@ those will be provided in subsequent sections.
 
 The cycle has the following phases and steps:
 
-* Internal development and testing phase (two weeks):
-    - Begins immediately after production deploy of previous wave
-    - Deploy previous stable version to `STG-02` **
+* Continual internal development and testing:
     - Feature branches are worked on and merged back into `main`
     - Developers can deploy their own isolated testnets if necessary
     - We can do quick `alpha` releases if necessary
 * Release candidate (RC) phase (one week):
-    - Create a `release-YYYY.MM.rc.1` branch from `main`. No new features will be accepted on this
-      branch.
+    - After two weeks of development since the last RC phase ended, create a `release-YYYY.MM.rc.1`
+      branch from `main`. No new features will be accepted on this branch.
     - Bump version numbers, with an `rc.1` suffix applied.
     - Build RC and release to Github as a public `pre-release` but with no published crates.
     - Deploy RC to `STG-01`.
