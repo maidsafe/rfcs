@@ -34,50 +34,6 @@ further experiment.
 
 ## Detailed Design
 
-## Beta Release Cycles and Schedule
-
-This section provides guidelines for possible dates for each cycle until launch.
-
-### Wave 1
-
-Release and deployment for next wave:
-* Stable release and production deploy: 2024-07-08
-
-### Wave 2
-
-Live for users: 2024-07-09 / 825 people / 11 week competition / competition ends: 2024-09-27
-
-Three week cycle:
-* Release candidate phase begins: 2024-07-22
-* Stable release and production deploy for wave 3: 2024-07-31
-
-### Wave 3
-
-Live for users: 2024-08-01 / 1000 people / 8 week competition / competition ends: 2024-09-27
-
-Three week cycle:
-* Release candidate phase begins: 2024-08-15
-* Stable release and production deploy for wave 4: 2024-08-22
-
-### Wave 4
-
-Live for users: 2024-08-23 / 1000 people / 5 week competition / competition ends: 2024-09-27
-
-Three week cycle:
-* Release candidate phase begins: 2024-09-05
-* Stable release and production deploy for wave 5: 2024-09-12
-
-### Wave 5
-
-Live for users: 2024-09-13 / 1000 people / 3 week competition / competition ends: 2024-09-27
-
-Three week cycle:
-* Release candidate phase begins: 2024-09-26
-* Stable release and production deploy for launch: 2024-10-03
-
-This would perhaps take us to launch. At this point, we could consider setting our crate versions to
-`1.0.0`.
-
 ## General Branching/Merging Techniques
 
 The chosen branching and release model is closely correlated with Gitflow. Gitflow is a mature model
@@ -108,27 +64,28 @@ The cycle has the following phases and steps:
 * Continual internal development and testing:
     - Feature branches are worked on and merged back into `main`
     - Developers can deploy their own isolated testnets if necessary
-    - We can do quick `alpha` releases if necessary
-* Release candidate (RC) phase (one week):
-    - After two weeks of development since the last RC phase ended, create a `release-YYYY.MM.rc.1`
+* Release candidate (RC) phase (two weeks):
+    - Twice a month, roughly corresponding two every two weeks, create a `release-YYYY.MM.rc.1`
       branch from `main`. No new features will be accepted on this branch.
     - Bump version numbers, with an `rc.1` suffix applied.
     - Build RC and release to Github as a public `pre-release` but with no published crates.
     - Deploy RC to `STG-01`.
+    - Deploy previous stable release to `STG-02`.
     - Production of changelog begins.
     - Invite community members to test against this network.
-    - Shu's metrics solution enables comparisons to be made to the previous stable release in `STG-02`.
+    - Initiate comparisons to the previous stable release in `STG-02`.
     - Fixes can be applied to the release branch, resulting in an `rc.2`. This will be
       released/deployed/tested. Repeat if necessary.
 * Release and deploy phase (one/two days):
-    - On the release branch, modify version numbers to remove the `rc` pre-release specifier.
+    - If the RC passes two weeks of QA, the release branch is ready to be merged back to `stable`.
+      On that branch, modify version numbers to remove the `rc` pre-release specifier.
     - Changelog finalised.
     - Merge the release branch into `stable`.
     - Merge the release branch into `main`.
-    - When ready, perform a release and tag of `stable` by kicking off a workflow. *
+    - When ready, use a GHA workflow to perform a stable release.
     - Delete the release branch.
-    - Deploy to `PROD-01`/`02` and drain *
-    - Announce to users
+    - Deploy the new release to nodes being hosted by Maidsafe.
+    - Announce to users.
 
 We can accommodate hotfixes at any point during the cycle.
 
@@ -139,25 +96,26 @@ in more detail.
 
 ### Artifacts
 
-All release types will produce a set of binary artifacts, so we'll discuss these first. In Rust,
-crates must use Semantic Versioning. A binary is defined within a crate, and therefore, by default,
-it will also have a Semantic Version; however, it is possible to override the `--version` argument
-on the binary to provide something custom. Our releases currently produce eight binary artifacts.
-It would be useful if we could refer to these collectively with a single version number and package,
-where the package name would reflect the version number. The `--version` argument would identify
-this version number, but also identify the individual component using its Semantic Version. *
+Our releases currently produce eight binary artifacts, so we'll discuss these first.
 
-The proposal is to use `YYYY.MM.X.Y` as the collective version number. The `X` is for the release
-cycle and `Y` is a counter from within the release cycle, which will increment if any more RC builds
-are made within that cycle.
+In Rust, crates must use Semantic Versioning. A binary is defined within a crate, and therefore, by
+default, it will also have a Semantic Version; however, it is possible to override the `--version`
+argument to provide something custom. It would be useful if we could refer to these collectively
+with a single version number and package, where the package name would reflect the version number.
+The collective version number will be `YYYY.MM.X.Y`, where `X` is for the release cycle within the
+month, and `Y` is a counter that will increment for each RC branch produced within the cycle.
 
-We would use the collective version number for a single Github Release. The assets for the release
-would be the combined binary packages for each platform. The changelog can also be nicely applied to
-this combined release.
+The collective version number is used for a single Github Release. The assets for the release are
+the combined binary packages for each platform. The changelog can also be nicely applied to this
+combined release.
 
-#### Uncertainties
+To accommodate these and some other things, our binaries will now have several version arguments,
+which are defined as follows:
 
-* Should Semantic Versions be dropped from user-facing elements?
+* `--package-version`: outputs the collective `YYYY.MM.X.Y` version
+* `--crate-version`: outputs the crate's Semantic Version
+* `--protocol-version`: outputs the network protocol version (correlated with the Semantic Version)
+* `--version`: outputs all of the above
 
 ### Alpha Releases
 
@@ -205,12 +163,11 @@ record of the existence of the alpha release.
 
 A release candidate (RC) is the binary that's intended to be released as a stable version. The set
 of features and fixes in the RC is what's included on `main` in the current cycle, i.e., between now
-and the last stable release. After about two weeks of development we should produce the RC for
-testing in the staging environment. Community users will be invited to participate in testing.
+and the last stable release. The release candidate branch will be cut twice a month, roughly every
+two weeks. Community users will be invited to participate in testing.
 
-An owner should be designated to the process, and it would be useful for this to cycle through
-everyone in the team. Once the RC branch is started, we won't accept new features on it, only fixes.
-Feature development can continue on `main`.
+Once the RC branch is started, we won't accept new features on it, only fixes. Feature development
+can continue on `main`.
 
 #### Process
 
@@ -240,16 +197,15 @@ Feature development can continue on `main`.
   the comparison to the previous stable release.
 * If fixes are necessary, they should be applied to this branch. We then bump to `rc.2` and do
   another release, which again should be deployed to `STG-01`. Users can get the new binaries. This
-  part could potentially be repeated, but obviously we want to avoid that.
+  part could potentially be repeated, but obviously we want to avoid that. When the fix is verified,
+  that commit should be cherry picked back in to the `main` branch.
 
-This whole process will likely last about a week. We would now be in a position where we'd be
-looking to do a stable release and deploy to production.
+We would now be in a position where we'd be looking to do a stable release and deploy to production.
 
 ### Stable Release
 
-The owner of the RC process can probably carry over to this one, though it would be possible for
-someone else to be assigned. At this point, the release branch still exists. This process is about
-making a stable release from that branch.
+At this point, the release branch still exists. This process is about making a stable release from
+that branch.
 
 #### Process
 
@@ -288,15 +244,10 @@ throughout the release cycle, although they'd probably more likely be near the b
 * Fetch this branch from `upstream` to a fork and apply the fix.
 * PR the commit with the fix to the `upstream` branch. This will enable someone to review it.
 * If changes are requested, keep going until those are resolved.
-* Use a workflow to deploy the fix to a dev/staging environment to be tested.*
+* Use a workflow to deploy the fix to a dev/staging environment to be tested.
 * When the fix is confirmed to be working:
     - Remove the `rc` pre-release specifier
     - Create a PR to merge the branch back into `stable`
 * Also merge it back into `main`.
-* Perform a stable release at the new version number.*
+* Perform a stable release at the new version number.
 * If it's a change to the node, deploy it to production using an upgrade process.
-
-#### Uncertainties
-
-* Should this replace what's on `STG-01`? Or would it be another isolated staging environment?
-* Could be automated or manually triggered.
